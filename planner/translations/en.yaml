@@ -1,0 +1,29 @@
+configuration:
+  notify_service:
+    name: Benachrichtigungsdienst
+    description: >-
+      Dienst für die täglichen Erinnerungen, zum Beispiel notify.mobile_app_dein_handy.
+      Leer lassen, dann gibt es keine Erinnerungen.
+  reminder_time:
+    name: Uhrzeit der Erinnerung
+    description: >-
+      Täglich um diese Uhrzeit (HH:MM) kommt eine Nachricht mit den heute fälligen
+      und überfälligen Aufgaben.
+  sensors:
+    name: Sensoren in Home Assistant
+    description: >-
+      Legt vier Sensoren an (offen, in Arbeit, überfällig, heute fällig),
+      etwa für Dashboards und Automationen.
+  anthropic_api_key:
+    name: Anthropic-API-Schlüssel
+    description: >-
+      Optional. Schaltet den KI-Assistenten im Planner frei. Ohne Schlüssel bleibt
+      die KI aus.
+  ai_model:
+    name: KI-Modell
+    description: Modellname für den KI-Assistenten. Standard ist claude-haiku-5-5.
+network:
+  8099/tcp: >-
+    Direkter Zugriff im Heimnetz, optional. Nur nötig, wenn der Planner ohne
+    Home-Assistant-Rahmen laufen soll (Safari: http://Adresse-von-Home-Assistant:8099,
+    dann „Zum Home-Bildschirm“). Feld leer lassen schaltet den direkten Zugriff aus.

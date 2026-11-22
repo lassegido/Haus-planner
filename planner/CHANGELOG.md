@@ -1,5 +1,8 @@
 # Änderungen
 
+## 1.15.3
+- Konfigurationsseite in Home Assistant: Alle Einstellungen haben jetzt deutsche Namen und kurze Erklärungen (Benachrichtigungsdienst, Uhrzeit der Erinnerung, Sensoren, KI-Schlüssel, KI-Modell) sowie eine verständliche Beschreibung des Ports 8099
+
 ## 1.15.2
 - Handy in Home Assistant: Die App füllt ihren Bereich jetzt fest bis zum unteren Rand aus (statt über die Bildschirmhöhe des Browsers). Das soll den leeren Streifen unten bei Board und Zeitstrahl beseitigen
 
