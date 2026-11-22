@@ -1,5 +1,8 @@
 # Änderungen
 
+## 1.15.2
+- Handy in Home Assistant: Die App füllt ihren Bereich jetzt fest bis zum unteren Rand aus (statt über die Bildschirmhöhe des Browsers). Das soll den leeren Streifen unten bei Board und Zeitstrahl beseitigen
+
 ## 1.15.1
 - Liste auf dem Handy: Zeilen haben wieder Abstand und kleben nicht mehr aneinander; die Filter-Pillen liegen in einer eigenen Zeile und werden nicht mehr vom „Gruppieren“-Knopf überdeckt
 - Die Auswahl „Form“ ist aus den Einstellungen entfernt; es gilt wieder durchgehend die flache Darstellung
