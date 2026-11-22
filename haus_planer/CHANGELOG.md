@@ -1,5 +1,10 @@
 # Änderungen
 
+## 1.9.0
+- Neu: 5 Farbdesigns (Portofino, Wald, Beere, Graphit, Sand), jeweils in Hell und Dunkel
+- Einstellungen mit Live-Vorschau oben: Farbdesign, Akzentfarbe, Hell/Dunkel und Schriftart lassen sich ausprobieren und mit „Übernehmen“ speichern oder mit „Verwerfen“ zurücknehmen
+- Akzentfarbe „Passend zum Farbdesign“ als Standard
+
 ## 1.8.2
 - Standardschrift ist jetzt Figtree (Einstellungen → Schriftart, dort lässt sich wieder auf Systemschrift oder andere wechseln)
 

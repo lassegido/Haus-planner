@@ -530,6 +530,21 @@ body.selmode #toast{bottom:5.2rem}
 #f_proj{border-left:.4rem solid var(--tc,var(--line2))}
 .wd{display:inline-block;width:.55rem;height:.55rem;border-radius:50%;margin-right:.55rem;background:var(--side-mut);vertical-align:.05em}
 .wd.am{background:#F2815A}.wd.al{background:#6CB6E4}.wd.ao{background:#FDAF54}
+.prev{position:sticky;top:-1.5rem;z-index:3;display:flex;border:1px solid var(--line2);border-radius:1rem;overflow:hidden;background:var(--bg);margin:0 0 .2rem;box-shadow:0 .4rem .8rem -.5rem rgba(10,28,38,.3)}
+.pv-side{flex:none;width:2.4rem;background:var(--side);display:flex;flex-direction:column;gap:.45rem;padding:.7rem .5rem}
+.pv-side i{display:block;height:.35rem;border-radius:.2rem;background:var(--side-mut);opacity:.7}.pv-side i:first-child{background:var(--sun);opacity:1;height:.9rem;border-radius:.3rem}
+.pv-main{flex:1;min-width:0;padding:.6rem .7rem}.pv-h{font:700 .78rem/1.2 var(--disp);color:var(--tx);margin-bottom:.45rem}
+.pv-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem}
+.pv-cols div{background:var(--card);border:1px solid var(--line);border-radius:.5rem;padding:.35rem .4rem;min-width:0}
+.pv-cols em{display:block;height:.2rem;border-radius:.2rem;margin-bottom:.3rem}.c1{background:var(--todo)}.c2{background:var(--doing)}.c3{background:var(--done)}
+.pv-cols span{display:block;font-size:.68rem;font-weight:600;line-height:1.2;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pv-b{display:flex;gap:.4rem;margin-top:.5rem}.pv-b b{background:var(--acc);color:var(--on-acc);border-radius:.5rem;font-size:.68rem;padding:.25rem .6rem}.pv-b u{text-decoration:none;color:var(--tagc);background:var(--acc-soft);border-radius:.5rem;font-size:.68rem;padding:.25rem .6rem}
+.desgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin-top:.3rem}
+.desgrid button{display:flex;align-items:center;gap:.6rem;min-height:2.7rem;border:1px solid var(--line2);background:var(--surf);color:var(--tx);border-radius:.8rem;font-size:.95rem;font-weight:600;padding:.35rem .6rem;text-align:left}
+.desgrid button.on{background:var(--acc-soft);border-color:var(--acc);color:var(--tagc)}
+.dp{position:relative;flex:none;width:2.1rem;height:1.6rem;border-radius:.4rem;border:1px solid rgba(0,0,0,.12);overflow:hidden}
+.dp i{position:absolute;left:0;top:0;bottom:0;width:.6rem}.dp b{position:absolute;left:.85rem;top:.3rem;right:.3rem;height:.3rem;border-radius:.2rem}.dp u{position:absolute;left:.85rem;top:.85rem;width:.6rem;height:.3rem;border-radius:.2rem;opacity:.6}
+.sw.auto{outline:2px dashed var(--line2);outline-offset:2px}
 .fontgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin-top:.3rem}
 .fontgrid button{min-height:2.7rem;border:1px solid var(--line2);background:var(--surf);color:var(--tx);border-radius:.8rem;font-size:.95rem;font-weight:600;padding:.4rem .6rem}
 .fontgrid button.on{background:var(--acc-soft);border-color:var(--acc);color:var(--tagc)}
@@ -572,8 +587,10 @@ body.selmode #toast{bottom:5.2rem}
 <div id="selbar" role="toolbar" aria-label="Auswahl"><span id="selcnt">Aufgaben antippen</span><button data-bs="todo">Zu starten</button><button data-bs="doing">In Arbeit</button><button data-bs="done">Erledigt</button><select id="selwho" aria-label="Zuständig setzen"></select><select id="selproj" aria-label="Projekt setzen"></select><button data-ba="arch">Archivieren</button><button data-ba="del">Löschen</button><button data-ba="x">Fertig</button></div>
 <dialog id="dls">
   <div class="dh">Einstellungen</div>
+  <div class="prev" id="s_prev" aria-label="Vorschau"><div class="pv-side"><i></i><i></i><i></i></div><div class="pv-main"><div class="pv-h">Vorschau · Haus-planner</div><div class="pv-cols"><div><em class="c1"></em><span>Dachrinne reinigen</span></div><div><em class="c2"></em><span>Kinderzimmer streichen</span></div><div><em class="c3"></em><span>Steuer abheften</span></div></div><div class="pv-b"><b>Speichern</b><u>Abbrechen</u></div></div></div>
   <label>Darstellung</label>
   <div class="seg3" id="s_theme"><button data-th="auto">Automatisch</button><button data-th="light">Hell</button><button data-th="dark">Dunkel</button></div>
+  <label>Farbdesign</label><div class="desgrid" id="s_des"></div>
   <label>Akzentfarbe</label><div class="swatches" id="s_acc"></div>
   <label>Schriftart</label><div class="fontgrid" id="s_font"></div>
   <label>Ich bin</label>
@@ -583,7 +600,7 @@ body.selmode #toast{bottom:5.2rem}
   <button class="btn ghost xb" id="s_open">Archiv und Papierkorb<small id="s_openn"></small></button>
   <div id="s_ha" style="display:none"><label>Home Assistant</label><div class="hacard" id="s_hatxt"></div><button class="btn ghost xb" id="s_hatest">Testbenachrichtigung senden<small>Prüft, ob die Erinnerung auf dem Handy ankommt</small></button></div>
   <div id="s_keys"><label>Tastaturkürzel</label><dl class="keys"><dt>N</dt><dd>Neue Aufgabe</dd><dt>/</dt><dd>Suchen</dd><dt>1 – 5</dt><dd>Start, Board, Liste, Zeitstrahl, Kalender</dd><dt>S</dt><dd>Mehrfachauswahl ein/aus</dd><dt>A</dt><dd>Alle auswählen</dd><dt>Entf</dt><dd>Auswahl löschen</dd><dt>H</dt><dd>Zeitstrahl: zu Heute</dd><dt>Esc</dt><dd>Auswahl beenden</dd></dl></div>
-  <div class="acts"><span class="sp"></span><button class="btn ghost" id="s_close" type="button">Fertig</button></div>
+  <div class="acts"><span class="sp"></span><button class="btn ghost" id="s_cancel" type="button">Verwerfen</button><button class="btn" id="s_close" type="button">Übernehmen</button></div>
 </dialog>
 <dialog id="dla">
   <div class="dh">Archiv und Papierkorb</div>
@@ -796,11 +813,26 @@ const ACC={
  rose:{l:["#B84B73","#FFFFFF","#F7E4EC","#A84568","#8F3A58"],d:["#E58BAE","#2A0F1B","#3A2030","#F0B0C8","#1C1117"]},
  slate:{l:["#4F6B7C","#FFFFFF","#E3EAEE","#3F5766","#3A5160"],d:["#93AAB8","#0E1E27","#1B2F3B","#B6C7D1","#0C161C"]}};
 const hostTheme=document.documentElement.dataset.theme||"";
+const PV={};
+function pg(k){return PV[k]!==undefined?PV[k]:prefGet(k)}
+const DK=["--bg","--surf","--card","--tx","--mut","--faint","--line","--line2","--wk","--side","--side-mut","--acc","--on-acc","--acc-soft","--tagc","--focus"];
+const DES=[
+ ["porto","Portofino",null,null],
+ ["wald","Wald",["#EDF2EA","#FBFDF9","#FBFDF9","#1B3024","#55695B","#9DB0A3","#DAE4D5","#C6D3BF","#E4ECDF","#2F5D44","#BFD9C8","#2F7D57","#FFFFFF","#DDEEE3","#256444","#2F7D57"],
+  ["#0F1B15","#15251D","#1A2D23","#EDF2EA","#94AC9C","#51695A","#223A2D","#2E4A3B","#12221A","#0A140F","#8FB59E","#6CC49A","#0E1E17","#1C3A2D","#9BDDBB","#6CC49A"]],
+ ["beere","Beere",["#F4EFF4","#FFFCFE","#FFFCFE","#2B1F33","#6C5A78","#B0A3B9","#E8DEEC","#D7C8DE","#ECE3EF","#5B3A6B","#D4BEE0","#7A4A92","#FFFFFF","#EEE3F3","#603878","#7A4A92"],
+  ["#1A1220","#221829","#2A1E32","#F4EFF4","#AE9BBA","#66566F","#3A2A44","#4A3857","#1E1526","#120B17","#B79BC8","#C79BE0","#22112B","#3A2548","#DDBFF0","#C79BE0"]],
+ ["graphit","Graphit",["#F0F1F2","#FFFFFF","#FFFFFF","#1B2126","#5C666E","#A3ABB1","#E0E3E5","#CDD2D6","#E7E9EB","#2A3238","#B6C0C8","#3E5C74","#FFFFFF","#E2E9EE","#34505F","#3E5C74"],
+  ["#121518","#1A1E22","#20252A","#EEF0F2","#9AA5AD","#566067","#2A3036","#38414A","#161A1E","#0C0E10","#9AA9B4","#8FB4D0","#101820","#26333E","#B5D0E3","#8FB4D0"]],
+ ["sand","Sand",["#F6EFE6","#FFFCF8","#FFFCF8","#3A2A20","#7A6455","#BBA999","#EADFD2","#DACBB8","#EFE5D8","#8A4B2E","#F0D3C2","#B5532F","#FFFFFF","#F7E3D8","#8E3F20","#B5532F"],
+  ["#1C1511","#251C17","#2C221C","#F6EFE6","#B8A190","#6E5B4E","#3A2D25","#4B3B30","#211812","#120D0A","#D9B49E","#E58A62","#2A1209","#43281C","#F2AE8D","#E58A62"]]];
+function isDark(){const th=pg("theme")||"auto";return th==="dark"||(th==="auto"&&(hostTheme?hostTheme==="dark":matchMedia("(prefers-color-scheme:dark)").matches))}
 function applyTheme(){
-  const th=prefGet("theme")||"auto",ac=prefGet("acc")||"sea",r=document.documentElement;
+  const th=pg("theme")||"auto",ac=pg("acc")||"",ds=pg("design")||"porto",r=document.documentElement;
   if(th==="auto"){hostTheme?r.dataset.theme=hostTheme:r.removeAttribute("data-theme")}else r.dataset.theme=th;
-  const dark=th==="dark"||(th==="auto"&&(hostTheme?hostTheme==="dark":matchMedia("(prefers-color-scheme:dark)").matches));
-  ["--acc","--on-acc","--acc-soft","--tagc","--focus","--side"].forEach(k=>r.style.removeProperty(k));
+  const dark=isDark();
+  DK.forEach(k=>r.style.removeProperty(k));
+  const d=DES.find(x=>x[0]===ds);if(d&&d[2])d[dark?3:2].forEach((v,i)=>r.style.setProperty(DK[i],v));
   const a=ACC[ac];if(a){const v=a[dark?"d":"l"];[["--acc",0],["--on-acc",1],["--acc-soft",2],["--tagc",3],["--focus",0],["--side",4]].forEach(([k,i])=>r.style.setProperty(k,v[i]))}
 }
 applyTheme();
@@ -809,7 +841,7 @@ matchMedia("(prefers-color-scheme:dark)").addEventListener("change",applyTheme);
 const SYSF='-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
 const FONTS=[["sys","Systemschrift","",SYSF],["figtree","Figtree","Figtree:wght@400;500;600;700;800",'"Figtree",'+SYSF],["jakarta","Plus Jakarta Sans","Plus+Jakarta+Sans:wght@400;500;600;700;800",'"Plus Jakarta Sans",'+SYSF],["dmsans","DM Sans","DM+Sans:wght@400;500;600;700",'"DM Sans",'+SYSF],["manrope","Manrope","Manrope:wght@400;500;600;700;800",'"Manrope",'+SYSF],["inter","Inter","Inter:wght@400;500;600;700",'"Inter",'+SYSF]];
 function applyFont(){
-  const k=prefGet("font")||"figtree",f=FONTS.find(x=>x[0]===k)||FONTS[0],r=document.documentElement;
+  const k=pg("font")||"figtree",f=FONTS.find(x=>x[0]===k)||FONTS[0],r=document.documentElement;
   if(f[2]&&!document.getElementById("gf-"+f[0])){const l=document.createElement("link");l.id="gf-"+f[0];l.rel="stylesheet";l.href="https://fonts.googleapis.com/css2?family="+f[2]+"&display=swap";document.head.appendChild(l)}
   r.style.setProperty("--fb",f[3]);r.style.setProperty("--disp",f[3])}
 applyFont();
@@ -837,11 +869,12 @@ $("a_empty").onclick=async()=>{const T=RAW.filter(t=>t.del);if(T.length&&confirm
 
 /* Einstellungen */
 function drawSettings(){
-  const th=prefGet("theme")||"auto",ac=prefGet("acc")||"sea";
+  const th=pg("theme")||"auto",ac=pg("acc")||"",ds=pg("design")||"porto";
   $("s_theme").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.th===th));
-  {const fk=prefGet("font")||"figtree";$("s_font").innerHTML=FONTS.map(f=>`<button data-font="${f[0]}" class="${f[0]===fk?"on":""}" style="font-family:${f[3].replace(/"/g,"&quot;")}">${f[1]}</button>`).join("")}
+  {const fk=pg("font")||"figtree";$("s_font").innerHTML=FONTS.map(f=>`<button data-font="${f[0]}" class="${f[0]===fk?"on":""}" style="font-family:${f[3].replace(/"/g,"&quot;")}">${f[1]}</button>`).join("")}
   $("s_me").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.me===(prefGet("me")||"")));
-  $("s_acc").innerHTML=ACCS.map(([k,n,c])=>`<button class="sw${k===ac?" on":""}" data-acc="${k}" style="--tc:${c}" aria-label="${n}" title="${n}"></button>`).join("");
+  {const dk=isDark();$("s_des").innerHTML=DES.map(([k,n,l,d])=>{const v=l?(dk?d:l):null,c=v?[v[0],v[9],v[11]]:dk?["#0E1E27","#0A171E","#6CB6E4"]:["#F5F3EB","#2D6786","#387CA3"];return `<button data-des="${k}" class="${k===ds?"on":""}"><span class="dp" style="background:${c[0]}"><i style="background:${c[1]}"></i><b style="background:${c[2]}"></b><u style="background:${c[2]}"></u></span>${n}</button>`}).join("")}
+  $("s_acc").innerHTML=`<button class="sw auto${ac===""?" on":""}" data-acc="" style="--tc:var(--acc)" aria-label="Passend zum Farbdesign" title="Passend zum Farbdesign"></button>`+ACCS.map(([k,n,c])=>`<button class="sw${k===ac?" on":""}" data-acc="${k}" style="--tc:${c}" aria-label="${n}" title="${n}"></button>`).join("");
   const dn2=tasks.filter(t=>t.status==="done").length,A=RAW.filter(t=>t.arch&&!t.del).length,T=RAW.filter(t=>t.del).length;
   $("s_archn").textContent=dn2?dn2+" erledigte "+(dn2===1?"Aufgabe":"Aufgaben")+" ins Archiv verschieben":"Keine erledigten Aufgaben";$("s_arch").disabled=!dn2;
   $("s_openn").textContent=A+" im Archiv · "+T+" im Papierkorb";
@@ -854,13 +887,17 @@ function drawSettings(){
     $("s_hatest").disabled=!h.api||!n}
 }
 function openSettings(){drawSettings();$("dls").showModal();}
-$("cfg").onclick=openSettings;$("s_close").onclick=()=>$("dls").close();
-$("s_theme").onclick=e=>{const b=e.target.closest("[data-th]");if(!b)return;prefSet("theme",b.dataset.th);applyTheme();drawSettings()};
+$("cfg").onclick=openSettings;function commitPV(){Object.keys(PV).forEach(k=>{prefSet(k,PV[k]);delete PV[k]})}
+function dropPV(){if(Object.keys(PV).length){Object.keys(PV).forEach(k=>delete PV[k]);applyTheme();applyFont()}}
+$("s_close").onclick=()=>{commitPV();$("dls").close()};$("s_cancel").onclick=()=>$("dls").close();
+$("dls").addEventListener("close",dropPV);
+$("s_theme").onclick=e=>{const b=e.target.closest("[data-th]");if(!b)return;PV.theme=b.dataset.th;applyTheme();drawSettings()};
+$("s_des").onclick=e=>{const b=e.target.closest("[data-des]");if(!b)return;PV.design=b.dataset.des;PV.acc="";applyTheme();drawSettings()};
 $("s_me").onclick=e=>{const b=e.target.closest("[data-me]");if(!b)return;prefSet("me",b.dataset.me);drawSettings()};
-$("s_font").onclick=e=>{const b=e.target.closest("[data-font]");if(!b)return;prefSet("font",b.dataset.font);applyFont();drawSettings()};
-$("s_acc").onclick=e=>{const b=e.target.closest("[data-acc]");if(!b)return;prefSet("acc",b.dataset.acc);applyTheme();drawSettings()};
-$("s_arch").onclick=async()=>{const L=tasks.filter(t=>t.status==="done");if(!L.length)return;await saveMany(L.map(t=>({...t,arch:true})));$("dls").close();toast(L.length+" erledigte archiviert",()=>saveMany(L))};
-$("s_open").onclick=()=>{$("dls").close();openArch()};
+$("s_font").onclick=e=>{const b=e.target.closest("[data-font]");if(!b)return;PV.font=b.dataset.font;applyFont();drawSettings()};
+$("s_acc").onclick=e=>{const b=e.target.closest("[data-acc]");if(!b)return;PV.acc=b.dataset.acc;applyTheme();drawSettings()};
+$("s_arch").onclick=async()=>{const L=tasks.filter(t=>t.status==="done");if(!L.length)return;commitPV();await saveMany(L.map(t=>({...t,arch:true})));$("dls").close();toast(L.length+" erledigte archiviert",()=>saveMany(L))};
+$("s_open").onclick=()=>{commitPV();$("dls").close();openArch()};
 $("s_hatest").onclick=async()=>{try{const r=await api("api/ha-test",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});$("dls").close();toast(r.ok?"Testnachricht gesendet":"Fehlgeschlagen: "+r.error)}catch(e){toast("Server nicht erreichbar")}};
 
 /* Mehrfachauswahl */
