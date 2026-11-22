@@ -471,6 +471,46 @@ body.selmode .ring{pointer-events:none}
 body.selmode #toast{bottom:5.2rem}
 @media (max-width:699px){body.selmode #toast{bottom:calc(9.6rem + env(safe-area-inset-bottom))}}
 @media (max-width:480px){.bar{gap:.4rem}.bar .ttl{flex:1;min-width:0}.bar .ib,#exp,#cfg{width:2.55rem!important;height:2.55rem!important}}
+
+/* 1.6: Kalender, Verlauf, Dateien */
+.ex{display:inline-flex;align-items:center;gap:.2rem;font-size:.78rem}
+.calbar{display:flex;align-items:center;gap:.5rem;margin-bottom:.8rem}
+.calbar h2{flex:1;margin:0;font:700 1.25rem/1 var(--disp);letter-spacing:-.02em}
+.cb{flex:none;width:2.4rem;height:2.4rem;display:grid;place-items:center;border-radius:50%;border:1px solid var(--line2);background:var(--surf);color:var(--tx);padding:0;font-size:1.3rem;line-height:1}
+.cb.t{width:auto;padding:0 .9rem;border-radius:2rem;font-size:.86rem;font-weight:560}
+.cgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:1rem;overflow:hidden}
+.cwd{background:var(--bg);text-align:center;font:700 .7rem/1 var(--disp);letter-spacing:.1em;color:var(--mut);padding:.6rem 0}
+.cd{background:var(--surf);min-height:6rem;padding:.35rem .4rem;display:flex;flex-direction:column;gap:.25rem;cursor:pointer;min-width:0}
+.cd.out{background:var(--bg)}.cd.out .n{color:var(--faint)}
+.cd .n{font-size:.8rem;font-weight:650;width:1.6rem;height:1.6rem;display:grid;place-items:center;border-radius:50%}
+.cd.today .n{background:var(--brick);color:#fff}
+.cd.sel{box-shadow:inset 0 0 0 2px var(--acc)}
+.pills{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pill{display:block;width:100%;border:0;border-radius:.35rem;padding:.16rem .4rem;text-align:left;font:inherit;font-size:.72rem;font-weight:560;color:var(--tx);background:color-mix(in srgb,var(--sky) 38%,var(--surf));overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pill.doing{background:color-mix(in srgb,var(--sun) 45%,var(--surf))}
+.pill.done{background:color-mix(in srgb,var(--sea) 30%,var(--surf));text-decoration:line-through;opacity:.8}
+.pill.late{box-shadow:inset 3px 0 var(--brick)}
+.pill.ms::before{content:"";display:inline-block;width:.42em;height:.42em;background:currentColor;transform:rotate(45deg);margin-right:.4em}
+.dots{display:none;gap:3px;flex-wrap:wrap;justify-content:center}
+.dots i{width:.45rem;height:.45rem;border-radius:50%;background:var(--sky)}.dots i.doing{background:var(--sun)}.dots i.done{background:var(--sea)}
+.cd em{font-style:normal;font-size:.68rem;color:var(--mut)}
+@container main (max-width:640px){.pills,.cd em{display:none}.dots{display:flex}.cd{min-height:3.7rem;align-items:center;padding:.3rem .1rem}}
+.agenda h3{display:flex;align-items:center;gap:.6rem;font:700 1rem/1.2 var(--disp);margin:1.3rem 0 .7rem}.agenda h3 span{flex:1}
+.agenda .card{margin-bottom:.6rem}
+.lgin{display:flex;gap:.5rem}.lgin input{flex:1}
+.lg{display:flex;flex-direction:column;gap:.45rem;margin-top:.6rem;max-height:15rem;overflow:auto}
+.lg .c{background:var(--bg);border:1px solid var(--line);border-radius:.8rem;padding:.55rem .75rem;font-size:.9rem;line-height:1.4;white-space:pre-wrap;word-break:break-word}
+.lg .c small{display:block;color:var(--mut);font-size:.72rem;margin-bottom:.15rem;font-weight:650}
+.lg .h{font-size:.8rem;color:var(--mut);padding:0 .25rem}
+.fls{display:grid;grid-template-columns:repeat(auto-fill,minmax(5.5rem,1fr));gap:.5rem}
+.fl{position:relative;border:1px solid var(--line2);border-radius:.8rem;overflow:hidden;background:var(--bg)}
+.fl.img img{display:block;width:100%;aspect-ratio:1;object-fit:cover}
+.fl.doc{grid-column:1/-1;display:flex;align-items:center;padding:.5rem .75rem}
+.fl.doc a{flex:1;min-width:0;color:var(--tx);text-decoration:none}
+.fl.doc b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.9rem}
+.fl small{color:var(--mut);font-size:.72rem}
+.fl .x{position:absolute;top:.25rem;right:.25rem;width:1.6rem;height:1.6rem;border-radius:50%;border:0;background:rgba(20,48,63,.7);color:#fff;font-size:.75rem;padding:0}
+.fl.doc .x{position:static;background:none;color:var(--mut);width:auto}
 </style>
 </head>
 <body>
@@ -486,6 +526,7 @@ body.selmode #toast{bottom:5.2rem}
     <button data-v="board"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="4.5" height="15" rx="1.2"/><rect x="9.75" y="4.5" width="4.5" height="9" rx="1.2"/><rect x="16" y="4.5" width="4.5" height="12" rx="1.2"/></svg><span>Board</span></button>
     <button data-v="list"><svg viewBox="0 0 24 24"><path d="M9 6.5h11M9 12h11M9 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01" stroke-width="2.4"/></svg><span>Liste</span></button>
     <button data-v="gantt"><svg viewBox="0 0 24 24"><path d="M4 6.5h8M8 12h10M12 17.5h8" stroke-width="2.6"/></svg><span>Zeitstrahl</span></button>
+    <button data-v="cal"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg><span>Kalender</span></button>
   </nav>
   <div class="chips" id="chips"></div>
 </aside>
@@ -510,11 +551,13 @@ body.selmode #toast{bottom:5.2rem}
   <label>Darstellung</label>
   <div class="seg3" id="s_theme"><button data-th="auto">Automatisch</button><button data-th="light">Hell</button><button data-th="dark">Dunkel</button></div>
   <label>Akzentfarbe</label><div class="swatches" id="s_acc"></div>
+  <label>Ich bin</label>
+  <div class="seg3" id="s_me"><button data-me="">Keine Angabe</button><button data-me="Lasse">Lasse</button><button data-me="Melanie">Melanie</button></div>
   <label>Aufgaben</label>
   <button class="btn ghost xb" id="s_arch">Erledigte archivieren<small id="s_archn"></small></button>
   <button class="btn ghost xb" id="s_open">Archiv und Papierkorb<small id="s_openn"></small></button>
   <div id="s_ha" style="display:none"><label>Home Assistant</label><div class="hacard" id="s_hatxt"></div><button class="btn ghost xb" id="s_hatest">Testbenachrichtigung senden<small>Prüft, ob die Erinnerung auf dem Handy ankommt</small></button></div>
-  <div id="s_keys"><label>Tastaturkürzel</label><dl class="keys"><dt>N</dt><dd>Neue Aufgabe</dd><dt>/</dt><dd>Suchen</dd><dt>1 – 4</dt><dd>Start, Board, Liste, Zeitstrahl</dd><dt>S</dt><dd>Mehrfachauswahl ein/aus</dd><dt>A</dt><dd>Alle auswählen</dd><dt>Entf</dt><dd>Auswahl löschen</dd><dt>H</dt><dd>Zeitstrahl: zu Heute</dd><dt>Esc</dt><dd>Auswahl beenden</dd></dl></div>
+  <div id="s_keys"><label>Tastaturkürzel</label><dl class="keys"><dt>N</dt><dd>Neue Aufgabe</dd><dt>/</dt><dd>Suchen</dd><dt>1 – 5</dt><dd>Start, Board, Liste, Zeitstrahl, Kalender</dd><dt>S</dt><dd>Mehrfachauswahl ein/aus</dd><dt>A</dt><dd>Alle auswählen</dd><dt>Entf</dt><dd>Auswahl löschen</dd><dt>H</dt><dd>Zeitstrahl: zu Heute</dd><dt>Esc</dt><dd>Auswahl beenden</dd></dl></div>
   <div class="acts"><span class="sp"></span><button class="btn ghost" id="s_close" type="button">Fertig</button></div>
 </dialog>
 <dialog id="dla">
@@ -527,6 +570,7 @@ body.selmode #toast{bottom:5.2rem}
   <div class="dh">Export &amp; Backup</div>
   <button class="btn xb" id="x_pdf">Als PDF speichern<small>Aufgabenliste mit Checklisten plus Zeitstrahl-Seite</small></button>
   <button class="btn ghost xb" id="x_xlsx">Als Excel speichern<small>3 Blätter (Liste, Board, Zeitstrahl), arbeitet in Excel eigenständig weiter</small></button>
+  <button class="btn ghost xb" id="x_ics">Kalender-Datei (.ics)<small>Offene Aufgaben für Apple Kalender, Google Kalender oder Outlook</small></button>
   <button class="btn ghost xb" id="x_json">Backup-Datei (JSON)<small>Vollständige Sicherung aller Daten</small></button>
   <button class="btn ghost xb" id="x_imp">Backup einspielen<small>Aufgaben aus einer JSON-Datei wiederherstellen</small></button>
   <input type="file" id="imp" accept=".json,application/json" hidden>
@@ -569,6 +613,8 @@ body.selmode #toast{bottom:5.2rem}
   <label>Abhängig von <span class="lh">muss vorher fertig sein</span></label><div class="deps" id="f_deps"></div>
   <label>Checkliste</label><div id="f_ck"></div><button class="btn ghost" id="ck_add" type="button"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Punkt hinzufügen</button>
   <label for="f_notes">Notizen</label><textarea id="f_notes" rows="3" placeholder="Maße, Material, Ansprechpartner …"></textarea>
+  <div id="f_filesec"><label>Fotos und Dateien</label><div class="fls" id="f_files"></div><button class="btn ghost" id="fl_btn" type="button" style="margin-top:.6rem">Foto oder Datei hinzufügen</button><input type="file" id="fl_in" multiple hidden accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"></div>
+  <div id="f_logsec"><label>Verlauf und Kommentare</label><div class="lgin"><input id="lg_in" placeholder="Kommentar schreiben …" maxlength="500" autocomplete="off"><button class="btn ghost" id="lg_add" type="button">Senden</button></div><div class="lg" id="lg_list"></div></div>
   <div class="acts"><button class="btn del" id="b_del" type="button" aria-label="Löschen"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg><span>Löschen</span></button><span class="sp"></span><button class="btn ghost" id="b_cancel" type="button">Abbrechen</button><button class="btn" id="b_save" type="button">Speichern</button></div>
 </dialog>
 
@@ -653,7 +699,7 @@ function nextOcc(t){
   do{s=addInterval(s,t.rec);e=iso(fromDn(dn(s)+len))}while(dn(e)<today()&&++g<500);
   return{...t,id:newId(),status:"todo",start:s,end:e,checklist:(t.checklist||[]).map(c=>({...c,d:false})),deps:[],spawned:""}}
 async function setStatus(t,next){
-  const u={...t,status:next};let sp=null;
+  const u={...t,status:next};u.log=diffLog(t,u);let sp=null;
   if(next==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);u.spawned=sp.id}
   await saveTask(u);if(sp)await saveTask(sp);return sp}
 /* Zeitstrahl: Balken ziehen */
@@ -696,7 +742,7 @@ function ganttDrag(){
       await saveTask({...to,deps:[...(to.deps||[]),s.t.id]});toast("„"+to.title+"“ startet nach „"+s.t.title+"“",()=>saveTask({...byId(to.id),deps:(byId(to.id).deps||[]).filter(x=>x!==s.t.id)}));return}
     const d=s.d||0;if(!d){render();return}
     const[s2,e2]=range(s.t,s.k,d),old={start:s.t.start,end:s.t.end};
-    await saveTask({...s.t,start:iso(fromDn(s2)),end:iso(fromDn(e2))});
+    {const n2={...s.t,start:iso(fromDn(s2)),end:iso(fromDn(e2))};n2.log=diffLog(s.t,n2);await saveTask(n2)}
     toast("„"+s.t.title+"“: "+fmt(s2,e2,s.t.ms),()=>saveTask({...byId(s.t.id),...old}));
   };
   svg.addEventListener("click",e=>{if(suppress){e.stopPropagation();e.preventDefault()}},true);
@@ -758,6 +804,7 @@ $("a_empty").onclick=async()=>{const T=RAW.filter(t=>t.del);if(T.length&&confirm
 function drawSettings(){
   const th=prefGet("theme")||"auto",ac=prefGet("acc")||"sea";
   $("s_theme").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.th===th));
+  $("s_me").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.me===(prefGet("me")||"")));
   $("s_acc").innerHTML=ACCS.map(([k,n,c])=>`<button class="sw${k===ac?" on":""}" data-acc="${k}" style="--tc:${c}" aria-label="${n}" title="${n}"></button>`).join("");
   const dn2=tasks.filter(t=>t.status==="done").length,A=RAW.filter(t=>t.arch&&!t.del).length,T=RAW.filter(t=>t.del).length;
   $("s_archn").textContent=dn2?dn2+" erledigte "+(dn2===1?"Aufgabe":"Aufgaben")+" ins Archiv verschieben":"Keine erledigten Aufgaben";$("s_arch").disabled=!dn2;
@@ -772,6 +819,7 @@ function drawSettings(){
 function openSettings(){drawSettings();$("dls").showModal()}
 $("cfg").onclick=openSettings;$("s_close").onclick=()=>$("dls").close();
 $("s_theme").onclick=e=>{const b=e.target.closest("[data-th]");if(!b)return;prefSet("theme",b.dataset.th);applyTheme();drawSettings()};
+$("s_me").onclick=e=>{const b=e.target.closest("[data-me]");if(!b)return;prefSet("me",b.dataset.me);drawSettings()};
 $("s_acc").onclick=e=>{const b=e.target.closest("[data-acc]");if(!b)return;prefSet("acc",b.dataset.acc);applyTheme();drawSettings()};
 $("s_arch").onclick=async()=>{const L=tasks.filter(t=>t.status==="done");if(!L.length)return;await saveMany(L.map(t=>({...t,arch:true})));$("dls").close();toast(L.length+" erledigte archiviert",()=>saveMany(L))};
 $("s_open").onclick=()=>{$("dls").close();openArch()};
@@ -804,9 +852,9 @@ $("selbar").onclick=async e=>{
   else if(b.dataset.ba==="del"){const d=iso(new Date());await saveMany(L.map(t=>({...t,del:true,delAt:d,arch:false})));toast(L.length+" im Papierkorb",()=>saveMany(L))}
   sel.clear();applySel()};
 $("selwho").onchange=async()=>{const v=$("selwho").value,L=selList();if(!v||!L.length)return;
-  await saveMany(L.map(t=>({...t,who:v==="__none"?"":v})));toast(L.length+" Aufgaben: "+(v==="__none"?"niemand zuständig":v));sel.clear();applySel()};
+  await saveMany(L.map(t=>lg(t,{...t,who:v==="__none"?"":v})));toast(L.length+" Aufgaben: "+(v==="__none"?"niemand zuständig":v));sel.clear();applySel()};
 $("selproj").onchange=async()=>{const v=$("selproj").value,L=selList();if(!v||!L.length)return;
-  await saveMany(L.map(t=>({...t,proj:v==="__none"?"":v})));toast(L.length+" Aufgaben: "+(v==="__none"?"ohne Projekt":v));sel.clear();applySel()};
+  await saveMany(L.map(t=>lg(t,{...t,proj:v==="__none"?"":v})));toast(L.length+" Aufgaben: "+(v==="__none"?"ohne Projekt":v));sel.clear();applySel()};
 
 /* Tastatur */
 document.addEventListener("keydown",e=>{
@@ -818,13 +866,93 @@ document.addEventListener("keydown",e=>{
   switch(e.key){
     case"n":e.preventDefault();openDlg();break;
     case"/":e.preventDefault();$("q").focus();break;
-    case"1":tab("home");break;case"2":tab("board");break;case"3":tab("list");break;case"4":tab("gantt");break;
+    case"1":tab("home");break;case"2":tab("board");break;case"3":tab("list");break;case"4":tab("gantt");break;case"5":tab("cal");break;
     case"s":setSel(!selMode);break;
     case"a":if(selMode){filtered().forEach(t=>sel.add(t.id));applySel()}break;
     case"Delete":case"Backspace":if(selMode&&sel.size){e.preventDefault();$("selbar").querySelector('[data-ba="del"]').click()}break;
     case"h":if(view==="gantt")gToday(true);break;
     case"?":case",":openSettings();break;
   }});
+/* Verlauf, Kommentare */
+const lg=(o,n)=>({...n,log:diffLog(o,n)});
+const CMI='<svg class="mi" viewBox="0 0 24 24" aria-label="Kommentare"><path d="M4 5h16v11H9l-5 4z"/></svg>';
+const FLI='<svg class="mi" viewBox="0 0 24 24" aria-label="Anhänge"><path d="M20 11.5l-7.8 7.8a5 5 0 0 1-7-7L13 4.5a3.4 3.4 0 0 1 4.8 4.8l-7.9 7.9a1.8 1.8 0 0 1-2.5-2.5l7.2-7.2"/></svg>';
+function extra(t){const c=(t.log||[]).filter(x=>x.k==="c").length,f=(t.files||[]).length;return(c?`<span class="ex">${CMI}${c}</span>`:"")+(f?`<span class="ex">${FLI}${f}</span>`:"")}
+function diffLog(o,n){
+  const L=(o.log||[]).slice(),me=prefGet("me")||"",now=new Date().toISOString().slice(0,16),add=x=>L.push({t:now,a:me,k:"h",x});
+  if(o.status!==n.status)add("Status: "+ST[o.status]+" → "+ST[n.status]);
+  if(o.start!==n.start||o.end!==n.end)add("Zeitraum: "+dr(o)+" → "+dr(n));
+  if((o.who||"")!==(n.who||""))add("Zuständig: "+(n.who||"niemand"));
+  if((o.proj||"")!==(n.proj||""))add("Projekt: "+(n.proj||"keins"));
+  if(o.title!==n.title)add("Titel geändert");
+  return L.slice(-120)}
+const fts=t=>{const d=new Date(t+"Z");return isNaN(d)?"":d.toLocaleString("de-DE",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})};
+function drawLog(){
+  $("f_logsec").style.display=editing?"":"none";if(!editing)return;
+  const L=(editing.log||[]).slice().reverse().slice(0,40);
+  $("lg_list").innerHTML=L.length?L.map(x=>x.k==="c"?`<div class="c"><small>${esc(x.a||"Kommentar")} · ${fts(x.t)}</small>${esc(x.x)}</div>`:`<div class="h">${fts(x.t)}${x.a?" · "+esc(x.a):""} · ${esc(x.x)}</div>`).join(""):'<div class="none">Noch nichts passiert.</div>'}
+async function addComment(){
+  const x=$("lg_in").value.trim();if(!x||!editing)return;
+  const L=[...(editing.log||[]),{t:new Date().toISOString().slice(0,16),a:prefGet("me")||"",k:"c",x:x.slice(0,500)}].slice(-120);
+  editing={...editing,log:L};$("lg_in").value="";drawLog();await saveTask({...byId(editing.id),log:L})}
+$("lg_add").onclick=addComment;
+$("lg_in").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();addComment()}};
+
+/* Fotos und Dateien (nur im Add-on, dort liegen sie auf dem Server) */
+const fsz=n=>n>1048576?(n/1048576).toFixed(1).replace(".",",")+" MB":Math.max(1,Math.round(n/1024))+" KB";
+function drawFiles(){
+  const can=typeof api==="function";$("f_filesec").style.display=can?"":"none";if(!can)return;
+  $("fl_btn").style.display=editing?"":"none";
+  if(!editing){$("f_files").innerHTML='<div class="none" style="grid-column:1/-1">Erst speichern, dann Fotos und Dateien anhängen.</div>';return}
+  const u=f=>`api/file/${editing.id}/${f.id}`,F=editing.files||[];
+  $("f_files").innerHTML=F.map(f=>/^image\//.test(f.ty)
+    ?`<div class="fl img"><a href="${u(f)}" target="_blank" rel="noopener"><img loading="lazy" src="${u(f)}" alt="${esc(f.n)}"></a><button class="x" data-fd="${f.id}" aria-label="Entfernen">✕</button></div>`
+    :`<div class="fl doc"><a href="${u(f)}" target="_blank" rel="noopener"><b>${esc(f.n)}</b><small>${fsz(f.s)}</small></a><button class="x" data-fd="${f.id}" aria-label="Entfernen">✕</button></div>`).join("")}
+async function shrink(f){
+  if(!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size<400000)return f;
+  try{const bm=await createImageBitmap(f),k=Math.min(1,1600/Math.max(bm.width,bm.height)),c=document.createElement("canvas");c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);
+    c.getContext("2d").drawImage(bm,0,0,c.width,c.height);const b=await new Promise(r=>c.toBlob(r,"image/jpeg",.82));return b&&b.size<f.size?b:f}catch(e){return f}}
+$("fl_btn").onclick=()=>$("fl_in").click();
+$("fl_in").onchange=async()=>{
+  const fs=[...$("fl_in").files];$("fl_in").value="";if(!editing)return;
+  for(const f of fs){
+    if(f.size>20e6){toast("„"+f.name+"“ ist größer als 20 MB");continue}
+    try{const b=await shrink(f),ty=b.type||f.type||"application/octet-stream",nm=b===f?f.name:f.name.replace(/\.\w+$/,"")+".jpg";
+      const r=await api("api/file/"+editing.id+"?name="+encodeURIComponent(nm)+"&type="+encodeURIComponent(ty),{method:"POST",body:b});
+      const files=[...(editing.files||[]),r.file];editing={...editing,files};await saveTask({...byId(editing.id),files});drawFiles()}
+    catch(e){toast("Hochladen fehlgeschlagen: "+f.name)}}};
+$("f_files").onclick=async e=>{
+  const b=e.target.closest("[data-fd]");if(!b||!editing)return;const fid=b.dataset.fd;
+  try{await api("api/file/"+editing.id+"/"+fid,{method:"DELETE"})}catch(x){}
+  const files=(editing.files||[]).filter(f=>f.id!==fid);editing={...editing,files};drawFiles();await saveTask({...byId(editing.id),files})};
+
+/* Kalender */
+let calM=null,calSel=null;
+const DLONG=["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
+function cal(list){
+  const T=iso(new Date());if(!calM)calM=T.slice(0,7);if(!calSel)calSel=T;
+  const[y,m]=calM.split("-").map(Number),first=Date.UTC(y,m-1,1)/864e5,dow=(fromDn(first).getUTCDay()+6)%7,start=first-dow,
+    nd=new Date(Date.UTC(y,m,0)).getUTCDate(),weeks=Math.ceil((dow+nd)/7);
+  let cells="";
+  for(let i=0;i<weeks*7;i++){
+    const d=start+i,ds=iso(fromDn(d)),dt=fromDn(d),L=list.filter(t=>dn(t.start)<=d&&dn(t.end)>=d);
+    cells+=`<div class="cd${dt.getUTCMonth()!==m-1?" out":""}${ds===T?" today":""}${ds===calSel?" sel":""}" data-day="${ds}"><span class="n">${dt.getUTCDate()}</span>`
+      +`<div class="pills">${L.slice(0,3).map(t=>`<button class="pill ${t.status}${t.ms?" ms":""}${isLate(t)?" late":""}" data-id="${t.id}">${esc(t.title)}</button>`).join("")}</div>`
+      +`<div class="dots">${L.slice(0,4).map(t=>`<i class="${t.status}"></i>`).join("")}</div>${L.length>3?`<em>+${L.length-3}</em>`:""}</div>`}
+  const sd=dn(calSel),sl=list.filter(t=>dn(t.start)<=sd&&dn(t.end)>=sd),sdt=fromDn(sd);
+  return`<div class="calbar"><button class="cb" data-cm="-1" aria-label="Voriger Monat">‹</button><h2>${MONL[m-1]} ${y}</h2><button class="cb" data-cm="1" aria-label="Nächster Monat">›</button><button class="cb t" data-cm="0">Heute</button></div>`
+   +`<div class="cgrid">${["Mo","Di","Mi","Do","Fr","Sa","So"].map(x=>`<div class="cwd">${x}</div>`).join("")}${cells}</div>`
+   +`<div class="agenda"><h3><span>${DLONG[sdt.getUTCDay()]}, ${sdt.getUTCDate()}. ${MONL[sdt.getUTCMonth()]}</span><button class="btn ghost sm" data-newday="${calSel}">Aufgabe anlegen</button></h3>${sl.length?sl.map((t,i)=>card(t,t.status,i)).join(""):'<div class="none">Nichts geplant.</div>'}</div>`}
+$("main").addEventListener("click",e=>{
+  const cm=e.target.closest("[data-cm]");
+  if(cm){const v=+cm.dataset.cm,T=iso(new Date());if(!v){calM=T.slice(0,7);calSel=T}else{const[y,m]=calM.split("-").map(Number),d=new Date(Date.UTC(y,m-1+v,1));calM=iso(d).slice(0,7);calSel=calM+"-01"}render();return}
+  const nd=e.target.closest("[data-newday]");if(nd){openDlg();$("f_start").value=nd.dataset.newday;$("f_end").value=nd.dataset.newday;return}
+  const dy=e.target.closest("[data-day]");if(dy&&!e.target.closest("[data-id]")){calSel=dy.dataset.day;render()}});
+function ics(){
+  const esc2=x=>String(x||"").replace(/\\/g,"\\\\").replace(/;/g,"\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n"),c=d=>d.replace(/-/g,""),stp=new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z";
+  const ev=tasks.filter(t=>t.status!=="done").map(t=>["BEGIN:VEVENT","UID:"+t.id+"@haus-planner","DTSTAMP:"+stp,"DTSTART;VALUE=DATE:"+c(t.start),"DTEND;VALUE=DATE:"+c(iso(fromDn(dn(t.end)+1))),"SUMMARY:"+esc2(t.title),...(t.notes?["DESCRIPTION:"+esc2(t.notes)]:[]),...(t.who?["CATEGORIES:"+esc2(t.who)]:[]),"END:VEVENT"].join("\r\n"));
+  return["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Haus-planner//DE","CALSCALE:GREGORIAN","X-WR-CALNAME:Haus-planner",...ev,"END:VCALENDAR"].join("\r\n")+"\r\n"}
+$("x_ics").onclick=()=>dl("haus-planner-"+stamp()+".ics",new Blob([ics()],{type:"text/calendar"}));
 /* Tags */
 const TC={sky:"#6CB6E4",sun:"#FDAF54",sea:"#387CA3",brick:"#D35526",mint:"#6CC49A",rose:"#E58BAE",lilac:"#9D86DB",sand:"#C9B77A",slate:"#7C93A3",lemon:"#D9CB3F"},TCK=Object.keys(TC);
 const tgs=t=>Array.isArray(t.tags)?t.tags:(t.area?[t.area]:[]);
@@ -981,7 +1109,7 @@ function render(){
   const n=tasks.length,d=tasks.filter(t=>t.status==="done").length,pct=n?Math.round(d/n*100):0;
   const doing=tasks.filter(t=>t.status==="doing").length,late=tasks.filter(isLate).length,blk=tasks.filter(isBlocked).length,op=n-d-doing;
   $("kpis").innerHTML=view==="home"?"":`<div class="kp"><div class="kn"><b><span data-n="${pct}">${pct}</span><i>%</i></b><span>erledigt · ${d} von ${n}</span></div><div class="kn"><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="kn ${late?"hot":""}"><b data-n="${late}">${late}</b><span>überfällig</span></div><div class="kn"><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div>${n?`<div class="stripe" title="Erledigt · In Arbeit · Offen"><i class="s-x" style="flex:${d}"></i><i class="s-d" style="flex:${doing}"></i><i class="s-o" style="flex:${op}"></i></div>`:""}`;
-  document.body.dataset.view=view;$("ttl").textContent=view==="home"?greet():{board:"Board",list:"Liste",gantt:"Zeitstrahl"}[view];
+  document.body.dataset.view=view;$("ttl").textContent=view==="home"?greet():{board:"Board",list:"Liste",gantt:"Zeitstrahl",cal:"Kalender"}[view];
     const whos=[...new Set(["Melanie","Lasse",...tasks.map(t=>t.who).filter(Boolean)])],curw=$("fw").value;
   $("fw").innerHTML='<option value="">Alle Personen</option>'+whos.map(a=>`<option ${a===curw?"selected":""}>${esc(a)}</option>`).join("")+`<option value="__none" ${curw==="__none"?"selected":""}>Nicht zugewiesen</option>`;
   $("whos").innerHTML=whos.map(a=>`<option value="${esc(a)}">`).join("");
@@ -991,7 +1119,7 @@ function render(){
   $("main").classList.toggle("g",view==="gantt"&&n>0);
   const old=snap(),list=filtered();
   if(!n){$("main").innerHTML='<div class="empty">Noch keine Aufgaben.<br><br><button class="btn" onclick="openDlg()">Erste Aufgabe anlegen</button></div>';return}
-  $("main").innerHTML=view==="home"?home():view==="board"?board(list):view==="list"?table(list):gantt(list);
+  $("main").innerHTML=view==="home"?home():view==="board"?board(list):view==="list"?table(list):view==="cal"?cal(list):gantt(list);
   bind();after(old);applySel();
 }
 const avc=w=>/^melanie/i.test(w)?"am":/^lasse/i.test(w)?"al":"ao";
@@ -999,13 +1127,13 @@ const cl=t=>{const a=t.checklist||[];return a.length?`<span class="ckc">${a.filt
 function card(t,s,i=0){
   const a=t.checklist||[],k=a.filter(x=>x.d).length,late=isLate(t);
   const tg=projChip(t)+tgs(t).map(chip).join("")+(isBlocked(t)?'<span class="blk">blockiert</span>':"");
-  return`<div class="card ${s}${t.id===lastMoved?" pop":""}" draggable="true" data-id="${t.id}" style="--i:${Math.min(i,8)}"><div class="ch"><button class="ring ${s}" data-adv="${t.id}" aria-label="Status: ${ST[s]}. Weiterschalten"></button><div class="t">${esc(t.title)}</div>${t.who?`<i class="av ${avc(t.who)}" title="${esc(t.who)}">${esc((t.who.trim()[0]||"").toUpperCase())}</i>`:""}</div>${tg?`<div class="tg">${tg}</div>`:""}${a.length?`<div class="cb"><i style="width:${Math.round(k/a.length*100)}%"></i></div>`:""}<div class="cm"><span class="${late?"late":""}">${dr(t)}</span><span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${cl(t)}</span></div></div>`}
+  return`<div class="card ${s}${t.id===lastMoved?" pop":""}" draggable="true" data-id="${t.id}" style="--i:${Math.min(i,8)}"><div class="ch"><button class="ring ${s}" data-adv="${t.id}" aria-label="Status: ${ST[s]}. Weiterschalten"></button><div class="t">${esc(t.title)}</div>${t.who?`<i class="av ${avc(t.who)}" title="${esc(t.who)}">${esc((t.who.trim()[0]||"").toUpperCase())}</i>`:""}</div>${tg?`<div class="tg">${tg}</div>`:""}${a.length?`<div class="cb"><i style="width:${Math.round(k/a.length*100)}%"></i></div>`:""}<div class="cm"><span class="${late?"late":""}">${dr(t)}</span><span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}${cl(t)}</span></div></div>`}
 function board(list){
   return`<div class="board">`+Object.keys(ST).map(s=>{const L=list.filter(t=>t.status===s);
     return`<div class="colm" data-s="${s}"><h3><i class="dt ${s}"></i><span>${ST[s]}</span><em>${L.length}</em></h3>`+(L.length?L.map((t,i)=>card(t,s,i)).join(""):'<div class="none">Keine Aufgaben</div>')+`</div>`}).join("")+`</div>`;
 }
 function table(list){
-  const row=t=>`<tr class="row" data-id="${t.id}"><td>${esc(t.title)} ${isBlocked(t)?'<span class="blk">blockiert</span>':""}<span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}</span></td><td>${projChip(t)}${tgs(t).map(chip).join("")}</td><td>${esc(t.who)}</td><td>${fd(t.start)}</td><td class="${isLate(t)?"late":""}">${fd(t.end)}</td><td><span class="st ${t.status}">${ST[t.status]}</span></td></tr>`;
+  const row=t=>`<tr class="row" data-id="${t.id}"><td>${esc(t.title)} ${isBlocked(t)?'<span class="blk">blockiert</span>':""}<span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}</span></td><td>${projChip(t)}${tgs(t).map(chip).join("")}</td><td>${esc(t.who)}</td><td>${fd(t.start)}</td><td class="${isLate(t)?"late":""}">${fd(t.end)}</td><td><span class="st ${t.status}">${ST[t.status]}</span></td></tr>`;
   return`<div class="wrap"><table><tr><th>Aufgabe</th><th>Tags</th><th>Ressource</th><th>Start</th><th>Ende</th><th>Status</th></tr>`+
   groups(list).map(g=>(g.l!=null?`<tr class="grp"><td colspan="6"><i class="dt" style="background:${g.c}"></i>${esc(g.l)}<em>${g.L.length}</em></td></tr>`:"")+g.L.map(row).join("")).join("")+`</table></div>`;
 }
@@ -1106,7 +1234,7 @@ function openDlg(id){
   $("f_start").value=t.start;$("f_end").value=t.end;initExtra(t);$("f_notes").value=t.notes||"";
   const others=tasks.filter(x=>!editing||x.id!==editing.id);
   $("f_deps").innerHTML=others.length?others.map(x=>`<label><input type="checkbox" value="${x.id}" ${(t.deps||[]).includes(x.id)?"checked":""}>${esc(x.title)}</label>`).join(""):'<span style="color:var(--mut);font-size:13px">Noch keine anderen Aufgaben.</span>';
-  cklist=(t.checklist||[]).map(x=>({...x}));drawCk();
+  cklist=(t.checklist||[]).map(x=>({...x}));drawCk();drawLog();drawFiles();
   $("b_del").style.display=editing?"":"none";
   $("dlg").showModal();setTimeout(()=>$("f_title").focus(),50);
 }
@@ -1131,6 +1259,7 @@ $("b_save").onclick=async()=>{
   $("dlg").close();
   let sp=null;if(t.status==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);t.spawned=sp.id}
   {const r=regDraft;if(r){if(proj&&!r.some(x=>x.p&&x.n===proj))r.push({n:proj,c:nextPColor(),p:1});selTags.forEach(n=>{if(!r.some(x=>!x.p&&x.n===n))r.push({n,c:colorKey(n)})});if(JSON.stringify(r)!==JSON.stringify(reg))saveReg(r)}}
+  if(editing)t.log=diffLog(editing,t);
   await saveTask(t);if(sp)await saveTask(sp);
 };
 $("b_cancel").onclick=()=>$("dlg").close();

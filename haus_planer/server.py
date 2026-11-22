@@ -1,6 +1,6 @@
-import datetime, json, os, re, shutil, threading, time, urllib.request
+import datetime, json, os, re, secrets, shutil, threading, time, urllib.request
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, unquote
 
 # /data bleibt bei Updates und Neu-Bauen des Add-ons erhalten.
 # Zusätzlich wird jede Änderung nach /share/haus_planer gespiegelt (überlebt sogar Deinstallation).
@@ -11,6 +11,9 @@ VERFILE = os.environ.get("VERSION_FILE", "/app/VERSION")
 PORT = int(os.environ.get("PORT", "8099"))
 DATA = os.path.join(D, "tasks.json")
 BK = os.path.join(D, "backups")
+FILES = os.path.join(D, "files")
+FID = re.compile(r"[a-f0-9]{12}")
+SAFE = ("image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf")
 LOCK = threading.Lock()
 state = {"rev": 0, "tasks": {}, "tags": []}
 COLORS = ("sky", "sun", "sea", "brick", "mint", "rose", "lilac", "sand", "slate", "lemon")
@@ -107,6 +110,43 @@ def clean_rec(r):
     return None
 
 
+def clean_log(lst):
+    out = []
+    for x in lst if isinstance(lst, list) else []:
+        if isinstance(x, dict) and x.get("k") in ("c", "h") and str(x.get("x", "")).strip():
+            out.append({"t": str(x.get("t", ""))[:16], "a": str(x.get("a", "") or "")[:30], "k": x["k"], "x": str(x["x"])[:500]})
+    return out[-120:]
+
+
+def clean_files(lst):
+    out = []
+    for f in lst if isinstance(lst, list) else []:
+        if isinstance(f, dict) and FID.fullmatch(str(f.get("id", ""))):
+            try:
+                size = int(f.get("s", 0))
+            except (TypeError, ValueError):
+                size = 0
+            out.append({"id": f["id"], "n": str(f.get("n", "Datei"))[:120], "s": size, "ty": str(f.get("ty", ""))[:60]})
+    return out[:30]
+
+
+def file_path(tid, fid):
+    for base in (FILES, os.path.join(SHARE, "files")):
+        p = os.path.join(base, tid, fid)
+        if os.path.isfile(p):
+            return p
+    return None
+
+
+def drop_files(tid, fid=None):
+    for base in (FILES, os.path.join(SHARE, "files")):
+        p = os.path.join(base, tid) if fid is None else os.path.join(base, tid, fid)
+        try:
+            shutil.rmtree(p) if fid is None else os.remove(p)
+        except Exception:
+            pass
+
+
 def clean(t):
     if not isinstance(t, dict):
         return None
@@ -128,7 +168,8 @@ def clean(t):
     return {"id": i, "title": title, "area": (tags[0] if tags else str(t.get("area", ""))[:60]), "tags": tags, "proj": str(t.get("proj", "") or "")[:30], "ms": bool(t.get("ms")), "rec": clean_rec(t.get("rec")), "spawned": str(t.get("spawned", "") or "")[:40], "who": str(t.get("who", ""))[:60],
             "status": st if st in ("todo", "doing", "done") else "todo", "start": s, "end": e,
             "notes": str(t.get("notes", ""))[:4000], "deps": deps, "checklist": ck,
-            "arch": bool(t.get("arch")), "del": bool(t.get("del")), "delAt": str(t.get("delAt", "") or "")[:10]}
+            "arch": bool(t.get("arch")), "del": bool(t.get("del")), "delAt": str(t.get("delAt", "") or "")[:10],
+            "log": clean_log(t.get("log")), "files": clean_files(t.get("files"))}
 
 
 # ---- Home Assistant: Erinnerungen und Sensoren (nur im Add-on, über die Supervisor-Schnittstelle)
@@ -274,6 +315,28 @@ class H(BaseHTTPRequestHandler):
                 if q == str(state["rev"]):
                     return self.out(200, {"rev": state["rev"], "version": version(), "ha": ha_info()})
                 return self.out(200, {"rev": state["rev"], "version": version(), "tasks": list(state["tasks"].values()), "tags": state["tags"], "ha": ha_info()})
+        m = re.search(r"/api/file/([A-Za-z0-9_-]{1,40})/([a-f0-9]{12})$", u.path)
+        if m:
+            with LOCK:
+                t = state["tasks"].get(m.group(1))
+                meta = next((f for f in (t or {}).get("files", []) if f["id"] == m.group(2)), None)
+            p = meta and file_path(m.group(1), m.group(2))
+            if not p:
+                return self.out(404, {"error": "nicht gefunden"})
+            ty = meta["ty"] if meta["ty"] in SAFE else "application/octet-stream"
+            with open(p, "rb") as f:
+                b = f.read()
+            self.send_response(200)
+            self.send_header("Content-Type", ty)
+            self.send_header("Content-Length", str(len(b)))
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Content-Security-Policy", "sandbox")
+            self.send_header("Cache-Control", "private, max-age=3600")
+            fn = re.sub(r"[^A-Za-z0-9._-]", "_", meta["n"])
+            self.send_header("Content-Disposition", ("inline" if ty in SAFE else "attachment") + '; filename="%s"' % fn)
+            self.end_headers()
+            self.wfile.write(b)
+            return
         with open(INDEX, "rb") as f:
             self.out(200, f.read(), "text/html")
 
@@ -284,7 +347,35 @@ class H(BaseHTTPRequestHandler):
         return json.loads(self.rfile.read(n))
 
     def do_POST(self):
-        path = urlparse(self.path).path
+        pu = urlparse(self.path)
+        path = pu.path
+        mf = re.search(r"/api/file/([A-Za-z0-9_-]{1,40})$", path)
+        if mf:
+            tid = mf.group(1)
+            try:
+                n = int(self.headers.get("Content-Length", "0"))
+                if n <= 0 or n > 20_000_000:
+                    raise ValueError
+                raw = self.rfile.read(n)
+            except Exception:
+                return self.out(400, {"error": "Datei zu groß oder leer"})
+            q = parse_qs(pu.query)
+            name = (q.get("name", ["Datei"])[0] or "Datei")[:120]
+            ty = (q.get("type", [""])[0] or "")[:60]
+            with LOCK:
+                if tid not in state["tasks"]:
+                    return self.out(404, {"error": "Aufgabe nicht gefunden"})
+            fid = secrets.token_hex(6)
+            for base in (FILES, os.path.join(SHARE, "files")):
+                try:
+                    os.makedirs(os.path.join(base, tid), exist_ok=True)
+                    with open(os.path.join(base, tid, fid), "wb") as f:
+                        f.write(raw)
+                except Exception as e:
+                    print("Datei speichern:", e, flush=True)
+                    if base == FILES:
+                        return self.out(500, {"error": "Speichern nicht möglich"})
+            return self.out(200, {"file": {"id": fid, "n": name, "s": len(raw), "ty": ty}})
         try:
             data = self.body()
         except Exception:
@@ -320,12 +411,17 @@ class H(BaseHTTPRequestHandler):
             self.out(200, {"rev": state["rev"], "count": len(items)})
 
     def do_DELETE(self):
+        mf = re.search(r"/api/file/([A-Za-z0-9_-]{1,40})/([a-f0-9]{12})$", urlparse(self.path).path)
+        if mf:
+            drop_files(mf.group(1), mf.group(2))
+            return self.out(200, {"ok": True})
         m = re.search(r"/api/task/([A-Za-z0-9_-]{1,40})$", urlparse(self.path).path)
         if not m:
             return self.out(404, {"error": "nicht gefunden"})
         i = m.group(1)
         with LOCK:
             state["tasks"].pop(i, None)
+            drop_files(i)
             for t in state["tasks"].values():
                 t["deps"] = [d for d in t.get("deps", []) if d != i]
             state["rev"] += 1
