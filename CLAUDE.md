@@ -1,4 +1,4 @@
-# Arbeitsanweisung für Claude: Haus-planner
+# Arbeitsanweisung für Claude: Planner
 
 Haus-Aufgaben-Tool von Lasse und Melanie (Kanban, Liste, Gantt). Sprache der Oberfläche und aller Texte: natürliches Deutsch. Lasse bevorzugt Kennzahlen zuerst, kompakte visuelle Signale, kurze Antworten.
 
@@ -6,7 +6,7 @@ Haus-Aufgaben-Tool von Lasse und Melanie (Kanban, Liste, Gantt). Sprache der Obe
 
 - **Master:** `src/haus-planner.html`. Das ist die Claude-Version (nutzt `window.claude.use("db")` und `"downloads"`). Änderungen am Aussehen oder Verhalten macht man **nur hier**.
 - **Add-on:** `haus_planer/index.html` und `haus_planer/VERSION` werden von `tools/build.py` erzeugt. **Nie von Hand ändern.**
-- Beide Versionen müssen nach jeder Änderung aktualisiert werden: Add-on über Git, Claude-Link über das Artifact-Tool (Artifact "Haus-planner" per `list` finden und dieselbe Datei auf dessen URL veröffentlichen).
+- Beide Versionen müssen nach jeder Änderung aktualisiert werden: Add-on über Git, Claude-Link über das Artifact-Tool (Artifact "Planner" per `list` finden und dieselbe Datei auf dessen URL veröffentlichen).
 
 ## Ablauf bei jeder Änderung
 
@@ -22,7 +22,7 @@ Haus-Aufgaben-Tool von Lasse und Melanie (Kanban, Liste, Gantt). Sprache der Obe
 
 - **Datenhaltung nicht verändern, ohne Rücksicht auf bestehende Daten.** Echte Aufgaben liegen im Add-on unter `/data/tasks.json` und gespiegelt unter `/share/haus_planer/`. Änderungen am Datenformat nur abwärtskompatibel (alte Dateien müssen lesbar bleiben, `clean()` in `server.py` ergänzen statt Felder zu entfernen).
 - Nie Daten aus `/data` oder `/share` ins Repository einchecken. Das Repository ist öffentlich.
-- Name überall **Haus-planner** (so heißt auch das Repository). Technische Bezeichner bleiben `haus_planer` (Slug, Ordner, `share/haus_planer`): nicht umbenennen.
+- Name überall **Planner** (das GitHub-Repository heißt weiterhin Haus-planner, URL nicht ändern). Technische Bezeichner bleiben `haus_planer` (Slug, Ordner, `share/haus_planer`): nicht umbenennen.
 - `slug` in `config.yaml` (`haus_planer`) nicht ändern, sonst ist es für Home Assistant ein neues Add-on mit leerem Datenordner.
 - Oberfläche muss auf Handy, iPad (hochkant und quer) und Desktop funktionieren. Keine festen Pixelbreiten für das Layout, Schriftgrößen relativ.
 - Farben: Portofino-Palette (D35526, FDAF54, F5F3EB, 6CB6E4, 387CA3). Offen = Himmelblau, In Arbeit = Orange, Erledigt = Meerblau, Überfällig = Ziegelrot. Kein typischer KI-Look (keine Verläufe, kein Glas, keine Emojis in der Oberfläche).

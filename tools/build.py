@@ -80,7 +80,7 @@ if "claude.use" in s or "window.claude" in s or "lsGet(" in s:
 
 PWA = ('<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">'
        '<link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes">'
-       '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Haus-planner">'
+       '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner">'
        '<meta name="apple-mobile-web-app-status-bar-style" content="default">')
 if s.count("</head>") != 1:
     sys.exit("FEHLER: </head> nicht eindeutig")

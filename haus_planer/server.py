@@ -307,7 +307,7 @@ def notify(message):
     if not sv:
         raise RuntimeError("Kein Benachrichtigungsdienst eingetragen")
     for s in sv:
-        ha_call("POST", "/services/notify/" + s, {"title": "Haus-planner", "message": message})
+        ha_call("POST", "/services/notify/" + s, {"title": "Planner", "message": message})
 
 
 def put_sensor(key, name, value, icon, titles):
@@ -325,10 +325,10 @@ def ha_tick():
         tasks = list(state["tasks"].values())
     act, due, late, doing = stats(tasks, today)
     if o.get("sensors", True):
-        for key, name, icon, lst in (("offen", "Haus-planner offen", "mdi:clipboard-list-outline", act),
-                                     ("in_arbeit", "Haus-planner in Arbeit", "mdi:hammer-wrench", doing),
-                                     ("ueberfaellig", "Haus-planner überfällig", "mdi:alert-circle-outline", late),
-                                     ("heute_faellig", "Haus-planner heute fällig", "mdi:calendar-today", due)):
+        for key, name, icon, lst in (("offen", "Planner offen", "mdi:clipboard-list-outline", act),
+                                     ("in_arbeit", "Planner in Arbeit", "mdi:hammer-wrench", doing),
+                                     ("ueberfaellig", "Planner überfällig", "mdi:alert-circle-outline", late),
+                                     ("heute_faellig", "Planner heute fällig", "mdi:calendar-today", due)):
             put_sensor(key, name, len(lst), icon, [t["title"] for t in lst])
     when = str(o.get("reminder_time") or "08:00")
     if services() and now.strftime("%H:%M") >= when and ha["last"] != today:
@@ -372,7 +372,7 @@ class H(BaseHTTPRequestHandler):
                     return self.out(200, {"rev": state["rev"], "version": version(), "ha": ha_info()})
                 return self.out(200, {"rev": state["rev"], "version": version(), "tasks": list(state["tasks"].values()), "tags": state["tags"], "ha": ha_info()})
         if u.path.endswith("/manifest.webmanifest"):
-            return self.out(200, {"name": "Haus-planner", "short_name": "Haus-planner", "start_url": "./", "scope": "./", "display": "standalone",
+            return self.out(200, {"name": "Planner", "short_name": "Planner", "start_url": "./", "scope": "./", "display": "standalone",
                                   "background_color": "#F5F3EB", "theme_color": "#2D6786", "lang": "de",
                                   "icons": [{"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
                                             {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}]},
@@ -468,7 +468,7 @@ class H(BaseHTTPRequestHandler):
             try:
                 if not TOKEN:
                     raise RuntimeError("Keine Verbindung zu Home Assistant")
-                notify("Testnachricht vom Haus-planner – die Erinnerungen funktionieren.")
+                notify("Testnachricht vom Planner – die Erinnerungen funktionieren.")
                 return self.out(200, {"ok": True})
             except Exception as e:
                 return self.out(200, {"ok": False, "error": str(e)[:200]})
@@ -526,6 +526,6 @@ if __name__ == "__main__":
     load()
     if state["tasks"]:
         save()  # bestehende Daten beim Start einmal in den Share-Spiegel kopieren
-    print("Haus-planner %s läuft auf Port %d, Daten in %s" % (version(), PORT, D), flush=True)
+    print("Planner %s läuft auf Port %d, Daten in %s" % (version(), PORT, D), flush=True)
     threading.Thread(target=ha_loop, daemon=True).start()
     ThreadingHTTPServer(("0.0.0.0", PORT), H).serve_forever()

@@ -1,5 +1,8 @@
 # Änderungen
 
+## 1.14.0
+- Die App heißt jetzt „Planner“ (Titel, Startbild, Seitenleiste, App-Symbol, Exporte, Erinnerungen, Sensornamen). Slug, Datenordner und Sensor-IDs (`sensor.haus_planner_*`) bleiben unverändert, Daten und Automationen funktionieren weiter
+
 ## 1.13.1
 - Handy: Die App nutzt den Bildschirm besser aus. Eingebettet in Home Assistant wurden die Sicherheitsabstände von Notch und Home-Leiste doppelt gerechnet (große Lücke oben und unten); das ist behoben
 - Kompaktere Abstände auf dem Handy, Spalten im Board etwas breiter (92 %)
