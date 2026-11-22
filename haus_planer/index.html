@@ -375,6 +375,41 @@ tr.grp em{font-style:normal;letter-spacing:0;margin-left:.5rem}
 @media (hover:hover){.gr.gh2:hover{background:color-mix(in srgb,var(--tc) 16%,var(--card))}}
 .pb i{background:var(--tc,var(--sea))}
 @media (max-width:699px){tr.grp{display:block}.tgrp{max-width:7.6rem}}
+
+/* 1.3.1: Formular */
+select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237C93A3' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .7rem center;background-size:1.05rem;padding-right:2.3rem}
+.tgrp,.filters select{padding-right:2.1rem}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+#dlg #dt{padding-right:.5rem}
+#dlg label{font:700 .7rem/1 var(--disp);letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin:1.35rem 0 .55rem}
+#dlg #dt+label{margin-top:1.2rem}
+#dlg .lh{font:500 .76rem "Instrument Sans",system-ui,sans-serif;letter-spacing:0;text-transform:none;margin-left:.35rem;color:var(--faint)}
+#dlg input:not([type=checkbox]):not([type=hidden]),#dlg select{height:2.9rem}
+#dlg .tpick input,#dlg .ck input{height:auto}
+#dlg .ck input.ct{height:2.7rem}
+#dlg input[type=date]{display:block;appearance:none;-webkit-appearance:none;min-width:0;text-align:left}
+#dlg input[type=date]::-webkit-date-and-time-value{text-align:left}
+#f_title{font-weight:600;font-size:1.1rem}
+.seg3{display:flex;gap:.25rem;background:var(--bg);border:1px solid var(--line);border-radius:.95rem;padding:.25rem}
+.seg3 button{flex:1;min-width:0;min-height:2.5rem;border:0;background:none;border-radius:.7rem;padding:.4rem .3rem;font-weight:600;font-size:.92rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .15s,color .15s,box-shadow .15s}
+.seg3 button.on{background:var(--surf);color:var(--tx);box-shadow:0 1px 3px rgba(20,48,63,.14),inset 0 0 0 1px var(--line2)}
+.seg3.who button.on{background:var(--acc-soft);color:var(--tagc);box-shadow:none}
+.seg3 [data-s=todo].on{background:color-mix(in srgb,var(--sky) 30%,var(--surf));box-shadow:none}
+.seg3 [data-s=doing].on{background:color-mix(in srgb,var(--sun) 38%,var(--surf));box-shadow:none}
+.seg3 [data-s=done].on{background:color-mix(in srgb,var(--sea) 30%,var(--surf));box-shadow:none}
+#dlg .deps{max-height:12.5rem;padding:.2rem .35rem;background:var(--bg);border:1px solid var(--line);border-radius:.9rem}
+#dlg .deps label{display:flex;align-items:center;gap:.75rem;margin:0;padding:.6rem .5rem;font:500 .95rem/1.25 "Instrument Sans",system-ui,sans-serif;letter-spacing:0;text-transform:none;color:var(--tx);cursor:pointer}
+#dlg .deps label+label{border-top:1px solid var(--line)}
+.ck{display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem}
+.ck input.ct{flex:1}
+.ck .x{flex:none;width:2.4rem;height:2.4rem;padding:0;border-radius:.6rem}
+#ck_add{width:100%;min-height:2.7rem;border-style:dashed;color:var(--mut);box-shadow:inset 0 0 0 1px var(--line2);font-weight:560}
+#f_notes{resize:vertical;min-height:5.5rem;line-height:1.45}
+#dlg .acts{gap:.6rem;align-items:center}
+#dlg .acts .btn{min-height:2.9rem;padding:.55rem 1.15rem}
+#dlg .acts .btn.del{padding:.55rem 1rem}
+@media (min-width:700px){#dlg{width:min(32rem,100vw)}}
+@media (max-width:480px){#dlg .acts .btn{padding-left:.9rem;padding-right:.9rem}#b_del{width:2.9rem;padding:0!important}#b_del span{display:none}}
 </style>
 </head>
 <body>
@@ -426,23 +461,26 @@ tr.grp em{font-style:normal;letter-spacing:0;margin-left:.5rem}
 </dialog>
 <dialog id="dlg">
   <div id="dt"></div>
-  <label style="margin-top:1.1rem">Titel</label><input id="f_title" autocomplete="off">
-  <label>Tags</label>
-  <div class="tpick" id="f_tpick"><span id="f_tsel" style="display:contents"></span><input id="f_tagin" placeholder="Tag wählen oder neu eingeben …" enterkeyhint="done" autocomplete="off"></div>
+  <label for="f_title">Titel</label><input id="f_title" autocomplete="off" placeholder="Was ist zu tun?">
+  <label for="f_tagin">Tags</label>
+  <div class="tpick" id="f_tpick"><span id="f_tsel" style="display:contents"></span><input id="f_tagin" placeholder="Tag hinzufügen …" enterkeyhint="done" autocomplete="off"></div>
   <div class="tsug" id="f_tsug"></div><div id="f_sw"></div>
-  <div class="g2">
-    <div><label>Ressource</label><select id="f_whosel"><option value="">Nicht zugewiesen</option><option>Melanie</option><option>Lasse</option><option value="__o">Andere …</option></select><input id="f_who" list="whos" placeholder="Name eingeben" style="display:none;margin-top:6px"></div>
-    <div><label>Status</label><select id="f_status"><option value="todo">Offen</option><option value="doing">In Arbeit</option><option value="done">Erledigt</option></select></div>
-  </div>
+  <label>Zuständig</label>
+  <div class="seg3 who" id="f_whoseg"><button type="button" data-w="">Niemand</button><button type="button" data-w="Melanie">Melanie</button><button type="button" data-w="Lasse">Lasse</button><button type="button" data-w="__o">Andere</button></div>
+  <input type="hidden" id="f_whosel">
+  <input id="f_who" list="whos" placeholder="Name eingeben" style="display:none;margin-top:.5rem" aria-label="Name">
   <datalist id="whos"></datalist>
+  <label>Status</label>
+  <div class="seg3 st3" id="f_stseg"><button type="button" data-s="todo">Offen</button><button type="button" data-s="doing">In Arbeit</button><button type="button" data-s="done">Erledigt</button></div>
+  <input type="hidden" id="f_status" value="todo">
   <div class="g2">
-    <div><label>Start</label><input type="date" id="f_start"></div>
-    <div><label>Ende</label><input type="date" id="f_end"></div>
+    <div><label for="f_start">Start</label><input type="date" id="f_start"></div>
+    <div><label for="f_end">Ende</label><input type="date" id="f_end"></div>
   </div>
-  <label>Hängt ab von (muss vorher fertig sein)</label><div class="deps" id="f_deps"></div>
-  <label>Checkliste</label><div id="f_ck"></div><button class="btn ghost" id="ck_add" type="button" style="padding:4px 10px;font-size:13px">+ Punkt</button>
-  <label>Notizen</label><textarea id="f_notes" rows="2"></textarea>
-  <div class="acts"><button class="btn del" id="b_del">Löschen</button><span class="sp"></span><button class="btn ghost" id="b_cancel">Abbrechen</button><button class="btn" id="b_save">Speichern</button></div>
+  <label>Abhängig von <span class="lh">muss vorher fertig sein</span></label><div class="deps" id="f_deps"></div>
+  <label>Checkliste</label><div id="f_ck"></div><button class="btn ghost" id="ck_add" type="button"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Punkt hinzufügen</button>
+  <label for="f_notes">Notizen</label><textarea id="f_notes" rows="3" placeholder="Maße, Material, Ansprechpartner …"></textarea>
+  <div class="acts"><button class="btn del" id="b_del" type="button" aria-label="Löschen"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg><span>Löschen</span></button><span class="sp"></span><button class="btn ghost" id="b_cancel" type="button">Abbrechen</button><button class="btn" id="b_save" type="button">Speichern</button></div>
 </dialog>
 
 <script>
@@ -743,8 +781,10 @@ function bind(){
 }
 
 /* Ressource: Auswahl oder Freitext */
-function setWho(){const v=$("f_who").value.trim(),sel=$("f_whosel");sel.value=(v===""||v==="Melanie"||v==="Lasse")?v:"__o";$("f_who").style.display=sel.value==="__o"?"":"none"}
-$("f_whosel").onchange=e=>{const v=e.target.value;if(v==="__o"){$("f_who").value="";$("f_who").style.display="";$("f_who").focus()}else{$("f_who").value=v;$("f_who").style.display="none"}};
+function setWho(){const v=$("f_who").value.trim(),sel=$("f_whosel");sel.value=(v===""||v==="Melanie"||v==="Lasse")?v:"__o";$("f_who").style.display=sel.value==="__o"?"":"none";syncSeg()}
+$("f_whoseg").onclick=e=>{const b=e.target.closest("[data-w]");if(!b)return;const v=b.dataset.w;$("f_whosel").value=v;if(v==="__o"){$("f_who").value="";$("f_who").style.display="";$("f_who").focus()}else{$("f_who").value=v;$("f_who").style.display="none"}syncSeg()};
+$("f_stseg").onclick=e=>{const b=e.target.closest("[data-s]");if(!b)return;$("f_status").value=b.dataset.s;syncSeg()};
+function syncSeg(){document.querySelectorAll("#f_whoseg button").forEach(b=>b.classList.toggle("on",b.dataset.w===$("f_whosel").value));document.querySelectorAll("#f_stseg button").forEach(b=>b.classList.toggle("on",b.dataset.s===$("f_status").value))}
 /* Checkliste */
 let cklist=[];
 function drawCk(){const box=$("f_ck");box.innerHTML=cklist.map((c,i)=>`<div class="ck"><input type="checkbox" data-i="${i}" ${c.d?"checked":""}><input class="ct" data-i="${i}" value="${esc(c.t)}" placeholder="Punkt"><button class="x" type="button" data-r="${i}">✕</button></div>`).join("");
@@ -757,7 +797,7 @@ $("ck_add").onclick=()=>{cklist.push({t:"",d:false});drawCk();const a=$("f_ck").
 function openDlg(id){
   editing=id?byId(id):null;const t=editing||{title:"",tags:ftags.size===1&&!ftags.has("__none")?[...ftags]:[],who:"",status:"todo",start:iso(new Date()),end:iso(new Date(Date.now()+6*864e5)),deps:[],notes:""};
   $("dt").textContent=editing?"Aufgabe bearbeiten":"Neue Aufgabe";
-  $("f_title").value=t.title;selTags=[...tgs(t)];regDraft=reg.map(x=>({...x}));colorFor=null;$("f_tagin").value="";drawTags();$("f_who").value=t.who||"";setWho();$("f_status").value=t.status;
+  $("f_title").value=t.title;selTags=[...tgs(t)];regDraft=reg.map(x=>({...x}));colorFor=null;$("f_tagin").value="";drawTags();$("f_who").value=t.who||"";setWho();$("f_status").value=t.status;syncSeg();
   $("f_start").value=t.start;$("f_end").value=t.end;$("f_notes").value=t.notes||"";
   const others=tasks.filter(x=>!editing||x.id!==editing.id);
   $("f_deps").innerHTML=others.length?others.map(x=>`<label><input type="checkbox" value="${x.id}" ${(t.deps||[]).includes(x.id)?"checked":""}>${esc(x.title)}</label>`).join(""):'<span style="color:var(--mut);font-size:13px">Noch keine anderen Aufgaben.</span>';
