@@ -75,7 +75,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 .kn.hot b{color:var(--brick-ink)}
 .stripe{display:flex;gap:3px;height:.42rem;margin-top:.9rem}
 .stripe i{display:block;border-radius:.25rem;min-width:0}
-.s-x{background:var(--sea)}.s-d{background:var(--sun)}.s-o{background:var(--sky)}.s-b{background:var(--bl)}
+.s-x{background:var(--sea)}.s-d{background:var(--sun)}.s-o{background:var(--sky)}
 #note{padding:.4rem var(--pad) 0;font-size:.82rem;color:var(--mut)}#note:empty{display:none}
 
 /* Inhalt */
@@ -85,13 +85,13 @@ main.g{display:flex;flex-direction:column;overflow:hidden;padding-bottom:var(--p
 .dots{display:none}
 
 /* Board */
-.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(.6rem,1.4vw,1.1rem);min-height:100%;align-items:stretch}
+.board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(.6rem,1.4vw,1.1rem);min-height:100%;align-items:stretch}
 .colm{--c:var(--sky);background:color-mix(in srgb,var(--c) 13%,var(--bg));border-top:.28rem solid var(--c);border-radius:1rem;padding:.8rem .7rem .3rem;min-width:0;transition:box-shadow .15s}
-.colm[data-s=backlog]{--c:var(--bl)}.colm[data-s=doing]{--c:var(--sun)}.colm[data-s=done]{--c:var(--sea)}
+.colm[data-s=doing]{--c:var(--sun)}.colm[data-s=done]{--c:var(--sea)}
 .colm.over{box-shadow:inset 0 0 0 2px var(--c)}
 .colm h3{display:flex;align-items:center;gap:.55rem;margin:.05rem .35rem .8rem;font:700 .78rem var(--disp);letter-spacing:.11em;text-transform:uppercase}
 .colm h3 em{margin-left:auto;font-style:normal;font-size:.82rem;letter-spacing:0;color:var(--mut);font-variant-numeric:tabular-nums}
-.dt{width:.7rem;height:.7rem;border-radius:50%;background:var(--sky);flex:none;display:inline-block}.dt.backlog{background:var(--bl)}.dt.doing{background:var(--sun)}.dt.done{background:var(--sea)}
+.dt{width:.7rem;height:.7rem;border-radius:50%;background:var(--sky);flex:none;display:inline-block}.dt.doing{background:var(--sun)}.dt.done{background:var(--sea)}
 .none{color:var(--mut);font-size:.88rem;text-align:center;padding:1.6rem 0;opacity:.8}
 .card{background:var(--card);border:1px solid var(--line);border-radius:.85rem;padding:.8rem .85rem .75rem;margin-bottom:.55rem;cursor:pointer;transition:transform .12s,border-color .12s,box-shadow .12s}
 @media (hover:hover){.card:hover{border-color:var(--line2);box-shadow:0 .3rem 1rem rgba(20,48,63,.1);transform:translateY(-1px)}}
@@ -116,7 +116,7 @@ tr.row{cursor:pointer}
 @media (hover:hover){tr.row:hover td{background:var(--acc-soft)}}
 .st{--c:var(--sky);display:inline-flex;align-items:center;gap:.45rem;padding:.12rem .7rem .12rem .55rem;border-radius:2rem;font-size:.82rem;font-weight:600;background:color-mix(in srgb,var(--c) 24%,transparent)}
 .st::before{content:"";width:.5rem;height:.5rem;border-radius:50%;background:var(--c)}
-.st.backlog{--c:var(--bl)}.st.doing{--c:var(--sun)}.st.done{--c:var(--sea)}
+.st.doing{--c:var(--sun)}.st.done{--c:var(--sea)}
 
 /* Zeitstrahl */
 .gctl{display:flex;align-items:center;justify-content:space-between;gap:.7rem;margin-bottom:.8rem;flex:none}
@@ -241,7 +241,7 @@ label{display:block;font-size:.76rem;font-weight:650;color:var(--mut);margin:1re
 .ring{--c:var(--sky);flex:none;position:relative;width:1.5rem;height:1.5rem;border-radius:50%;border:2px solid var(--c);background:transparent;padding:0;transition:background-color .18s,border-color .18s,transform .15s}
 .ring::before{content:"";position:absolute;inset:-.55rem}
 .ring::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--c);transform:scale(0);transition:transform .22s cubic-bezier(.3,1.6,.5,1)}
-.ring.backlog{--c:var(--bl);border-style:dashed}.ring.doing{--c:var(--sun)}.ring.doing::after{transform:scale(1)}
+.ring.doing{--c:var(--sun)}.ring.doing::after{transform:scale(1)}
 .ring.done{--c:var(--sea);background:var(--sea) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/78% no-repeat}
 .ring.done::after{display:none}
 @media (hover:hover){.ring:hover{transform:scale(1.14)}}
@@ -392,7 +392,6 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
 .seg3 button{flex:1;min-width:0;min-height:2.5rem;border:0;background:none;border-radius:.7rem;padding:.4rem .3rem;font-weight:600;font-size:.92rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .15s,color .15s,box-shadow .15s}
 .seg3 button.on{background:var(--surf);color:var(--tx);box-shadow:0 1px 3px rgba(20,48,63,.14),inset 0 0 0 1px var(--line2)}
 .seg3.who button.on{background:var(--acc-soft);color:var(--tagc);box-shadow:none}
-.seg3 [data-s=backlog].on{background:color-mix(in srgb,var(--bl) 30%,var(--surf));box-shadow:none}
 .seg3 [data-s=todo].on{background:color-mix(in srgb,var(--sky) 30%,var(--surf));box-shadow:none}
 .seg3 [data-s=doing].on{background:color-mix(in srgb,var(--sun) 38%,var(--surf));box-shadow:none}
 .seg3 [data-s=done].on{background:color-mix(in srgb,var(--sea) 30%,var(--surf));box-shadow:none}
@@ -486,13 +485,12 @@ body.selmode #toast{bottom:5.2rem}
 .cd.sel{box-shadow:inset 0 0 0 2px var(--acc)}
 .pills{display:flex;flex-direction:column;gap:2px;min-width:0}
 .pill{display:block;width:100%;border:0;border-radius:.35rem;padding:.16rem .4rem;text-align:left;font:inherit;font-size:.72rem;font-weight:560;color:var(--tx);background:color-mix(in srgb,var(--sky) 38%,var(--surf));overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pill.backlog{background:color-mix(in srgb,var(--bl) 30%,var(--surf))}
 .pill.doing{background:color-mix(in srgb,var(--sun) 45%,var(--surf))}
 .pill.done{background:color-mix(in srgb,var(--sea) 30%,var(--surf));text-decoration:line-through;opacity:.8}
 .pill.late{box-shadow:inset 3px 0 var(--brick)}
 .pill.ms::before{content:"";display:inline-block;width:.42em;height:.42em;background:currentColor;transform:rotate(45deg);margin-right:.4em}
 .cdots{display:none;gap:3px;flex-wrap:wrap;justify-content:center}
-.cdots i{width:.45rem;height:.45rem;border-radius:50%;background:var(--sky)}.cdots i.backlog{background:var(--bl)}.cdots i.doing{background:var(--sun)}.cdots i.done{background:var(--sea)}.cdots i.ol{background:none;box-shadow:inset 0 0 0 1.5px var(--mut)}
+.cdots i{width:.45rem;height:.45rem;border-radius:50%;background:var(--sky)}.cdots i.doing{background:var(--sun)}.cdots i.done{background:var(--sea)}
 .cd em{font-style:normal;font-size:.68rem;color:var(--mut)}
 @container main (max-width:640px){.pills,.cd em{display:none}.cdots{display:flex}.cd{min-height:3.7rem;align-items:center;padding:.3rem .1rem}}
 .agenda h3{display:flex;align-items:center;gap:.6rem;font:700 1rem/1.2 var(--disp);margin:1.3rem 0 .7rem}.agenda h3 span{flex:1}
@@ -521,7 +519,7 @@ body.selmode #toast{bottom:5.2rem}
 #dlg label.aii input{width:1.1rem;height:1.1rem;flex:none;margin-top:.12rem;accent-color:var(--sea);padding:0}
 .aia{display:flex;gap:.5rem;margin-top:.7rem}
 
-/* 1.8: Auswahlfelder, Farben je Feldtyp, Schrift, Outlook */
+/* 1.8: Auswahlfelder, Farben je Feldtyp, Schrift */
 #dlg input:not([type=checkbox]):not([type=radio]):not([type=file]):not(#f_tagin):not(.ct),#dlg select{min-height:2.9rem}
 .seg3 button{min-height:2.3rem}
 .seg3.st3 button,.seg3.who button{font-size:.86rem;padding-left:.15rem;padding-right:.15rem}
@@ -536,13 +534,6 @@ body.selmode #toast{bottom:5.2rem}
 .fontgrid button{min-height:2.7rem;border:1px solid var(--line2);background:var(--surf);color:var(--tx);border-radius:.8rem;font-size:.95rem;font-weight:600;padding:.4rem .6rem}
 .fontgrid button.on{background:var(--acc-soft);border-color:var(--acc);color:var(--tagc)}
 @media (min-width:1200px){.board{gap:1rem}}
-.pill.ol{background:transparent;box-shadow:inset 0 0 0 1.5px var(--faint);color:var(--mut);font-weight:500}
-.agenda h4{font:700 .72rem/1 var(--disp);letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:1.1rem 0 .5rem}
-.olr{display:flex;gap:.8rem;align-items:baseline;padding:.55rem .8rem;border:1px dashed var(--line2);border-radius:.8rem;margin-bottom:.45rem;font-size:.92rem}
-.olr b{flex:none;min-width:5.2rem;font-weight:650;color:var(--mut);font-size:.82rem}
-.cnav.t.on{background:var(--tx);color:var(--bg);border-color:transparent}
-.olin{display:flex;gap:.5rem;margin-top:.6rem}.olin input{flex:1;min-width:0}
-#dls label.sub{margin-top:1rem}
 @media (max-width:480px){.calbar h2{font-size:1.02rem;line-height:1.15}.calbar{gap:.4rem}}
 </style>
 </head>
@@ -578,7 +569,7 @@ body.selmode #toast{bottom:5.2rem}
 </div>
 </div>
 
-<div id="selbar" role="toolbar" aria-label="Auswahl"><span id="selcnt">Aufgaben antippen</span><button data-bs="backlog">Backlog</button><button data-bs="todo">Zu starten</button><button data-bs="doing">In Arbeit</button><button data-bs="done">Erledigt</button><select id="selwho" aria-label="Zuständig setzen"></select><select id="selproj" aria-label="Projekt setzen"></select><button data-ba="arch">Archivieren</button><button data-ba="del">Löschen</button><button data-ba="x">Fertig</button></div>
+<div id="selbar" role="toolbar" aria-label="Auswahl"><span id="selcnt">Aufgaben antippen</span><button data-bs="todo">Zu starten</button><button data-bs="doing">In Arbeit</button><button data-bs="done">Erledigt</button><select id="selwho" aria-label="Zuständig setzen"></select><select id="selproj" aria-label="Projekt setzen"></select><button data-ba="arch">Archivieren</button><button data-ba="del">Löschen</button><button data-ba="x">Fertig</button></div>
 <dialog id="dls">
   <div class="dh">Einstellungen</div>
   <label>Darstellung</label>
@@ -591,11 +582,6 @@ body.selmode #toast{bottom:5.2rem}
   <button class="btn ghost xb" id="s_arch">Erledigte archivieren<small id="s_archn"></small></button>
   <button class="btn ghost xb" id="s_open">Archiv und Papierkorb<small id="s_openn"></small></button>
   <div id="s_ha" style="display:none"><label>Home Assistant</label><div class="hacard" id="s_hatxt"></div><button class="btn ghost xb" id="s_hatest">Testbenachrichtigung senden<small>Prüft, ob die Erinnerung auf dem Handy ankommt</small></button></div>
-  <div id="s_ol" style="display:none"><label>Outlook-Kalender</label><div class="hacard" id="s_oltxt"></div>
-    <div class="olin"><input id="ol_url" autocomplete="off" spellcheck="false" aria-label="ICS-Link aus Outlook"><button class="btn ghost" id="ol_save" type="button">Speichern</button><button class="btn ghost" id="ol_rm" type="button" style="display:none">Entfernen</button></div>
-    <label class="sub">Haus-planner in Outlook einbinden</label>
-    <div class="olin"><input id="ol_feed" readonly aria-label="Kalender-Link"><button class="btn ghost" id="ol_copy" type="button">Kopieren</button></div>
-    <p class="hint">Outlook am Computer oder Mac: Kalender hinzufügen → Aus dem Internet. Dafür muss im Add-on unter Netzwerk der Port 8099 aktiv sein, und statt des Namens gehört die IP von Home Assistant in den Link. Outlook im Web und in der Handy-App holen den Link über Microsoft-Server ab und erreichen dein Heimnetz nicht.</p></div>
   <div id="s_keys"><label>Tastaturkürzel</label><dl class="keys"><dt>N</dt><dd>Neue Aufgabe</dd><dt>/</dt><dd>Suchen</dd><dt>1 – 5</dt><dd>Start, Board, Liste, Zeitstrahl, Kalender</dd><dt>S</dt><dd>Mehrfachauswahl ein/aus</dd><dt>A</dt><dd>Alle auswählen</dd><dt>Entf</dt><dd>Auswahl löschen</dd><dt>H</dt><dd>Zeitstrahl: zu Heute</dd><dt>Esc</dt><dd>Auswahl beenden</dd></dl></div>
   <div class="acts"><span class="sp"></span><button class="btn ghost" id="s_close" type="button">Fertig</button></div>
 </dialog>
@@ -639,7 +625,7 @@ body.selmode #toast{bottom:5.2rem}
   <input id="f_who" list="whos" placeholder="Name eingeben" style="display:none;margin-top:.5rem" aria-label="Name">
   <datalist id="whos"></datalist>
   <label>Status</label>
-  <div class="seg3 st3" id="f_stseg"><button type="button" data-s="backlog">Backlog</button><button type="button" data-s="todo">Zu starten</button><button type="button" data-s="doing">In Arbeit</button><button type="button" data-s="done">Erledigt</button></div>
+  <div class="seg3 st3" id="f_stseg"><button type="button" data-s="todo">Zu starten</button><button type="button" data-s="doing">In Arbeit</button><button type="button" data-s="done">Erledigt</button></div>
   <input type="hidden" id="f_status" value="todo">
   <div class="g2">
     <div><label for="f_start">Start</label><input type="date" id="f_start"></div>
@@ -660,7 +646,7 @@ body.selmode #toast{bottom:5.2rem}
 </dialog>
 
 <script>
-const ST={backlog:"Backlog",todo:"Zu starten",doing:"In Arbeit",done:"Erledigt"},NEXT={backlog:"todo",todo:"doing",doing:"done",done:"todo"};
+const ST={todo:"Zu starten",doing:"In Arbeit",done:"Erledigt"},NEXT={todo:"doing",doing:"done",done:"todo"};
 let RAW=[],tasks=[],selMode=false,sel=new Set(),haInfo=null,purged=false,reg=[],ftags=new Set(),fprojs=new Set(),grp="none",selTags=[],regDraft=null,colorFor=null,palOpen=null,view="home",col=null,editing=null,loaded=false;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -670,7 +656,7 @@ const fromDn=n=>new Date(n*864e5);
 const today=()=>dn(iso(new Date()));
 const fd=s=>s?fromDn(dn(s)).toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",timeZone:"UTC"}):"";
 const byId=id=>RAW.find(t=>t.id===id);
-const isLate=t=>t.status!=="done"&&t.status!=="backlog"&&dn(t.end)<today();
+const isLate=t=>t.status!=="done"&&dn(t.end)<today();
 const isBlocked=t=>t.status!=="done"&&(t.deps||[]).some(i=>{const p=byId(i);return p&&!p.del&&p.status!=="done"});
 
 /* Speicher: gemeinsame Datenbank, sonst lokal */
@@ -859,7 +845,7 @@ function drawSettings(){
   const dn2=tasks.filter(t=>t.status==="done").length,A=RAW.filter(t=>t.arch&&!t.del).length,T=RAW.filter(t=>t.del).length;
   $("s_archn").textContent=dn2?dn2+" erledigte "+(dn2===1?"Aufgabe":"Aufgaben")+" ins Archiv verschieben":"Keine erledigten Aufgaben";$("s_arch").disabled=!dn2;
   $("s_openn").textContent=A+" im Archiv · "+T+" im Papierkorb";
-  const h=haInfo;$("s_ha").style.display=h?"":"none";$("s_ol").style.display=h?"":"none";if(h)drawOl();
+  const h=haInfo;$("s_ha").style.display=h?"":"none";
   if(h){const n=(h.notify||[]).map(esc).join(", ");
     $("s_hatxt").innerHTML=(h.api?"Verbindung zu Home Assistant: <b>aktiv</b>":"Verbindung zu Home Assistant: <b>nicht verfügbar</b>")
       +"<br>Erinnerung: "+(n?`<b>täglich ab ${esc(h.time)} Uhr</b> an ${n}`:"<b>nicht eingerichtet</b> (Add-on → Konfiguration → Benachrichtigungsdienst)")
@@ -867,7 +853,7 @@ function drawSettings(){
       +"<br>Sensoren: "+(h.sensors?"<b>aktiv</b> (sensor.haus_planner_…)":"<b>aus</b>");
     $("s_hatest").disabled=!h.api||!n}
 }
-function openSettings(){drawSettings();$("dls").showModal();if(haInfo&&haInfo.outlook)loadOut(true).then(drawOl)}
+function openSettings(){drawSettings();$("dls").showModal();}
 $("cfg").onclick=openSettings;$("s_close").onclick=()=>$("dls").close();
 $("s_theme").onclick=e=>{const b=e.target.closest("[data-th]");if(!b)return;prefSet("theme",b.dataset.th);applyTheme();drawSettings()};
 $("s_me").onclick=e=>{const b=e.target.closest("[data-me]");if(!b)return;prefSet("me",b.dataset.me);drawSettings()};
@@ -982,28 +968,27 @@ $("f_files").onclick=async e=>{
 let calM=null,calSel=null;
 const DLONG=["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
 function cal(list){
-  loadOut();const T=iso(new Date());if(!calM)calM=T.slice(0,7);if(!calSel)calSel=T;
+  const T=iso(new Date());if(!calM)calM=T.slice(0,7);if(!calSel)calSel=T;
   const[y,m]=calM.split("-").map(Number),first=Date.UTC(y,m-1,1)/864e5,dow=(fromDn(first).getUTCDay()+6)%7,start=first-dow,
     nd=new Date(Date.UTC(y,m,0)).getUTCDate(),weeks=Math.ceil((dow+nd)/7);
   let cells="";
   for(let i=0;i<weeks*7;i++){
-    const d=start+i,ds=iso(fromDn(d)),dt=fromDn(d),L=list.filter(t=>dn(t.start)<=d&&dn(t.end)>=d),O=olOf(ds),tl=L.slice(0,3),ol=O.slice(0,3-tl.length),more=L.length+O.length-tl.length-ol.length;
+    const d=start+i,ds=iso(fromDn(d)),dt=fromDn(d),L=list.filter(t=>dn(t.start)<=d&&dn(t.end)>=d);
     cells+=`<div class="cd${dt.getUTCMonth()!==m-1?" out":""}${ds===T?" today":""}${ds===calSel?" sel":""}" data-day="${ds}"><span class="n">${dt.getUTCDate()}</span>`
-      +`<div class="pills">${tl.map(t=>`<button class="pill ${t.status}${t.ms?" ms":""}${isLate(t)?" late":""}" data-id="${t.id}">${esc(t.title)}</button>`).join("")}${ol.map(pillOl).join("")}</div>`
-      +`<div class="cdots">${L.slice(0,4).map(t=>`<i class="${t.status}"></i>`).join("")}${O.slice(0,Math.max(0,4-L.length)).map(()=>`<i class="ol"></i>`).join("")}</div>${more>0?`<em>+${more}</em>`:""}</div>`}
-  const sd=dn(calSel),sl=list.filter(t=>dn(t.start)<=sd&&dn(t.end)>=sd),sdt=fromDn(sd),so=olOf(calSel);
-  return`<div class="calbar"><button class="cnav" data-cm="-1" aria-label="Voriger Monat">‹</button><h2>${MONL[m-1]} ${y}</h2><button class="cnav" data-cm="1" aria-label="Nächster Monat">›</button>${haInfo&&haInfo.outlook?`<button class="cnav t${prefGet("olshow")==="0"?"":" on"}" data-olt>Outlook</button>`:""}<button class="cnav t" data-cm="0">Heute</button></div>`
+      +`<div class="pills">${L.slice(0,3).map(t=>`<button class="pill ${t.status}${t.ms?" ms":""}${isLate(t)?" late":""}" data-id="${t.id}">${esc(t.title)}</button>`).join("")}</div>`
+      +`<div class="cdots">${L.slice(0,4).map(t=>`<i class="${t.status}"></i>`).join("")}</div>${L.length>3?`<em>+${L.length-3}</em>`:""}</div>`}
+  const sd=dn(calSel),sl=list.filter(t=>dn(t.start)<=sd&&dn(t.end)>=sd),sdt=fromDn(sd);
+  return`<div class="calbar"><button class="cnav" data-cm="-1" aria-label="Voriger Monat">‹</button><h2>${MONL[m-1]} ${y}</h2><button class="cnav" data-cm="1" aria-label="Nächster Monat">›</button><button class="cnav t" data-cm="0">Heute</button></div>`
    +`<div class="cgrid">${["Mo","Di","Mi","Do","Fr","Sa","So"].map(x=>`<div class="cwd">${x}</div>`).join("")}${cells}</div>`
-   +`<div class="agenda"><h3><span>${DLONG[sdt.getUTCDay()]}, ${sdt.getUTCDate()}. ${MONL[sdt.getUTCMonth()]}</span><button class="btn ghost sm" data-newday="${calSel}">Aufgabe anlegen</button></h3>${sl.length?sl.map((t,i)=>card(t,t.status,i)).join(""):(so.length?"":'<div class="none">Nichts geplant.</div>')}${so.length?"<h4>Outlook</h4>"+so.map(olRow).join(""):""}</div>`}
+   +`<div class="agenda"><h3><span>${DLONG[sdt.getUTCDay()]}, ${sdt.getUTCDate()}. ${MONL[sdt.getUTCMonth()]}</span><button class="btn ghost sm" data-newday="${calSel}">Aufgabe anlegen</button></h3>${sl.length?sl.map((t,i)=>card(t,t.status,i)).join(""):'<div class="none">Nichts geplant.</div>'}</div>`}
 $("main").addEventListener("click",e=>{
   const cm=e.target.closest("[data-cm]");
   if(cm){const v=+cm.dataset.cm,T=iso(new Date());if(!v){calM=T.slice(0,7);calSel=T}else{const[y,m]=calM.split("-").map(Number),d=new Date(Date.UTC(y,m-1+v,1));calM=iso(d).slice(0,7);calSel=calM+"-01"}render();return}
-  const ot=e.target.closest("[data-olt]");if(ot){prefSet("olshow",prefGet("olshow")==="0"?"1":"0");render();return}
   const nd=e.target.closest("[data-newday]");if(nd){openDlg();$("f_start").value=nd.dataset.newday;$("f_end").value=nd.dataset.newday;return}
   const dy=e.target.closest("[data-day]");if(dy&&!e.target.closest("[data-id]")){calSel=dy.dataset.day;render()}});
 function ics(){
   const esc2=x=>String(x||"").replace(/\\/g,"\\\\").replace(/;/g,"\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n"),c=d=>d.replace(/-/g,""),stp=new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z";
-  const ev=tasks.filter(t=>t.status!=="done"&&t.status!=="backlog").map(t=>["BEGIN:VEVENT","UID:"+t.id+"@haus-planner","DTSTAMP:"+stp,"DTSTART;VALUE=DATE:"+c(t.start),"DTEND;VALUE=DATE:"+c(iso(fromDn(dn(t.end)+1))),"SUMMARY:"+esc2(t.title),...(t.notes?["DESCRIPTION:"+esc2(t.notes)]:[]),...(t.who?["CATEGORIES:"+esc2(t.who)]:[]),"END:VEVENT"].join("\r\n"));
+  const ev=tasks.filter(t=>t.status!=="done").map(t=>["BEGIN:VEVENT","UID:"+t.id+"@haus-planner","DTSTAMP:"+stp,"DTSTART;VALUE=DATE:"+c(t.start),"DTEND;VALUE=DATE:"+c(iso(fromDn(dn(t.end)+1))),"SUMMARY:"+esc2(t.title),...(t.notes?["DESCRIPTION:"+esc2(t.notes)]:[]),...(t.who?["CATEGORIES:"+esc2(t.who)]:[]),"END:VEVENT"].join("\r\n"));
   return["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Haus-planner//DE","CALSCALE:GREGORIAN","X-WR-CALNAME:Haus-planner",...ev,"END:VCALENDAR"].join("\r\n")+"\r\n"}
 $("x_ics").onclick=()=>dl("haus-planner-"+stamp()+".ics",new Blob([ics()],{type:"text/calendar"}));
 /* KI-Assistent */
@@ -1029,31 +1014,6 @@ $("ai_ok").onclick=()=>{
   if(!aiRes)return;const on=[...document.querySelectorAll("#ai_items input:checked")].map(i=>aiRes.items[+i.dataset.ai]);
   if(aiRes.notes){const n=$("f_notes");n.value=(n.value.trim()?n.value.trim()+"\n\n":"")+aiRes.notes}
   on.forEach(x=>cklist.push({t:x,d:false}));drawCk();aiRes=null;drawAi()};
-/* Outlook (nur im Add-on) */
-let outEv=[],outInfo=null,outT=0,outBusy=false;
-const olOn=()=>prefGet("olshow")!=="0";
-const olOf=ds=>olOn()?outEv.filter(e=>e.s<=ds&&e.e>=ds).sort((a,b)=>(a.st||"").localeCompare(b.st||"")):[];
-const pillOl=e=>`<span class="pill ol" title="${esc(e.t)}">${!e.a&&e.st?e.st+" ":""}${esc(e.t)}</span>`;
-const olRow=e=>`<div class="olr"><b>${e.a?"Ganztägig":esc(e.st)+(e.en?" – "+esc(e.en):"")}</b><span>${esc(e.t)}</span></div>`;
-async function loadOut(force){
-  if(typeof api!=="function"||!haInfo||!haInfo.outlook||outBusy||(!force&&Date.now()-outT<600000))return;
-  outBusy=true;
-  try{const j=await api("api/outlook");outEv=j.events||[];outInfo=j}catch(e){}
-  outT=Date.now();outBusy=false;if(view==="cal")render()}
-function drawOl(){
-  const i=outInfo,cfg=!!(haInfo&&haInfo.outlook);
-  $("s_oltxt").innerHTML="Import aus Outlook: "+(cfg?`<b>${i?i.events.length:"?"} Termine</b>${i&&i.updated?" · Stand "+fts(i.updated):""}${i&&i.error?`<br>Fehler: ${esc(i.error)}`:""}`:"<b>nicht eingerichtet</b>");
-  $("ol_url").placeholder=cfg?"Gespeichert. Neuen ICS-Link einfügen zum Ändern":"ICS-Link aus Outlook einfügen";
-  $("ol_rm").style.display=cfg?"":"none";
-  $("ol_feed").value="http://"+location.hostname+":8099/calendar.ics?key="+((haInfo&&haInfo.feed)||"")}
-async function olPost(u){
-  try{const j=await api("api/outlook",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url:u})});
-    outInfo=j;outEv=j.events||[];haInfo={...haInfo,outlook:j.configured};outT=Date.now();$("ol_url").value="";drawOl();render();
-    toast(j.error?"Outlook: "+j.error:u?outEv.length+" Termine geladen":"Outlook-Import entfernt")}
-  catch(e){toast("Server nicht erreichbar")}}
-$("ol_save").onclick=()=>{const u=$("ol_url").value.trim();if(u)olPost(u)};
-$("ol_rm").onclick=()=>{if(confirm("Outlook-Import entfernen?"))olPost("")};
-$("ol_copy").onclick=async()=>{const v=$("ol_feed").value;try{await navigator.clipboard.writeText(v);toast("Link kopiert")}catch(e){$("ol_feed").select();toast("Bitte Link von Hand kopieren")}};
 /* Tags */
 const TC={sky:"#6CB6E4",sun:"#FDAF54",sea:"#387CA3",brick:"#D35526",mint:"#6CC49A",rose:"#E58BAE",lilac:"#9D86DB",sand:"#C9B77A",slate:"#7C93A3",lemon:"#D9CB3F"},TCK=Object.keys(TC);
 const tgs=t=>Array.isArray(t.tags)?t.tags:(t.area?[t.area]:[]);
@@ -1167,8 +1127,8 @@ function hrow(t,i){return`<div class="hrow" data-id="${t.id}" style="--i:${Math.
 function home(){
   const T=today(),n=tasks.length,d=tasks.filter(t=>t.status==="done").length,pct=n?Math.round(d/n*100):0;
   const doing=tasks.filter(t=>t.status==="doing").length,over=tasks.filter(isLate).sort((a,b)=>dn(a.end)-dn(b.end)),blk=tasks.filter(isBlocked).length;
-  const week=tasks.filter(t=>t.status!=="done"&&t.status!=="backlog"&&!isLate(t)&&dn(t.start)<=T+7&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end)||dn(a.start)-dn(b.start));
-  const nx=tasks.filter(t=>t.status!=="done"&&t.status!=="backlog"&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end))[0],C=326.7,off=(C*(1-pct/100)).toFixed(1),open=n-d;
+  const week=tasks.filter(t=>t.status!=="done"&&!isLate(t)&&dn(t.start)<=T+7&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end)||dn(a.start)-dn(b.start));
+  const nx=tasks.filter(t=>t.status!=="done"&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end))[0],C=326.7,off=(C*(1-pct/100)).toFixed(1),open=n-d;
   const sub=over.length?`${over.length} ${over.length===1?"Aufgabe ist":"Aufgaben sind"} überfällig.`:week.length?`${week.length} ${week.length===1?"Aufgabe":"Aufgaben"} in den nächsten 7 Tagen.`:open?"Aktuell ist nichts dringend.":"Alles erledigt.";
   const areas=allTags().filter(a=>tasks.some(t=>tgs(t).includes(a)));
   const bars=areas.map(a=>{const L=tasks.filter(t=>tgs(t).includes(a)),x=L.filter(t=>t.status==="done").length;return`<div class="pr" style="--tc:${tcol(a)}"><span>${esc(a)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
@@ -1194,22 +1154,22 @@ function gToday(smooth){const g=document.querySelector(".gwrap"),sv=g&&g.querySe
 function stickyLabels(){const g=document.querySelector(".gwrap");if(!g)return;const x0=g.scrollLeft;g.querySelectorAll(".l1").forEach(t=>{const a=+t.dataset.a,b=+t.dataset.b,w=t.getComputedTextLength?t.getComputedTextLength():60;t.setAttribute("x",Math.max(a+10,Math.min(x0+10,b-w-10)))})}
 function after(o){
   const entering=o.v!==view;renderedView=view;if(entering)enter();setTimeout(()=>{lastMoved=null},500);
-  if(view==="board"){$("main").insertAdjacentHTML("beforeend",'<div class="dots"><i class="on"></i><i></i><i></i><i></i></div>');
+  if(view==="board"){$("main").insertAdjacentHTML("beforeend",'<div class="dots"><i class="on"></i><i></i><i></i></div>');
     const b=document.querySelector(".board"),dots=[...document.querySelectorAll(".dots i")];
-    if(b){const mark=()=>{const w=b.firstElementChild.offsetWidth+12,i=Math.max(0,Math.min(3,Math.round(b.scrollLeft/w)));dots.forEach((d,k)=>d.classList.toggle("on",k===i))};b.onscroll=mark;if(o.v==="board"&&o.b)b.scrollLeft=o.b;mark()}}
+    if(b){const mark=()=>{const w=b.firstElementChild.offsetWidth+12,i=Math.max(0,Math.min(2,Math.round(b.scrollLeft/w)));dots.forEach((d,k)=>d.classList.toggle("on",k===i))};b.onscroll=mark;if(o.v==="board"&&o.b)b.scrollLeft=o.b;mark()}}
   const g=document.querySelector(".gwrap");
   if(o.v===view){$("main").scrollTop=o.m;scrollTo(0,o.y);if(g&&o.g!=null){g.scrollLeft=o.g;g.scrollTop=o.gy||0}}
   else if(g)gToday(false);
   if(g){g.onscroll=stickyLabels;stickyLabels();ganttDrag()}
 }
 function render(){
-  tasks=RAW.filter(t=>!t.arch&&!t.del);
+  tasks=RAW.filter(t=>!t.arch&&!t.del).map(t=>t.status==="backlog"?{...t,status:"todo"}:t);
   if(!purged&&RAW.length){purged=true;const lim=iso(new Date(Date.now()-30*864e5));RAW.filter(t=>t.del&&t.delAt&&t.delAt<lim).forEach(t=>delTask(t.id))}
   for(const id of [...sel])if(!tasks.some(t=>t.id===id))sel.delete(id);
   $("sub").textContent=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
   const n=tasks.length,d=tasks.filter(t=>t.status==="done").length,pct=n?Math.round(d/n*100):0;
-  const doing=tasks.filter(t=>t.status==="doing").length,late=tasks.filter(isLate).length,blk=tasks.filter(isBlocked).length,bl=tasks.filter(t=>t.status==="backlog").length,op=n-d-doing-bl;
-  $("kpis").innerHTML=view==="home"?"":`<div class="kp"><div class="kn"><b><span data-n="${pct}">${pct}</span><i>%</i></b><span>erledigt · ${d} von ${n}</span></div><div class="kn"><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="kn ${late?"hot":""}"><b data-n="${late}">${late}</b><span>überfällig</span></div><div class="kn"><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div>${n?`<div class="stripe" title="Erledigt · In Arbeit · Zu starten · Backlog"><i class="s-x" style="flex:${d}"></i><i class="s-d" style="flex:${doing}"></i><i class="s-o" style="flex:${op}"></i><i class="s-b" style="flex:${bl}"></i></div>`:""}`;
+  const doing=tasks.filter(t=>t.status==="doing").length,late=tasks.filter(isLate).length,blk=tasks.filter(isBlocked).length,op=n-d-doing;
+  $("kpis").innerHTML=view==="home"?"":`<div class="kp"><div class="kn"><b><span data-n="${pct}">${pct}</span><i>%</i></b><span>erledigt · ${d} von ${n}</span></div><div class="kn"><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="kn ${late?"hot":""}"><b data-n="${late}">${late}</b><span>überfällig</span></div><div class="kn"><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div>${n?`<div class="stripe" title="Erledigt · In Arbeit · Zu starten"><i class="s-x" style="flex:${d}"></i><i class="s-d" style="flex:${doing}"></i><i class="s-o" style="flex:${op}"></i></div>`:""}`;
   document.body.dataset.view=view;$("ttl").textContent=view==="home"?greet():{board:"Board",list:"Liste",gantt:"Zeitstrahl",cal:"Kalender"}[view];
     const whos=[...new Set(["Melanie","Lasse",...tasks.map(t=>t.who).filter(Boolean)])],curw=$("fw").value;
   $("fw").innerHTML='<option value="">Alle Personen</option>'+whos.map(a=>`<option ${a===curw?"selected":""}>${esc(a)}</option>`).join("")+`<option value="__none" ${curw==="__none"?"selected":""}>Nicht zugewiesen</option>`;
@@ -1286,7 +1246,7 @@ function gantt(list){
   }
   items.forEach(it=>{if(it.g)gd+=`<rect style="fill:color-mix(in srgb,${it.g.c} 16%,var(--card))" x="0" y="${it.y}" width="${W}" height="${GH}"/>`;gd+=`<line class="gs1" x1="0" x2="${W}" y1="${it.y}" y2="${it.y}"/>`});
   gd+=`<line class="gs1" x1="0" x2="${W}" y1="${BH}" y2="${BH}"/>`;
-  const col={backlog:"var(--bl)",todo:"var(--todo)",doing:"var(--doing)",done:"var(--done)"},pos={};
+  const col={todo:"var(--todo)",doing:"var(--doing)",done:"var(--done)"},pos={};
   items.forEach(it=>{if(!it.t)return;const t=it.t,x1=X(dn(t.start)),x2=X(dn(t.end)+1);pos[t.id]=t.ms?{x:x1+(x2-x1)/2-9,w:18,y:it.y}:{x:x1,w:Math.max(x2-x1,8),y:it.y}});
   gd+=`<line x1="${tdx}" x2="${tdx}" y1="0" y2="${BH}" stroke="var(--bad)" stroke-width="1.6" stroke-dasharray="3 3"/>`;
   list.forEach(t=>(t.deps||[]).forEach(id=>{const a=pos[id],b=pos[t.id];if(!a)return;
@@ -1394,7 +1354,7 @@ $("x_pdf").onclick=()=>{
   if(n){
     doc.addPage("a4","l");doc.setFont("helvetica","bold");doc.setFontSize(14);doc.setTextColor(30,30,30);doc.text("Zeitstrahl",14,14);
     const T=today(),d0=Math.min(T,...list.map(t=>dn(t.start)))-1,d1=Math.max(T,...list.map(t=>dn(t.end)))+1,X0=75,sc=(297-X0-10)/(d1-d0+1),top=26,rh=Math.min(8,165/n);
-    const col={backlog:[132,151,163],todo:[108,182,228],doing:[253,175,84],done:[56,124,163]};
+    const col={todo:[108,182,228],doing:[253,175,84],done:[56,124,163]};
     doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setLineWidth(.15);
     for(let k=d0;k<=d1;k++){const dt=fromDn(k);if(dt.getUTCDate()===1||k===d0){const x=X0+(k-d0)*sc;doc.setDrawColor(220,220,220);doc.line(x,top-4,x,top+n*rh);doc.setTextColor(90,90,90);doc.text(dt.toLocaleDateString("de-DE",{month:"short",year:"2-digit",timeZone:"UTC"}),x+1,top-5)}}
     const pos={};
@@ -1412,7 +1372,7 @@ async function buildXlsx(){
   const list=tasks.slice().sort((a,b)=>dn(a.start)-dn(b.start)||dn(a.end)-dn(b.end));
   const nr={};list.forEach((t,i)=>nr[t.id]=i+1);
   const R0=5,R1=304,DATA="Liste";
-  const C={ink:"FF387CA3",line:"FFE6E1D2",todo:"FFDCEEF9",doing:"FFFEE7C8",done:"FFCBDEE9",bad:"FFD35526",back:"FFE3E8EB",grey:"FF587080",bTodo:"FF6CB6E4",bDoing:"FFFDAF54",bDone:"FF387CA3",today:"FFF6CDBD",we:"FFEDE9DC"};
+  const C={ink:"FF387CA3",line:"FFE6E1D2",todo:"FFDCEEF9",doing:"FFFEE7C8",done:"FFCBDEE9",bad:"FFD35526",grey:"FF587080",bTodo:"FF6CB6E4",bDoing:"FFFDAF54",bDone:"FF387CA3",today:"FFF6CDBD",we:"FFEDE9DC"};
   const edge={style:"thin",color:{argb:C.line}},box={top:edge,left:edge,bottom:edge,right:edge};
   const fill=a=>({type:"pattern",pattern:"solid",fgColor:{argb:a}});
   const cf=a=>({fill:{type:"pattern",pattern:"solid",bgColor:{argb:a}}});
@@ -1422,14 +1382,14 @@ async function buildXlsx(){
 
   /* ---------- Blatt 1: Liste (hier werden Aufgaben gepflegt) ---------- */
   const ws=wb.addWorksheet("Liste",{views:[{state:"frozen",xSplit:2,ySplit:4,showGridLines:false}],properties:{tabColor:{argb:C.ink}}});
-  ws.columns=[{width:6},{width:34},{width:14},{width:13},{width:12},{width:12},{width:12},{width:14},{width:34},{width:30},{width:12},{width:30},{width:6,hidden:true},{width:6,hidden:true},{width:6,hidden:true},{width:6,hidden:true}];
+  ws.columns=[{width:6},{width:34},{width:14},{width:13},{width:12},{width:12},{width:12},{width:14},{width:34},{width:30},{width:12},{width:30},{width:6,hidden:true},{width:6,hidden:true},{width:6,hidden:true}];
   ws.getCell("A1").value="Haus-planner";ws.getCell("A1").font={bold:true,size:18};
   ws.getCell("H1").value="Neue Aufgabe: einfach in der nächsten freien Zeile eintragen. Board und Zeitstrahl aktualisieren sich automatisch (bis Zeile 304).";
   ws.getCell("H1").font={italic:true,color:{argb:C.grey},size:10};
   const kp=[["B","Aufgaben",`COUNTIF(B${R0}:B${R1},"?*")`,"0"],["C","Erledigt",`IFERROR(COUNTIF(G${R0}:G${R1},"Erledigt")/B3,0)`,"0%"],["D","In Arbeit",`COUNTIF(G${R0}:G${R1},"In Arbeit")`,"0"],["E","Überfällig",`SUMPRODUCT((B${R0}:B${R1}<>"")*(G${R0}:G${R1}<>"Erledigt")*ISNUMBER(F${R0}:F${R1})*(F${R0}:F${R1}<TODAY()))`,"0"],["F","Konflikte",`COUNTIF(L${R0}:L${R1},"?*")`,"0"]];
   kp.forEach(([c,l,f,nf])=>{const a=ws.getCell(c+"2"),b=ws.getCell(c+"3");a.value=l;a.font={size:9,color:{argb:C.grey}};b.value={formula:f};b.numFmt=nf;b.font={bold:true,size:18};a.border={top:edge,left:edge,right:edge};b.border={bottom:edge,left:edge,right:edge};b.alignment={horizontal:"left"}});
   ws.getRow(3).height=28;
-  ["Nr","Aufgabe","Tags","Ressource","Start","Ende","Status","Abhängig von (Nr, z. B. 2,5)","Checkliste (eine Zeile je Punkt, [x] = erledigt)","Notizen","Checkl.-Stand","Hinweis","Offen","In Arbeit","Erledigt","Backlog"].forEach((h,i)=>hdr(ws.getCell(4,i+1),h));
+  ["Nr","Aufgabe","Tags","Ressource","Start","Ende","Status","Abhängig von (Nr, z. B. 2,5)","Checkliste (eine Zeile je Punkt, [x] = erledigt)","Notizen","Checkl.-Stand","Hinweis","Offen","In Arbeit","Erledigt"].forEach((h,i)=>hdr(ws.getCell(4,i+1),h));
   ws.getRow(4).height=36;
   for(let r=R0;r<=R1;r++){
     const t=list[r-R0],row=ws.getRow(r);
@@ -1445,30 +1405,28 @@ async function buildXlsx(){
     row.getCell(11).value={formula:`IF(I${r}="","",${dn_}&"/"&(${dn_}+${op_}))`};
     row.getCell(12).value={formula:`IF(OR(B${r}="",H${r}="",E${r}=""),"",IF(SUMPRODUCT(($A$${R0}:$A$${R1}<>"")*ISNUMBER(SEARCH(","&$A$${R0}:$A$${R1}&",",","&SUBSTITUTE(H${r}," ","")&","))*ISNUMBER($F$${R0}:$F$${R1})*($F$${R0}:$F$${R1}>=E${r}))>0,"Start vor Ende des Vorgängers",""))`};
     row.getCell(13).value={formula:`IF(AND($B${r}<>"",OR($G${r}="Zu starten",$G${r}="")),MAX(M$4:M${r-1})+1,"")`};
-    row.getCell(16).value={formula:`IF(AND($B${r}<>"",$G${r}="Backlog"),MAX(P$4:P${r-1})+1,"")`};
     row.getCell(14).value={formula:`IF(AND($B${r}<>"",$G${r}="In Arbeit"),MAX(N$4:N${r-1})+1,"")`};
     row.getCell(15).value={formula:`IF(AND($B${r}<>"",$G${r}="Erledigt"),MAX(O$4:O${r-1})+1,"")`};
     for(let c=1;c<=12;c++){const cell=row.getCell(c);cell.border=box;cell.font={size:11,color:{argb:(c===1||c===11)?C.grey:"FF1B201C"}};cell.alignment={vertical:"top",wrapText:(c===2||c===9||c===10||c===12),horizontal:(c===1||c===11)?"center":undefined}}
     row.getCell(5).numFmt="dd.mm.yyyy";row.getCell(6).numFmt="dd.mm.yyyy";row.getCell(8).numFmt="@";
-    row.getCell(7).dataValidation={type:"list",allowBlank:true,formulae:['"Zu starten,In Arbeit,Erledigt,Backlog"']};
+    row.getCell(7).dataValidation={type:"list",allowBlank:true,formulae:['"Zu starten,In Arbeit,Erledigt"']};
     row.getCell(4).dataValidation={type:"list",allowBlank:true,showErrorMessage:false,formulae:['"Melanie,Lasse"']};
   }
   ws.autoFilter=`A4:L${R1}`;
   ws.addConditionalFormatting({ref:`G${R0}:G${R1}`,rules:[
     {type:"expression",formulae:[`$G${R0}="Erledigt"`],style:cf(C.done)},
     {type:"expression",formulae:[`$G${R0}="In Arbeit"`],style:cf(C.doing)},
-    {type:"expression",formulae:[`AND($B${R0}<>"",OR($G${R0}="Zu starten",$G${R0}=""))`],style:cf(C.todo)},
-    {type:"expression",formulae:[`$G${R0}="Backlog"`],style:cf(C.back)}]});
+    {type:"expression",formulae:[`AND($B${R0}<>"",OR($G${R0}="Zu starten",$G${R0}=""))`],style:cf(C.todo)}]});
   ws.addConditionalFormatting({ref:`F${R0}:F${R1}`,rules:[{type:"expression",formulae:[`AND(ISNUMBER($F${R0}),$F${R0}<TODAY(),$G${R0}<>"Erledigt")`],style:{font:{bold:true,color:{argb:C.bad}}}}]});
   ws.addConditionalFormatting({ref:`L${R0}:L${R1}`,rules:[{type:"expression",formulae:[`$L${R0}<>""`],style:{font:{bold:true,color:{argb:C.bad}}}}]});
   ws.addConditionalFormatting({ref:`B${R0}:B${R1}`,rules:[{type:"expression",formulae:[`$G${R0}="Erledigt"`],style:{font:{strike:true,color:{argb:C.grey}}}}]});
 
   /* ---------- Blatt 2: Board (wird aus der Liste befüllt) ---------- */
   const wb2=wb.addWorksheet("Board",{views:[{showGridLines:false}],properties:{tabColor:{argb:C.bDoing}}});
-  wb2.columns=[{width:4,hidden:true},{width:38},{width:2},{width:4,hidden:true},{width:38},{width:2},{width:4,hidden:true},{width:38},{width:2},{width:4,hidden:true},{width:38}];
+  wb2.columns=[{width:4,hidden:true},{width:38},{width:2},{width:4,hidden:true},{width:38}];
   wb2.getCell("B1").value="Board";wb2.getCell("B1").font={bold:true,size:18};
   wb2.getCell("B2").value="Wird automatisch aus der Liste befüllt. Status in der Liste ändern, um eine Karte zu verschieben.";wb2.getCell("B2").font={italic:true,color:{argb:C.grey},size:10};
-  const cols=[["A","B","Zu starten","M",C.todo],["D","E","In Arbeit","N",C.doing],["G","H","Erledigt","O",C.done],["J","K","Backlog","P",C.back]];
+  const cols=[["A","B","Zu starten","M",C.todo],["D","E","In Arbeit","N",C.doing],["G","H","Erledigt","O",C.done]];
   const SL=40;
   cols.forEach(([ix,cd,name,hc,colr])=>{
     hdr(wb2.getCell(cd+"4"),null);wb2.getCell(cd+"4").value={formula:`"${name} ("&MAX(${L}$${hc}$${R0}:$${hc}$${R1})&")"`};

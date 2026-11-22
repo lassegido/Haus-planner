@@ -1,4 +1,4 @@
-import calendar, datetime, hmac, json, os, re, secrets, shutil, threading, time, urllib.error, urllib.request
+import datetime, json, os, re, secrets, shutil, threading, time, urllib.error, urllib.request
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs, unquote
 
@@ -168,7 +168,7 @@ def clean(t):
         tags = [t.get("area")] if t.get("area") else []
     tags = [n for n in dict.fromkeys(str(x).strip()[:30] for x in tags if isinstance(x, str)) if n][:20]
     return {"id": i, "title": title, "area": (tags[0] if tags else str(t.get("area", ""))[:60]), "tags": tags, "proj": str(t.get("proj", "") or "")[:30], "ms": bool(t.get("ms")), "rec": clean_rec(t.get("rec")), "spawned": str(t.get("spawned", "") or "")[:40], "who": str(t.get("who", ""))[:60],
-            "status": st if st in ("backlog", "todo", "doing", "done") else "todo", "start": s, "end": e,
+            "status": st if st in ("todo", "doing", "done") else "todo", "start": s, "end": e,
             "notes": str(t.get("notes", ""))[:4000], "deps": deps, "checklist": ck,
             "arch": bool(t.get("arch")), "del": bool(t.get("del")), "delAt": str(t.get("delAt", "") or "")[:10],
             "log": clean_log(t.get("log")), "files": clean_files(t.get("files"))}
@@ -198,302 +198,7 @@ def ha_info():
     o = options()
     return {"api": bool(TOKEN), "notify": services(), "time": str(o.get("reminder_time") or "08:00"),
             "sensors": bool(o.get("sensors", True)),
-            "outlook": bool(ol["url"]), "feed": feed_key(),
             "ai": bool(str(o.get("anthropic_api_key") or "").strip()), "model": str(o.get("ai_model") or "claude-haiku-5-5")}
-
-
-# ---- Outlook: Termine aus einem veröffentlichten ICS-Link einlesen, eigene Aufgaben als ICS-Feed anbieten
-OLF = os.path.join(D, "outlook.json")
-KEYF = os.path.join(D, "feed_key.txt")
-ol = {"url": "", "events": [], "updated": "", "error": ""}
-WINTZ = {"W. Europe Standard Time": "Europe/Berlin", "Central Europe Standard Time": "Europe/Budapest", "Romance Standard Time": "Europe/Paris",
-         "Central European Standard Time": "Europe/Warsaw", "GMT Standard Time": "Europe/London", "E. Europe Standard Time": "Europe/Bucharest",
-         "FLE Standard Time": "Europe/Helsinki", "Eastern Standard Time": "America/New_York", "Central Standard Time": "America/Chicago",
-         "Mountain Standard Time": "America/Denver", "Pacific Standard Time": "America/Los_Angeles", "UTC": "UTC"}
-WD = {"MO": 0, "TU": 1, "WE": 2, "TH": 3, "FR": 4, "SA": 5, "SU": 6}
-
-
-def feed_key():
-    try:
-        with open(KEYF, encoding="utf-8") as f:
-            k = f.read().strip()
-            if k:
-                return k
-    except Exception:
-        pass
-    k = secrets.token_urlsafe(18)
-    try:
-        os.makedirs(D, exist_ok=True)
-        with open(KEYF, "w", encoding="utf-8") as f:
-            f.write(k)
-    except Exception:
-        pass
-    return k
-
-
-def load_outlook():
-    try:
-        with open(OLF, encoding="utf-8") as f:
-            ol["url"] = str(json.load(f).get("url", ""))
-    except Exception:
-        pass
-
-
-def local_tz():
-    if ha["tz"]:
-        return ha["tz"]
-    try:
-        from zoneinfo import ZoneInfo
-        return ZoneInfo("Europe/Berlin")
-    except Exception:
-        return datetime.timezone.utc
-
-
-def zone(name):
-    try:
-        from zoneinfo import ZoneInfo
-        return ZoneInfo(WINTZ.get(name, name))
-    except Exception:
-        return None
-
-
-def unfold(text):
-    out = []
-    for ln in text.replace("\r\n", "\n").replace("\r", "\n").split("\n"):
-        if ln[:1] in (" ", "\t") and out:
-            out[-1] += ln[1:]
-        else:
-            out.append(ln)
-    return out
-
-
-def unesc(x):
-    return x.replace("\\n", "\n").replace("\\N", "\n").replace("\\,", ",").replace("\\;", ";").replace("\\\\", "\\")
-
-
-def split_prop(ln):
-    q, i = False, -1
-    for k, ch in enumerate(ln):
-        if ch == '"':
-            q = not q
-        elif ch == ":" and not q:
-            i = k
-            break
-    if i < 0:
-        return None
-    head, val = ln[:i], ln[i + 1:]
-    parts = head.split(";")
-    params = {}
-    for p in parts[1:]:
-        a, _, b = p.partition("=")
-        params[a.upper()] = b.strip('"')
-    return parts[0].upper(), params, val
-
-
-def parse_dt(params, value, tz):
-    v = value.strip()
-    if params.get("VALUE") == "DATE" or len(v) == 8:
-        return datetime.datetime(int(v[:4]), int(v[4:6]), int(v[6:8])), True
-    dt = datetime.datetime.strptime(v[:15], "%Y%m%dT%H%M%S")
-    if v.endswith("Z"):
-        return dt.replace(tzinfo=datetime.timezone.utc).astimezone(tz).replace(tzinfo=None), False
-    z = zone(params["TZID"]) if params.get("TZID") else None
-    if z:
-        return dt.replace(tzinfo=z).astimezone(tz).replace(tzinfo=None), False
-    return dt, False
-
-
-def nth_weekday(y, m, wd, nth):
-    last = calendar.monthrange(y, m)[1]
-    if nth > 0:
-        d = 1 + (wd - datetime.date(y, m, 1).weekday()) % 7 + 7 * (nth - 1)
-    else:
-        d = last - (datetime.date(y, m, last).weekday() - wd) % 7 - 7 * (-nth - 1)
-    return d if 1 <= d <= last else None
-
-
-def occurrences(start, rule, w1):
-    freq = rule.get("FREQ", "")
-    n = max(1, int(rule.get("INTERVAL", "1") or 1))
-    count = int(rule["COUNT"]) if rule.get("COUNT", "").isdigit() else None
-    until = None
-    if rule.get("UNTIL"):
-        try:
-            until = datetime.datetime.strptime(rule["UNTIL"][:8], "%Y%m%d") + datetime.timedelta(days=1)
-        except ValueError:
-            pass
-    tm = start.time()
-    produced = 0
-
-    def gen():
-        if freq == "DAILY":
-            for k in range(6000):
-                yield start + datetime.timedelta(days=k * n)
-        elif freq == "WEEKLY":
-            days = sorted({WD[x[-2:]] for x in rule.get("BYDAY", "").split(",") if x[-2:] in WD}) or [start.weekday()]
-            w0 = datetime.datetime.combine(start.date() - datetime.timedelta(days=start.weekday()), tm)
-            for k in range(1500):
-                for wd in days:
-                    dt = w0 + datetime.timedelta(weeks=k * n, days=wd)
-                    if dt >= start:
-                        yield dt
-        elif freq == "MONTHLY":
-            for k in range(600):
-                mi = start.month - 1 + k * n
-                y, m = start.year + mi // 12, mi % 12 + 1
-                by = rule.get("BYDAY", "")
-                mdays = [int(x) for x in rule.get("BYMONTHDAY", "").split(",") if x.lstrip("-").isdigit()]
-                if by and re.fullmatch(r"-?\d?[A-Z]{2}", by.split(",")[0]) and by.split(",")[0][:-2]:
-                    nth = int(by.split(",")[0][:-2])
-                    d = nth_weekday(y, m, WD.get(by.split(",")[0][-2:], 0), nth)
-                    days = [d] if d else []
-                elif mdays:
-                    last = calendar.monthrange(y, m)[1]
-                    days = sorted(x if x > 0 else last + 1 + x for x in mdays)
-                else:
-                    days = [start.day]
-                for d in days:
-                    if 1 <= d <= calendar.monthrange(y, m)[1]:
-                        dt = datetime.datetime.combine(datetime.date(y, m, d), tm)
-                        if dt >= start:
-                            yield dt
-        elif freq == "YEARLY":
-            for k in range(200):
-                try:
-                    yield datetime.datetime.combine(datetime.date(start.year + k * n, start.month, start.day), tm)
-                except ValueError:
-                    continue
-
-    for dt in gen():
-        if until and dt >= until:
-            return
-        if dt.date() > w1:
-            return
-        produced += 1
-        yield dt
-        if count and produced >= count:
-            return
-
-
-def parse_ics(text):
-    tz = local_tz()
-    today = datetime.datetime.now(tz).date()
-    w0, w1 = today - datetime.timedelta(days=45), today + datetime.timedelta(days=400)
-    evs, cur = [], None
-    for ln in unfold(text):
-        if ln == "BEGIN:VEVENT":
-            cur = {}
-        elif ln == "END:VEVENT":
-            if cur is not None:
-                evs.append(cur)
-            cur = None
-        elif cur is not None:
-            sp = split_prop(ln)
-            if sp:
-                name, params, val = sp
-                if name == "EXDATE":
-                    cur.setdefault("EXDATE", []).append((params, val))
-                else:
-                    cur[name] = (params, val)
-    over = set()
-    for e in evs:
-        if "RECURRENCE-ID" in e and "UID" in e:
-            try:
-                over.add((e["UID"][1], parse_dt(*e["RECURRENCE-ID"], tz)[0].date()))
-            except Exception:
-                pass
-    out = []
-    for e in evs:
-        try:
-            if e.get("STATUS", ({}, ""))[1].upper() == "CANCELLED" or "DTSTART" not in e:
-                continue
-            start, allday = parse_dt(*e["DTSTART"], tz)
-            if "DTEND" in e:
-                end = parse_dt(*e["DTEND"], tz)[0]
-            elif "DURATION" in e:
-                end = start + datetime.timedelta(days=1)
-            else:
-                end = start + (datetime.timedelta(days=1) if allday else datetime.timedelta())
-            dur = max(end - start, datetime.timedelta())
-            title = unesc(e.get("SUMMARY", ({}, "(ohne Titel)"))[1]).strip()[:120] or "(ohne Titel)"
-            uid = e.get("UID", ({}, ""))[1]
-            if "RRULE" in e and "RECURRENCE-ID" not in e:
-                rule = dict(x.partition("=")[::2] for x in e["RRULE"][1].split(";") if "=" in x)
-                ex = set()
-                for params, val in e.get("EXDATE", []):
-                    for one in val.split(","):
-                        try:
-                            ex.add(parse_dt(params, one, tz)[0].date())
-                        except Exception:
-                            pass
-                occs = [d for d in occurrences(start, rule, w1) if d.date() not in ex and (uid, d.date()) not in over]
-            else:
-                occs = [start]
-            for d in occs:
-                fin = d + dur - (datetime.timedelta(seconds=1) if dur else datetime.timedelta())
-                if fin.date() < w0 or d.date() > w1:
-                    continue
-                out.append({"t": title, "s": d.date().isoformat(), "e": max(fin.date(), d.date()).isoformat(), "a": allday,
-                            "st": "" if allday else d.strftime("%H:%M"), "en": "" if allday or not dur else (d + dur).strftime("%H:%M")})
-        except Exception:
-            continue
-    out.sort(key=lambda x: (x["s"], x["st"]))
-    return out[:3000]
-
-
-def fetch_outlook():
-    if not ol["url"]:
-        ol.update(events=[], updated="", error="")
-        return
-    try:
-        u = ol["url"].strip()
-        if u.lower().startswith("webcal://"):
-            u = "https://" + u[9:]
-        if not u.lower().startswith(("https://", "http://localhost", "http://127.0.0.1")):
-            raise ValueError("Der Link muss mit https:// beginnen")
-        req = urllib.request.Request(u, headers={"User-Agent": "Haus-planner"})
-        with urllib.request.urlopen(req, timeout=25) as r:
-            raw = r.read(6_000_001)
-        if len(raw) > 6_000_000:
-            raise ValueError("Kalenderdatei zu groß")
-        txt = raw.decode("utf-8", "replace")
-        if "BEGIN:VCALENDAR" not in txt:
-            raise ValueError("Der Link liefert keinen Kalender (ICS)")
-        ol.update(events=parse_ics(txt), updated=time.strftime("%Y-%m-%dT%H:%M", time.gmtime()), error="")
-    except Exception as e:
-        ol["error"] = str(e)[:160]
-
-
-def outlook_loop():
-    time.sleep(8)
-    while True:
-        try:
-            fetch_outlook()
-        except Exception as e:
-            print("Outlook-Abgleich:", e, flush=True)
-        time.sleep(1800)
-
-
-def feed_ics():
-    def esc(x):
-        return str(x or "").replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
-    stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
-    lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Haus-planner//DE", "CALSCALE:GREGORIAN", "X-WR-CALNAME:Haus-planner", "X-PUBLISHED-TTL:PT1H"]
-    with LOCK:
-        tasks = list(state["tasks"].values())
-    for t in tasks:
-        if t.get("del") or t.get("arch") or t["status"] in ("done", "backlog"):
-            continue
-        end = datetime.date.fromisoformat(t["end"]) + datetime.timedelta(days=1)
-        lines += ["BEGIN:VEVENT", "UID:%s@haus-planner" % t["id"], "DTSTAMP:" + stamp, "DTSTART;VALUE=DATE:" + t["start"].replace("-", ""),
-                  "DTEND;VALUE=DATE:" + end.isoformat().replace("-", ""), "SUMMARY:" + esc(t["title"])]
-        if t.get("notes"):
-            lines.append("DESCRIPTION:" + esc(t["notes"]))
-        if t.get("who"):
-            lines.append("CATEGORIES:" + esc(t["who"]))
-        lines.append("END:VEVENT")
-    lines.append("END:VCALENDAR")
-    return "\r\n".join(lines) + "\r\n"
 
 
 AI_SYSTEM = "Du bist ein sachkundiger Helfer für Heim- und Gartenprojekte. Antworte immer auf Deutsch und genau im verlangten JSON-Format."
@@ -556,7 +261,7 @@ def init_tz():
 
 
 def stats(tasks, today):
-    act = [t for t in tasks if not t.get("del") and not t.get("arch") and t["status"] not in ("done", "backlog")]
+    act = [t for t in tasks if not t.get("del") and not t.get("arch") and t["status"] != "done"]
     due = [t for t in act if t["end"] == today]
     late = [t for t in act if t["end"] < today]
     doing = [t for t in act if t["status"] == "doing"]
@@ -643,13 +348,6 @@ class H(BaseHTTPRequestHandler):
                 if q == str(state["rev"]):
                     return self.out(200, {"rev": state["rev"], "version": version(), "ha": ha_info()})
                 return self.out(200, {"rev": state["rev"], "version": version(), "tasks": list(state["tasks"].values()), "tags": state["tags"], "ha": ha_info()})
-        if u.path.endswith("/calendar.ics"):
-            key = parse_qs(u.query).get("key", [""])[0]
-            if not hmac.compare_digest(key.encode(), feed_key().encode()):
-                return self.out(403, {"error": "Schlüssel falsch"})
-            return self.out(200, feed_ics().encode("utf-8"), "text/calendar")
-        if u.path.endswith("/api/outlook"):
-            return self.out(200, {"configured": bool(ol["url"]), "events": ol["events"], "updated": ol["updated"], "error": ol["error"]})
         if u.path.endswith("/manifest.webmanifest"):
             return self.out(200, {"name": "Haus-planner", "short_name": "Haus-planner", "start_url": "./", "scope": "./", "display": "standalone",
                                   "background_color": "#F5F3EB", "theme_color": "#2D6786", "lang": "de",
@@ -735,17 +433,6 @@ class H(BaseHTTPRequestHandler):
             data = self.body()
         except Exception:
             return self.out(400, {"error": "ungültige Anfrage"})
-        if path.endswith("/api/outlook"):
-            url = str(data.get("url", "")).strip()[:1500] if isinstance(data, dict) else ""
-            ol["url"] = url
-            try:
-                with open(OLF, "w", encoding="utf-8") as f:
-                    json.dump({"url": url}, f)
-                os.chmod(OLF, 0o600)
-            except Exception as e:
-                print("Outlook-Link speichern:", e, flush=True)
-            fetch_outlook()
-            return self.out(200, {"configured": bool(ol["url"]), "events": ol["events"], "updated": ol["updated"], "error": ol["error"]})
         if path.endswith("/api/ai"):
             try:
                 p = data.get("prompt") if isinstance(data, dict) else None
@@ -808,7 +495,5 @@ if __name__ == "__main__":
     if state["tasks"]:
         save()  # bestehende Daten beim Start einmal in den Share-Spiegel kopieren
     print("Haus-planner %s läuft auf Port %d, Daten in %s" % (version(), PORT, D), flush=True)
-    load_outlook()
     threading.Thread(target=ha_loop, daemon=True).start()
-    threading.Thread(target=outlook_loop, daemon=True).start()
     ThreadingHTTPServer(("0.0.0.0", PORT), H).serve_forever()

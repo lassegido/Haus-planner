@@ -1,5 +1,9 @@
 # Änderungen
 
+## 1.8.1
+- Outlook-Anbindung und die Backlog-Spalte wieder entfernt. Vorhandene Backlog-Aufgaben erscheinen unter „Zu starten". Der .ics-Export unter Export bleibt
+- Gleich große Auswahlfelder, Farbkonzept und Schriftwahl aus 1.8.0 bleiben
+
 ## 1.8.0
 - Neue Spalte „Backlog" (grau) vor „Zu starten"; „Offen" heißt jetzt „Zu starten". Backlog-Aufgaben zählen nicht als überfällig und lösen keine Erinnerung aus. Bestehende Aufgaben bleiben unverändert („Offen" wird zu „Zu starten")
 - Auswahlfelder einheitlich: Optionen eines Reglers sind gleich breit (Tage / Monate / Jahre), Eingabefelder im Formular gleich hoch
