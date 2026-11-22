@@ -22,6 +22,9 @@ COLORS = ("sky", "sun", "sea", "brick", "mint", "rose", "lilac", "sand", "slate"
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 ID = re.compile(r"[A-Za-z0-9_-]{1,40}")
 DAILY = re.compile(r"tasks-\d{4}-\d{2}-\d{2}\.json")
+MONTHLY = re.compile(r"tasks-monat-\d{4}-\d{2}\.json")
+SCHEMA = 2  # Datenformat-Version; neuere Dateien werden nie abwärts beschnitten, ältere beim Lesen ergänzt
+ICON = re.compile(r"[a-z]{2,20}")
 OPTS = os.path.join(D, "options.json")
 HASTATE = os.path.join(D, "ha_state.json")
 SUP = os.environ.get("SUPERVISOR_URL", "http://supervisor/core/api")
@@ -40,7 +43,10 @@ def version():
 def read_file(path):
     with open(path, encoding="utf-8") as f:
         j = json.load(f)
-    return {t["id"]: t for t in j.get("tasks", [])}, j.get("rev", 0), clean_tags(j.get("tags", []))
+    tasks = {t["id"]: t for t in j.get("tasks", [])}
+    for t in tasks.values():
+        t.setdefault("v", 0)  # Dateien aus älteren Versionen haben noch keine Versionsnummer
+    return tasks, j.get("rev", 0), clean_tags(j.get("tags", []))
 
 
 def load():
@@ -62,25 +68,39 @@ def load():
             print("Share-Spiegel nicht lesbar:", e, flush=True)
 
 
-def prune(folder, keep=30):
+def prune(folder, keep=30, keep_months=24):
     files = sorted(f for f in os.listdir(folder) if DAILY.fullmatch(f))
     for old in files[:-keep]:
         os.remove(os.path.join(folder, old))
+    months = sorted(f for f in os.listdir(folder) if MONTHLY.fullmatch(f))
+    for old in months[:-keep_months]:
+        os.remove(os.path.join(folder, old))
+
+
+def snapshot(folder):
+    """Je Monat eine Sicherung (die erste Speicherung im Monat), damit auch ältere Stände erreichbar bleiben."""
+    p = os.path.join(folder, "tasks-monat-%s.json" % time.strftime("%Y-%m"))
+    if not os.path.exists(p):
+        shutil.copyfile(DATA, p)
 
 
 def save():
     os.makedirs(BK, exist_ok=True)
     tmp = DATA + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
-        json.dump({"rev": state["rev"], "tasks": list(state["tasks"].values()), "tags": state["tags"]}, f, ensure_ascii=False)
+        json.dump({"schema": SCHEMA, "rev": state["rev"], "tasks": list(state["tasks"].values()), "tags": state["tags"]}, f, ensure_ascii=False)
+        f.flush()
+        os.fsync(f.fileno())
     os.replace(tmp, DATA)
     day = "tasks-%s.json" % time.strftime("%Y-%m-%d")
     shutil.copyfile(DATA, os.path.join(BK, day))
+    snapshot(BK)
     prune(BK)
     try:
         os.makedirs(SHARE, exist_ok=True)
         shutil.copyfile(DATA, os.path.join(SHARE, "tasks-latest.json"))
         shutil.copyfile(DATA, os.path.join(SHARE, day))
+        snapshot(SHARE)
         prune(SHARE)
     except Exception as e:
         print("Share-Spiegel nicht möglich:", e, flush=True)
@@ -97,7 +117,8 @@ def clean_tags(lst):
             continue
         seen.add(key)
         c = x.get("c")
-        out.append({"n": n, "c": c if c in COLORS else "", **({"p": 1} if x.get("p") else {})})
+        ic = str(x.get("i", ""))
+        out.append({"n": n, "c": c if c in COLORS else "", **({"p": 1} if x.get("p") else {}), **({"i": ic} if ICON.fullmatch(ic) and not x.get("p") else {})})
     return out[:100]
 
 
@@ -171,7 +192,7 @@ def clean(t):
             "status": st if st in ("todo", "doing", "done") else "todo", "start": s, "end": e,
             "notes": str(t.get("notes", ""))[:4000], "deps": deps, "checklist": ck,
             "arch": bool(t.get("arch")), "del": bool(t.get("del")), "delAt": str(t.get("delAt", "") or "")[:10],
-            "log": clean_log(t.get("log")), "files": clean_files(t.get("files"))}
+            "log": clean_log(t.get("log")), "files": clean_files(t.get("files")), "v": 0}
 
 
 # ---- Home Assistant: Erinnerungen und Sensoren (nur im Add-on, über die Supervisor-Schnittstelle)
@@ -204,7 +225,7 @@ def ha_info():
 AI_SYSTEM = "Du bist ein sachkundiger Helfer für Heim- und Gartenprojekte. Antworte immer auf Deutsch und genau im verlangten JSON-Format."
 
 
-def ai_call(prompt):
+def ai_call(prompt, raw=False):
     o = options()
     key = str(o.get("anthropic_api_key") or "").strip()
     if not key:
@@ -227,6 +248,8 @@ def ai_call(prompt):
     if a < 0 or z < a:
         raise RuntimeError("Unerwartete Antwort")
     d = json.loads(text[a:z + 1])
+    if raw:  # freie Zuordnungen (z. B. Tag -> Symbol), nur kurze Texte
+        return {str(k)[:60]: str(v)[:40] for k, v in list(d.items())[:100]}
     items = [str(x).strip()[:120] for x in d.get("checklist", []) if str(x).strip()] if isinstance(d.get("checklist"), list) else []
     return {"notes": str(d.get("notes", "")).strip()[:1000], "checklist": items[:10]}
 
@@ -393,9 +416,9 @@ class H(BaseHTTPRequestHandler):
         with open(INDEX, "rb") as f:
             self.out(200, f.read(), "text/html")
 
-    def body(self):
+    def body(self, limit=2_000_000):
         n = int(self.headers.get("Content-Length", "0"))
-        if n > 2_000_000:
+        if n > limit:
             raise ValueError
         return json.loads(self.rfile.read(n))
 
@@ -430,7 +453,7 @@ class H(BaseHTTPRequestHandler):
                         return self.out(500, {"error": "Speichern nicht möglich"})
             return self.out(200, {"file": {"id": fid, "n": name, "s": len(raw), "ty": ty}})
         try:
-            data = self.body()
+            data = self.body(25_000_000 if path.endswith("/api/import") else 2_000_000)
         except Exception:
             return self.out(400, {"error": "ungültige Anfrage"})
         if path.endswith("/api/ai"):
@@ -438,7 +461,7 @@ class H(BaseHTTPRequestHandler):
                 p = data.get("prompt") if isinstance(data, dict) else None
                 if not isinstance(p, str) or not p.strip():
                     raise RuntimeError("Leere Anfrage")
-                return self.out(200, {"ok": True, "data": ai_call(p)})
+                return self.out(200, {"ok": True, "data": ai_call(p, bool(data.get("raw")))})
             except Exception as e:
                 return self.out(200, {"ok": False, "error": str(e)[:200]})
         if path.endswith("/api/ha-test"):
@@ -465,11 +488,20 @@ class H(BaseHTTPRequestHandler):
         if not items:
             return self.out(400, {"error": "ungültige Aufgabe"})
         with LOCK:
+            if path.endswith("/api/task") and self.headers.get("X-Check") == "1":
+                old = state["tasks"].get(items[0]["id"])
+                try:
+                    sent = int(data.get("v", -1))
+                except (TypeError, ValueError):
+                    sent = -1
+                if old is not None and sent >= 0 and sent != old.get("v", 0):
+                    return self.out(409, {"error": "konflikt", "task": old})
             for t in items:
+                t["v"] = state["tasks"].get(t["id"], {}).get("v", 0) + 1
                 state["tasks"][t["id"]] = t
             state["rev"] += 1
             save()
-            self.out(200, {"rev": state["rev"], "count": len(items)})
+            self.out(200, {"rev": state["rev"], "count": len(items), "v": items[0]["v"]})
 
     def do_DELETE(self):
         mf = re.search(r"/api/file/([A-Za-z0-9_-]{1,40})/([a-f0-9]{12})$", urlparse(self.path).path)

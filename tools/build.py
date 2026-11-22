@@ -20,7 +20,7 @@ storage = '''/* Speicher: Server im Home-Assistant-Add-on (relative Pfade wegen 
 let rev=-1;
 function prefGet(k){try{return localStorage.getItem("haus-"+k)}catch(e){return null}}
 function prefSet(k,v){try{localStorage.setItem("haus-"+k,v)}catch(e){}}
-async function api(path,opt){const r=await fetch(path,opt);if(!r.ok)throw new Error(r.status);return r.json()}
+async function api(path,opt){const r=await fetch(path,opt);if(r.status===409){const e=new Error("409");e.conflict=await r.json().catch(()=>({}));throw e}if(!r.ok)throw new Error(r.status);return r.json()}
 async function pull(force){
   try{const j=await api("api/tasks"+(force?"":"?rev="+rev));
     $("note").textContent="";
@@ -29,10 +29,13 @@ async function pull(force){
     if(j.tasks){RAW=j.tasks;reg=j.tags||[];regLoaded=true;rev=j.rev;loaded=true;render()}
   }catch(e){$("note").textContent="Keine Verbindung zum Server – Änderungen werden evtl. nicht gespeichert."}
 }
-async function saveTask(t){
+async function saveTask(t,o){
   const i=RAW.findIndex(x=>x.id===t.id);i>=0?RAW[i]=t:RAW.push(t);render();
-  try{await api("api/task",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(t)})}
-  catch(e){$("note").textContent="Speichern fehlgeschlagen."}
+  try{await api("api/task",{method:"POST",headers:{"Content-Type":"application/json",...(o&&o.check?{"X-Check":"1"}:{})},body:JSON.stringify(t)})}
+  catch(e){
+    if(e.conflict&&e.conflict.task){const s=e.conflict.task,j=RAW.findIndex(x=>x.id===s.id);if(j>=0)RAW[j]=s;render();
+      toast("„"+s.title+"“ wurde zwischenzeitlich geändert. Deine Änderung ist nicht gespeichert.",()=>saveTask({...t,v:s.v}),"Trotzdem speichern",10000);return}
+    $("note").textContent="Speichern fehlgeschlagen."}
   pull(true);
 }
 async function delTask(id){
@@ -53,7 +56,7 @@ async function saveMany(list){
   pull(true);
 }
 const aiAvail=()=>!!(haInfo&&haInfo.ai);
-async function aiJson(prompt){const r=await api("api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt})});if(!r.ok)throw new Error(r.error||"KI-Fehler");return r.data}
+async function aiJson(prompt,raw){const r=await api("api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,raw:!!raw})});if(!r.ok)throw new Error(r.error||"KI-Fehler");return r.data}
 function init(){
   pull(true);setInterval(()=>pull(),5000);
   document.addEventListener("visibilitychange",()=>{if(!document.hidden)pull()});

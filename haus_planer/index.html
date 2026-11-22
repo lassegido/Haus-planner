@@ -602,9 +602,18 @@ body:not([data-view=home]) .kn b{font-size:clamp(1.35rem,1rem + 1.2vw,1.9rem);le
 #s_body .keys{margin-top:.5rem}
 td .st{white-space:nowrap}
 td.late{background:none;padding:.4rem .8rem;border-radius:0}
+/* 1.11: Tag-Symbole */
+.ti{flex:none;width:1.05em;height:1.05em;fill:none;stroke:var(--tc,currentColor);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.17em}
+.card .tag::before,tr.row .tag::before,td .tag::before{display:none}
+.card .tag,tr.row .tag,td .tag{gap:.3rem}
+.tc .ti{width:1rem;height:1rem;margin-right:-.05rem}
+.pr .pn{display:inline-flex;align-items:center;gap:.4rem}.pr .pn .ti{width:1rem;height:1rem}
+.more{display:block;width:100%;margin:.2rem 0 .6rem}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Haus-planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"></head>
 <body>
+<svg id="icsp" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-bad" viewBox="0 0 24 24"><path d="M3 12h18v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-2z"/><path d="M6 12V6.5A2.5 2.5 0 0 1 8.5 4 2.5 2.5 0 0 1 11 6.5"/><path d="M7 18l-1 2M17 18l1 2"/></symbol><symbol id="i-kueche" viewBox="0 0 24 24"><path d="M5 10h14v7a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-7z"/><path d="M3 10h2M19 10h2M9 6.5c0-1.2 1-1.2 1-2.5M14 6.5c0-1.2 1-1.2 1-2.5"/></symbol><symbol id="i-sofa" viewBox="0 0 24 24"><path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><path d="M3 13a2 2 0 0 1 4 0v1h10v-1a2 2 0 0 1 4 0v4H3v-4z"/><path d="M6 17v2M18 17v2"/></symbol><symbol id="i-bett" viewBox="0 0 24 24"><path d="M3 19V6M3 14.5h18V19M21 14.5V12a3 3 0 0 0-3-3h-7v5.5"/><circle cx="7" cy="11" r="1.8"/></symbol><symbol id="i-kind" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="6.5"/><circle cx="6.6" cy="6.8" r="2.2"/><circle cx="17.4" cy="6.8" r="2.2"/><circle cx="12" cy="15.2" r="2"/><path d="M9.6 11.6h.01M14.4 11.6h.01"/></symbol><symbol id="i-tuer" viewBox="0 0 24 24"><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M4 21h16"/><circle cx="15" cy="12.5" r=".9" fill="currentColor"/></symbol><symbol id="i-pflanze" viewBox="0 0 24 24"><path d="M12 21v-9"/><path d="M12 12c0-4 3-6.5 7-6.5 0 4-2.5 6.5-7 6.5z"/><path d="M12 15.5c0-3-2.3-5-6-5 0 3.2 2 5 6 5z"/></symbol><symbol id="i-baum" viewBox="0 0 24 24"><path d="M12 21v-6"/><path d="M12 15c-4 0-6.5-2.5-6.5-5.5C5.5 6 8.5 3.5 12 3.5s6.5 2.5 6.5 6c0 3-2.5 5.5-6.5 5.5z"/></symbol><symbol id="i-sonne" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.8"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></symbol><symbol id="i-treppe" viewBox="0 0 24 24"><path d="M3.5 20.5h17M5 20.5v-4h4v-4h4v-4h4v-4"/></symbol><symbol id="i-dach" viewBox="0 0 24 24"><path d="M2.5 13L12 5l9.5 8"/><path d="M17 8.5V5h2v5.2"/><path d="M6 11.5V19h12v-7.5"/></symbol><symbol id="i-fenster" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="17" rx="1.5"/><path d="M12 3.5v17M4.5 12h15"/></symbol><symbol id="i-flamme" viewBox="0 0 24 24"><path d="M12 21c-3.9 0-6-2.5-6-5.7 0-3.6 3.2-5.5 3.7-9.3C12.4 7.4 18 10.2 18 15.3c0 3.2-2.1 5.7-6 5.7z"/><path d="M12 21c-1.6 0-2.6-1-2.6-2.5 0-1.5 1.6-2.2 2.6-3.7 1 1.5 2.6 2.2 2.6 3.7 0 1.5-1 2.5-2.6 2.5z"/></symbol><symbol id="i-blitz" viewBox="0 0 24 24"><path d="M13 3L5.5 13.5H11L10 21l7.5-10.5H12L13 3z"/></symbol><symbol id="i-tropfen" viewBox="0 0 24 24"><path d="M12 3.5c3.2 4 6 7 6 10.2a6 6 0 0 1-12 0C6 10.5 8.8 7.5 12 3.5z"/></symbol><symbol id="i-werkzeug" viewBox="0 0 24 24"><path d="M14 4.5l5.5 5.5-2.8 2.8-5.5-5.5z"/><path d="M12.2 9.7L4.8 17.1a1.9 1.9 0 0 0 2.7 2.7l7.4-7.4"/></symbol><symbol id="i-roller" viewBox="0 0 24 24"><rect x="4" y="3.5" width="14" height="5.5" rx="1.5"/><path d="M18 6h2.5v5.5h-8V14"/><rect x="10.7" y="14" width="3.6" height="6.5" rx="1.2"/></symbol><symbol id="i-boden" viewBox="0 0 24 24"><path d="M12 4l9 5-9 5-9-5z"/><path d="M3 13.5l9 5 9-5"/></symbol><symbol id="i-dokument" viewBox="0 0 24 24"><path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-16z"/><path d="M14 3.5v4h4M9.5 12.5h5M9.5 16h5"/></symbol><symbol id="i-muenze" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M15.2 9.2a4 4 0 1 0 0 5.6M8.3 11h5M8.3 13h5"/></symbol><symbol id="i-schild" viewBox="0 0 24 24"><path d="M12 3.5l7 2.5v5.5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z"/><path d="M9 12l2.2 2.2L15.2 10"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><path d="M4 16v-3.5L6 7.5h12l2 5V16"/><path d="M4 12.5h16M4 16h16"/><circle cx="7.5" cy="16.5" r="1.7"/><circle cx="16.5" cy="16.5" r="1.7"/></symbol><symbol id="i-wagen" viewBox="0 0 24 24"><path d="M3 4.5h2.5l2 10.5h10.5l2-8H7"/><circle cx="9.2" cy="19" r="1.2"/><circle cx="16.8" cy="19" r="1.2"/></symbol><symbol id="i-eimer" viewBox="0 0 24 24"><path d="M5 9h14l-1.6 11H6.6z"/><path d="M5 9c0-2.6 3-4.2 7-4.2s7 1.6 7 4.2"/></symbol><symbol id="i-karton" viewBox="0 0 24 24"><path d="M3.5 8L12 4l8.5 4v8.5L12 20.5l-8.5-4z"/><path d="M3.5 8L12 12l8.5-4M12 12v8.5"/></symbol><symbol id="i-pfote" viewBox="0 0 24 24"><ellipse cx="12" cy="15.5" rx="4" ry="3.2"/><circle cx="6.3" cy="11" r="1.6"/><circle cx="9.7" cy="6.8" r="1.6"/><circle cx="14.3" cy="6.8" r="1.6"/><circle cx="17.7" cy="11" r="1.6"/></symbol><symbol id="i-herz" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.5-7.5-10A4.2 4.2 0 0 1 12 7.6 4.2 4.2 0 0 1 19.5 10C19.5 15.5 12 20 12 20z"/></symbol><symbol id="i-koffer" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v2M4 13.5h16"/></symbol><symbol id="i-geschenk" viewBox="0 0 24 24"><rect x="4" y="9.5" width="16" height="10.5" rx="1.5"/><path d="M3 9.5h18M12 9.5V20"/><path d="M12 9.5C11 6 7.5 6 8 8c.3 1.4 4 1.5 4 1.5zM12 9.5c1-3.5 4.5-3.5 4-1.5-.3 1.4-4 1.5-4 1.5z"/></symbol><symbol id="i-schloss" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><circle cx="12" cy="15.5" r="1"/></symbol><symbol id="i-wlan" viewBox="0 0 24 24"><path d="M3.5 9.5a12 12 0 0 1 17 0M6.5 12.8a7.8 7.8 0 0 1 11 0M9.5 16a3.5 3.5 0 0 1 5 0"/><circle cx="12" cy="19" r=".9" fill="currentColor"/></symbol><symbol id="i-birne" viewBox="0 0 24 24"><path d="M9 17.5h6M10 20.5h4"/><path d="M12 3.5a5.5 5.5 0 0 0-3.2 10c.6.5 1.2 1.3 1.2 2.5h4c0-1.2.6-2 1.2-2.5A5.5 5.5 0 0 0 12 3.5z"/></symbol><symbol id="i-waschmaschine" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="17" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 7h.01M11 7h2"/></symbol><symbol id="i-kalender" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v3.5M15.5 3.5v3.5"/></symbol><symbol id="i-tonne" viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13"/><path d="M10.5 11v5.5M13.5 11v5.5"/></symbol><symbol id="i-stuhl" viewBox="0 0 24 24"><path d="M7 12V5a1.5 1.5 0 0 1 1.5-1.5h7A1.5 1.5 0 0 1 17 5v7"/><path d="M5.5 12h13v3.5h-13zM7.5 15.5V21M16.5 15.5V21"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M3.5 12.5V4.5a1 1 0 0 1 1-1h8L21 12l-8.5 8.5z"/><circle cx="8" cy="8" r="1.2"/></symbol></defs></svg>
+
 <div id="splash" aria-hidden="true"><div class="sp-in"><svg class="sp-mark" viewBox="0 0 24 24"><path pathLength="1" d="M3.5 11 12 4l8.5 7"/><path pathLength="1" d="M5.5 9.8V20h13V9.8"/><path pathLength="1" d="M10 20v-5.5h4V20"/></svg><div class="sp-name">Haus-planner</div><div class="sp-sub" id="sp_sub"></div></div></div>
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="dtip" aria-hidden="true"></div>
@@ -720,7 +729,7 @@ const isBlocked=t=>t.status!=="done"&&(t.deps||[]).some(i=>{const p=byId(i);retu
 let rev=-1;
 function prefGet(k){try{return localStorage.getItem("haus-"+k)}catch(e){return null}}
 function prefSet(k,v){try{localStorage.setItem("haus-"+k,v)}catch(e){}}
-async function api(path,opt){const r=await fetch(path,opt);if(!r.ok)throw new Error(r.status);return r.json()}
+async function api(path,opt){const r=await fetch(path,opt);if(r.status===409){const e=new Error("409");e.conflict=await r.json().catch(()=>({}));throw e}if(!r.ok)throw new Error(r.status);return r.json()}
 async function pull(force){
   try{const j=await api("api/tasks"+(force?"":"?rev="+rev));
     $("note").textContent="";
@@ -729,10 +738,13 @@ async function pull(force){
     if(j.tasks){RAW=j.tasks;reg=j.tags||[];regLoaded=true;rev=j.rev;loaded=true;render()}
   }catch(e){$("note").textContent="Keine Verbindung zum Server – Änderungen werden evtl. nicht gespeichert."}
 }
-async function saveTask(t){
+async function saveTask(t,o){
   const i=RAW.findIndex(x=>x.id===t.id);i>=0?RAW[i]=t:RAW.push(t);render();
-  try{await api("api/task",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(t)})}
-  catch(e){$("note").textContent="Speichern fehlgeschlagen."}
+  try{await api("api/task",{method:"POST",headers:{"Content-Type":"application/json",...(o&&o.check?{"X-Check":"1"}:{})},body:JSON.stringify(t)})}
+  catch(e){
+    if(e.conflict&&e.conflict.task){const s=e.conflict.task,j=RAW.findIndex(x=>x.id===s.id);if(j>=0)RAW[j]=s;render();
+      toast("„"+s.title+"“ wurde zwischenzeitlich geändert. Deine Änderung ist nicht gespeichert.",()=>saveTask({...t,v:s.v}),"Trotzdem speichern",10000);return}
+    $("note").textContent="Speichern fehlgeschlagen."}
   pull(true);
 }
 async function delTask(id){
@@ -753,7 +765,7 @@ async function saveMany(list){
   pull(true);
 }
 const aiAvail=()=>!!(haInfo&&haInfo.ai);
-async function aiJson(prompt){const r=await api("api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt})});if(!r.ok)throw new Error(r.error||"KI-Fehler");return r.data}
+async function aiJson(prompt,raw){const r=await api("api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,raw:!!raw})});if(!r.ok)throw new Error(r.error||"KI-Fehler");return r.data}
 function init(){
   pull(true);setInterval(()=>pull(),5000);
   document.addEventListener("visibilitychange",()=>{if(!document.hidden)pull()});
@@ -764,7 +776,7 @@ function init(){
 let lastMoved=null,tt,enterT;
 const greet=()=>{const h=new Date().getHours();return h<5?"Gute Nacht":h<11?"Guten Morgen":h<17?"Guten Tag":"Guten Abend"};
 const reduced=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
-function toast(msg,undo){const el=$("toast");el.innerHTML="<span></span>"+(undo?"<button>Rückgängig</button>":"");el.firstChild.textContent=msg;if(undo)el.querySelector("button").onclick=()=>{undo();el.classList.remove("on")};el.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("on"),4500)}
+function toast(msg,undo,label,ms){const el=$("toast");el.innerHTML="<span></span>"+(undo?"<button>"+(label||"Rückgängig")+"</button>":"");el.firstChild.textContent=msg;if(undo)el.querySelector("button").onclick=()=>{undo();el.classList.remove("on")};el.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("on"),ms||4500)}
 async function advance(id){
   const t=byId(id);if(!t)return;const prev=t.status,next=NEXT[prev];navigator.vibrate&&navigator.vibrate(8);lastMoved=id;
   const sp=await setStatus(t,next);
@@ -1125,7 +1137,23 @@ const hashC=n=>{let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))>>>0;return TCK
 const autoC=n=>{const i=allTags().indexOf(n);return i<0?hashC(n):TCK[i%TCK.length]};
 const colorKey=n=>{const c=(cur().find(x=>!x.p&&x.n===n)||{}).c;return TC[c]?c:autoC(n)};
 const tcol=n=>TC[colorKey(n)];
-const chip=n=>`<span class="tag" style="--tc:${tcol(n)}">${esc(n)}</span>`;
+/* Tag-Symbole: feine Linienicons, automatisch zugeordnet (Stichworte offline, KI verfeinert) */
+const ICN=["bad", "kueche", "sofa", "bett", "kind", "tuer", "pflanze", "baum", "sonne", "treppe", "dach", "fenster", "flamme", "blitz", "tropfen", "werkzeug", "roller", "boden", "dokument", "muenze", "schild", "auto", "wagen", "eimer", "karton", "pfote", "herz", "koffer", "geschenk", "schloss", "wlan", "birne", "waschmaschine", "kalender", "tonne", "stuhl", "tag"];
+const ICN_KW=[[/bad|dusche|wc|toilette|sanit|badezimmer/,"bad"],[/k(ü|ue)che|kochen|herd|geschirr|spül|spuel|backofen/,"kueche"],[/wohnzimmer|sofa|couch|wohnen/,"sofa"],[/schlaf|bett|matratze/,"bett"],[/kind|baby|kita|schule|spiel|nachwuchs|familie/,"kind"],[/flur|diele|t(ü|ue)r|eingang|garderobe/,"tuer"],[/baum|obst|wald|hecke|zaun/,"baum"],[/garten|beet|pflanz|rasen|blume|unkraut|gem(ü|ue)se|mähen|maehen/,"pflanze"],[/terrasse|balkon|sommer|grill|sonne|markise/,"sonne"],[/keller|treppe|stufe/,"treppe"],[/dach|schornstein|giebel|dachboden|speicher/,"dach"],[/fenster|rolll|jalousie|verglas/,"fenster"],[/heiz|ofen|kamin|w(ä|ae)rme|therme|brenner/,"flamme"],[/strom|elektr|steckdose|solar|photovoltaik|energie|sicherung|akku/,"blitz"],[/wasser|rohr|leitung|abfluss|pool|regen|tropf|dichtung/,"tropfen"],[/farbe|streich|maler|tapet|lack|renovier/,"roller"],[/boden|fliese|parkett|laminat|teppich|estrich|silikon|fuge/,"boden"],[/b(ü|ue)ro|papier|dokument|unterlagen|post\b|brief|beh(ö|oe)rde|antrag|formular|ablage/,"dokument"],[/steuer|geld|finanz|budget|rechnung|kosten|bank|sparen|kredit|miete/,"muenze"],[/versicher|recht|vertrag|garantie|gew(ä|ae)hrleistung/,"schild"],[/auto|garage|fahrzeug|reifen|carport|laden|tüv|tuev|werkstatt/,"auto"],[/einkauf|besorg|shopping|bestell|baumarkt/,"wagen"],[/putz|reinig|sauber|aufr(ä|ae)um|ordnung|fenster putzen/,"eimer"],[/umzug|karton|kiste|lager|stauraum|vorrat|keller aus/,"karton"],[/tier|hund|katze|vogel|fisch/,"pfote"],[/gesund|arzt|medizin|vorsorge|apotheke|fitness|erholung|pflege/,"herz"],[/urlaub|reise|ferien|koffer|trip|ausflug/,"koffer"],[/geburtstag|feier|fest\b|geschenk|party|weihnacht|besuch|einladung/,"geschenk"],[/sicher|schloss|alarm|einbruch|kamera|schl(ü|ue)ssel/,"schloss"],[/internet|wlan|netz|router|smart|computer|\bit\b|handy|drucker|fernseh/,"wlan"],[/licht|lampe|leucht|beleucht/,"birne"],[/wasch|w(ä|ae)sche|trockner|spülmaschine/,"waschmaschine"],[/termin|kalender|planung|frist|wartung|regelm/,"kalender"],[/m(ü|ue)ll|abfall|entsorg|sperrm|tonne|recycl/,"tonne"],[/m(ö|oe)bel|stuhl|schrank|regal|tisch|ikea|einrichtung/,"stuhl"],[/technik|ger(ä|ae)t|reparatur|werkzeug|bau|handwerk|montage|umbau|sanier|defekt|kaputt/,"werkzeug"]];
+const tagIconAuto=n=>{const l=String(n).toLowerCase();for(const [r,k] of ICN_KW)if(r.test(l))return k;return "tag"};
+const tagIconStored=n=>{const i=(cur().find(x=>!x.p&&x.n===n)||{}).i;return ICN.includes(i)?i:""};
+const tagIcon=n=>tagIconStored(n)||tagIconAuto(n);
+const tIc=n=>`<svg class="ti" aria-hidden="true"><use href="#i-${tagIcon(n)}"/></svg>`;
+let iconTried=false;
+async function iconSync(){
+  if(iconTried||!regLoaded||!loaded)return;
+  const names=allTags().filter(n=>!tagIconStored(n));if(!names.length||!aiAvail())return;
+  iconTried=true;
+  try{const r=await aiJson("Ordne jedem Tag genau ein passendes Symbol aus der Liste zu, das den Bereich im Haushalt am besten verdeutlicht. Tags: "+JSON.stringify(names)+". Symbole: "+ICN.join(", ")+'. Antworte nur als JSON-Objekt der Form {"Tag":"symbol"}.',true);
+    if(!r||typeof r!=="object")return;
+    const m={};names.forEach(n=>{const k=r[n];m[n]=ICN.includes(k)?k:tagIconAuto(n)});
+    saveReg(fullReg().map(x=>!x.p&&m[x.n]?{...x,i:m[x.n]}:x))}catch(e){}}
+const chip=n=>`<span class="tag" style="--tc:${tcol(n)}">${tIc(n)}${esc(n)}</span>`;
 function allTags(){const out=cur().filter(x=>!x.p).map(x=>x.n);[...new Set(tasks.flatMap(tgs))].filter(n=>!out.includes(n)).sort((a,b)=>a.localeCompare(b,"de")).forEach(n=>out.push(n));return out}
 const nextColor=()=>{const used=new Set(allTags().map(colorKey));return TCK.find(k=>!used.has(k))||TCK[allTags().length%TCK.length]};
 const mergeReg=l=>{const out=reg.map(x=>({...x}));l.forEach(x=>{if(x&&x.n&&!out.some(y=>!!y.p===!!x.p&&y.n===x.n))out.push({n:String(x.n).slice(0,30),c:TC[x.c]?x.c:hashC(String(x.n)),...(x.p?{p:1}:{})})});return out};
@@ -1134,7 +1162,7 @@ const pcolorKey=n=>{const c=(cur().find(x=>x.p&&x.n===n)||{}).c;if(TC[c])return 
 const pcol=n=>TC[pcolorKey(n)];
 const nextPColor=()=>{const used=new Set(allProjs().map(pcolorKey));return TCK.find(k=>!used.has(k))||TCK[allProjs().length%TCK.length]};
 const projChip=t=>t.proj?`<span class="tag proj" style="--tc:${pcol(t.proj)}">${esc(t.proj)}</span>`:"";
-const fullReg=()=>[...allTags().map(n=>({n,c:colorKey(n)})),...allProjs().map(n=>({n,c:pcolorKey(n),p:1}))];
+const fullReg=()=>[...allTags().map(n=>{const o={n,c:colorKey(n)},i=tagIconStored(n);if(i)o.i=i;return o}),...allProjs().map(n=>({n,c:pcolorKey(n),p:1}))];
 const tagOk=t=>(!ftags.size||[...ftags].some(k=>k==="__none"?!tgs(t).length:tgs(t).includes(k)))&&(!fprojs.size||fprojs.has(t.proj));
 function groups(list){
   if(grp==="none")return[{l:null,L:list}];
@@ -1151,7 +1179,7 @@ function migrateReg(){if(migrated||!regLoaded||!tasks.length)return;migrated=tru
 function drawTbar(){
   const names=allTags(),pn=allProjs(),n=tasks.length,none=tasks.filter(t=>!tgs(t).length).length,box=$("tchips"),sl=box.scrollLeft;
   ftags=new Set([...ftags].filter(x=>x==="__none"||names.includes(x)));fprojs=new Set([...fprojs].filter(x=>pn.includes(x)));
-  const c=(a,k,l,cnt,col,cls)=>`<button class="tc${cls||""}${(a==="p"?fprojs:ftags).has(k)?" on":""}" data-${a}="${esc(k)}"${col?` style="--tc:${col}"`:""}>${col?"<i></i>":""}<span>${esc(l)}</span><em>${cnt}</em></button>`;
+  const c=(a,k,l,cnt,col,cls)=>`<button class="tc${cls||""}${(a==="p"?fprojs:ftags).has(k)?" on":""}" data-${a}="${esc(k)}"${col?` style="--tc:${col}"`:""}>${col?(a==="t"&&k!=="__none"?tIc(k):"<i></i>"):""}<span>${esc(l)}</span><em>${cnt}</em></button>`;
   box.innerHTML=`<button class="tc all${ftags.size||fprojs.size?"":" on"}" data-t=""><span>Alle</span><em>${n}</em></button>`+names.map(x=>c("t",x,x,tasks.filter(t=>tgs(t).includes(x)).length,tcol(x))).join("")+(none&&names.length?c("t","__none","Ohne Tag",none):"")+(pn.length?'<span class="tsep"></span>'+pn.map(x=>c("p",x,x,tasks.filter(t=>t.proj===x).length,pcol(x)," pj")).join(""):"");
   box.scrollLeft=sl;$("grp").value=grp;
 }
@@ -1234,7 +1262,7 @@ function home(){
   const nx=tasks.filter(t=>t.status!=="done"&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end))[0],C=326.7,off=(C*(1-pct/100)).toFixed(1),open=n-d;
   const sub=over.length?`${over.length} ${over.length===1?"Aufgabe ist":"Aufgaben sind"} überfällig.`:week.length?`${week.length} ${week.length===1?"Aufgabe":"Aufgaben"} in den nächsten 7 Tagen.`:open?"Nichts Dringendes.":"Alles erledigt.";
   const areas=allTags().filter(a=>tasks.some(t=>tgs(t).includes(a)));
-  const bars=areas.map(a=>{const L=tasks.filter(t=>tgs(t).includes(a)),x=L.filter(t=>t.status==="done").length;return`<div class="pr" style="--tc:${tcol(a)}"><span>${esc(a)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
+  const bars=areas.map(a=>{const L=tasks.filter(t=>tgs(t).includes(a)),x=L.filter(t=>t.status==="done").length;return`<div class="pr" style="--tc:${tcol(a)}"><span class="pn">${tIc(a)}${esc(a)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
   const names=[...new Set(["Melanie","Lasse",...tasks.map(t=>t.who).filter(Boolean)])],cnt=w=>tasks.filter(t=>t.status!=="done"&&t.who===w).length,mx=Math.max(1,...names.map(cnt));
   const who=names.map(w=>`<div class="pr"><span>${esc(w)}</span><div class="pb ${avc(w)}"><i style="width:${Math.round(cnt(w)/mx*100)}%"></i></div><em>${cnt(w)}</em></div>`).join("");
   const pjs=allProjs().filter(n=>tasks.some(t=>t.proj===n)),pbars=pjs.map(n=>{const L=tasks.filter(t=>t.proj===n),x=L.filter(t=>t.status==="done").length;return`<div class="pr" style="--tc:${pcol(n)}"><span>${esc(n)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
@@ -1279,7 +1307,7 @@ function render(){
   $("whos").innerHTML=whos.map(a=>`<option value="${esc(a)}">`).join("");
   const fw2=$("fw").value,ch=(attr,val,label,c,on)=>`<button data-${attr}="${esc(val)}" class="${on?"on":""}"><span>${attr==="cw"&&val&&val!=="__none"?`<i class="wd ${avc(val)}"></i>`:""}${esc(label)}</span><em>${c}</em></button>`;
   $("chips").innerHTML=`<div class="cg"><h4>Wer</h4>${ch("cw","","Alle",n,!fw2)}${whos.map(w=>ch("cw",w,w,tasks.filter(t=>t.who===w).length,w===fw2)).join("")}${ch("cw","__none","Nicht zugewiesen",tasks.filter(t=>!t.who).length,fw2==="__none")}</div>`;
-  drawTbar();migrateReg();
+  drawTbar();migrateReg();if(!iconTried)setTimeout(iconSync,1200);
   $("main").classList.toggle("g",view==="gantt"&&n>0);
   const old=snap(),list=filtered();
   if(!n){$("main").innerHTML='<div class="empty">Noch keine Aufgaben.<br><br><button class="btn" onclick="openDlg()">Erste Aufgabe anlegen</button></div>';return}
@@ -1292,9 +1320,11 @@ function card(t,s,i=0){
   const a=t.checklist||[],k=a.filter(x=>x.d).length,late=isLate(t);
   const tg=projChip(t)+tgs(t).map(chip).join("")+(isBlocked(t)?'<span class="blk">blockiert</span>':"");
   return`<div class="card ${s}${t.id===lastMoved?" pop":""}" draggable="true" data-id="${t.id}" style="--i:${Math.min(i,8)}"><div class="ch"><button class="ring ${s}" data-adv="${t.id}" aria-label="Status: ${ST[s]}. Weiterschalten"></button><div class="t">${esc(t.title)}</div>${t.who?`<i class="av ${avc(t.who)}" title="${esc(t.who)}">${esc((t.who.trim()[0]||"").toUpperCase())}</i>`:""}</div>${tg?`<div class="tg">${tg}</div>`:""}${a.length?`<div class="cb"><i style="width:${Math.round(k/a.length*100)}%"></i></div>`:""}<div class="cm"><span class="${late?"late":""}">${dr(t)}</span><span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}${cl(t)}</span></div></div>`}
+let showDone=false;const DONE_MAX=20;
 function board(list){
-  return`<div class="board">`+Object.keys(ST).map(s=>{const L=list.filter(t=>t.status===s);
-    return`<div class="colm" data-s="${s}"><h3><i class="dt ${s}"></i><span>${ST[s]}</span><em>${L.length}</em></h3>`+(L.length?L.map((t,i)=>card(t,s,i)).join(""):'<div class="none">Keine Aufgaben</div>')+`</div>`}).join("")+`</div>`;
+  return`<div class="board">`+Object.keys(ST).map(s=>{let L=list.filter(t=>t.status===s);const all=L.length;
+    const cut=s==="done"&&!showDone&&all>DONE_MAX;if(cut)L=L.slice().sort((x,y)=>dn(y.end)-dn(x.end)).slice(0,DONE_MAX);
+    return`<div class="colm" data-s="${s}"><h3><i class="dt ${s}"></i><span>${ST[s]}</span><em>${all}</em></h3>`+(L.length?L.map((t,i)=>card(t,s,i)).join(""):'<div class="none">Keine Aufgaben</div>')+(cut?`<button class="btn ghost sm more" onclick="showDone=true;render()">Alle ${all} anzeigen</button>`:"")+`</div>`}).join("")+`</div>`;
 }
 function table(list){
   const row=t=>`<tr class="row" data-id="${t.id}"><td>${esc(t.title)} ${isBlocked(t)?'<span class="blk">blockiert</span>':""}<span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}</span></td><td>${projChip(t)}${tgs(t).map(chip).join("")}</td><td>${esc(t.who)}</td><td>${fd(t.start)}</td><td class="${isLate(t)?"late":""}">${fd(t.end)}</td><td><span class="st ${t.status}">${ST[t.status]}</span></td></tr>`;
@@ -1425,7 +1455,7 @@ $("b_save").onclick=async()=>{
   let sp=null;if(t.status==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);t.spawned=sp.id}
   {const r=regDraft;if(r){if(proj&&!r.some(x=>x.p&&x.n===proj))r.push({n:proj,c:nextPColor(),p:1});selTags.forEach(n=>{if(!r.some(x=>!x.p&&x.n===n))r.push({n,c:colorKey(n)})});if(JSON.stringify(r)!==JSON.stringify(reg))saveReg(r)}}
   if(editing)t.log=diffLog(editing,t);
-  await saveTask(t);if(sp)await saveTask(sp);
+  await saveTask(t,{check:true});if(sp)await saveTask(sp);
 };
 $("b_cancel").onclick=()=>$("dlg").close();
 $("dlg").addEventListener("close",()=>{regDraft=null;colorFor=null});

@@ -1,5 +1,12 @@
 # Änderungen
 
+## 1.11.0
+- Neu: feine Linienicons neben den Tags (Board, Liste, Filter, Start). Sie werden automatisch zugeordnet: zuerst über Stichworte, mit eingetragenem KI-Schlüssel wählt die KI das passende Symbol; gespeichert im Tag-Verzeichnis, nicht von Hand wählbar
+- Gleichzeitiges Bearbeiten: Wurde eine Aufgabe in der Zwischenzeit von jemand anderem geändert, wird nicht stillschweigend überschrieben, sondern gefragt („Trotzdem speichern“)
+- Datenformat mit Versionsnummer (schema 2) und Aufgabenversion (v); alte Dateien bleiben lesbar
+- Zusätzlich zu den 30 Tagessicherungen jetzt eine Sicherung pro Monat (24 Monate)
+- Backups bis 25 MB lassen sich einspielen (vorher 2 MB); Speichern wird auf den Datenträger abgesichert (fsync)
+- Board: Spalte „Erledigt“ zeigt die 20 neuesten, der Rest per Knopf
 ## 1.10.0
 - Einstellungen neu: gruppierte Liste mit Untermenüs (Darstellung, Farbdesign, Akzentfarbe, Schriftart, Ich bin) und Vorschau; Änderungen gelten sofort
 - Ruhigeres Design: Beschriftungen ohne Großbuchstaben, neutrale Board-Spalten, Tags als Text mit Farbpunkt, flache Startkarte, keine Farbleiste unter den Kennzahlen

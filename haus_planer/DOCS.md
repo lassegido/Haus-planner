@@ -56,3 +56,12 @@ Der Zugriff über Home Assistant (Ingress) braucht dessen Anmeldung und lässt s
 2. Auf dem iPhone in Safari `http://<IP-von-Home-Assistant>:8099` öffnen, dann **Teilen → Zum Home-Bildschirm**.
 
 Achtung: Dieser Port hat **keine Anmeldung**. Jeder im Heimnetz kann ihn öffnen. Nur aktivieren, wenn dein Netz vertrauenswürdig ist, und nie ins Internet weiterleiten.
+
+
+## Daten und Grenzen
+
+- Alle Aufgaben liegen in `/data/tasks.json` (Format-Version 2) und werden bei jedem Speichern nach `/share/haus_planer/` gespiegelt.
+- Sicherungen: 30 Tage täglich, 24 Monate je eine pro Monat (`tasks-monat-JJJJ-MM.json`), in `/data/backups` und im Share.
+- Bearbeiten zwei Personen dieselbe Aufgabe gleichzeitig, fragt die App beim Speichern nach, statt still zu überschreiben.
+- Richtwert: bis etwa 500 aktive Aufgaben bleibt alles flüssig. Erledigtes lässt sich in den Einstellungen archivieren; Archivierte zählen nicht zu den aktiven.
+- Fotos und Dateien liegen in `/data/files`; es gibt kein Gesamtlimit, Speicherplatz bitte gelegentlich prüfen.
