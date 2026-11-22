@@ -1,5 +1,13 @@
 # Änderungen
 
+## 1.3.0
+- Tags statt Freitext-Bereich: mehrere Tags pro Aufgabe auswählen oder direkt neu eingeben, jeder Tag mit eigener Farbe (10 Pastell- und Portofino-Farben)
+- Tags verwalten: Farbe ändern, umbenennen (gilt für alle Aufgaben), löschen, neue anlegen
+- Filter über die Tag-Leiste in Board, Liste und Zeitstrahl (mehrere Tags gleichzeitig, „Ohne Tag“)
+- Gruppieren nach Tag oder Person in Liste und Zeitstrahl
+- Bisherige Bereiche werden automatisch zu Tags, Aufgaben und Daten bleiben erhalten
+- Excel, PDF und JSON-Backup enthalten die Tags
+
 ## 1.2.0
 - Startseite mit Fortschrittsring, Überfälligem, Wochenübersicht und Auslastung pro Person; Begrüßung nach Tageszeit
 - Kurzer Startbildschirm beim Öffnen

@@ -12,7 +12,8 @@ PORT = int(os.environ.get("PORT", "8099"))
 DATA = os.path.join(D, "tasks.json")
 BK = os.path.join(D, "backups")
 LOCK = threading.Lock()
-state = {"rev": 0, "tasks": {}}
+state = {"rev": 0, "tasks": {}, "tags": []}
+COLORS = ("sky", "sun", "sea", "brick", "mint", "rose", "lilac", "sand", "slate", "lemon")
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 ID = re.compile(r"[A-Za-z0-9_-]{1,40}")
 DAILY = re.compile(r"tasks-\d{4}-\d{2}-\d{2}\.json")
@@ -29,14 +30,14 @@ def version():
 def read_file(path):
     with open(path, encoding="utf-8") as f:
         j = json.load(f)
-    return {t["id"]: t for t in j.get("tasks", [])}, j.get("rev", 0)
+    return {t["id"]: t for t in j.get("tasks", [])}, j.get("rev", 0), clean_tags(j.get("tags", []))
 
 
 def load():
     os.makedirs(D, exist_ok=True)
     if os.path.exists(DATA):
         try:
-            state["tasks"], state["rev"] = read_file(DATA)
+            state["tasks"], state["rev"], state["tags"] = read_file(DATA)
             return
         except Exception as e:
             print("Datendatei defekt, wird beiseite gelegt:", e, flush=True)
@@ -44,7 +45,7 @@ def load():
     mirror = os.path.join(SHARE, "tasks-latest.json")
     if os.path.exists(mirror):
         try:
-            state["tasks"], state["rev"] = read_file(mirror)
+            state["tasks"], state["rev"], state["tags"] = read_file(mirror)
             print("Daten aus dem Share-Spiegel wiederhergestellt (%d Aufgaben)" % len(state["tasks"]), flush=True)
             save()
         except Exception as e:
@@ -61,7 +62,7 @@ def save():
     os.makedirs(BK, exist_ok=True)
     tmp = DATA + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
-        json.dump({"rev": state["rev"], "tasks": list(state["tasks"].values())}, f, ensure_ascii=False)
+        json.dump({"rev": state["rev"], "tasks": list(state["tasks"].values()), "tags": state["tags"]}, f, ensure_ascii=False)
     os.replace(tmp, DATA)
     day = "tasks-%s.json" % time.strftime("%Y-%m-%d")
     shutil.copyfile(DATA, os.path.join(BK, day))
@@ -73,6 +74,20 @@ def save():
         prune(SHARE)
     except Exception as e:
         print("Share-Spiegel nicht möglich:", e, flush=True)
+
+
+def clean_tags(lst):
+    out, seen = [], set()
+    for x in lst if isinstance(lst, list) else []:
+        if not isinstance(x, dict):
+            continue
+        n = str(x.get("n", "")).strip()[:30]
+        if not n or n.lower() in seen:
+            continue
+        seen.add(n.lower())
+        c = x.get("c")
+        out.append({"n": n, "c": c if c in COLORS else ""})
+    return out[:100]
 
 
 def clean(t):
@@ -89,7 +104,11 @@ def clean(t):
     deps = [str(x) for x in t.get("deps", []) if isinstance(x, str) and ID.fullmatch(x) and x != i][:50]
     ck = [{"t": str(c.get("t", ""))[:200], "d": bool(c.get("d"))}
           for c in t.get("checklist", []) if isinstance(c, dict)][:100]
-    return {"id": i, "title": title, "area": str(t.get("area", ""))[:60], "who": str(t.get("who", ""))[:60],
+    tags = t.get("tags")
+    if not isinstance(tags, list):
+        tags = [t.get("area")] if t.get("area") else []
+    tags = [n for n in dict.fromkeys(str(x).strip()[:30] for x in tags if isinstance(x, str)) if n][:20]
+    return {"id": i, "title": title, "area": (tags[0] if tags else str(t.get("area", ""))[:60]), "tags": tags, "who": str(t.get("who", ""))[:60],
             "status": st if st in ("todo", "doing", "done") else "todo", "start": s, "end": e,
             "notes": str(t.get("notes", ""))[:4000], "deps": deps, "checklist": ck}
 
@@ -114,7 +133,7 @@ class H(BaseHTTPRequestHandler):
             with LOCK:
                 if q == str(state["rev"]):
                     return self.out(200, {"rev": state["rev"], "version": version()})
-                return self.out(200, {"rev": state["rev"], "version": version(), "tasks": list(state["tasks"].values())})
+                return self.out(200, {"rev": state["rev"], "version": version(), "tasks": list(state["tasks"].values()), "tags": state["tags"]})
         with open(INDEX, "rb") as f:
             self.out(200, f.read(), "text/html")
 
@@ -130,6 +149,12 @@ class H(BaseHTTPRequestHandler):
             data = self.body()
         except Exception:
             return self.out(400, {"error": "ungültige Anfrage"})
+        if path.endswith("/api/tags"):
+            with LOCK:
+                state["tags"] = clean_tags(data.get("tags", []) if isinstance(data, dict) else [])
+                state["rev"] += 1
+                save()
+                return self.out(200, {"rev": state["rev"], "count": len(state["tags"])})
         if path.endswith("/api/task"):
             items = [clean(data)]
         elif path.endswith("/api/import"):

@@ -23,7 +23,7 @@ async function pull(force){
   try{const j=await api("api/tasks"+(force?"":"?rev="+rev));
     $("note").textContent="";
     if(j.version)$("ver").textContent="Add-on-Version "+j.version;
-    if(j.tasks){tasks=j.tasks;rev=j.rev;loaded=true;render()}
+    if(j.tasks){tasks=j.tasks;reg=j.tags||[];regLoaded=true;rev=j.rev;loaded=true;render()}
   }catch(e){$("note").textContent="Keine Verbindung zum Server – Änderungen werden evtl. nicht gespeichert."}
 }
 async function saveTask(t){
@@ -35,6 +35,18 @@ async function saveTask(t){
 async function delTask(id){
   tasks=tasks.filter(t=>t.id!==id).map(t=>({...t,deps:(t.deps||[]).filter(x=>x!==id)}));render();
   try{await api("api/task/"+id,{method:"DELETE"})}catch(e){$("note").textContent="Löschen fehlgeschlagen."}
+  pull(true);
+}
+async function saveReg(l){
+  reg=l;render();
+  try{await api("api/tags",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({tags:l})})}
+  catch(e){$("note").textContent="Tags speichern fehlgeschlagen."}
+  pull(true);
+}
+async function saveMany(list){
+  list.forEach(t=>{const i=tasks.findIndex(x=>x.id===t.id);i>=0?tasks[i]=t:tasks.push(t)});render();
+  try{await api("api/import",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({tasks:list})})}
+  catch(e){$("note").textContent="Speichern fehlgeschlagen."}
   pull(true);
 }
 function init(){
