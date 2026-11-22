@@ -550,6 +550,58 @@ body.selmode #toast{bottom:5.2rem}
 .fontgrid button.on{background:var(--acc-soft);border-color:var(--acc);color:var(--tagc)}
 @media (min-width:1200px){.board{gap:1rem}}
 @media (max-width:480px){.calbar h2{font-size:1.02rem;line-height:1.15}.calbar{gap:.4rem}}
+
+/* 1.10: ruhiger, näher an echten Apps */
+.colm h3,th,.cg h4,.hnext small,.pnl h3,tr.grp td,.gr.gh2,#dlg label,#dlt label,#dla label,.aih{text-transform:none;letter-spacing:0}
+.colm h3{font-size:.95rem;font-weight:650}
+.pnl h3{font-size:.95rem;font-weight:650;color:var(--tx);margin-bottom:.2rem}.pnl h3 em{font-weight:500;color:var(--mut)}
+.pnl.hot h3{color:var(--brick-ink)}
+th{font-size:.8rem;font-weight:600;border-bottom:1px solid var(--line2)}
+tr.grp td,.gr.gh2{font-size:.85rem;font-weight:650}
+.cg h4,.hnext small,.aih{font-size:.8rem;font-weight:600}
+#dlg label,#dlt label,#dla label{font:600 .82rem/1.2 var(--disp);color:var(--mut);margin:1.25rem 0 .45rem}
+.colm{background:var(--wk);border-top:0;border-radius:1rem}
+.colm.over{box-shadow:inset 0 0 0 2px var(--acc)}
+.card{border-radius:.8rem;transition:border-color .12s,background .12s}
+@media (hover:hover){.card:hover{box-shadow:none;transform:none;border-color:var(--line2)}}
+.card .tag,tr.row .tag,td .tag{background:none;color:var(--mut);padding:0;font-weight:500;display:inline-flex;align-items:center;gap:.35rem;margin:0 .6rem .1rem 0}
+.card .tag::before,tr.row .tag::before,td .tag::before{content:"";width:.5rem;height:.5rem;border-radius:50%;background:var(--tc,var(--sky));flex:none}
+.stripe{display:none}
+.kp{margin-bottom:.1rem}
+body:not([data-view=home]) .kn b{font-size:clamp(1.35rem,1rem + 1.2vw,1.9rem);letter-spacing:-.03em}
+.hero{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:1.1rem}
+.hring .rt{stroke:var(--line)}.hring .rg{stroke:var(--acc)}
+.hsub,.hst span,.hnext small,.hnext span{color:var(--mut)}
+.hst .hot b{color:var(--brick-ink)}
+.hnext{border-left-color:var(--line)}
+.hh{letter-spacing:-.015em}
+.pnl{border-radius:1rem}
+.bn,.sp-name{letter-spacing:-.02em}
+.sp-sub{display:none}
+/* Einstellungen als gruppierte Liste */
+.sh{display:flex;align-items:center;gap:.3rem;margin:0 0 .3rem}.sh .dh{margin:0}
+.sback{flex:none;display:grid;place-items:center;width:2.4rem;height:2.4rem;margin-left:-.7rem;border:0;border-radius:50%;background:none;color:var(--acc)}
+.sback[hidden]{display:none}
+.sback svg{width:1.5rem;height:1.5rem;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.sgt{margin:1.3rem .5rem .4rem;font-size:.82rem;font-weight:600;color:var(--mut)}
+.scap{margin:.5rem .5rem 0;font-size:.82rem;line-height:1.4;color:var(--mut)}
+.sgrp{background:var(--bg);border-radius:.95rem;overflow:hidden}
+.srow{display:flex;align-items:center;gap:.75rem;width:100%;min-height:3.1rem;padding:.6rem .95rem;border:0;border-top:1px solid var(--line);background:none;color:var(--tx);font-size:1rem;text-align:left}
+.srow:first-child{border-top:0}
+.srow>span:not(.dp){flex:1;min-width:0}.srow .dp{flex:none}
+.srow em{flex:none;font-style:normal;color:var(--mut);max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow .chev{flex:none;width:1.1rem;height:1.1rem;fill:none;stroke:var(--faint);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.srow .ck{flex:none;width:1.25rem;height:1.25rem;fill:none;stroke:var(--acc);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.srow:disabled{opacity:.45;cursor:default}
+@media (hover:hover){.srow:not(:disabled):hover{background:var(--wk)}}
+.srow:active:not(:disabled){background:var(--wk)}
+.sdot{flex:none;width:1.15rem;height:1.15rem;border-radius:50%;display:inline-block}
+.sdot.sm{width:.8rem;height:.8rem;vertical-align:-.05rem}.sdot.ring{border:2px dashed var(--faint)}
+.srow .dp{margin-right:.1rem}
+.prev{position:static;margin:.2rem 0 1rem;box-shadow:none}
+#s_body .keys{margin-top:.5rem}
+td .st{white-space:nowrap}
+td.late{background:none;padding:.4rem .8rem;border-radius:0}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Haus-planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"></head>
 <body>
@@ -586,21 +638,9 @@ body.selmode #toast{bottom:5.2rem}
 
 <div id="selbar" role="toolbar" aria-label="Auswahl"><span id="selcnt">Aufgaben antippen</span><button data-bs="todo">Zu starten</button><button data-bs="doing">In Arbeit</button><button data-bs="done">Erledigt</button><select id="selwho" aria-label="Zuständig setzen"></select><select id="selproj" aria-label="Projekt setzen"></select><button data-ba="arch">Archivieren</button><button data-ba="del">Löschen</button><button data-ba="x">Fertig</button></div>
 <dialog id="dls">
-  <div class="dh">Einstellungen</div>
-  <div class="prev" id="s_prev" aria-label="Vorschau"><div class="pv-side"><i></i><i></i><i></i></div><div class="pv-main"><div class="pv-h">Vorschau · Haus-planner</div><div class="pv-cols"><div><em class="c1"></em><span>Dachrinne reinigen</span></div><div><em class="c2"></em><span>Kinderzimmer streichen</span></div><div><em class="c3"></em><span>Steuer abheften</span></div></div><div class="pv-b"><b>Speichern</b><u>Abbrechen</u></div></div></div>
-  <label>Darstellung</label>
-  <div class="seg3" id="s_theme"><button data-th="auto">Automatisch</button><button data-th="light">Hell</button><button data-th="dark">Dunkel</button></div>
-  <label>Farbdesign</label><div class="desgrid" id="s_des"></div>
-  <label>Akzentfarbe</label><div class="swatches" id="s_acc"></div>
-  <label>Schriftart</label><div class="fontgrid" id="s_font"></div>
-  <label>Ich bin</label>
-  <div class="seg3" id="s_me"><button data-me="">Keine Angabe</button><button data-me="Lasse">Lasse</button><button data-me="Melanie">Melanie</button></div>
-  <label>Aufgaben</label>
-  <button class="btn ghost xb" id="s_arch">Erledigte archivieren<small id="s_archn"></small></button>
-  <button class="btn ghost xb" id="s_open">Archiv und Papierkorb<small id="s_openn"></small></button>
-  <div id="s_ha" style="display:none"><label>Home Assistant</label><div class="hacard" id="s_hatxt"></div><button class="btn ghost xb" id="s_hatest">Testbenachrichtigung senden<small>Prüft, ob die Erinnerung auf dem Handy ankommt</small></button></div>
-  <div id="s_keys"><label>Tastaturkürzel</label><dl class="keys"><dt>N</dt><dd>Neue Aufgabe</dd><dt>/</dt><dd>Suchen</dd><dt>1 – 5</dt><dd>Start, Board, Liste, Zeitstrahl, Kalender</dd><dt>S</dt><dd>Mehrfachauswahl ein/aus</dd><dt>A</dt><dd>Alle auswählen</dd><dt>Entf</dt><dd>Auswahl löschen</dd><dt>H</dt><dd>Zeitstrahl: zu Heute</dd><dt>Esc</dt><dd>Auswahl beenden</dd></dl></div>
-  <div class="acts"><span class="sp"></span><button class="btn ghost" id="s_cancel" type="button">Verwerfen</button><button class="btn" id="s_close" type="button">Übernehmen</button></div>
+  <div class="sh"><button class="sback" id="s_back" type="button" hidden aria-label="Zurück"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button><div class="dh" id="s_title">Einstellungen</div></div>
+  <div id="s_body"></div>
+  <div class="acts"><span class="sp"></span><button class="btn" id="s_close" type="button">Fertig</button></div>
 </dialog>
 <dialog id="dla">
   <div class="dh">Archiv und Papierkorb</div>
@@ -610,11 +650,11 @@ body.selmode #toast{bottom:5.2rem}
 
 <dialog id="dlx">
   <div class="dh">Export &amp; Backup</div>
-  <button class="btn xb" id="x_pdf">Als PDF speichern<small>Aufgabenliste mit Checklisten plus Zeitstrahl-Seite</small></button>
-  <button class="btn ghost xb" id="x_xlsx">Als Excel speichern<small>3 Blätter (Liste, Board, Zeitstrahl), arbeitet in Excel eigenständig weiter</small></button>
-  <button class="btn ghost xb" id="x_ics">Kalender-Datei (.ics)<small>Offene Aufgaben für Apple Kalender, Google Kalender oder Outlook</small></button>
-  <button class="btn ghost xb" id="x_json">Backup-Datei (JSON)<small>Vollständige Sicherung aller Daten</small></button>
-  <button class="btn ghost xb" id="x_imp">Backup einspielen<small>Aufgaben aus einer JSON-Datei wiederherstellen</small></button>
+  <button class="btn xb" id="x_pdf">Als PDF speichern<small>Liste mit Checklisten und Zeitstrahl</small></button>
+  <button class="btn ghost xb" id="x_xlsx">Als Excel speichern<small>Liste, Board und Zeitstrahl als Tabellenblätter</small></button>
+  <button class="btn ghost xb" id="x_ics">Kalender-Datei (.ics)<small>Offene Aufgaben für Apple, Google oder Outlook</small></button>
+  <button class="btn ghost xb" id="x_json">Backup-Datei (JSON)<small>Alle Daten sichern</small></button>
+  <button class="btn ghost xb" id="x_imp">Backup einspielen<small>Aus einer Backup-Datei wiederherstellen</small></button>
   <input type="file" id="imp" accept=".json,application/json" hidden>
   <div class="ver" id="ver"></div>
   <div class="acts"><span class="sp"></span><button class="btn ghost" id="x_close">Schließen</button></div>
@@ -648,14 +688,14 @@ body.selmode #toast{bottom:5.2rem}
     <div><label for="f_start">Start</label><input type="date" id="f_start"></div>
     <div><label for="f_end">Ende</label><input type="date" id="f_end"></div>
   </div>
-  <label class="cbl"><input type="checkbox" id="f_ms"><span>Meilenstein (nur dieser eine Tag)</span></label>
+  <label class="cbl"><input type="checkbox" id="f_ms"><span>Meilenstein (ein einzelner Tag)</span></label>
   <label for="f_rec">Wiederholen</label>
   <select id="f_rec"><option value="">Nie</option><option value="1d">Täglich</option><option value="1w">Wöchentlich</option><option value="2w">Alle 2 Wochen</option><option value="1m">Monatlich</option><option value="3m">Vierteljährlich</option><option value="1y">Jährlich</option></select>
-  <div class="hint" id="f_rechint" style="display:none">Wenn du die Aufgabe erledigst, legt der Haus-planner automatisch die nächste an.</div>
+  <div class="hint" id="f_rechint" style="display:none">Beim Erledigen wird die nächste Aufgabe automatisch angelegt.</div>
   <label>Abhängig von <span class="lh">muss vorher fertig sein</span></label><div class="deps" id="f_deps"></div>
   <label>Checkliste</label><div id="f_ck"></div><button class="btn ghost" id="ck_add" type="button"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Punkt hinzufügen</button>
   <div class="aiw" id="ai_row"><button class="btn ghost sm" id="ai_btn" type="button">Mit KI ausfüllen</button><span class="hint">Notizen und Checkliste vorschlagen</span></div>
-  <div class="aibox" id="ai_box" style="display:none"><div class="aih">Vorschlag der KI</div><div id="ai_notes"></div><div id="ai_items"></div><div class="aia"><button class="btn sm" id="ai_ok" type="button">Übernehmen</button><button class="btn ghost sm" id="ai_no" type="button">Verwerfen</button></div></div>
+  <div class="aibox" id="ai_box" style="display:none"><div class="aih">Vorschlag</div><div id="ai_notes"></div><div id="ai_items"></div><div class="aia"><button class="btn sm" id="ai_ok" type="button">Übernehmen</button><button class="btn ghost sm" id="ai_no" type="button">Verwerfen</button></div></div>
   <label for="f_notes">Notizen</label><textarea id="f_notes" rows="3" placeholder="Maße, Material, Ansprechpartner …"></textarea>
   <div id="f_filesec"><label>Fotos und Dateien</label><div class="fls" id="f_files"></div><button class="btn ghost" id="fl_btn" type="button" style="margin-top:.6rem">Foto oder Datei hinzufügen</button><input type="file" id="fl_in" multiple hidden accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"></div>
   <div id="f_logsec"><label>Verlauf und Kommentare</label><div class="lgin"><input id="lg_in" placeholder="Kommentar schreiben …" maxlength="500" autocomplete="off"><button class="btn ghost" id="lg_add" type="button">Senden</button></div><div class="lg" id="lg_list"></div></div>
@@ -815,8 +855,7 @@ const ACC={
  rose:{l:["#B84B73","#FFFFFF","#F7E4EC","#A84568","#8F3A58"],d:["#E58BAE","#2A0F1B","#3A2030","#F0B0C8","#1C1117"]},
  slate:{l:["#4F6B7C","#FFFFFF","#E3EAEE","#3F5766","#3A5160"],d:["#93AAB8","#0E1E27","#1B2F3B","#B6C7D1","#0C161C"]}};
 const hostTheme=document.documentElement.dataset.theme||"";
-const PV={};
-function pg(k){return PV[k]!==undefined?PV[k]:prefGet(k)}
+const pg=prefGet;
 const DK=["--bg","--surf","--card","--tx","--mut","--faint","--line","--line2","--wk","--side","--side-mut","--acc","--on-acc","--acc-soft","--tagc","--focus"];
 const DES=[
  ["porto","Portofino",null,null],
@@ -870,37 +909,62 @@ $("a_list").onclick=async e=>{
 $("a_empty").onclick=async()=>{const T=RAW.filter(t=>t.del);if(T.length&&confirm(T.length+" Aufgaben endgültig löschen?")){for(const t of T)await delTask(t.id);drawArch()}};
 
 /* Einstellungen */
+let sPage="main";
+const CH='<svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',CK='<svg class="ck" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
+const THN={auto:"Automatisch",light:"Hell",dark:"Dunkel"},STT={theme:"Darstellung",des:"Farbdesign",acc:"Akzentfarbe",font:"Schriftart",me:"Ich bin",keys:"Tastaturkürzel"};
+const PREV='<div class="prev" aria-label="Vorschau"><div class="pv-side"><i></i><i></i><i></i></div><div class="pv-main"><div class="pv-h">Haus-planner</div><div class="pv-cols"><div><em class="c1"></em><span>Dachrinne reinigen</span></div><div><em class="c2"></em><span>Kinderzimmer streichen</span></div><div><em class="c3"></em><span>Steuer abheften</span></div></div><div class="pv-b"><b>Speichern</b><u>Abbrechen</u></div></div></div>';
+const srow=(a,l,v,x,chev=true)=>`<button class="srow" ${a}>${x||""}<span>${l}</span>${v!=null?`<em>${v}</em>`:""}${chev?CH:""}</button>`;
+const sopt=(a,l,on,x,st)=>`<button class="srow opt${on?" on":""}" ${a}>${x||""}<span${st?` style="${st}"`:""}>${l}</span>${on?CK:""}</button>`;
+function dpHtml(l,d){const dk=isDark(),v=l?(dk?d:l):null,c=v?[v[0],v[9],v[11]]:dk?["#0E1E27","#0A171E","#6CB6E4"]:["#F5F3EB","#2D6786","#387CA3"];return `<span class="dp" style="background:${c[0]}"><i style="background:${c[1]}"></i><b style="background:${c[2]}"></b><u style="background:${c[2]}"></u></span>`}
 function drawSettings(){
-  const th=pg("theme")||"auto",ac=pg("acc")||"",ds=pg("design")||"porto";
-  $("s_theme").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.th===th));
-  {const fk=pg("font")||"figtree";$("s_font").innerHTML=FONTS.map(f=>`<button data-font="${f[0]}" class="${f[0]===fk?"on":""}" style="font-family:${f[3].replace(/"/g,"&quot;")}">${f[1]}</button>`).join("")}
-  $("s_me").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.me===(prefGet("me")||"")));
-  {const dk=isDark();$("s_des").innerHTML=DES.map(([k,n,l,d])=>{const v=l?(dk?d:l):null,c=v?[v[0],v[9],v[11]]:dk?["#0E1E27","#0A171E","#6CB6E4"]:["#F5F3EB","#2D6786","#387CA3"];return `<button data-des="${k}" class="${k===ds?"on":""}"><span class="dp" style="background:${c[0]}"><i style="background:${c[1]}"></i><b style="background:${c[2]}"></b><u style="background:${c[2]}"></u></span>${n}</button>`}).join("")}
-  $("s_acc").innerHTML=`<button class="sw auto${ac===""?" on":""}" data-acc="" style="--tc:var(--acc)" aria-label="Passend zum Farbdesign" title="Passend zum Farbdesign"></button>`+ACCS.map(([k,n,c])=>`<button class="sw${k===ac?" on":""}" data-acc="${k}" style="--tc:${c}" aria-label="${n}" title="${n}"></button>`).join("");
-  const dn2=tasks.filter(t=>t.status==="done").length,A=RAW.filter(t=>t.arch&&!t.del).length,T=RAW.filter(t=>t.del).length;
-  $("s_archn").textContent=dn2?dn2+" erledigte "+(dn2===1?"Aufgabe":"Aufgaben")+" ins Archiv verschieben":"Keine erledigten Aufgaben";$("s_arch").disabled=!dn2;
-  $("s_openn").textContent=A+" im Archiv · "+T+" im Papierkorb";
-  const h=haInfo;$("s_ha").style.display=h?"":"none";
-  if(h){const n=(h.notify||[]).map(esc).join(", ");
-    $("s_hatxt").innerHTML=(h.api?"Verbindung zu Home Assistant: <b>aktiv</b>":"Verbindung zu Home Assistant: <b>nicht verfügbar</b>")
-      +"<br>Erinnerung: "+(n?`<b>täglich ab ${esc(h.time)} Uhr</b> an ${n}`:"<b>nicht eingerichtet</b> (Add-on → Konfiguration → Benachrichtigungsdienst)")
-      +"<br>KI-Assistent: "+(h.ai?`<b>aktiv</b> (${esc(h.model)})`:"<b>nicht eingerichtet</b> (Add-on → Konfiguration → anthropic_api_key)")
-      +"<br>Sensoren: "+(h.sensors?"<b>aktiv</b> (sensor.haus_planner_…)":"<b>aus</b>");
-    $("s_hatest").disabled=!h.api||!n}
+  const th=prefGet("theme")||"auto",ac=prefGet("acc")||"",ds=prefGet("design")||"porto",fk=prefGet("font")||"figtree",me=prefGet("me")||"";
+  $("s_back").hidden=sPage==="main";$("s_title").textContent=sPage==="main"?"Einstellungen":STT[sPage];
+  const grp=x=>`<div class="sgrp">${x}</div>`,cap=t=>`<p class="scap">${t}</p>`;let h="";
+  if(sPage==="main"){
+    const dn=tasks.filter(t=>t.status==="done").length,A=RAW.filter(t=>t.arch&&!t.del).length,T=RAW.filter(t=>t.del).length;
+    const accN=ac?(ACCS.find(x=>x[0]===ac)||[,"Eigene"])[1]:"Passend",accD=`<i class="sdot sm" style="background:var(--acc)"></i> `;
+    h=`<p class="sgt">Erscheinungsbild</p>`+grp(srow('data-go="theme"',"Darstellung",THN[th])+srow('data-go="des"',"Farbdesign",DES.find(x=>x[0]===ds)[1])+srow('data-go="acc"',"Akzentfarbe",accD+accN)+srow('data-go="font"',"Schriftart",(FONTS.find(x=>x[0]===fk)||FONTS[0])[1]))
+     +`<p class="sgt">Persönlich</p>`+grp(srow('data-go="me"',"Ich bin",me||"Keine Angabe"))
+     +`<p class="sgt">Aufgaben</p>`+grp(srow(`data-act="arch"${dn?"":" disabled"}`,"Erledigte archivieren",dn?String(dn):"Keine",null,false)+srow('data-act="open"',"Archiv und Papierkorb",A+T?(A+T)+(A+T===1?" Eintrag":" Einträge"):"Leer"));
+    const hi=haInfo;
+    if(hi){const n=(hi.notify||[]).length;
+      h+=`<p class="sgt">Home Assistant</p>`+grp(
+        srow("",`Verbindung`,hi.api?"Aktiv":"Nicht verfügbar",null,false)
+       +srow("",`Erinnerung`,n?"Täglich "+esc(hi.time)+" Uhr":"Aus",null,false)
+       +srow("",`KI-Assistent`,hi.ai?esc(hi.model):"Aus",null,false)
+       +srow("","Sensoren",hi.sensors?"Aktiv":"Aus",null,false)
+       +srow(`data-act="hatest"${hi.api&&n?"":" disabled"}`,"Testnachricht senden",null,null,false))
+       +(n&&hi.ai?"":cap("Erinnerung und KI richtest du in Home Assistant unter Add-on → Konfiguration ein."))}
+    if(matchMedia("(hover:hover)").matches)h+=`<p class="sgt">Hilfe</p>`+grp(srow('data-go="keys"',"Tastaturkürzel"));
+  }else if(sPage==="theme"){
+    h=PREV+grp(Object.keys(THN).map(k=>sopt(`data-set="theme:${k}"`,THN[k],k===th)).join(""))+cap("Automatisch folgt der Einstellung deines Geräts.");
+  }else if(sPage==="des"){
+    h=PREV+grp(DES.map(([k,n,l,d])=>sopt(`data-set="des:${k}"`,n,k===ds,dpHtml(l,d))).join(""));
+  }else if(sPage==="acc"){
+    h=PREV+grp(sopt('data-set="acc:"',"Passend zum Farbdesign",ac==="",'<i class="sdot ring"></i>')+ACCS.map(([k,n,c])=>sopt(`data-set="acc:${k}"`,n,k===ac,`<i class="sdot" style="background:${c}"></i>`)).join(""));
+  }else if(sPage==="font"){
+    h=PREV+grp(FONTS.map(f=>sopt(`data-set="font:${f[0]}"`,f[1],f[0]===fk,"",`font-family:${f[3].replace(/"/g,"&quot;")}`)).join(""));
+  }else if(sPage==="me"){
+    h=grp([["","Keine Angabe"],["Lasse","Lasse"],["Melanie","Melanie"]].map(([k,n])=>sopt(`data-set="me:${k}"`,n,k===me)).join(""))+cap("Damit weiß die App, welche Aufgaben deine sind.");
+  }else if(sPage==="keys"){
+    h=`<dl class="keys"><dt>N</dt><dd>Neue Aufgabe</dd><dt>/</dt><dd>Suchen</dd><dt>1 – 5</dt><dd>Start, Board, Liste, Zeitstrahl, Kalender</dd><dt>S</dt><dd>Mehrfachauswahl</dd><dt>A</dt><dd>Alle auswählen</dd><dt>Entf</dt><dd>Auswahl löschen</dd><dt>H</dt><dd>Zeitstrahl: zu Heute</dd><dt>Esc</dt><dd>Auswahl beenden</dd></dl>`;
+  }
+  $("s_body").innerHTML=h;
 }
-function openSettings(){drawSettings();$("dls").showModal();}
-$("cfg").onclick=openSettings;function commitPV(){Object.keys(PV).forEach(k=>{prefSet(k,PV[k]);delete PV[k]})}
-function dropPV(){if(Object.keys(PV).length){Object.keys(PV).forEach(k=>delete PV[k]);applyTheme();applyFont()}}
-$("s_close").onclick=()=>{commitPV();$("dls").close()};$("s_cancel").onclick=()=>$("dls").close();
-$("dls").addEventListener("close",dropPV);
-$("s_theme").onclick=e=>{const b=e.target.closest("[data-th]");if(!b)return;PV.theme=b.dataset.th;applyTheme();drawSettings()};
-$("s_des").onclick=e=>{const b=e.target.closest("[data-des]");if(!b)return;PV.design=b.dataset.des;PV.acc="";applyTheme();drawSettings()};
-$("s_me").onclick=e=>{const b=e.target.closest("[data-me]");if(!b)return;prefSet("me",b.dataset.me);drawSettings()};
-$("s_font").onclick=e=>{const b=e.target.closest("[data-font]");if(!b)return;PV.font=b.dataset.font;applyFont();drawSettings()};
-$("s_acc").onclick=e=>{const b=e.target.closest("[data-acc]");if(!b)return;PV.acc=b.dataset.acc;applyTheme();drawSettings()};
-$("s_arch").onclick=async()=>{const L=tasks.filter(t=>t.status==="done");if(!L.length)return;commitPV();await saveMany(L.map(t=>({...t,arch:true})));$("dls").close();toast(L.length+" erledigte archiviert",()=>saveMany(L))};
-$("s_open").onclick=()=>{commitPV();$("dls").close();openArch()};
-$("s_hatest").onclick=async()=>{try{const r=await api("api/ha-test",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});$("dls").close();toast(r.ok?"Testnachricht gesendet":"Fehlgeschlagen: "+r.error)}catch(e){toast("Server nicht erreichbar")}};
+function openSettings(){sPage="main";drawSettings();$("dls").showModal();$("dls").scrollTop=0}
+$("cfg").onclick=openSettings;$("s_close").onclick=()=>$("dls").close();
+$("s_back").onclick=()=>{sPage="main";drawSettings();$("dls").scrollTop=0};
+$("s_body").onclick=async e=>{
+  const b=e.target.closest("button");if(!b||b.disabled)return;const d=b.dataset;
+  if(d.go){sPage=d.go;drawSettings();$("dls").scrollTop=0;return}
+  if(d.set){const i=d.set.indexOf(":"),k=d.set.slice(0,i),v=d.set.slice(i+1);
+    if(k==="theme"){prefSet("theme",v);applyTheme()}else if(k==="des"){prefSet("design",v);prefSet("acc","");applyTheme()}
+    else if(k==="acc"){prefSet("acc",v);applyTheme()}else if(k==="font"){prefSet("font",v);applyFont()}else if(k==="me")prefSet("me",v);
+    drawSettings();return}
+  if(d.act==="arch"){const L=tasks.filter(t=>t.status==="done");if(!L.length)return;await saveMany(L.map(t=>({...t,arch:true})));$("dls").close();toast(L.length+" erledigte archiviert",()=>saveMany(L))}
+  else if(d.act==="open"){$("dls").close();openArch()}
+  else if(d.act==="hatest"){try{const r=await api("api/ha-test",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});$("dls").close();toast(r.ok?"Testnachricht gesendet":"Fehlgeschlagen: "+r.error)}catch(e){toast("Server nicht erreichbar")}}
+};
 
 /* Mehrfachauswahl */
 function applySel(){
@@ -1168,7 +1232,7 @@ function home(){
   const doing=tasks.filter(t=>t.status==="doing").length,over=tasks.filter(isLate).sort((a,b)=>dn(a.end)-dn(b.end)),blk=tasks.filter(isBlocked).length;
   const week=tasks.filter(t=>t.status!=="done"&&!isLate(t)&&dn(t.start)<=T+7&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end)||dn(a.start)-dn(b.start));
   const nx=tasks.filter(t=>t.status!=="done"&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end))[0],C=326.7,off=(C*(1-pct/100)).toFixed(1),open=n-d;
-  const sub=over.length?`${over.length} ${over.length===1?"Aufgabe ist":"Aufgaben sind"} überfällig.`:week.length?`${week.length} ${week.length===1?"Aufgabe":"Aufgaben"} in den nächsten 7 Tagen.`:open?"Aktuell ist nichts dringend.":"Alles erledigt.";
+  const sub=over.length?`${over.length} ${over.length===1?"Aufgabe ist":"Aufgaben sind"} überfällig.`:week.length?`${week.length} ${week.length===1?"Aufgabe":"Aufgaben"} in den nächsten 7 Tagen.`:open?"Nichts Dringendes.":"Alles erledigt.";
   const areas=allTags().filter(a=>tasks.some(t=>tgs(t).includes(a)));
   const bars=areas.map(a=>{const L=tasks.filter(t=>tgs(t).includes(a)),x=L.filter(t=>t.status==="done").length;return`<div class="pr" style="--tc:${tcol(a)}"><span>${esc(a)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
   const names=[...new Set(["Melanie","Lasse",...tasks.map(t=>t.who).filter(Boolean)])],cnt=w=>tasks.filter(t=>t.status!=="done"&&t.who===w).length,mx=Math.max(1,...names.map(cnt));
@@ -1177,10 +1241,10 @@ function home(){
   let k=1;const P=(cls,h,c,body)=>`<section class="pnl ${cls}" style="--i:${k++}"><h3><span>${h}</span><em>${c}</em></h3>${body}</section>`;
   return`<div class="home"><section class="hero" style="--i:0"><div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn"><span data-n="${pct}">${pct}</span><i>%</i></div></div><div class="hbody"><div class="hh">${d} von ${n} erledigt</div><div class="hsub">${sub}</div><div class="hst"><div><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="${over.length?"hot":""}"><b data-n="${over.length}">${over.length}</b><span>überfällig</span></div><div><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div></div>${nx?`<div class="hnext"><small>Nächste Frist</small><strong>${esc(nx.title)}</strong><span>${[nx.area,rel(nx)].filter(Boolean).map(esc).join(" · ")}</span></div>`:""}</section>`+
     (over.length?P("hot","Überfällig",over.length,over.slice(0,6).map(hrow).join("")):"")+
-    P("","Diese Woche",week.length,week.length?week.slice(0,7).map(hrow).join(""):'<div class="none">Für die nächsten 7 Tage ist nichts geplant.</div>')+
+    P("","Diese Woche",week.length,week.length?week.slice(0,7).map(hrow).join(""):'<div class="none">Diese Woche ist nichts fällig.</div>')+
     (pjs.length?P("","Projekte",pjs.length,pbars):"")+
     P("","Tags",areas.length,bars||'<div class="none">Noch keine Tags.</div>')+
-    P("","Offene Aufgaben pro Person",open,who)+`</div>`}
+    P("","Offen pro Person",open,who)+`</div>`}
 
 function filtered(){
   const q=$("q").value.toLowerCase(),w=$("fw").value;
@@ -1209,7 +1273,7 @@ function render(){
   const n=tasks.length,d=tasks.filter(t=>t.status==="done").length,pct=n?Math.round(d/n*100):0;
   const doing=tasks.filter(t=>t.status==="doing").length,late=tasks.filter(isLate).length,blk=tasks.filter(isBlocked).length,op=n-d-doing;
   $("kpis").innerHTML=view==="home"?"":`<div class="kp"><div class="kn"><b><span data-n="${pct}">${pct}</span><i>%</i></b><span>erledigt · ${d} von ${n}</span></div><div class="kn"><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="kn ${late?"hot":""}"><b data-n="${late}">${late}</b><span>überfällig</span></div><div class="kn"><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div>${n?`<div class="stripe" title="Erledigt · In Arbeit · Zu starten"><i class="s-x" style="flex:${d}"></i><i class="s-d" style="flex:${doing}"></i><i class="s-o" style="flex:${op}"></i></div>`:""}`;
-  document.body.dataset.view=view;$("ttl").textContent=view==="home"?greet():{board:"Board",list:"Liste",gantt:"Zeitstrahl",cal:"Kalender"}[view];
+  document.body.dataset.view=view;$("ttl").textContent=view==="home"?"Start":{board:"Board",list:"Liste",gantt:"Zeitstrahl",cal:"Kalender"}[view];
     const whos=[...new Set(["Melanie","Lasse",...tasks.map(t=>t.who).filter(Boolean)])],curw=$("fw").value;
   $("fw").innerHTML='<option value="">Alle Personen</option>'+whos.map(a=>`<option ${a===curw?"selected":""}>${esc(a)}</option>`).join("")+`<option value="__none" ${curw==="__none"?"selected":""}>Nicht zugewiesen</option>`;
   $("whos").innerHTML=whos.map(a=>`<option value="${esc(a)}">`).join("");
@@ -1539,8 +1603,8 @@ $("tabs").onclick=e=>{const bt=e.target.closest("button"),v=bt&&bt.dataset.v;if(
 (function(){const s=$("splash");let seen=false;try{seen=sessionStorage.getItem("hp-start")}catch(e){}
   if(seen||reduced()){s.remove();return}
   try{sessionStorage.setItem("hp-start","1")}catch(e){}
-  $("sp_sub").textContent=greet();
-  const close=()=>{s.classList.add("out");setTimeout(()=>s.remove(),700)};setTimeout(close,1700);s.onclick=close})();
+  
+  const close=()=>{s.classList.add("out");setTimeout(()=>s.remove(),700)};setTimeout(close,1100);s.onclick=close})();
 init();
 </script>
 </body>

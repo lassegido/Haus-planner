@@ -1,5 +1,10 @@
 # Änderungen
 
+## 1.10.0
+- Einstellungen neu: gruppierte Liste mit Untermenüs (Darstellung, Farbdesign, Akzentfarbe, Schriftart, Ich bin) und Vorschau; Änderungen gelten sofort
+- Ruhigeres Design: Beschriftungen ohne Großbuchstaben, neutrale Board-Spalten, Tags als Text mit Farbpunkt, flache Startkarte, keine Farbleiste unter den Kennzahlen
+- Texte gekürzt und vereinfacht; Startseite heißt jetzt „Start“, kürzerer Startbildschirm
+
 ## 1.9.0
 - Neu: 5 Farbdesigns (Portofino, Wald, Beere, Graphit, Sand), jeweils in Hell und Dunkel
 - Einstellungen mit Live-Vorschau oben: Farbdesign, Akzentfarbe, Hell/Dunkel und Schriftart lassen sich ausprobieren und mit „Übernehmen“ speichern oder mit „Verwerfen“ zurücknehmen
