@@ -18,22 +18,25 @@ a = s.index("/* Speicher: gemeinsame Datenbank, sonst lokal */")
 b = s.index("/* Anzeige */")
 storage = '''/* Speicher: Server im Home-Assistant-Add-on (relative Pfade wegen Ingress) */
 let rev=-1;
+function prefGet(k){try{return localStorage.getItem("haus-"+k)}catch(e){return null}}
+function prefSet(k,v){try{localStorage.setItem("haus-"+k,v)}catch(e){}}
 async function api(path,opt){const r=await fetch(path,opt);if(!r.ok)throw new Error(r.status);return r.json()}
 async function pull(force){
   try{const j=await api("api/tasks"+(force?"":"?rev="+rev));
     $("note").textContent="";
     if(j.version)$("ver").textContent="Add-on-Version "+j.version;
-    if(j.tasks){tasks=j.tasks;reg=j.tags||[];regLoaded=true;rev=j.rev;loaded=true;render()}
+    haInfo=j.ha||null;
+    if(j.tasks){RAW=j.tasks;reg=j.tags||[];regLoaded=true;rev=j.rev;loaded=true;render()}
   }catch(e){$("note").textContent="Keine Verbindung zum Server – Änderungen werden evtl. nicht gespeichert."}
 }
 async function saveTask(t){
-  const i=tasks.findIndex(x=>x.id===t.id);i>=0?tasks[i]=t:tasks.push(t);render();
+  const i=RAW.findIndex(x=>x.id===t.id);i>=0?RAW[i]=t:RAW.push(t);render();
   try{await api("api/task",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(t)})}
   catch(e){$("note").textContent="Speichern fehlgeschlagen."}
   pull(true);
 }
 async function delTask(id){
-  tasks=tasks.filter(t=>t.id!==id).map(t=>({...t,deps:(t.deps||[]).filter(x=>x!==id)}));render();
+  RAW=RAW.filter(t=>t.id!==id).map(t=>({...t,deps:(t.deps||[]).filter(x=>x!==id)}));render();
   try{await api("api/task/"+id,{method:"DELETE"})}catch(e){$("note").textContent="Löschen fehlgeschlagen."}
   pull(true);
 }
@@ -44,7 +47,7 @@ async function saveReg(l){
   pull(true);
 }
 async function saveMany(list){
-  list.forEach(t=>{const i=tasks.findIndex(x=>x.id===t.id);i>=0?tasks[i]=t:tasks.push(t)});render();
+  list.forEach(t=>{const i=RAW.findIndex(x=>x.id===t.id);i>=0?RAW[i]=t:RAW.push(t)});render();
   try{await api("api/import",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({tasks:list})})}
   catch(e){$("note").textContent="Speichern fehlgeschlagen."}
   pull(true);
@@ -67,7 +70,7 @@ dl = '''async function dl(name,data){
 s, n = re.subn(r"async function dl\(name,data\)\{.*\n", lambda m: dl, s, count=1)
 if n != 1:
     sys.exit("FEHLER: dl()-Funktion in src/haus-planner.html nicht gefunden")
-if "claude.use" in s or "localStorage" in s:
+if "claude.use" in s or "window.claude" in s or "lsGet(" in s:
     sys.exit("FEHLER: Claude-/Browser-spezifischer Code ist noch in der Add-on-Version")
 
 open(os.path.join(ADDON, "index.html"), "w", encoding="utf-8").write(s)

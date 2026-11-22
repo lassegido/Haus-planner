@@ -1,4 +1,4 @@
-import json, os, re, shutil, threading, time
+import datetime, json, os, re, shutil, threading, time, urllib.request
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
@@ -17,6 +17,11 @@ COLORS = ("sky", "sun", "sea", "brick", "mint", "rose", "lilac", "sand", "slate"
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 ID = re.compile(r"[A-Za-z0-9_-]{1,40}")
 DAILY = re.compile(r"tasks-\d{4}-\d{2}-\d{2}\.json")
+OPTS = os.path.join(D, "options.json")
+HASTATE = os.path.join(D, "ha_state.json")
+SUP = os.environ.get("SUPERVISOR_URL", "http://supervisor/core/api")
+TOKEN = os.environ.get("SUPERVISOR_TOKEN", "")
+ha = {"tz": None, "last": ""}
 
 
 def version():
@@ -122,7 +127,130 @@ def clean(t):
     tags = [n for n in dict.fromkeys(str(x).strip()[:30] for x in tags if isinstance(x, str)) if n][:20]
     return {"id": i, "title": title, "area": (tags[0] if tags else str(t.get("area", ""))[:60]), "tags": tags, "proj": str(t.get("proj", "") or "")[:30], "ms": bool(t.get("ms")), "rec": clean_rec(t.get("rec")), "spawned": str(t.get("spawned", "") or "")[:40], "who": str(t.get("who", ""))[:60],
             "status": st if st in ("todo", "doing", "done") else "todo", "start": s, "end": e,
-            "notes": str(t.get("notes", ""))[:4000], "deps": deps, "checklist": ck}
+            "notes": str(t.get("notes", ""))[:4000], "deps": deps, "checklist": ck,
+            "arch": bool(t.get("arch")), "del": bool(t.get("del")), "delAt": str(t.get("delAt", "") or "")[:10]}
+
+
+# ---- Home Assistant: Erinnerungen und Sensoren (nur im Add-on, über die Supervisor-Schnittstelle)
+def options():
+    try:
+        with open(OPTS, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def services():
+    out = []
+    for x in str(options().get("notify_service") or "").split(","):
+        x = x.strip()
+        if x.startswith("notify."):
+            x = x[7:]
+        if re.fullmatch(r"[A-Za-z0-9_]+", x):
+            out.append(x)
+    return out
+
+
+def ha_info():
+    o = options()
+    return {"api": bool(TOKEN), "notify": services(), "time": str(o.get("reminder_time") or "08:00"),
+            "sensors": bool(o.get("sensors", True))}
+
+
+def ha_call(method, path, body=None):
+    req = urllib.request.Request(SUP + path, method=method, data=None if body is None else json.dumps(body).encode(),
+                                 headers={"Authorization": "Bearer " + TOKEN, "Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=10) as r:
+        raw = r.read()
+        return json.loads(raw) if raw else None
+
+
+def init_tz():
+    name = None
+    if TOKEN:
+        try:
+            name = (ha_call("GET", "/config") or {}).get("time_zone")
+        except Exception as e:
+            print("HA-Zeitzone nicht lesbar:", e, flush=True)
+    name = name or os.environ.get("TZ")
+    if name:
+        try:
+            from zoneinfo import ZoneInfo
+            ha["tz"] = ZoneInfo(name)
+        except Exception as e:
+            print("Zeitzone nicht verfügbar:", e, flush=True)
+    try:
+        with open(HASTATE, encoding="utf-8") as f:
+            ha["last"] = json.load(f).get("last", "")
+    except Exception:
+        pass
+
+
+def stats(tasks, today):
+    act = [t for t in tasks if not t.get("del") and not t.get("arch") and t["status"] != "done"]
+    due = [t for t in act if t["end"] == today]
+    late = [t for t in act if t["end"] < today]
+    doing = [t for t in act if t["status"] == "doing"]
+    return act, due, late, doing
+
+
+def reminder_text(due, late):
+    parts = []
+    if due:
+        parts.append("%d heute fällig" % len(due))
+    if late:
+        parts.append("%d überfällig" % len(late))
+    names = [t["title"] for t in late + due]
+    txt = ", ".join(parts) + ": " + ", ".join(names[:4]) + (" …" if len(names) > 4 else "")
+    return txt
+
+
+def notify(message):
+    sv = services()
+    if not sv:
+        raise RuntimeError("Kein Benachrichtigungsdienst eingetragen")
+    for s in sv:
+        ha_call("POST", "/services/notify/" + s, {"title": "Haus-planner", "message": message})
+
+
+def put_sensor(key, name, value, icon, titles):
+    ha_call("POST", "/states/sensor.haus_planner_" + key,
+            {"state": str(value), "attributes": {"friendly_name": name, "unit_of_measurement": "Aufgaben", "icon": icon, "aufgaben": titles[:20]}})
+
+
+def ha_tick():
+    if not TOKEN:
+        return
+    o = options()
+    now = datetime.datetime.now(ha["tz"]) if ha["tz"] else datetime.datetime.now()
+    today = now.strftime("%Y-%m-%d")
+    with LOCK:
+        tasks = list(state["tasks"].values())
+    act, due, late, doing = stats(tasks, today)
+    if o.get("sensors", True):
+        for key, name, icon, lst in (("offen", "Haus-planner offen", "mdi:clipboard-list-outline", act),
+                                     ("in_arbeit", "Haus-planner in Arbeit", "mdi:hammer-wrench", doing),
+                                     ("ueberfaellig", "Haus-planner überfällig", "mdi:alert-circle-outline", late),
+                                     ("heute_faellig", "Haus-planner heute fällig", "mdi:calendar-today", due)):
+            put_sensor(key, name, len(lst), icon, [t["title"] for t in lst])
+    when = str(o.get("reminder_time") or "08:00")
+    if services() and now.strftime("%H:%M") >= when and ha["last"] != today:
+        if due or late:
+            notify(reminder_text(due, late))
+        ha["last"] = today
+        with open(HASTATE, "w", encoding="utf-8") as f:
+            json.dump({"last": today}, f)
+
+
+def ha_loop():
+    time.sleep(5)
+    init_tz()
+    while True:
+        try:
+            ha_tick()
+        except Exception as e:
+            print("Home-Assistant-Abgleich:", e, flush=True)
+        time.sleep(60)
 
 
 class H(BaseHTTPRequestHandler):
@@ -144,8 +272,8 @@ class H(BaseHTTPRequestHandler):
             q = parse_qs(u.query).get("rev", [""])[0]
             with LOCK:
                 if q == str(state["rev"]):
-                    return self.out(200, {"rev": state["rev"], "version": version()})
-                return self.out(200, {"rev": state["rev"], "version": version(), "tasks": list(state["tasks"].values()), "tags": state["tags"]})
+                    return self.out(200, {"rev": state["rev"], "version": version(), "ha": ha_info()})
+                return self.out(200, {"rev": state["rev"], "version": version(), "tasks": list(state["tasks"].values()), "tags": state["tags"], "ha": ha_info()})
         with open(INDEX, "rb") as f:
             self.out(200, f.read(), "text/html")
 
@@ -161,6 +289,14 @@ class H(BaseHTTPRequestHandler):
             data = self.body()
         except Exception:
             return self.out(400, {"error": "ungültige Anfrage"})
+        if path.endswith("/api/ha-test"):
+            try:
+                if not TOKEN:
+                    raise RuntimeError("Keine Verbindung zu Home Assistant")
+                notify("Testnachricht vom Haus-planner – die Erinnerungen funktionieren.")
+                return self.out(200, {"ok": True})
+            except Exception as e:
+                return self.out(200, {"ok": False, "error": str(e)[:200]})
         if path.endswith("/api/tags"):
             with LOCK:
                 state["tags"] = clean_tags(data.get("tags", []) if isinstance(data, dict) else [])
@@ -202,4 +338,5 @@ if __name__ == "__main__":
     if state["tasks"]:
         save()  # bestehende Daten beim Start einmal in den Share-Spiegel kopieren
     print("Haus-planner %s läuft auf Port %d, Daten in %s" % (version(), PORT, D), flush=True)
+    threading.Thread(target=ha_loop, daemon=True).start()
     ThreadingHTTPServer(("0.0.0.0", PORT), H).serve_forever()

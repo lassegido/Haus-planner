@@ -28,3 +28,14 @@ Die Aufgaben bleiben dabei erhalten. **Nicht deinstallieren**, um zu aktualisier
 ## Von unterwegs
 
 Zugriff von außen nur über Nabu Casa oder ein VPN (z. B. Tailscale).
+
+## Erinnerungen aufs Handy
+
+1. **Einstellungen → Add-ons → Haus-planner → Konfiguration.**
+2. Bei **notify_service** den Namen des Benachrichtigungsdienstes der Home-Assistant-App eintragen, z. B. `mobile_app_iphone_von_lasse` (zu finden unter Entwicklerwerkzeuge → Aktionen, Suche nach „notify."). Mehrere Geräte durch Komma trennen.
+3. **reminder_time** ist die Uhrzeit der täglichen Erinnerung (Standard 08:00, in der Zeitzone von Home Assistant). Sie kommt nur, wenn etwas heute fällig oder überfällig ist.
+4. Speichern und das Add-on neu starten. In der App unter **Einstellungen** gibt es einen Knopf „Testbenachrichtigung senden".
+
+## Sensoren
+
+Der Haus-planner legt in Home Assistant vier Sensoren an, die jede Minute aktualisiert werden: `sensor.haus_planner_offen`, `sensor.haus_planner_in_arbeit`, `sensor.haus_planner_ueberfaellig` und `sensor.haus_planner_heute_faellig`. Das Attribut `aufgaben` enthält die Titel. Abschalten mit `sensors: false` in der Konfiguration.
