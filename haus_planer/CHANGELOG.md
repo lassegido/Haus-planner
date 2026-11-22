@@ -1,5 +1,13 @@
 # Änderungen
 
+## 1.8.0
+- Neue Spalte „Backlog" (grau) vor „Zu starten"; „Offen" heißt jetzt „Zu starten". Backlog-Aufgaben zählen nicht als überfällig und lösen keine Erinnerung aus. Bestehende Aufgaben bleiben unverändert („Offen" wird zu „Zu starten")
+- Auswahlfelder einheitlich: Optionen eines Reglers sind gleich breit (Tage / Monate / Jahre), Eingabefelder im Formular gleich hoch
+- Farben je Feldtyp: Status in Statusfarben, Zuständig in Personenfarben (Melanie, Lasse, Andere), Projekt mit Projektfarbe, Personen-Punkte in der Seitenleiste
+- Schriftart wählbar (Einstellungen): Systemschrift als Standard, dazu Figtree, Plus Jakarta Sans, DM Sans, Manrope und Inter
+- Outlook: Termine aus einem veröffentlichten Outlook-ICS-Link erscheinen im Kalender (zuschaltbar), und die Aufgaben gibt es als ICS-Link zum Einbinden in Outlook (beides nur im Add-on)
+- Kalender: Board-Punkte am Handy und Kalender-Punkte kollidieren nicht mehr
+
 ## 1.7.0
 - KI-Assistent in der Aufgabe („Mit KI ausfüllen"): schlägt Notizen und Checklistenpunkte vor, du wählst aus, was übernommen wird. Im Add-on über einen eigenen Anthropic-API-Schlüssel (Konfiguration: `anthropic_api_key`)
 - App-Symbol und Vollbild: Manifest, Symbole und Handy-Metadaten; über den optionalen direkten Port (Netzwerk) lässt sich der Haus-planner auf dem Home-Bildschirm ablegen

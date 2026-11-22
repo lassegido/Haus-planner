@@ -56,3 +56,16 @@ Der Zugriff über Home Assistant (Ingress) braucht dessen Anmeldung und lässt s
 2. Auf dem iPhone in Safari `http://<IP-von-Home-Assistant>:8099` öffnen, dann **Teilen → Zum Home-Bildschirm**.
 
 Achtung: Dieser Port hat **keine Anmeldung**. Jeder im Heimnetz kann ihn öffnen. Nur aktivieren, wenn dein Netz vertrauenswürdig ist, und nie ins Internet weiterleiten.
+
+## Outlook-Kalender
+
+**Termine aus Outlook im Kalender sehen (Import):**
+1. Outlook im Web → Einstellungen → Kalender → Freigegebene Kalender → **Kalender veröffentlichen** → ICS-Link kopieren. (In manchen Firmenkonten sperrt der Administrator das Veröffentlichen.)
+2. In der App unter **Einstellungen → Outlook-Kalender** einfügen und speichern. Die Termine werden alle 30 Minuten aktualisiert und lassen sich im Kalender mit dem Knopf „Outlook" ein- und ausblenden. Sie sind nur lesbar.
+
+**Aufgaben in Outlook sehen (Link zum Einbinden):**
+1. Im Add-on unter **Netzwerk** den Port 8099 aktivieren.
+2. In den Einstellungen den Link kopieren, den Namen im Link durch die IP von Home Assistant ersetzen.
+3. Outlook am Computer oder Mac: Kalender hinzufügen → Aus dem Internet.
+
+Outlook im Web und in der Handy-App rufen Abo-Links über Microsoft-Server ab und erreichen dein Heimnetz nicht. Der Link ist durch einen langen Schlüssel geschützt, der Port ansonsten ungeschützt: nur im vertrauenswürdigen Heimnetz nutzen, nie ins Internet weiterleiten.
