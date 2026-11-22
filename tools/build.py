@@ -52,6 +52,8 @@ async function saveMany(list){
   catch(e){$("note").textContent="Speichern fehlgeschlagen."}
   pull(true);
 }
+const aiAvail=()=>!!(haInfo&&haInfo.ai);
+async function aiJson(prompt){const r=await api("api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt})});if(!r.ok)throw new Error(r.error||"KI-Fehler");return r.data}
 function init(){
   pull(true);setInterval(()=>pull(),5000);
   document.addEventListener("visibilitychange",()=>{if(!document.hidden)pull()});
@@ -73,6 +75,13 @@ if n != 1:
 if "claude.use" in s or "window.claude" in s or "lsGet(" in s:
     sys.exit("FEHLER: Claude-/Browser-spezifischer Code ist noch in der Add-on-Version")
 
+PWA = ('<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">'
+       '<link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes">'
+       '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Haus-planner">'
+       '<meta name="apple-mobile-web-app-status-bar-style" content="default">')
+if s.count("</head>") != 1:
+    sys.exit("FEHLER: </head> nicht eindeutig")
+s = s.replace("</head>", PWA + "</head>")
 open(os.path.join(ADDON, "index.html"), "w", encoding="utf-8").write(s)
 open(os.path.join(ADDON, "VERSION"), "w", encoding="utf-8").write(ver + "\n")
 print("OK: haus_planer/index.html und VERSION erzeugt, Version", ver)

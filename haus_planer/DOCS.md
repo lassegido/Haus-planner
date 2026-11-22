@@ -39,3 +39,20 @@ Zugriff von außen nur über Nabu Casa oder ein VPN (z. B. Tailscale).
 ## Sensoren
 
 Der Haus-planner legt in Home Assistant vier Sensoren an, die jede Minute aktualisiert werden: `sensor.haus_planner_offen`, `sensor.haus_planner_in_arbeit`, `sensor.haus_planner_ueberfaellig` und `sensor.haus_planner_heute_faellig`. Das Attribut `aufgaben` enthält die Titel. Abschalten mit `sensors: false` in der Konfiguration.
+
+## KI-Assistent
+
+In jeder Aufgabe schlägt „Mit KI ausfüllen" Notizen und Checklistenpunkte vor. Du entscheidest, was übernommen wird.
+
+1. Unter [console.anthropic.com](https://console.anthropic.com) einen API-Schlüssel erstellen.
+2. Im Add-on unter **Konfiguration** bei `anthropic_api_key` eintragen und neu starten.
+3. Die Nutzung kostet Geld (abgerechnet von Anthropic, pro Anfrage meist nur Bruchteile eines Cents mit dem Standardmodell `claude-haiku-5-5`). Es wird nur der Aufgabentext gesendet, keine anderen Daten.
+
+## Auf den Home-Bildschirm (App-Symbol, Vollbild)
+
+Der Zugriff über Home Assistant (Ingress) braucht dessen Anmeldung und lässt sich nicht als eigene App ablegen. Dafür gibt es einen optionalen direkten Port:
+
+1. Im Add-on unter **Netzwerk** den Port `8099` eintragen (z. B. 8099) und speichern.
+2. Auf dem iPhone in Safari `http://<IP-von-Home-Assistant>:8099` öffnen, dann **Teilen → Zum Home-Bildschirm**.
+
+Achtung: Dieser Port hat **keine Anmeldung**. Jeder im Heimnetz kann ihn öffnen. Nur aktivieren, wenn dein Netz vertrauenswürdig ist, und nie ins Internet weiterleiten.

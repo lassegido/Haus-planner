@@ -1,5 +1,5 @@
 name: Haus-planner
-version: "1.6.0"
+version: "1.7.0"
 slug: haus_planer
 description: Aufgaben, Kanban-Board und Gantt-Zeitstrahl für zu Hause
 arch:
@@ -20,7 +20,15 @@ options:
   notify_service: ""
   reminder_time: "08:00"
   sensors: true
+  anthropic_api_key: ""
+  ai_model: "claude-haiku-5-5"
 schema:
   notify_service: str?
   reminder_time: match(^([01][0-9]|2[0-3]):[0-5][0-9]$)?
   sensors: bool?
+  anthropic_api_key: password?
+  ai_model: str?
+ports:
+  8099/tcp: null
+ports_description:
+  8099/tcp: "Direkter Zugriff im Heimnetz (optional, für Zum Home-Bildschirm)"

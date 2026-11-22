@@ -1,5 +1,9 @@
 # Änderungen
 
+## 1.7.0
+- KI-Assistent in der Aufgabe („Mit KI ausfüllen"): schlägt Notizen und Checklistenpunkte vor, du wählst aus, was übernommen wird. Im Add-on über einen eigenen Anthropic-API-Schlüssel (Konfiguration: `anthropic_api_key`)
+- App-Symbol und Vollbild: Manifest, Symbole und Handy-Metadaten; über den optionalen direkten Port (Netzwerk) lässt sich der Haus-planner auf dem Home-Bildschirm ablegen
+
 ## 1.6.0
 - Verlauf und Kommentare an jeder Aufgabe: Status-, Termin- und Zuständigkeits-Änderungen werden automatisch festgehalten, Kommentare mit Name (Einstellungen → „Ich bin")
 - Kalender: Monatsansicht mit Tagesliste und Schnellanlage, Export als .ics für Apple, Google oder Outlook

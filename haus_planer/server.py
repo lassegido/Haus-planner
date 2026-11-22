@@ -1,4 +1,4 @@
-import datetime, json, os, re, secrets, shutil, threading, time, urllib.request
+import datetime, json, os, re, secrets, shutil, threading, time, urllib.error, urllib.request
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs, unquote
 
@@ -12,6 +12,8 @@ PORT = int(os.environ.get("PORT", "8099"))
 DATA = os.path.join(D, "tasks.json")
 BK = os.path.join(D, "backups")
 FILES = os.path.join(D, "files")
+ICONS = os.environ.get("ICONS_DIR", os.path.join(os.path.dirname(INDEX), "icons"))
+ANTHROPIC = os.environ.get("ANTHROPIC_URL", "https://api.anthropic.com/v1/messages")
 FID = re.compile(r"[a-f0-9]{12}")
 SAFE = ("image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf")
 LOCK = threading.Lock()
@@ -195,7 +197,38 @@ def services():
 def ha_info():
     o = options()
     return {"api": bool(TOKEN), "notify": services(), "time": str(o.get("reminder_time") or "08:00"),
-            "sensors": bool(o.get("sensors", True))}
+            "sensors": bool(o.get("sensors", True)),
+            "ai": bool(str(o.get("anthropic_api_key") or "").strip()), "model": str(o.get("ai_model") or "claude-haiku-5-5")}
+
+
+AI_SYSTEM = "Du bist ein sachkundiger Helfer für Heim- und Gartenprojekte. Antworte immer auf Deutsch und genau im verlangten JSON-Format."
+
+
+def ai_call(prompt):
+    o = options()
+    key = str(o.get("anthropic_api_key") or "").strip()
+    if not key:
+        raise RuntimeError("Kein API-Schlüssel eingetragen")
+    body = {"model": str(o.get("ai_model") or "claude-haiku-5-5"), "max_tokens": 900, "system": AI_SYSTEM,
+            "messages": [{"role": "user", "content": prompt[:4000]}]}
+    req = urllib.request.Request(ANTHROPIC, method="POST", data=json.dumps(body).encode(),
+                                 headers={"x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            j = json.load(r)
+    except urllib.error.HTTPError as e:
+        try:
+            msg = json.load(e).get("error", {}).get("message", "")
+        except Exception:
+            msg = ""
+        raise RuntimeError("Anthropic %s %s" % (e.code, msg[:120]))
+    text = "".join(c.get("text", "") for c in j.get("content", []) if c.get("type") == "text")
+    a, z = text.find("{"), text.rfind("}")
+    if a < 0 or z < a:
+        raise RuntimeError("Unerwartete Antwort")
+    d = json.loads(text[a:z + 1])
+    items = [str(x).strip()[:120] for x in d.get("checklist", []) if str(x).strip()] if isinstance(d.get("checklist"), list) else []
+    return {"notes": str(d.get("notes", "")).strip()[:1000], "checklist": items[:10]}
 
 
 def ha_call(method, path, body=None):
@@ -315,6 +348,26 @@ class H(BaseHTTPRequestHandler):
                 if q == str(state["rev"]):
                     return self.out(200, {"rev": state["rev"], "version": version(), "ha": ha_info()})
                 return self.out(200, {"rev": state["rev"], "version": version(), "tasks": list(state["tasks"].values()), "tags": state["tags"], "ha": ha_info()})
+        if u.path.endswith("/manifest.webmanifest"):
+            return self.out(200, {"name": "Haus-planner", "short_name": "Haus-planner", "start_url": "./", "scope": "./", "display": "standalone",
+                                  "background_color": "#F5F3EB", "theme_color": "#2D6786", "lang": "de",
+                                  "icons": [{"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+                                            {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}]},
+                            "application/manifest+json")
+        mi = re.search(r"/icons/(icon-192|icon-512|apple-touch-icon)\.png$", u.path)
+        if mi:
+            try:
+                with open(os.path.join(ICONS, mi.group(1) + ".png"), "rb") as f:
+                    b = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "image/png")
+                self.send_header("Content-Length", str(len(b)))
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.end_headers()
+                self.wfile.write(b)
+                return
+            except Exception:
+                return self.out(404, {"error": "nicht gefunden"})
         m = re.search(r"/api/file/([A-Za-z0-9_-]{1,40})/([a-f0-9]{12})$", u.path)
         if m:
             with LOCK:
@@ -380,6 +433,14 @@ class H(BaseHTTPRequestHandler):
             data = self.body()
         except Exception:
             return self.out(400, {"error": "ungültige Anfrage"})
+        if path.endswith("/api/ai"):
+            try:
+                p = data.get("prompt") if isinstance(data, dict) else None
+                if not isinstance(p, str) or not p.strip():
+                    raise RuntimeError("Leere Anfrage")
+                return self.out(200, {"ok": True, "data": ai_call(p)})
+            except Exception as e:
+                return self.out(200, {"ok": False, "error": str(e)[:200]})
         if path.endswith("/api/ha-test"):
             try:
                 if not TOKEN:

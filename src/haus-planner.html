@@ -511,6 +511,15 @@ body.selmode #toast{bottom:5.2rem}
 .fl small{color:var(--mut);font-size:.72rem}
 .fl .x{position:absolute;top:.25rem;right:.25rem;width:1.6rem;height:1.6rem;border-radius:50%;border:0;background:rgba(20,48,63,.7);color:#fff;font-size:.75rem;padding:0}
 .fl.doc .x{position:static;background:none;color:var(--mut);width:auto}
+
+/* 1.7: KI-Vorschlag */
+.aiw{display:flex;align-items:center;gap:.7rem;margin-top:1.2rem}.aiw .hint{margin:0;font-size:.78rem;color:var(--mut)}.aiw .btn{white-space:nowrap;flex:none}
+.aibox{margin-top:.7rem;border:1px solid var(--line2);border-left:4px solid var(--acc);border-radius:.8rem;background:var(--bg);padding:.8rem .9rem}
+.aih{font:700 .72rem/1 var(--disp);letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:.5rem}
+#ai_notes{font-size:.92rem;line-height:1.45;margin-bottom:.4rem;white-space:pre-wrap}
+#dlg label.aii{text-transform:none;display:flex;gap:.6rem;align-items:flex-start;margin:.3rem 0;font:450 .92rem/1.35 "Instrument Sans",system-ui,sans-serif;letter-spacing:0;color:var(--tx);cursor:pointer}
+#dlg label.aii input{width:1.1rem;height:1.1rem;flex:none;margin-top:.12rem;accent-color:var(--sea);padding:0}
+.aia{display:flex;gap:.5rem;margin-top:.7rem}
 </style>
 </head>
 <body>
@@ -612,6 +621,8 @@ body.selmode #toast{bottom:5.2rem}
   <div class="hint" id="f_rechint" style="display:none">Wenn du die Aufgabe erledigst, legt der Haus-planner automatisch die nächste an.</div>
   <label>Abhängig von <span class="lh">muss vorher fertig sein</span></label><div class="deps" id="f_deps"></div>
   <label>Checkliste</label><div id="f_ck"></div><button class="btn ghost" id="ck_add" type="button"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Punkt hinzufügen</button>
+  <div class="aiw" id="ai_row"><button class="btn ghost sm" id="ai_btn" type="button">Mit KI ausfüllen</button><span class="hint">Notizen und Checkliste vorschlagen</span></div>
+  <div class="aibox" id="ai_box" style="display:none"><div class="aih">Vorschlag der KI</div><div id="ai_notes"></div><div id="ai_items"></div><div class="aia"><button class="btn sm" id="ai_ok" type="button">Übernehmen</button><button class="btn ghost sm" id="ai_no" type="button">Verwerfen</button></div></div>
   <label for="f_notes">Notizen</label><textarea id="f_notes" rows="3" placeholder="Maße, Material, Ansprechpartner …"></textarea>
   <div id="f_filesec"><label>Fotos und Dateien</label><div class="fls" id="f_files"></div><button class="btn ghost" id="fl_btn" type="button" style="margin-top:.6rem">Foto oder Datei hinzufügen</button><input type="file" id="fl_in" multiple hidden accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"></div>
   <div id="f_logsec"><label>Verlauf und Kommentare</label><div class="lgin"><input id="lg_in" placeholder="Kommentar schreiben …" maxlength="500" autocomplete="off"><button class="btn ghost" id="lg_add" type="button">Senden</button></div><div class="lg" id="lg_list"></div></div>
@@ -670,6 +681,8 @@ async function saveReg(l){
   else{lsSetReg();render()}
 }
 async function saveMany(list){for(const t of list)await saveTask(t)}
+const aiAvail=()=>true;
+async function aiJson(prompt){const sm=await window.claude.use("sample");if(!sm)throw new Error("Die KI ist hier nicht verfügbar");return sm.json(prompt)}
 
 /* Anzeige */
 /* Startseite, Hilfen, Bewegung */
@@ -811,6 +824,7 @@ function drawSettings(){
   if(h){const n=(h.notify||[]).map(esc).join(", ");
     $("s_hatxt").innerHTML=(h.api?"Verbindung zu Home Assistant: <b>aktiv</b>":"Verbindung zu Home Assistant: <b>nicht verfügbar</b>")
       +"<br>Erinnerung: "+(n?`<b>täglich ab ${esc(h.time)} Uhr</b> an ${n}`:"<b>nicht eingerichtet</b> (Add-on → Konfiguration → Benachrichtigungsdienst)")
+      +"<br>KI-Assistent: "+(h.ai?`<b>aktiv</b> (${esc(h.model)})`:"<b>nicht eingerichtet</b> (Add-on → Konfiguration → anthropic_api_key)")
       +"<br>Sensoren: "+(h.sensors?"<b>aktiv</b> (sensor.haus_planner_…)":"<b>aus</b>");
     $("s_hatest").disabled=!h.api||!n}
 }
@@ -951,6 +965,29 @@ function ics(){
   const ev=tasks.filter(t=>t.status!=="done").map(t=>["BEGIN:VEVENT","UID:"+t.id+"@haus-planner","DTSTAMP:"+stp,"DTSTART;VALUE=DATE:"+c(t.start),"DTEND;VALUE=DATE:"+c(iso(fromDn(dn(t.end)+1))),"SUMMARY:"+esc2(t.title),...(t.notes?["DESCRIPTION:"+esc2(t.notes)]:[]),...(t.who?["CATEGORIES:"+esc2(t.who)]:[]),"END:VEVENT"].join("\r\n"));
   return["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Haus-planner//DE","CALSCALE:GREGORIAN","X-WR-CALNAME:Haus-planner",...ev,"END:VCALENDAR"].join("\r\n")+"\r\n"}
 $("x_ics").onclick=()=>dl("haus-planner-"+stamp()+".ics",new Blob([ics()],{type:"text/calendar"}));
+/* KI-Assistent */
+function aiPrompt(){
+  const t=$("f_title").value.trim(),notes=$("f_notes").value.trim(),have=cklist.map(c=>c.t).filter(Boolean),tags=selTags.join(", "),pv=$("f_proj").value,proj=pv&&pv!=="__new"?pv:"";
+  return"Du hilfst einem Paar beim Planen von Aufgaben rund ums Haus. Schreibe auf Deutsch, knapp und praktisch.\nAufgabe: "+t+"\n"+(tags?"Tags: "+tags+"\n":"")+(proj?"Projekt: "+proj+"\n":"")+(notes?"Vorhandene Notizen (nicht wiederholen): "+notes+"\n":"")+(have.length?"Vorhandene Checklistenpunkte (nicht wiederholen): "+have.join("; ")+"\n":"")
+   +'Antworte ausschließlich mit einem JSON-Objekt, ohne Erklärung und ohne Code-Block: {"notes":"1 bis 3 kurze Sätze: was ist zu tun, worauf achten","checklist":["3 bis 8 kurze Schritte im Imperativ"]}'}
+let aiRes=null;
+async function aiRun(){
+  if(!$("f_title").value.trim()){toast("Bitte zuerst einen Titel eingeben");$("f_title").focus();return}
+  const b=$("ai_btn");b.disabled=true;b.textContent="KI denkt nach …";
+  try{const r=await aiJson(aiPrompt()),notes=String(r&&r.notes||"").trim().slice(0,1000),items=(Array.isArray(r&&r.checklist)?r.checklist:[]).map(x=>String(x).trim().slice(0,120)).filter(Boolean).slice(0,10);
+    if(!notes&&!items.length)throw new Error("Keine brauchbare Antwort");aiRes={notes,items};drawAi()}
+  catch(e){toast("KI nicht erreichbar: "+((e&&(e.message||e.code))||"unbekannt"))}
+  b.disabled=false;b.textContent="Mit KI ausfüllen"}
+function drawAi(){
+  const box=$("ai_box");if(!aiRes){box.style.display="none";return}box.style.display="";
+  $("ai_notes").textContent=aiRes.notes;
+  $("ai_items").innerHTML=aiRes.items.map((x,i)=>`<label class="aii"><input type="checkbox" data-ai="${i}" checked><span>${esc(x)}</span></label>`).join("")}
+$("ai_btn").onclick=aiRun;
+$("ai_no").onclick=()=>{aiRes=null;drawAi()};
+$("ai_ok").onclick=()=>{
+  if(!aiRes)return;const on=[...document.querySelectorAll("#ai_items input:checked")].map(i=>aiRes.items[+i.dataset.ai]);
+  if(aiRes.notes){const n=$("f_notes");n.value=(n.value.trim()?n.value.trim()+"\n\n":"")+aiRes.notes}
+  on.forEach(x=>cklist.push({t:x,d:false}));drawCk();aiRes=null;drawAi()};
 /* Tags */
 const TC={sky:"#6CB6E4",sun:"#FDAF54",sea:"#387CA3",brick:"#D35526",mint:"#6CC49A",rose:"#E58BAE",lilac:"#9D86DB",sand:"#C9B77A",slate:"#7C93A3",lemon:"#D9CB3F"},TCK=Object.keys(TC);
 const tgs=t=>Array.isArray(t.tags)?t.tags:(t.area?[t.area]:[]);
@@ -1232,7 +1269,7 @@ function openDlg(id){
   $("f_start").value=t.start;$("f_end").value=t.end;initExtra(t);$("f_notes").value=t.notes||"";
   const others=tasks.filter(x=>!editing||x.id!==editing.id);
   $("f_deps").innerHTML=others.length?others.map(x=>`<label><input type="checkbox" value="${x.id}" ${(t.deps||[]).includes(x.id)?"checked":""}>${esc(x.title)}</label>`).join(""):'<span style="color:var(--mut);font-size:13px">Noch keine anderen Aufgaben.</span>';
-  cklist=(t.checklist||[]).map(x=>({...x}));drawCk();drawLog();drawFiles();
+  cklist=(t.checklist||[]).map(x=>({...x}));drawCk();drawLog();drawFiles();aiRes=null;drawAi();$("ai_row").style.display=aiAvail()?"":"none";
   $("b_del").style.display=editing?"":"none";
   $("dlg").showModal();setTimeout(()=>$("f_title").focus(),50);
 }
