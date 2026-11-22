@@ -1,0 +1,17 @@
+name: Haus-Planer
+version: "1.1.0"
+slug: haus_planer
+description: Aufgaben, Kanban-Board und Gantt-Zeitstrahl für zu Hause
+arch:
+  - aarch64
+  - amd64
+init: false
+startup: services
+boot: auto
+map:
+  - share:rw
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:home-city
+panel_title: Haus-Planer
+panel_admin: false
