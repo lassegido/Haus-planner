@@ -1,5 +1,10 @@
 # Änderungen
 
+## 1.13.0
+- Neu in den Einstellungen: „Form“ mit 11 Varianten (Flach, Schichten, Inseln, Redaktion, Bento, Zuschnitt, Kapsel, Ton, Kontrast, Mineral, Schiefer); sie ändern Karten, Spalten, Kennzahlen und Seitenleiste, unabhängig vom Farbdesign
+- Drei neue Farbdesigns: Salbei, Tinte, Nacht (jeweils auch dunkel)
+- Standard bleibt „Flach“, bestehende Einstellungen ändern sich nicht
+
 ## 1.12.0
 - Zeitraum per Kalender: ein Feld statt zwei Datumsfelder, Start und Ende nacheinander antippen; dazu „Heute“, „Diese Woche“, „Nächste Woche“
 - „Verantwortlich“ erlaubt mehrere Personen (Antippen zum An- und Abwählen, neue Personen per „+ Person“); Filter, Gruppierung und Zähler berücksichtigen alle
