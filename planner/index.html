@@ -647,111 +647,6 @@ td.late{background:none;padding:.4rem .8rem;border-radius:0}
 .dsec summary span{flex:1}.dsec summary em{font-style:normal;font-weight:500;color:var(--mut);font-size:.9rem}
 .dsec .dbody{padding:0 0 1rem}.dsec .dbody>label:first-child{margin-top:.1rem}
 #dlg label.sl{margin-top:1.1rem}
-/* 1.13: Formen */
-:root{--hl:rgba(255,255,255,.8);--shc:30,48,62}
-:root[data-theme="dark"]{--hl:rgba(255,255,255,.06);--shc:0,0,0}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--hl:rgba(255,255,255,.06);--shc:0,0,0}}
-.fp{flex:none;width:1.7rem;height:1.3rem;border:2px solid var(--tx);background:var(--card);display:inline-block;margin-right:.1rem}
-.srow>span:not(.dp):not(.fp){flex:1;min-width:0}
-/* Schichten */
-html[data-form="schichten"] .kn,html[data-form="schichten"] .card,html[data-form="schichten"] .pnl{background:var(--card);border:1px solid var(--line)!important;box-shadow:inset 0 1px 0 var(--hl),0 1px 2px rgba(var(--shc),.16),0 12px 20px -12px rgba(var(--shc),.5)}
-html[data-form="schichten"] .kn{border-radius:1.1rem;padding:.85rem 1rem!important;border-left:1px solid var(--line)!important}
-html[data-form="schichten"] .kp{gap:.8rem}
-html[data-form="schichten"] .colm{background:color-mix(in srgb,var(--tx) 6%,var(--bg));border:1px solid var(--line)!important;border-top:1px solid var(--line)!important;box-shadow:inset 0 3px 7px rgba(var(--shc),.16),inset 0 -1px 0 var(--hl)}
-html[data-form="schichten"] .card:hover{transform:translateY(-3px)}
-html[data-form="schichten"] .btn,html[data-form="schichten"] #new{box-shadow:0 3px 0 rgba(0,0,0,.22),0 6px 12px -6px rgba(var(--shc),.5)}
-html[data-form="schichten"] .hero{box-shadow:inset 0 1px 0 var(--hl),0 18px 28px -14px rgba(var(--shc),.7)}
-/* Inseln */
-html[data-form="inseln"] .colm{background:transparent!important;border:0!important;box-shadow:none!important;padding:.2rem .1rem}
-html[data-form="inseln"] .colm h3{background:var(--card);border-radius:2rem;padding:.6rem 1rem;margin:0 0 .9rem;box-shadow:0 10px 20px -12px rgba(var(--shc),.5),0 1px 2px rgba(var(--shc),.14)}
-html[data-form="inseln"] .card,html[data-form="inseln"] .pnl{border:0!important;border-radius:1.5rem;background:var(--card);box-shadow:0 1px 2px rgba(var(--shc),.12),0 14px 26px -14px rgba(var(--shc),.5);padding:1rem 1.1rem!important}
-html[data-form="inseln"] .pnl{border-radius:1.8rem}
-html[data-form="inseln"] .card:hover{transform:translateY(-4px)}
-html[data-form="inseln"] .kp{gap:.9rem}
-html[data-form="inseln"] .kn{background:var(--card);border:0!important;border-radius:1.6rem;padding:1.05rem 1.25rem!important;box-shadow:0 14px 26px -16px rgba(var(--shc),.5),0 1px 2px rgba(var(--shc),.12)}
-html[data-form="inseln"] .kn:nth-child(1){background:var(--acc);color:var(--on-acc)}html[data-form="inseln"] .kn:nth-child(1) *{color:inherit!important}
-html[data-form="inseln"] .kn b{font-size:2.3rem!important;letter-spacing:-.04em}
-html[data-form="inseln"] .chip,html[data-form="inseln"] .tc,html[data-form="inseln"] .btn,html[data-form="inseln"] .search input,html[data-form="inseln"] #q{border-radius:2rem!important}
-html[data-form="inseln"] .hero{border:0!important;border-radius:2rem;box-shadow:0 22px 36px -18px rgba(0,0,0,.55)}
-@media (min-width:761px){html[data-form="inseln"] .side{margin:.8rem 0 .8rem .8rem;border-radius:1.9rem;box-shadow:0 24px 44px -22px rgba(0,0,0,.6),0 2px 4px rgba(0,0,0,.2)}}
-/* Redaktion */
-html[data-form="redaktion"] *{border-radius:0!important}
-html[data-form="redaktion"] .av,html[data-form="redaktion"] .ring,html[data-form="redaktion"] .sdot,html[data-form="redaktion"] .hring,html[data-form="redaktion"] .sw{border-radius:50%!important}
-html[data-form="redaktion"] .colm{background:transparent!important;border:0!important;border-top:4px solid var(--c)!important;box-shadow:none!important;padding:.7rem 0 .2rem}
-html[data-form="redaktion"] .colm h3{font-size:1.15rem!important;font-weight:800;margin:0 0 .7rem}
-html[data-form="redaktion"] .card,html[data-form="redaktion"] .pnl{background:var(--card);border:1px solid var(--tx)!important;box-shadow:4px 4px 0 rgba(var(--shc),.16);padding:.9rem 1rem!important}
-html[data-form="redaktion"] .card:hover{box-shadow:6px 6px 0 var(--c,var(--tx));transform:translate(-2px,-2px)}
-html[data-form="redaktion"] .kn{border:0!important;border-top:1px solid var(--tx)!important;background:transparent;padding:.6rem 0 0!important}
-html[data-form="redaktion"] .kn b{font-size:2.6rem!important;font-weight:800;letter-spacing:-.04em}
-html[data-form="redaktion"] .kp{gap:1.8rem;margin-bottom:1rem}
-html[data-form="redaktion"] .hero{background:var(--card)!important;color:var(--tx);border:1px solid var(--tx)!important;box-shadow:6px 6px 0 var(--sun)}
-html[data-form="redaktion"] .hero *{color:var(--tx)!important}html[data-form="redaktion"] .hring .rt{stroke:var(--line2)!important}html[data-form="redaktion"] .hring .rg{stroke:var(--brick)!important}
-html[data-form="redaktion"] .chip,html[data-form="redaktion"] .tc,html[data-form="redaktion"] .cfgbtn,html[data-form="redaktion"] .search input,html[data-form="redaktion"] #q{border:1px solid var(--tx)!important}
-@media (min-width:761px){html[data-form="redaktion"] .side{background:var(--bg)!important;border-right:1px solid var(--tx);color:var(--tx)}
-html[data-form="redaktion"] .side *{opacity:1!important;color:var(--tx)}
-html[data-form="redaktion"] .side small,html[data-form="redaktion"] .side .wh{color:var(--mut)!important}
-html[data-form="redaktion"] .side .btn,html[data-form="redaktion"] #new{background:var(--tx)!important;color:var(--bg)!important;box-shadow:4px 4px 0 var(--sun)}
-html[data-form="redaktion"] .side .on,html[data-form="redaktion"] .side button.on{background:transparent!important;box-shadow:inset 3px 0 0 var(--brick);font-weight:700}}
-/* Bento */
-html[data-form="bento"] .kp{gap:.8rem}
-html[data-form="bento"] .kn{border:0!important;border-radius:1.7rem;padding:1.1rem 1.3rem!important;background:var(--card)}
-html[data-form="bento"] .kn:nth-child(1){background:var(--sun);color:#14303F}html[data-form="bento"] .kn:nth-child(1) *{color:#14303F!important}
-html[data-form="bento"] .kn:nth-child(3){background:color-mix(in srgb,var(--brick) 22%,var(--card))}
-html[data-form="bento"] .kn:nth-child(4){background:color-mix(in srgb,var(--sky) 38%,var(--card))}
-html[data-form="bento"] .kn b{font-size:2.5rem!important;letter-spacing:-.04em}
-html[data-form="bento"] .colm{border:0!important;border-radius:2rem!important;padding:1rem .8rem .4rem!important;box-shadow:none!important;background:color-mix(in srgb,var(--c) 30%,var(--bg))!important}
-html[data-form="bento"] .colm h3{margin:0 .3rem .9rem;font-size:1.1rem!important}
-html[data-form="bento"] .card{border:0!important;border-radius:1.2rem;background:var(--card);box-shadow:0 1px 2px rgba(var(--shc),.14);padding:.95rem 1rem!important}
-html[data-form="bento"] .card:hover{transform:scale(1.02);box-shadow:0 10px 20px -10px rgba(var(--shc),.45)}
-html[data-form="bento"] .hero{border-radius:2rem!important;box-shadow:none}
-html[data-form="bento"] .pnl{border:0!important;border-radius:1.8rem;background:var(--card);box-shadow:none}
-@media (min-width:761px){html[data-form="bento"] .side{border-radius:0 2rem 2rem 0}}
-/* Zuschnitt */
-html[data-form="zuschnitt"] .colm{background:transparent!important;border:0!important;box-shadow:none!important;padding:.2rem 0;filter:drop-shadow(0 2px 2px rgba(var(--shc),.24)) drop-shadow(0 10px 10px rgba(var(--shc),.12))}
-html[data-form="zuschnitt"] .colm h3{margin:0 0 .8rem;padding:.55rem .9rem;background:var(--c);color:#14303F;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,0 100%);font-size:1rem!important}
-html[data-form="zuschnitt"] .colm h3 em{color:#14303F}
-html[data-form="zuschnitt"] .card{border:0!important;border-left:5px solid var(--c)!important;border-radius:0!important;background:var(--card);clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,0 100%);padding:.9rem 1rem!important;box-shadow:none}
-html[data-form="zuschnitt"] .card:hover{transform:translateY(-3px)}
-html[data-form="zuschnitt"] .kp{gap:.8rem;filter:drop-shadow(0 2px 2px rgba(var(--shc),.22)) drop-shadow(0 8px 8px rgba(var(--shc),.1))}
-html[data-form="zuschnitt"] .kn{border:0!important;border-left:5px solid var(--tx)!important;border-radius:0;background:var(--card);clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,0 100%);padding:.9rem 1rem!important}
-html[data-form="zuschnitt"] .kn:nth-child(1){border-left-color:var(--sun)!important}html[data-form="zuschnitt"] .kn:nth-child(3){border-left-color:var(--brick)!important}html[data-form="zuschnitt"] .kn:nth-child(4){border-left-color:var(--sky)!important}
-html[data-form="zuschnitt"] .hero{border-radius:0!important;clip-path:polygon(0 0,calc(100% - 28px) 0,100% 28px,100% 100%,0 100%);box-shadow:none}
-html[data-form="zuschnitt"] .pnl{border:0!important;border-radius:0;background:var(--card);clip-path:polygon(0 0,calc(100% - 22px) 0,100% 22px,100% 100%,0 100%)}
-html[data-form="zuschnitt"] .chip,html[data-form="zuschnitt"] .tc,html[data-form="zuschnitt"] .search input,html[data-form="zuschnitt"] #q{border-radius:.2rem!important}
-/* Kapsel */
-html[data-form="kapsel"] .colm{border:0!important;border-radius:2.6rem!important;padding:1.1rem .8rem .5rem!important;box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--c) 45%,transparent)!important;background:color-mix(in srgb,var(--c) 10%,var(--bg))!important}
-html[data-form="kapsel"] .colm h3{justify-content:center;margin:0 0 1rem;font-size:1.05rem!important}
-html[data-form="kapsel"] .colm h3 em{margin-left:.5rem;background:var(--c);color:#14303F;border-radius:2rem;padding:0 .6rem}
-html[data-form="kapsel"] .card{border:0!important;border-radius:2.1rem!important;background:var(--card);padding:1rem 1.4rem!important;box-shadow:0 6px 14px -8px rgba(var(--shc),.4)}
-html[data-form="kapsel"] .card:hover{transform:translateY(-3px)}
-html[data-form="kapsel"] .kp{gap:.7rem}
-html[data-form="kapsel"] .kn{border:0!important;border-radius:999px;background:var(--card);padding:.7rem 1.5rem!important;display:flex;align-items:baseline;gap:.7rem;box-shadow:0 6px 14px -8px rgba(var(--shc),.4)}
-html[data-form="kapsel"] .kn b{font-size:1.9rem!important}
-html[data-form="kapsel"] .chip,html[data-form="kapsel"] .tc,html[data-form="kapsel"] .btn,html[data-form="kapsel"] .search input,html[data-form="kapsel"] #q,html[data-form="kapsel"] #new{border-radius:999px!important}
-html[data-form="kapsel"] .hero{border-radius:3rem!important;padding-left:2.2rem!important}
-html[data-form="kapsel"] .pnl{border:0!important;border-radius:2.4rem;background:var(--card);box-shadow:0 8px 18px -10px rgba(var(--shc),.4)}
-@media (min-width:761px){html[data-form="kapsel"] .side{border-radius:0 2.4rem 2.4rem 0}}
-/* Ton */
-html[data-form="ton"] .card,html[data-form="ton"] .kn,html[data-form="ton"] .pnl,html[data-form="ton"] .chip,html[data-form="ton"] .search input,html[data-form="ton"] #q{background:var(--bg);border:0!important;border-radius:1.4rem;box-shadow:7px 7px 14px rgba(var(--shc),.22),-6px -6px 12px var(--hl)}
-html[data-form="ton"] .kn{padding:1rem 1.2rem!important}html[data-form="ton"] .kp{gap:1rem}
-html[data-form="ton"] .colm{border:0!important;background:color-mix(in srgb,var(--tx) 4%,var(--bg))!important;border-radius:1.6rem;box-shadow:inset 5px 5px 10px rgba(var(--shc),.2),inset -5px -5px 10px var(--hl)!important}
-/* Kontrast */
-html[data-form="kontrast"] .card,html[data-form="kontrast"] .kn,html[data-form="kontrast"] .pnl{border:2px solid var(--tx)!important;border-radius:.5rem;background:var(--card);box-shadow:4px 4px 0 var(--tx)}
-html[data-form="kontrast"] .card:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--tx)}
-html[data-form="kontrast"] .kp{gap:1rem}
-html[data-form="kontrast"] .colm{border:2px solid var(--tx)!important;border-radius:.6rem;box-shadow:none!important}
-html[data-form="kontrast"] .hero{background:var(--sun)!important;color:#14303F;border:2px solid var(--tx)!important;border-radius:.6rem;box-shadow:4px 4px 0 var(--tx)}
-html[data-form="kontrast"] .hero *{color:#14303F!important}html[data-form="kontrast"] .hring .rt{stroke:rgba(0,0,0,.2)!important}html[data-form="kontrast"] .hring .rg{stroke:#14303F!important}
-/* Mineral */
-html[data-form="mineral"] .card{border:1px solid var(--line)!important;border-top:3px solid var(--c,var(--sky))!important;border-radius:.8rem;background:var(--card);box-shadow:0 1px 2px rgba(var(--shc),.14),0 10px 18px -12px rgba(var(--shc),.45)}
-html[data-form="mineral"] .kn{border:1px solid var(--line)!important;border-top:4px solid var(--acc)!important;border-radius:.8rem;background:var(--card);padding:.85rem 1rem!important;box-shadow:0 1px 2px rgba(var(--shc),.14),0 10px 18px -12px rgba(var(--shc),.45)}
-html[data-form="mineral"] .kp{gap:.8rem}
-html[data-form="mineral"] .colm{border:1px solid var(--line)!important;border-top:1px solid var(--line)!important;border-radius:.9rem;background:color-mix(in srgb,var(--tx) 5%,var(--bg))!important;box-shadow:inset 0 2px 5px rgba(var(--shc),.12)}
-/* Schiefer */
-html[data-form="schiefer"] .card,html[data-form="schiefer"] .kn,html[data-form="schiefer"] .pnl{border:1px solid var(--line2)!important;border-radius:.35rem;background:var(--card);box-shadow:0 1px 0 rgba(var(--shc),.1),0 2px 4px rgba(var(--shc),.12)}
-html[data-form="schiefer"] .kp{gap:.7rem}
-html[data-form="schiefer"] .colm{border:1px solid var(--line2)!important;border-top:3px solid var(--c)!important;border-radius:.4rem;background:color-mix(in srgb,var(--tx) 5%,var(--bg))!important;box-shadow:inset 0 1px 3px rgba(var(--shc),.14)}
-html[data-form="schiefer"] .hero{border-radius:.4rem}
 /* 1.13.1: Handy, mehr Platz */
 @media (max-width:699px){
   .bar{padding:max(.55rem,var(--sat)) .85rem 0}
@@ -762,6 +657,13 @@ html[data-form="schiefer"] .hero{border-radius:.4rem}
   .board{grid-auto-columns:92%!important}
   html.emb .side{bottom:.5rem}
   .card{padding:.8rem .9rem .75rem}
+}
+/* 1.15.1: Liste und Filterleiste auf dem Handy */
+@media (max-width:699px){
+  table{border-spacing:0}
+  tr.row{margin-bottom:.6rem}
+  .tbar{flex-wrap:wrap;row-gap:.5rem}
+  .tchips{flex:1 1 100%;min-width:0}
 }
 </style>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"></head>
@@ -1048,9 +950,6 @@ function applyTheme(){
   const d=DES.find(x=>x[0]===ds);if(d&&d[2])d[dark?3:2].forEach((v,i)=>r.style.setProperty(DK[i],v));
   const a=ACC[ac];if(a){const v=a[dark?"d":"l"];[["--acc",0],["--on-acc",1],["--acc-soft",2],["--tagc",3],["--focus",0],["--side",4]].forEach(([k,i])=>r.style.setProperty(k,v[i]))}
 }
-const FORMS=[["flach","Flach","Die bisherige, ruhige Darstellung.","0"],["schichten","Schichten","Erhabene Karten, Spalten als Mulden.",".5rem"],["inseln","Inseln","Freie, runde Karten und eine schwebende Seitenleiste.","1rem"],["redaktion","Redaktion","Eckig, Linien, große Zahlen.","0"],["bento","Bento","Große farbige Kacheln.",".9rem"],["zuschnitt","Zuschnitt","Abgeschrägte Ecken mit Statuskante.","0 .6rem 0 0"],["kapsel","Kapsel","Alles rund, Pillen und Bahnen.","999px"],["ton","Ton","Weich geformt, Licht von links oben.",".7rem"],["kontrast","Kontrast","Kräftige Linien, harter Schatten.",".2rem"],["mineral","Mineral","Statuslinie oben an jeder Karte.",".3rem"],["schiefer","Schiefer","Scharfkantig und nüchtern.",".1rem"]];
-function applyForm(){const k=pg("form")||"flach";document.documentElement.dataset.form=FORMS.some(f=>f[0]===k)?k:"flach"}
-applyForm();
 applyTheme();
 matchMedia("(prefers-color-scheme:dark)").addEventListener("change",applyTheme);
 
@@ -1086,19 +985,19 @@ $("a_empty").onclick=async()=>{const T=RAW.filter(t=>t.del);if(T.length&&confirm
 /* Einstellungen */
 let sPage="main";
 const CH='<svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',CK='<svg class="ck" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
-const THN={auto:"Automatisch",light:"Hell",dark:"Dunkel"},STT={theme:"Darstellung",form:"Form",des:"Farbdesign",acc:"Akzentfarbe",font:"Schriftart",me:"Ich bin",keys:"Tastaturkürzel"};
+const THN={auto:"Automatisch",light:"Hell",dark:"Dunkel"},STT={theme:"Darstellung",des:"Farbdesign",acc:"Akzentfarbe",font:"Schriftart",me:"Ich bin",keys:"Tastaturkürzel"};
 const PREV='<div class="prev" aria-label="Vorschau"><div class="pv-side"><i></i><i></i><i></i></div><div class="pv-main"><div class="pv-h">Planner</div><div class="pv-cols"><div><em class="c1"></em><span>Dachrinne reinigen</span></div><div><em class="c2"></em><span>Kinderzimmer streichen</span></div><div><em class="c3"></em><span>Steuer abheften</span></div></div><div class="pv-b"><b>Speichern</b><u>Abbrechen</u></div></div></div>';
 const srow=(a,l,v,x,chev=true)=>`<button class="srow" ${a}>${x||""}<span>${l}</span>${v!=null?`<em>${v}</em>`:""}${chev?CH:""}</button>`;
 const sopt=(a,l,on,x,st)=>`<button class="srow opt${on?" on":""}" ${a}>${x||""}<span${st?` style="${st}"`:""}>${l}</span>${on?CK:""}</button>`;
 function dpHtml(l,d){const dk=isDark(),v=l?(dk?d:l):null,c=v?[v[0],v[9],v[11]]:dk?["#0E1E27","#0A171E","#6CB6E4"]:["#F5F3EB","#2D6786","#387CA3"];return `<span class="dp" style="background:${c[0]}"><i style="background:${c[1]}"></i><b style="background:${c[2]}"></b><u style="background:${c[2]}"></u></span>`}
 function drawSettings(){
-  const fm=prefGet("form")||"flach",th=prefGet("theme")||"auto",ac=prefGet("acc")||"",ds=prefGet("design")||"porto",fk=prefGet("font")||"figtree",me=prefGet("me")||"";
+  const th=prefGet("theme")||"auto",ac=prefGet("acc")||"",ds=prefGet("design")||"porto",fk=prefGet("font")||"figtree",me=prefGet("me")||"";
   $("s_back").hidden=sPage==="main";$("s_title").textContent=sPage==="main"?"Einstellungen":STT[sPage];
   const grp=x=>`<div class="sgrp">${x}</div>`,cap=t=>`<p class="scap">${t}</p>`;let h="";
   if(sPage==="main"){
     const dn=tasks.filter(t=>t.status==="done").length,A=RAW.filter(t=>t.arch&&!t.del).length,T=RAW.filter(t=>t.del).length;
     const accN=ac?(ACCS.find(x=>x[0]===ac)||[,"Eigene"])[1]:"Passend",accD=`<i class="sdot sm" style="background:var(--acc)"></i> `;
-    h=`<p class="sgt">Erscheinungsbild</p>`+grp(srow('data-go="theme"',"Darstellung",THN[th])+srow('data-go="form"',"Form",(FORMS.find(x=>x[0]===fm)||FORMS[0])[1])+srow('data-go="des"',"Farbdesign",DES.find(x=>x[0]===ds)[1])+srow('data-go="acc"',"Akzentfarbe",accD+accN)+srow('data-go="font"',"Schriftart",(FONTS.find(x=>x[0]===fk)||FONTS[0])[1]))
+    h=`<p class="sgt">Erscheinungsbild</p>`+grp(srow('data-go="theme"',"Darstellung",THN[th])+srow('data-go="des"',"Farbdesign",DES.find(x=>x[0]===ds)[1])+srow('data-go="acc"',"Akzentfarbe",accD+accN)+srow('data-go="font"',"Schriftart",(FONTS.find(x=>x[0]===fk)||FONTS[0])[1]))
      +`<p class="sgt">Persönlich</p>`+grp(srow('data-go="me"',"Ich bin",me||"Keine Angabe"))
      +`<p class="sgt">Aufgaben</p>`+grp(srow(`data-act="arch"${dn?"":" disabled"}`,"Erledigte archivieren",dn?String(dn):"Keine",null,false)+srow('data-act="open"',"Archiv und Papierkorb",A+T?(A+T)+(A+T===1?" Eintrag":" Einträge"):"Leer"));
     const hi=haInfo;
@@ -1113,8 +1012,6 @@ function drawSettings(){
     if(matchMedia("(hover:hover)").matches)h+=`<p class="sgt">Hilfe</p>`+grp(srow('data-go="keys"',"Tastaturkürzel"));
   }else if(sPage==="theme"){
     h=PREV+grp(Object.keys(THN).map(k=>sopt(`data-set="theme:${k}"`,THN[k],k===th)).join(""))+cap("Automatisch folgt der Einstellung deines Geräts.");
-  }else if(sPage==="form"){
-    h=PREV+grp(FORMS.map(([k,n,d,r])=>sopt(`data-set="form:${k}"`,n,k===fm,`<span class="fp" style="border-radius:${r}"></span>`)).join(""))+cap((FORMS.find(x=>x[0]===fm)||FORMS[0])[2]);
   }else if(sPage==="des"){
     h=PREV+grp(DES.map(([k,n,l,d])=>sopt(`data-set="des:${k}"`,n,k===ds,dpHtml(l,d))).join(""));
   }else if(sPage==="acc"){
@@ -1135,7 +1032,7 @@ $("s_body").onclick=async e=>{
   const b=e.target.closest("button");if(!b||b.disabled)return;const d=b.dataset;
   if(d.go){sPage=d.go;drawSettings();$("dls").scrollTop=0;return}
   if(d.set){const i=d.set.indexOf(":"),k=d.set.slice(0,i),v=d.set.slice(i+1);
-    if(k==="theme"){prefSet("theme",v);applyTheme()}else if(k==="form"){prefSet("form",v);applyForm()}else if(k==="des"){prefSet("design",v);prefSet("acc","");applyTheme()}
+    if(k==="theme"){prefSet("theme",v);applyTheme()}else if(k==="des"){prefSet("design",v);prefSet("acc","");applyTheme()}
     else if(k==="acc"){prefSet("acc",v);applyTheme()}else if(k==="font"){prefSet("font",v);applyFont()}else if(k==="me")prefSet("me",v);
     drawSettings();return}
   if(d.act==="arch"){const L=tasks.filter(t=>t.status==="done");if(!L.length)return;await saveMany(L.map(t=>({...t,arch:true})));$("dls").close();toast(L.length+" erledigte archiviert",()=>saveMany(L))}

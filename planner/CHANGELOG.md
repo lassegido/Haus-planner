@@ -1,5 +1,9 @@
 # Änderungen
 
+## 1.15.1
+- Liste auf dem Handy: Zeilen haben wieder Abstand und kleben nicht mehr aneinander; die Filter-Pillen liegen in einer eigenen Zeile und werden nicht mehr vom „Gruppieren“-Knopf überdeckt
+- Die Auswahl „Form“ ist aus den Einstellungen entfernt; es gilt wieder durchgehend die flache Darstellung
+
 ## 1.15.0
 - Technische Umbenennung: Slug, Ordner und Sensor-IDs heißen jetzt `planner` (Sensoren: `sensor.planner_offen`, `_in_arbeit`, `_ueberfaellig`, `_heute_faellig`); der Spiegel liegt unter `share/planner/`
 - Für Home Assistant ist das ein neues Add-on: beim ersten Start übernimmt es Aufgaben, Tags und Dateianhänge automatisch aus dem alten Spiegel `share/haus_planer/`
