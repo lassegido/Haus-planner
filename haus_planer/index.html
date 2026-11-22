@@ -811,7 +811,7 @@ matchMedia("(prefers-color-scheme:dark)").addEventListener("change",applyTheme);
 const SYSF='-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
 const FONTS=[["sys","Systemschrift","",SYSF],["figtree","Figtree","Figtree:wght@400;500;600;700;800",'"Figtree",'+SYSF],["jakarta","Plus Jakarta Sans","Plus+Jakarta+Sans:wght@400;500;600;700;800",'"Plus Jakarta Sans",'+SYSF],["dmsans","DM Sans","DM+Sans:wght@400;500;600;700",'"DM Sans",'+SYSF],["manrope","Manrope","Manrope:wght@400;500;600;700;800",'"Manrope",'+SYSF],["inter","Inter","Inter:wght@400;500;600;700",'"Inter",'+SYSF]];
 function applyFont(){
-  const k=prefGet("font")||"sys",f=FONTS.find(x=>x[0]===k)||FONTS[0],r=document.documentElement;
+  const k=prefGet("font")||"figtree",f=FONTS.find(x=>x[0]===k)||FONTS[0],r=document.documentElement;
   if(f[2]&&!document.getElementById("gf-"+f[0])){const l=document.createElement("link");l.id="gf-"+f[0];l.rel="stylesheet";l.href="https://fonts.googleapis.com/css2?family="+f[2]+"&display=swap";document.head.appendChild(l)}
   r.style.setProperty("--fb",f[3]);r.style.setProperty("--disp",f[3])}
 applyFont();
@@ -841,7 +841,7 @@ $("a_empty").onclick=async()=>{const T=RAW.filter(t=>t.del);if(T.length&&confirm
 function drawSettings(){
   const th=prefGet("theme")||"auto",ac=prefGet("acc")||"sea";
   $("s_theme").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.th===th));
-  {const fk=prefGet("font")||"sys";$("s_font").innerHTML=FONTS.map(f=>`<button data-font="${f[0]}" class="${f[0]===fk?"on":""}" style="font-family:${f[3].replace(/"/g,"&quot;")}">${f[1]}</button>`).join("")}
+  {const fk=prefGet("font")||"figtree";$("s_font").innerHTML=FONTS.map(f=>`<button data-font="${f[0]}" class="${f[0]===fk?"on":""}" style="font-family:${f[3].replace(/"/g,"&quot;")}">${f[1]}</button>`).join("")}
   $("s_me").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.me===(prefGet("me")||"")));
   $("s_acc").innerHTML=ACCS.map(([k,n,c])=>`<button class="sw${k===ac?" on":""}" data-acc="${k}" style="--tc:${c}" aria-label="${n}" title="${n}"></button>`).join("");
   const dn2=tasks.filter(t=>t.status==="done").length,A=RAW.filter(t=>t.arch&&!t.del).length,T=RAW.filter(t=>t.del).length;

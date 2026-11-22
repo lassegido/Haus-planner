@@ -1,5 +1,8 @@
 # Änderungen
 
+## 1.8.2
+- Standardschrift ist jetzt Figtree (Einstellungen → Schriftart, dort lässt sich wieder auf Systemschrift oder andere wechseln)
+
 ## 1.8.1
 - Outlook-Anbindung und die Backlog-Spalte wieder entfernt. Vorhandene Backlog-Aufgaben erscheinen unter „Zu starten". Der .ics-Export unter Export bleibt
 - Gleich große Auswahlfelder, Farbkonzept und Schriftwahl aus 1.8.0 bleiben
