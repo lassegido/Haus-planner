@@ -28,6 +28,7 @@ SCHEMA = 2  # Datenformat-Version; neuere Dateien werden nie abwärts beschnitte
 ICON = re.compile(r"[a-z]{2,20}")
 OPTS = os.path.join(D, "options.json")
 HASTATE = os.path.join(D, "ha_state.json")
+SETTINGS = os.path.join(D, "settings.json")  # Auswahl aus der App (Erinnerung), hat Vorrang vor der Add-on-Konfiguration
 SUP = os.environ.get("SUPERVISOR_URL", "http://supervisor/core/api")
 TOKEN = os.environ.get("SUPERVISOR_TOKEN", "")
 ha = {"tz": None, "last": ""}
@@ -216,9 +217,35 @@ def options():
         return {}
 
 
+def app_settings():
+    try:
+        with open(SETTINGS, encoding="utf-8") as f:
+            d = json.load(f)
+            return d if isinstance(d, dict) else {}
+    except Exception:
+        return {}
+
+
+def save_app_settings(d):
+    tmp = SETTINGS + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(d, f, ensure_ascii=False)
+    os.replace(tmp, SETTINGS)
+
+
+def remind_time():
+    t = app_settings().get("time")
+    if isinstance(t, str) and re.fullmatch(r"([01][0-9]|2[0-3]):[0-5][0-9]", t):
+        return t
+    return str(options().get("reminder_time") or "08:00")
+
+
 def services():
     out = []
-    for x in str(options().get("notify_service") or "").split(","):
+    st = app_settings()
+    raw = st["notify"] if isinstance(st.get("notify"), list) else str(options().get("notify_service") or "").split(",")
+    for x in raw:
+        x = str(x)
         x = x.strip()
         if x.startswith("notify."):
             x = x[7:]
@@ -229,7 +256,7 @@ def services():
 
 def ha_info():
     o = options()
-    return {"api": bool(TOKEN), "notify": services(), "time": str(o.get("reminder_time") or "08:00"),
+    return {"api": bool(TOKEN), "notify": services(), "time": remind_time(),
             "sensors": bool(o.get("sensors", True)),
             "ai": bool(str(o.get("anthropic_api_key") or "").strip()), "model": str(o.get("ai_model") or "claude-haiku-5-5")}
 
@@ -342,7 +369,7 @@ def ha_tick():
                                      ("ueberfaellig", "Planner überfällig", "mdi:alert-circle-outline", late),
                                      ("heute_faellig", "Planner heute fällig", "mdi:calendar-today", due)):
             put_sensor(key, name, len(lst), icon, [t["title"] for t in lst])
-    when = str(o.get("reminder_time") or "08:00")
+    when = remind_time()
     if services() and now.strftime("%H:%M") >= when and ha["last"] != today:
         if due or late:
             notify(reminder_text(due, late))
@@ -377,6 +404,19 @@ class H(BaseHTTPRequestHandler):
 
     def do_GET(self):
         u = urlparse(self.path)
+        if u.path.endswith("/api/ha-notify"):
+            try:
+                if not TOKEN:
+                    raise RuntimeError("Keine Verbindung zu Home Assistant")
+                out = []
+                for dom in ha_call("GET", "/services") or []:
+                    if dom.get("domain") == "notify":
+                        for name in sorted((dom.get("services") or {}).keys()):
+                            if name not in ("notify", "send_message", "persistent_notification") and re.fullmatch(r"[A-Za-z0-9_]+", name):
+                                out.append(name)
+                return self.out(200, {"ok": True, "services": out})
+            except Exception as e:
+                return self.out(200, {"ok": False, "error": str(e)[:200], "services": []})
         if u.path.endswith("/api/tasks"):
             q = parse_qs(u.query).get("rev", [""])[0]
             with LOCK:
@@ -476,6 +516,16 @@ class H(BaseHTTPRequestHandler):
                 return self.out(200, {"ok": True, "data": ai_call(p, bool(data.get("raw")))})
             except Exception as e:
                 return self.out(200, {"ok": False, "error": str(e)[:200]})
+        if path.endswith("/api/ha-settings"):
+            if not isinstance(data, dict):
+                return self.out(400, {"error": "Ungültig"})
+            st = app_settings()
+            if isinstance(data.get("notify"), list):
+                st["notify"] = [str(x)[:80] for x in data["notify"][:12] if re.fullmatch(r"[A-Za-z0-9_]+", str(x))]
+            if isinstance(data.get("time"), str) and re.fullmatch(r"([01][0-9]|2[0-3]):[0-5][0-9]", data["time"]):
+                st["time"] = data["time"]
+            save_app_settings(st)
+            return self.out(200, {"ok": True, "ha": ha_info()})
         if path.endswith("/api/ha-test"):
             try:
                 if not TOKEN:

@@ -31,9 +31,9 @@ Zugriff von außen nur über Nabu Casa oder ein VPN (z. B. Tailscale).
 
 ## Erinnerungen aufs Handy
 
-1. **Einstellungen → Add-ons → Planner → Konfiguration.**
-2. Bei **notify_service** den Namen des Benachrichtigungsdienstes der Home-Assistant-App eintragen, z. B. `mobile_app_iphone_von_lasse` (zu finden unter Entwicklerwerkzeuge → Aktionen, Suche nach „notify."). Mehrere Geräte durch Komma trennen.
-3. **reminder_time** ist die Uhrzeit der täglichen Erinnerung (Standard 08:00, in der Zeitzone von Home Assistant). Sie kommt nur, wenn etwas heute fällig oder überfällig ist.
+1. Im Planner **Einstellungen → Home Assistant → Erinnerung** öffnen.
+2. Die Geräte auswählen, die erinnert werden sollen (alle Benachrichtigungsdienste der Home-Assistant-App werden automatisch gefunden). Mehrere sind möglich.
+3. Unter **Uhrzeit** die Zeit der täglichen Erinnerung wählen (Standard 08:00, in der Zeitzone von Home Assistant). Sie kommt nur, wenn etwas heute fällig oder überfällig ist.
 4. Speichern und das Add-on neu starten. In der App unter **Einstellungen** gibt es einen Knopf „Testbenachrichtigung senden".
 
 ## Sensoren

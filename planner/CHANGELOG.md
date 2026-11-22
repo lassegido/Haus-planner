@@ -1,5 +1,9 @@
 # Änderungen
 
+## 1.16.0
+- Erinnerung ohne Tippen: In den Einstellungen des Planners wählst du unter Home Assistant → Erinnerung die Geräte aus einer Liste (alle gefundenen Benachrichtigungsdienste, z. B. dein iPhone) und die Uhrzeit aus einer Liste. Die Auswahl wird im Add-on gespeichert und hat Vorrang vor der alten Konfiguration
+- Konfiguration in Home Assistant: Die Felder Benachrichtigungsdienst und Uhrzeit entfallen; das KI-Modell ist eine Auswahlliste (Haiku, Sonnet, Opus); der Port 8099 ist vorbelegt. Nur der API-Schlüssel muss getippt werden, und nur wer die KI nutzen will
+
 ## 1.15.3
 - Konfigurationsseite in Home Assistant: Alle Einstellungen haben jetzt deutsche Namen und kurze Erklärungen (Benachrichtigungsdienst, Uhrzeit der Erinnerung, Sensoren, KI-Schlüssel, KI-Modell) sowie eine verständliche Beschreibung des Ports 8099
 

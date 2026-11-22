@@ -769,7 +769,7 @@ td.late{background:none;padding:.4rem .8rem;border-radius:0}
 const wl=t=>String(t.who||"").split(",").map(x=>x.trim()).filter(Boolean);
 const allWho=()=>[...new Set(["Melanie","Lasse",...tasks.flatMap(wl)])];
 const ST={todo:"Offen",doing:"In Arbeit",done:"Erledigt"},NEXT={todo:"doing",doing:"done",done:"todo"};
-let RAW=[],tasks=[],selMode=false,sel=new Set(),haInfo=null,purged=false,reg=[],ftags=new Set(),fprojs=new Set(),grp="none",selTags=[],regDraft=null,colorFor=null,palOpen=null,view="home",col=null,editing=null,loaded=false;
+let RAW=[],tasks=[],selMode=false,sel=new Set(),haInfo=null,haAvail=null,purged=false,reg=[],ftags=new Set(),fprojs=new Set(),grp="none",selTags=[],regDraft=null,colorFor=null,palOpen=null,view="home",col=null,editing=null,loaded=false;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const iso=d=>d.toISOString().slice(0,10);
@@ -985,9 +985,13 @@ $("a_empty").onclick=async()=>{const T=RAW.filter(t=>t.del);if(T.length&&confirm
 /* Einstellungen */
 let sPage="main";
 const CH='<svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',CK='<svg class="ck" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
-const THN={auto:"Automatisch",light:"Hell",dark:"Dunkel"},STT={theme:"Darstellung",des:"Farbdesign",acc:"Akzentfarbe",font:"Schriftart",me:"Ich bin",keys:"Tastaturkürzel"};
+const THN={auto:"Automatisch",light:"Hell",dark:"Dunkel"},STT={rem:"Erinnerung",remt:"Uhrzeit",theme:"Darstellung",des:"Farbdesign",acc:"Akzentfarbe",font:"Schriftart",me:"Ich bin",keys:"Tastaturkürzel"};
 const PREV='<div class="prev" aria-label="Vorschau"><div class="pv-side"><i></i><i></i><i></i></div><div class="pv-main"><div class="pv-h">Planner</div><div class="pv-cols"><div><em class="c1"></em><span>Dachrinne reinigen</span></div><div><em class="c2"></em><span>Kinderzimmer streichen</span></div><div><em class="c3"></em><span>Steuer abheften</span></div></div><div class="pv-b"><b>Speichern</b><u>Abbrechen</u></div></div></div>';
 const srow=(a,l,v,x,chev=true)=>`<button class="srow" ${a}>${x||""}<span>${l}</span>${v!=null?`<em>${v}</em>`:""}${chev?CH:""}</button>`;
+const REMT=[];for(let h=5;h<=22;h++){REMT.push(String(h).padStart(2,"0")+":00");if(h<22)REMT.push(String(h).padStart(2,"0")+":30")}
+const ntfName=x=>x.replace(/^mobile_app_/,"").split("_").map(w=>w==="von"?w:w==="iphone"?"iPhone":w==="ipad"?"iPad":w.charAt(0).toUpperCase()+w.slice(1)).join(" ");
+async function haSave(o){try{const r=await api("api/ha-settings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(o)});if(r.ha)haInfo=r.ha}catch(e){toast("Speichern fehlgeschlagen")}}
+async function loadAvail(){try{const r=await api("api/ha-notify");haAvail=r.services||[]}catch(e){haAvail=[]}if($("dls").open&&sPage==="rem")drawSettings()}
 const sopt=(a,l,on,x,st)=>`<button class="srow opt${on?" on":""}" ${a}>${x||""}<span${st?` style="${st}"`:""}>${l}</span>${on?CK:""}</button>`;
 function dpHtml(l,d){const dk=isDark(),v=l?(dk?d:l):null,c=v?[v[0],v[9],v[11]]:dk?["#0E1E27","#0A171E","#6CB6E4"]:["#F5F3EB","#2D6786","#387CA3"];return `<span class="dp" style="background:${c[0]}"><i style="background:${c[1]}"></i><b style="background:${c[2]}"></b><u style="background:${c[2]}"></u></span>`}
 function drawSettings(){
@@ -1004,12 +1008,21 @@ function drawSettings(){
     if(hi){const n=(hi.notify||[]).length;
       h+=`<p class="sgt">Home Assistant</p>`+grp(
         srow("",`Verbindung`,hi.api?"Aktiv":"Nicht verfügbar",null,false)
-       +srow("",`Erinnerung`,n?"Täglich "+esc(hi.time)+" Uhr":"Aus",null,false)
+       +(hi.api?srow('data-go="rem"',`Erinnerung`,n?"Täglich "+esc(hi.time)+" Uhr":"Aus"):srow("",`Erinnerung`,"Aus",null,false))
        +srow("",`KI-Assistent`,hi.ai?esc(hi.model):"Aus",null,false)
        +srow("","Sensoren",hi.sensors?"Aktiv":"Aus",null,false)
        +srow(`data-act="hatest"${hi.api&&n?"":" disabled"}`,"Testnachricht senden",null,null,false))
-       +(n&&hi.ai?"":cap("Erinnerung und KI richtest du in Home Assistant unter Add-on → Konfiguration ein."))}
+       +(hi.ai?"":cap("Den KI-Assistenten schaltest du in Home Assistant unter Add-on → Konfiguration frei (API-Schlüssel eintragen)."))}
     if(matchMedia("(hover:hover)").matches)h+=`<p class="sgt">Hilfe</p>`+grp(srow('data-go="keys"',"Tastaturkürzel"));
+  }else if(sPage==="rem"){
+    const sel=new Set((haInfo&&haInfo.notify)||[]),av=haAvail;
+    if(av===null)h=cap("Lade Geräte …");
+    else{const names=[...new Set([...av,...sel])];
+      h=(names.length?grp(names.map(x=>sopt(`data-set="ntf:${x}"`,esc(ntfName(x)),sel.has(x))).join("")):cap("Es wurde kein Gerät gefunden. Installiere die Home-Assistant-App auf dem Handy und melde dich an."))
+       +cap("Wähle die Geräte, die täglich an fällige und überfällige Aufgaben erinnert werden. Ohne Auswahl ist die Erinnerung aus.")
+       +grp(srow('data-go="remt"',"Uhrzeit",esc((haInfo&&haInfo.time)||"08:00")+" Uhr")+srow(`data-act="hatest"${sel.size?"":" disabled"}`,"Testnachricht senden",null,null,false))}
+  }else if(sPage==="remt"){
+    h=grp(REMT.map(t=>sopt(`data-set="rtime:${t}"`,t+" Uhr",t===(haInfo&&haInfo.time))).join(""));
   }else if(sPage==="theme"){
     h=PREV+grp(Object.keys(THN).map(k=>sopt(`data-set="theme:${k}"`,THN[k],k===th)).join(""))+cap("Automatisch folgt der Einstellung deines Geräts.");
   }else if(sPage==="des"){
@@ -1027,12 +1040,14 @@ function drawSettings(){
 }
 function openSettings(){sPage="main";drawSettings();$("dls").showModal();$("dls").scrollTop=0}
 $("cfg").onclick=openSettings;$("s_close").onclick=()=>$("dls").close();
-$("s_back").onclick=()=>{sPage="main";drawSettings();$("dls").scrollTop=0};
+$("s_back").onclick=()=>{sPage=sPage==="remt"?"rem":"main";drawSettings();$("dls").scrollTop=0};
 $("s_body").onclick=async e=>{
   const b=e.target.closest("button");if(!b||b.disabled)return;const d=b.dataset;
-  if(d.go){sPage=d.go;drawSettings();$("dls").scrollTop=0;return}
+  if(d.go){sPage=d.go;if(d.go==="rem"&&haAvail===null)loadAvail();drawSettings();$("dls").scrollTop=0;return}
   if(d.set){const i=d.set.indexOf(":"),k=d.set.slice(0,i),v=d.set.slice(i+1);
     if(k==="theme"){prefSet("theme",v);applyTheme()}else if(k==="des"){prefSet("design",v);prefSet("acc","");applyTheme()}
+    else if(k==="ntf"){const cur=new Set((haInfo&&haInfo.notify)||[]);cur.has(v)?cur.delete(v):cur.add(v);await haSave({notify:[...cur]})}
+    else if(k==="rtime"){await haSave({time:v});sPage="rem"}
     else if(k==="acc"){prefSet("acc",v);applyTheme()}else if(k==="font"){prefSet("font",v);applyFont()}else if(k==="me")prefSet("me",v);
     drawSettings();return}
   if(d.act==="arch"){const L=tasks.filter(t=>t.status==="done");if(!L.length)return;await saveMany(L.map(t=>({...t,arch:true})));$("dls").close();toast(L.length+" erledigte archiviert",()=>saveMany(L))}
