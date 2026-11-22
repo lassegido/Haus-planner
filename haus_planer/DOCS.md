@@ -1,4 +1,4 @@
-# Haus-Planer
+# Haus-planner
 
 Aufgaben, Board, Liste und Zeitstrahl für zu Hause. Läuft komplett lokal auf deinem Home Assistant.
 
@@ -15,7 +15,7 @@ Aufgaben, Board, Liste und Zeitstrahl für zu Hause. Läuft komplett lokal auf d
 Der Code kommt von GitHub. Wenn dort eine neue Version liegt:
 
 1. **Einstellungen → Add-ons → Add-on-Store → ⋮ (oben rechts) → Nach Updates suchen.**
-2. Beim Haus-Planer auf **Aktualisieren** klicken.
+2. Beim Haus-planner auf **Aktualisieren** klicken.
 3. In der App unter **Export** steht unten die installierte Version.
 
 Die Aufgaben bleiben dabei erhalten. **Nicht deinstallieren**, um zu aktualisieren: Nur beim Deinstallieren werden die Daten im Add-on gelöscht.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Erzeugt die Add-on-Version (haus_planer/index.html + VERSION) aus der Master-Datei src/haus-planer.html.
+"""Erzeugt die Add-on-Version (haus_planer/index.html + VERSION) aus der Master-Datei src/haus-planner.html.
 
 Aufruf im Repository-Hauptordner:  python3 tools/build.py
 Die Versionsnummer kommt aus haus_planer/config.yaml (Zeile "version").
@@ -7,7 +7,7 @@ Die Versionsnummer kommt aus haus_planer/config.yaml (Zeile "version").
 import os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(ROOT, "src", "haus-planer.html")
+SRC = os.path.join(ROOT, "src", "haus-planner.html")
 ADDON = os.path.join(ROOT, "haus_planer")
 
 cfg = open(os.path.join(ADDON, "config.yaml"), encoding="utf-8").read()
@@ -54,7 +54,7 @@ dl = '''async function dl(name,data){
 '''
 s, n = re.subn(r"async function dl\(name,data\)\{.*\n", lambda m: dl, s, count=1)
 if n != 1:
-    sys.exit("FEHLER: dl()-Funktion in src/haus-planer.html nicht gefunden")
+    sys.exit("FEHLER: dl()-Funktion in src/haus-planner.html nicht gefunden")
 if "claude.use" in s or "localStorage" in s:
     sys.exit("FEHLER: Claude-/Browser-spezifischer Code ist noch in der Add-on-Version")
 

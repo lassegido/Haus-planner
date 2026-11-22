@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Haus-Planer">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Haus-planner">
 <meta name="theme-color" content="#F5F3EB" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0E1E27" media="(prefers-color-scheme: dark)">
-<title>Haus-Planer</title>
+<title>Haus-planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -249,7 +249,7 @@ label{display:block;font-size:.76rem;font-weight:650;color:var(--mut);margin:1re
 <body>
 <div class="app">
 <aside class="side">
-  <div class="brand"><svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5.5h4V20"/></svg><span class="bn">Haus-Planer</span></div>
+  <div class="brand"><svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5.5h4V20"/></svg><span class="bn">Haus-planner</span></div>
   <button class="add" id="add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span class="l-w">Neue Aufgabe</span><span class="l-n">Neu</span></button>
   <nav class="tabs" id="tabs">
     <button data-v="board" class="on"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="4.5" height="15" rx="1.2"/><rect x="9.75" y="4.5" width="4.5" height="9" rx="1.2"/><rect x="16" y="4.5" width="4.5" height="12" rx="1.2"/></svg><span>Board</span></button>
@@ -506,7 +506,7 @@ async function dl(name,data){try{const d=await window.claude.use("downloads");if
 const stamp=()=>iso(new Date()),fdl=s=>fromDn(dn(s)).toLocaleDateString("de-DE",{timeZone:"UTC"});
 $("exp").onclick=()=>$("dlx").showModal();
 $("x_close").onclick=()=>$("dlx").close();
-$("x_json").onclick=()=>dl("haus-planer-backup-"+stamp()+".json",new Blob([JSON.stringify({version:1,exportiert:new Date().toISOString(),tasks},null,2)],{type:"application/json"}));
+$("x_json").onclick=()=>dl("haus-planner-backup-"+stamp()+".json",new Blob([JSON.stringify({version:1,exportiert:new Date().toISOString(),tasks},null,2)],{type:"application/json"}));
 $("x_imp").onclick=()=>$("imp").click();
 $("imp").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const j=JSON.parse(await f.text()),arr=Array.isArray(j)?j:j.tasks;if(!Array.isArray(arr))throw 0;if(!confirm(arr.length+" Aufgaben einspielen? Vorhandene mit gleicher ID werden überschrieben."))return;for(const t of arr)if(t&&t.id&&t.title&&t.start&&t.end)await saveTask(t);$("dlx").close()}catch(x){alert("Die Datei konnte nicht gelesen werden.")}e.target.value=""};
 $("x_pdf").onclick=()=>{
@@ -515,7 +515,7 @@ $("x_pdf").onclick=()=>{
   const c2=s=>String(s??"").replace(/[^\u0000-\u00ff]/g,"");
   const ln=(txt,sz=10,b=0,ind=0,c=[30,30,30])=>{doc.setFont("helvetica",b?"bold":"normal");doc.setFontSize(sz);doc.setTextColor(...c);for(const l of doc.splitTextToSize(c2(txt),182-ind)){if(y>282){doc.addPage();y=18}doc.text(l,L+ind,y);y+=sz*.45}};
   const grey=[90,90,90],list=tasks.slice().sort((a,b)=>dn(a.start)-dn(b.start)||dn(a.end)-dn(b.end)),n=list.length;
-  ln("Haus-Planer",20,1);y+=1;
+  ln("Haus-planner",20,1);y+=1;
   ln(`Stand ${new Date().toLocaleDateString("de-DE")} | ${list.filter(t=>t.status==="done").length} von ${n} erledigt | ${tasks.filter(t=>t.status==="doing").length} in Arbeit | ${tasks.filter(isLate).length} überfällig | ${tasks.filter(isBlocked).length} blockiert`,10,0,0,grey);y+=4;
   list.forEach(t=>{
     ln(t.title,12,1);
@@ -536,12 +536,12 @@ $("x_pdf").onclick=()=>{
     list.forEach(t=>(t.deps||[]).forEach(i=>{const a=pos[i],b=pos[t.id];if(!a)return;const x1=a.x+a.w,y1=a.yy+rh/2,x2=b.x,y2=b.yy+rh/2,mx=Math.max(x1+2,x2-2);doc.line(x1,y1,mx,y1);doc.line(mx,y1,mx,y2);doc.line(mx,y2,x2,y2);doc.triangle(x2,y2,x2-1.4,y2-.9,x2-1.4,y2+.9,"F")}));
     const tx=X0+(T-d0+.5)*sc;doc.setDrawColor(211,85,38);doc.line(tx,top-2,tx,top+n*rh);
   }
-  dl("haus-planer-"+stamp()+".pdf",doc.output("arraybuffer"));
+  dl("haus-planner-"+stamp()+".pdf",doc.output("arraybuffer"));
 };
 /* Excel-Export (ExcelJS wird erst bei Bedarf geladen) */
 function loadJs(src){return new Promise((ok,no)=>{if(window.ExcelJS)return ok();const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=()=>no(new Error("Excel-Bibliothek konnte nicht geladen werden"));document.head.appendChild(s)})}
 async function buildXlsx(){
-  const wb=new ExcelJS.Workbook();wb.creator="Haus-Planer";wb.calcProperties={fullCalcOnLoad:true};
+  const wb=new ExcelJS.Workbook();wb.creator="Haus-planner";wb.calcProperties={fullCalcOnLoad:true};
   const list=tasks.slice().sort((a,b)=>dn(a.start)-dn(b.start)||dn(a.end)-dn(b.end));
   const nr={};list.forEach((t,i)=>nr[t.id]=i+1);
   const R0=5,R1=304,DATA="Liste";
@@ -556,7 +556,7 @@ async function buildXlsx(){
   /* ---------- Blatt 1: Liste (hier werden Aufgaben gepflegt) ---------- */
   const ws=wb.addWorksheet("Liste",{views:[{state:"frozen",xSplit:2,ySplit:4,showGridLines:false}],properties:{tabColor:{argb:C.ink}}});
   ws.columns=[{width:6},{width:34},{width:14},{width:13},{width:12},{width:12},{width:12},{width:14},{width:34},{width:30},{width:12},{width:30},{width:6,hidden:true},{width:6,hidden:true},{width:6,hidden:true}];
-  ws.getCell("A1").value="Haus-Planer";ws.getCell("A1").font={bold:true,size:18};
+  ws.getCell("A1").value="Haus-planner";ws.getCell("A1").font={bold:true,size:18};
   ws.getCell("H1").value="Neue Aufgabe: einfach in der nächsten freien Zeile eintragen. Board und Zeitstrahl aktualisieren sich automatisch (bis Zeile 304).";
   ws.getCell("H1").font={italic:true,color:{argb:C.grey},size:10};
   const kp=[["B","Aufgaben",`COUNTIF(B${R0}:B${R1},"?*")`,"0"],["C","Erledigt",`IFERROR(COUNTIF(G${R0}:G${R1},"Erledigt")/B3,0)`,"0%"],["D","In Arbeit",`COUNTIF(G${R0}:G${R1},"In Arbeit")`,"0"],["E","Überfällig",`SUMPRODUCT((B${R0}:B${R1}<>"")*(G${R0}:G${R1}<>"Erledigt")*ISNUMBER(F${R0}:F${R1})*(F${R0}:F${R1}<TODAY()))`,"0"],["F","Konflikte",`COUNTIF(L${R0}:L${R1},"?*")`,"0"]];
@@ -656,7 +656,7 @@ async function buildXlsx(){
 $("x_xlsx").onclick=async()=>{
   try{$("note").textContent="Excel-Datei wird erstellt …";await loadJs("https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js");
     const buf=await buildXlsx();$("note").textContent="";
-    await dl("haus-planer-"+stamp()+".xlsx",new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}))
+    await dl("haus-planner-"+stamp()+".xlsx",new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}))
   }catch(e){$("note").textContent="Excel-Export fehlgeschlagen: "+((e&&(e.message||e.code))||e)}
 };
 

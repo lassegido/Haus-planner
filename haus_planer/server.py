@@ -164,5 +164,5 @@ if __name__ == "__main__":
     load()
     if state["tasks"]:
         save()  # bestehende Daten beim Start einmal in den Share-Spiegel kopieren
-    print("Haus-Planer %s läuft auf Port %d, Daten in %s" % (version(), PORT, D), flush=True)
+    print("Haus-planner %s läuft auf Port %d, Daten in %s" % (version(), PORT, D), flush=True)
     ThreadingHTTPServer(("0.0.0.0", PORT), H).serve_forever()
