@@ -1,5 +1,9 @@
 # Änderungen
 
+## 1.13.1
+- Handy: Die App nutzt den Bildschirm besser aus. Eingebettet in Home Assistant wurden die Sicherheitsabstände von Notch und Home-Leiste doppelt gerechnet (große Lücke oben und unten); das ist behoben
+- Kompaktere Abstände auf dem Handy, Spalten im Board etwas breiter (92 %)
+
 ## 1.13.0
 - Neu in den Einstellungen: „Form“ mit 11 Varianten (Flach, Schichten, Inseln, Redaktion, Bento, Zuschnitt, Kapsel, Ton, Kontrast, Mineral, Schiefer); sie ändern Karten, Spalten, Kennzahlen und Seitenleiste, unabhängig vom Farbdesign
 - Drei neue Farbdesigns: Salbei, Tinte, Nacht (jeweils auch dunkel)
