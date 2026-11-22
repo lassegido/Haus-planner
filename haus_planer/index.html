@@ -410,11 +410,38 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
 #dlg .acts .btn.del{padding:.55rem 1rem}
 @media (min-width:700px){#dlg{width:min(32rem,100vw)}}
 @media (max-width:480px){#dlg .acts .btn{padding-left:.9rem;padding-right:.9rem}#b_del{width:2.9rem;padding:0!important}#b_del span{display:none}}
+
+/* 1.4: Projekte, Meilensteine, Wiederholung, Ziehen */
+.tag.proj{background:transparent;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--tc) 70%,transparent);display:inline-flex;align-items:center;gap:.4rem}
+.tag.proj::before{content:"";width:.55em;height:.55em;border-radius:.15em;background:var(--tc)}
+.tc.pj i{border-radius:.15rem}
+.tsep{flex:none;width:1px;align-self:stretch;margin:.25rem .2rem;background:var(--line2)}
+.mi{width:.95rem;height:.95rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.17em}
+.ic{display:inline-flex;align-items:center;gap:.5rem;color:var(--mut)}
+td .ic{margin-left:.4rem}
+.tm .dotb.sq{border-radius:.5rem}
+#dlt label{font:700 .7rem/1 var(--disp);letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin:1.4rem 0 .5rem}
+#dlg label.cbl{display:flex;align-items:center;gap:.7rem;margin:1rem 0 0;font:500 .95rem "Instrument Sans",system-ui,sans-serif;letter-spacing:0;text-transform:none;color:var(--tx);cursor:pointer}
+#dlg label.cbl input{width:1.2rem;height:1.2rem;flex:none;accent-color:var(--sea);padding:0}
+.g2.ms{grid-template-columns:minmax(0,1fr)}
+.gb{user-select:none;-webkit-user-select:none}
+.gbar{cursor:pointer}
+.gh1{fill:transparent}
+.gdep{fill:var(--surf);stroke:var(--mut);stroke-width:1.5;opacity:0;cursor:crosshair;transition:opacity .12s}
+.gbar:hover .gdep,.gbar.drag .gdep{opacity:1}
+.gbar.drag{opacity:.9}.gbar.drag rect:not(.gh1){filter:drop-shadow(0 3px 6px rgba(20,48,63,.3))}
+.gbar.tgt rect{stroke:var(--tx);stroke-width:2}
+.gtmp{fill:none;stroke:var(--tx);stroke-width:1.6;stroke-dasharray:4 3;pointer-events:none}
+@media (hover:hover){.gbar{cursor:grab}.gbar.drag{cursor:grabbing}.gh1{cursor:ew-resize}}
+@media (pointer:coarse){.gdep{display:none}}
+#dtip{position:fixed;z-index:70;transform:translateX(-50%);background:var(--tx);color:var(--bg);font-size:.8rem;font-weight:600;padding:.3rem .6rem;border-radius:.5rem;pointer-events:none;opacity:0;transition:opacity .12s;white-space:nowrap}
+#dtip.on{opacity:1}
 </style>
 </head>
 <body>
 <div id="splash" aria-hidden="true"><div class="sp-in"><svg class="sp-mark" viewBox="0 0 24 24"><path pathLength="1" d="M3.5 11 12 4l8.5 7"/><path pathLength="1" d="M5.5 9.8V20h13V9.8"/><path pathLength="1" d="M10 20v-5.5h4V20"/></svg><div class="sp-name">Haus-planner</div><div class="sp-sub" id="sp_sub"></div></div></div>
 <div id="toast" role="status" aria-live="polite"></div>
+<div id="dtip" aria-hidden="true"></div>
 <div class="app">
 <aside class="side">
   <div class="brand"><svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5.5h4V20"/></svg><span class="bn">Haus-planner</span></div>
@@ -436,7 +463,7 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
   </header>
   <section class="kpis" id="kpis"></section>
   <div id="note"></div>
-  <div class="tbar" id="tbar"><div class="tchips" id="tchips"></div><select class="tgrp" id="grp" aria-label="Gruppieren"><option value="none">Gruppe: keine</option><option value="tag">Gruppe: Tag</option><option value="who">Gruppe: Person</option></select><button class="tgear" id="tman" aria-label="Tags verwalten" title="Tags verwalten"><svg viewBox="0 0 24 24"><path d="M20 13.2 13.2 20a2 2 0 0 1-2.8 0L3.5 13.1V4.5a1 1 0 0 1 1-1h8.6L20 10.4a2 2 0 0 1 0 2.8z"/><circle cx="8.2" cy="8.2" r="1.3"/></svg></button></div>
+  <div class="tbar" id="tbar"><div class="tchips" id="tchips"></div><select class="tgrp" id="grp" aria-label="Gruppieren"><option value="none">Gruppe: keine</option><option value="tag">Gruppe: Tag</option><option value="proj">Gruppe: Projekt</option><option value="who">Gruppe: Person</option></select><button class="tgear" id="tman" aria-label="Tags verwalten" title="Tags verwalten"><svg viewBox="0 0 24 24"><path d="M20 13.2 13.2 20a2 2 0 0 1-2.8 0L3.5 13.1V4.5a1 1 0 0 1 1-1h8.6L20 10.4a2 2 0 0 1 0 2.8z"/><circle cx="8.2" cy="8.2" r="1.3"/></svg></button></div>
   <main id="main"></main>
 </div>
 </div>
@@ -452,11 +479,12 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
   <div class="acts"><span class="sp"></span><button class="btn ghost" id="x_close">Schließen</button></div>
 </dialog>
 <dialog id="dlt">
-  <div class="dh">Tags verwalten</div>
-  <p class="hint">Farbe antippen zum Ändern. Umbenennen gilt für alle Aufgaben mit diesem Tag.</p>
-  <div id="tm_list" style="margin-top:.8rem"></div>
-  <label>Neuer Tag</label>
-  <div class="tmadd"><input id="tm_new" placeholder="Name" maxlength="30" autocomplete="off"><button class="btn" id="tm_add" type="button">Anlegen</button></div>
+  <div class="dh">Tags und Projekte</div>
+  <p class="hint">Farbe antippen zum Ändern. Umbenennen gilt für alle Aufgaben.</p>
+  <label>Tags</label><div id="tm_list"></div>
+  <div class="tmadd"><input id="tm_new" placeholder="Neuer Tag" maxlength="30" autocomplete="off"><button class="btn" id="tm_add" type="button">Anlegen</button></div>
+  <label>Projekte</label><div id="tm_plist"></div>
+  <div class="tmadd"><input id="tm_pnew" placeholder="Neues Projekt" maxlength="30" autocomplete="off"><button class="btn" id="tm_padd" type="button">Anlegen</button></div>
   <div class="acts"><span class="sp"></span><button class="btn ghost" id="tm_close" type="button">Fertig</button></div>
 </dialog>
 <dialog id="dlg">
@@ -465,6 +493,8 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
   <label for="f_tagin">Tags</label>
   <div class="tpick" id="f_tpick"><span id="f_tsel" style="display:contents"></span><input id="f_tagin" placeholder="Tag hinzufügen …" enterkeyhint="done" autocomplete="off"></div>
   <div class="tsug" id="f_tsug"></div><div id="f_sw"></div>
+  <label for="f_proj">Projekt</label>
+  <select id="f_proj"></select><input id="f_projnew" placeholder="Projektname" maxlength="30" style="display:none;margin-top:.5rem" aria-label="Neues Projekt">
   <label>Zuständig</label>
   <div class="seg3 who" id="f_whoseg"><button type="button" data-w="">Niemand</button><button type="button" data-w="Melanie">Melanie</button><button type="button" data-w="Lasse">Lasse</button><button type="button" data-w="__o">Andere</button></div>
   <input type="hidden" id="f_whosel">
@@ -477,6 +507,10 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
     <div><label for="f_start">Start</label><input type="date" id="f_start"></div>
     <div><label for="f_end">Ende</label><input type="date" id="f_end"></div>
   </div>
+  <label class="cbl"><input type="checkbox" id="f_ms"><span>Meilenstein (nur dieser eine Tag)</span></label>
+  <label for="f_rec">Wiederholen</label>
+  <select id="f_rec"><option value="">Nie</option><option value="1d">Täglich</option><option value="1w">Wöchentlich</option><option value="2w">Alle 2 Wochen</option><option value="1m">Monatlich</option><option value="3m">Vierteljährlich</option><option value="1y">Jährlich</option></select>
+  <div class="hint" id="f_rechint" style="display:none">Wenn du die Aufgabe erledigst, legt der Haus-planner automatisch die nächste an.</div>
   <label>Abhängig von <span class="lh">muss vorher fertig sein</span></label><div class="deps" id="f_deps"></div>
   <label>Checkliste</label><div id="f_ck"></div><button class="btn ghost" id="ck_add" type="button"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Punkt hinzufügen</button>
   <label for="f_notes">Notizen</label><textarea id="f_notes" rows="3" placeholder="Maße, Material, Ansprechpartner …"></textarea>
@@ -485,7 +519,7 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
 
 <script>
 const ST={todo:"Offen",doing:"In Arbeit",done:"Erledigt"},NEXT={todo:"doing",doing:"done",done:"todo"};
-let tasks=[],reg=[],ftags=new Set(),grp="none",selTags=[],regDraft=null,colorFor=null,palOpen=null,view="home",col=null,editing=null,loaded=false;
+let tasks=[],reg=[],ftags=new Set(),fprojs=new Set(),grp="none",selTags=[],regDraft=null,colorFor=null,palOpen=null,view="home",col=null,editing=null,loaded=false;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const iso=d=>d.toISOString().slice(0,10);
@@ -541,42 +575,125 @@ let lastMoved=null,tt,enterT;
 const greet=()=>{const h=new Date().getHours();return h<5?"Gute Nacht":h<11?"Guten Morgen":h<17?"Guten Tag":"Guten Abend"};
 const reduced=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
 function toast(msg,undo){const el=$("toast");el.innerHTML="<span></span>"+(undo?"<button>Rückgängig</button>":"");el.firstChild.textContent=msg;if(undo)el.querySelector("button").onclick=()=>{undo();el.classList.remove("on")};el.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("on"),4500)}
-function advance(id){const t=byId(id);if(!t)return;const prev=t.status,next=NEXT[prev];navigator.vibrate&&navigator.vibrate(8);lastMoved=id;saveTask({...t,status:next});
-  toast("„"+t.title+"“: "+ST[next],()=>{const c=byId(id);if(c){lastMoved=id;saveTask({...c,status:prev})}})}
+async function advance(id){
+  const t=byId(id);if(!t)return;const prev=t.status,next=NEXT[prev];navigator.vibrate&&navigator.vibrate(8);lastMoved=id;
+  const sp=await setStatus(t,next);
+  toast("„"+t.title+"“: "+ST[next]+(sp?" · nächste am "+fd(sp.start):""),async()=>{const c=byId(id);if(c){lastMoved=id;await saveTask({...c,status:prev,spawned:sp?"":c.spawned});if(sp)delTask(sp.id)}})}
+/* Wiederholung, Meilenstein */
+const RECI='<svg class="mi" viewBox="0 0 24 24" aria-label="Wiederholt sich"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"/></svg>';
+const MSI='<svg class="mi" viewBox="0 0 24 24" aria-label="Meilenstein"><path d="M12 3l9 9-9 9-9-9z"/></svg>';
+const dr=t=>t.ms?fd(t.start):`${fd(t.start)}–${fd(t.end)}`;
+const newId=()=>"t"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+function addInterval(d,r){
+  const dt=fromDn(dn(d));
+  if(r.u==="d")dt.setUTCDate(dt.getUTCDate()+r.n);
+  else if(r.u==="w")dt.setUTCDate(dt.getUTCDate()+7*r.n);
+  else{const m=r.u==="y"?r.n*12:r.n,day=dt.getUTCDate();dt.setUTCDate(1);dt.setUTCMonth(dt.getUTCMonth()+m);dt.setUTCDate(Math.min(day,new Date(Date.UTC(dt.getUTCFullYear(),dt.getUTCMonth()+1,0)).getUTCDate()))}
+  return iso(dt)}
+function nextOcc(t){
+  const len=dn(t.end)-dn(t.start);let s=t.start,e=t.end,g=0;
+  do{s=addInterval(s,t.rec);e=iso(fromDn(dn(s)+len))}while(dn(e)<today()&&++g<500);
+  return{...t,id:newId(),status:"todo",start:s,end:e,checklist:(t.checklist||[]).map(c=>({...c,d:false})),deps:[],spawned:""}}
+async function setStatus(t,next){
+  const u={...t,status:next};let sp=null;
+  if(next==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);u.spawned=sp.id}
+  await saveTask(u);if(sp)await saveTask(sp);return sp}
+/* Zeitstrahl: Balken ziehen */
+const dependsOn=(a,b,seen=new Set())=>{if(seen.has(a))return false;seen.add(a);const t=byId(a);return!!t&&(t.deps||[]).some(d=>d===b||dependsOn(d,b,seen))};
+function ganttDrag(){
+  const svg=document.querySelector(".gb");if(!svg)return;const ppd=+svg.dataset.ppd||38;
+  let st=null,lp=null,suppress=false;
+  const tip=$("dtip");
+  const showTip=(x,y,txt)=>{tip.textContent=txt;tip.style.left=x+"px";tip.style.top=(y-34)+"px";tip.classList.add("on")};
+  const range=(t,k,d)=>{let s=dn(t.start),e=dn(t.end);if(k==="m"){s+=d;e+=d}else if(k==="s")s=Math.min(s+d,e);else e=Math.max(e+d,s);return[s,e]};
+  const fmt=(s,e,ms)=>ms?fd(iso(fromDn(s))):fd(iso(fromDn(s)))+" – "+fd(iso(fromDn(e)));
+  const begin=(e,g,t,k)=>{
+    const r=g.querySelector("rect:not(.gh1)");
+    st={t,k,g,x0:e.clientX,y0:e.clientY,moved:false,x:r?+r.getAttribute("x"):0,w:r?+r.getAttribute("width"):0,r,id:e.pointerId};
+    g.classList.add("drag");if(k==="dep"){st.line=document.createElementNS("http://www.w3.org/2000/svg","path");st.line.setAttribute("class","gtmp");svg.appendChild(st.line)}
+    document.addEventListener("touchmove",blockScroll,{passive:false});
+  };
+  const blockScroll=e=>{if(st)e.preventDefault()};
+  const move=e=>{
+    if(!st)return;const dx=e.clientX-st.x0,dy=e.clientY-st.y0;
+    if(!st.moved&&Math.hypot(dx,dy)<4)return;st.moved=true;
+    if(st.k==="dep"){const b=svg.getBoundingClientRect(),c=st.g.querySelector(".gdep"),x1=+c.getAttribute("cx"),y1=+c.getAttribute("cy");
+      st.line.setAttribute("d",`M${x1} ${y1}L${e.clientX-b.left} ${e.clientY-b.top}`);
+      const over=document.elementFromPoint(e.clientX,e.clientY),tg=over&&over.closest&&over.closest("g[data-id]");
+      svg.querySelectorAll(".gbar.tgt").forEach(x=>x.classList.remove("tgt"));if(tg&&tg!==st.g)tg.classList.add("tgt");
+      return}
+    const d=Math.round(dx/ppd),[s2,e2]=range(st.t,st.k,d),px=d*ppd;
+    if(st.k==="m")st.g.setAttribute("transform",`translate(${px} 0)`);
+    else if(st.r){if(st.k==="s"){st.r.setAttribute("x",st.x+Math.min(px,st.w-8));st.r.setAttribute("width",Math.max(8,st.w-px))}else st.r.setAttribute("width",Math.max(8,st.w+px))}
+    st.d=d;showTip(e.clientX,e.clientY,fmt(s2,e2,st.t.ms));
+  };
+  const end=async e=>{
+    document.removeEventListener("pointermove",move);document.removeEventListener("pointerup",end);document.removeEventListener("pointercancel",end);document.removeEventListener("touchmove",blockScroll);
+    clearTimeout(lp);tip.classList.remove("on");const s=st;st=null;if(!s)return;
+    s.g.classList.remove("drag");svg.querySelectorAll(".gbar.tgt").forEach(x=>x.classList.remove("tgt"));if(s.line)s.line.remove();
+    if(!s.moved)return;suppress=true;setTimeout(()=>{suppress=false},60);
+    if(s.k==="dep"){const over=document.elementFromPoint(e.clientX,e.clientY),tg=over&&over.closest&&over.closest("g[data-id]"),to=tg&&byId(tg.dataset.id);
+      if(!to||to.id===s.t.id||(to.deps||[]).includes(s.t.id))return;
+      if(dependsOn(s.t.id,to.id)){toast("Das wäre ein Kreis: „"+s.t.title+"“ hängt schon von „"+to.title+"“ ab.");return}
+      await saveTask({...to,deps:[...(to.deps||[]),s.t.id]});toast("„"+to.title+"“ startet nach „"+s.t.title+"“",()=>saveTask({...byId(to.id),deps:(byId(to.id).deps||[]).filter(x=>x!==s.t.id)}));return}
+    const d=s.d||0;if(!d){render();return}
+    const[s2,e2]=range(s.t,s.k,d),old={start:s.t.start,end:s.t.end};
+    await saveTask({...s.t,start:iso(fromDn(s2)),end:iso(fromDn(e2))});
+    toast("„"+s.t.title+"“: "+fmt(s2,e2,s.t.ms),()=>saveTask({...byId(s.t.id),...old}));
+  };
+  svg.addEventListener("click",e=>{if(suppress){e.stopPropagation();e.preventDefault()}},true);
+  svg.addEventListener("pointerdown",e=>{
+    if(e.button>0)return;const g=e.target.closest("g[data-id]");if(!g)return;const t=byId(g.dataset.id);if(!t)return;
+    const h=e.target.closest("[data-h]"),k=h?h.dataset.h:"m";
+    if(e.pointerType==="touch"&&k==="dep")return;
+    document.addEventListener("pointermove",move);document.addEventListener("pointerup",end);document.addEventListener("pointercancel",end);
+    if(e.pointerType==="touch"){
+      const x0=e.clientX,y0=e.clientY;
+      const cancel=ev=>{if(Math.hypot(ev.clientX-x0,ev.clientY-y0)>8){clearTimeout(lp);document.removeEventListener("pointermove",cancel);if(!st){document.removeEventListener("pointermove",move);document.removeEventListener("pointerup",end)}}};
+      document.addEventListener("pointermove",cancel);
+      lp=setTimeout(()=>{document.removeEventListener("pointermove",cancel);begin(e,g,t,k);navigator.vibrate&&navigator.vibrate(12)},380);
+    }else{begin(e,g,t,k);e.preventDefault()}
+  });
+}
 /* Tags */
 const TC={sky:"#6CB6E4",sun:"#FDAF54",sea:"#387CA3",brick:"#D35526",mint:"#6CC49A",rose:"#E58BAE",lilac:"#9D86DB",sand:"#C9B77A",slate:"#7C93A3",lemon:"#D9CB3F"},TCK=Object.keys(TC);
 const tgs=t=>Array.isArray(t.tags)?t.tags:(t.area?[t.area]:[]);
 const cur=()=>regDraft||reg;
 const hashC=n=>{let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))>>>0;return TCK[h%TCK.length]};
 const autoC=n=>{const i=allTags().indexOf(n);return i<0?hashC(n):TCK[i%TCK.length]};
-const colorKey=n=>{const c=(cur().find(x=>x.n===n)||{}).c;return TC[c]?c:autoC(n)};
+const colorKey=n=>{const c=(cur().find(x=>!x.p&&x.n===n)||{}).c;return TC[c]?c:autoC(n)};
 const tcol=n=>TC[colorKey(n)];
 const chip=n=>`<span class="tag" style="--tc:${tcol(n)}">${esc(n)}</span>`;
-function allTags(){const out=cur().map(x=>x.n);[...new Set(tasks.flatMap(tgs))].filter(n=>!out.includes(n)).sort((a,b)=>a.localeCompare(b,"de")).forEach(n=>out.push(n));return out}
+function allTags(){const out=cur().filter(x=>!x.p).map(x=>x.n);[...new Set(tasks.flatMap(tgs))].filter(n=>!out.includes(n)).sort((a,b)=>a.localeCompare(b,"de")).forEach(n=>out.push(n));return out}
 const nextColor=()=>{const used=new Set(allTags().map(colorKey));return TCK.find(k=>!used.has(k))||TCK[allTags().length%TCK.length]};
-const mergeReg=l=>{const out=reg.map(x=>({...x}));l.forEach(x=>{if(x&&x.n&&!out.some(y=>y.n===x.n))out.push({n:String(x.n).slice(0,30),c:TC[x.c]?x.c:hashC(String(x.n))})});return out};
-const fullReg=()=>allTags().map(n=>({n,c:colorKey(n)}));
-const tagOk=t=>!ftags.size||[...ftags].some(k=>k==="__none"?!tgs(t).length:tgs(t).includes(k));
+const mergeReg=l=>{const out=reg.map(x=>({...x}));l.forEach(x=>{if(x&&x.n&&!out.some(y=>!!y.p===!!x.p&&y.n===x.n))out.push({n:String(x.n).slice(0,30),c:TC[x.c]?x.c:hashC(String(x.n)),...(x.p?{p:1}:{})})});return out};
+function allProjs(){const out=cur().filter(x=>x.p).map(x=>x.n);[...new Set(tasks.map(t=>t.proj).filter(Boolean))].filter(n=>!out.includes(n)).sort((a,b)=>a.localeCompare(b,"de")).forEach(n=>out.push(n));return out}
+const pcolorKey=n=>{const c=(cur().find(x=>x.p&&x.n===n)||{}).c;if(TC[c])return c;const i=allProjs().indexOf(n);return TCK[((i<0?0:i)+3)%TCK.length]};
+const pcol=n=>TC[pcolorKey(n)];
+const nextPColor=()=>{const used=new Set(allProjs().map(pcolorKey));return TCK.find(k=>!used.has(k))||TCK[allProjs().length%TCK.length]};
+const projChip=t=>t.proj?`<span class="tag proj" style="--tc:${pcol(t.proj)}">${esc(t.proj)}</span>`:"";
+const fullReg=()=>[...allTags().map(n=>({n,c:colorKey(n)})),...allProjs().map(n=>({n,c:pcolorKey(n),p:1}))];
+const tagOk=t=>(!ftags.size||[...ftags].some(k=>k==="__none"?!tgs(t).length:tgs(t).includes(k)))&&(!fprojs.size||fprojs.has(t.proj));
 function groups(list){
   if(grp==="none")return[{l:null,L:list}];
-  const key=t=>grp==="tag"?(tgs(t)[0]||""):(t.who||"");
-  const order=grp==="tag"?allTags():[...new Set(["Melanie","Lasse",...tasks.map(t=>t.who).filter(Boolean)])];
+  const key=t=>grp==="tag"?(tgs(t)[0]||""):grp==="proj"?(t.proj||""):(t.who||"");
+  const order=grp==="tag"?allTags():grp==="proj"?allProjs():[...new Set(["Melanie","Lasse",...tasks.map(t=>t.who).filter(Boolean)])];
   const m=new Map();list.forEach(t=>{const k=key(t);if(!m.has(k))m.set(k,[]);m.get(k).push(t)});
   const ks=[...m.keys()].filter(Boolean).sort((a,b)=>{const i=order.indexOf(a),j=order.indexOf(b);return(i<0?999:i)-(j<0?999:j)||a.localeCompare(b,"de")});
   if(m.has(""))ks.push("");
   const pc=w=>/^melanie/i.test(w)?TC.brick:/^lasse/i.test(w)?TC.sea:TC.sky;
-  return ks.map(k=>({l:k||(grp==="tag"?"Ohne Tag":"Nicht zugewiesen"),c:k?(grp==="tag"?tcol(k):pc(k)):"#9FB0B9",L:m.get(k)}))
+  return ks.map(k=>({l:k||(grp==="tag"?"Ohne Tag":grp==="proj"?"Ohne Projekt":"Nicht zugewiesen"),c:k?(grp==="tag"?tcol(k):grp==="proj"?pcol(k):pc(k)):"#9FB0B9",L:m.get(k)}))
 }
 let migrated=false,regLoaded=false;
-function migrateReg(){if(migrated||!regLoaded||!tasks.length)return;migrated=true;if(allTags().some(n=>!reg.some(x=>x.n===n)))saveReg(fullReg())}
+function migrateReg(){if(migrated||!regLoaded||!tasks.length)return;migrated=true;if(allTags().some(n=>!reg.some(x=>!x.p&&x.n===n))||allProjs().some(n=>!reg.some(x=>x.p&&x.n===n)))saveReg(fullReg())}
 function drawTbar(){
-  const names=allTags(),n=tasks.length,none=tasks.filter(t=>!tgs(t).length).length,box=$("tchips"),sl=box.scrollLeft;
-  ftags=new Set([...ftags].filter(x=>x==="__none"||names.includes(x)));
-  const c=(k,l,cnt,col)=>`<button class="tc${ftags.has(k)?" on":""}" data-t="${esc(k)}"${col?` style="--tc:${col}"`:""}>${col?"<i></i>":""}<span>${esc(l)}</span><em>${cnt}</em></button>`;
-  box.innerHTML=`<button class="tc all${ftags.size?"":" on"}" data-t=""><span>Alle</span><em>${n}</em></button>`+names.map(x=>c(x,x,tasks.filter(t=>tgs(t).includes(x)).length,tcol(x))).join("")+(none&&names.length?c("__none","Ohne Tag",none):"");
+  const names=allTags(),pn=allProjs(),n=tasks.length,none=tasks.filter(t=>!tgs(t).length).length,box=$("tchips"),sl=box.scrollLeft;
+  ftags=new Set([...ftags].filter(x=>x==="__none"||names.includes(x)));fprojs=new Set([...fprojs].filter(x=>pn.includes(x)));
+  const c=(a,k,l,cnt,col,cls)=>`<button class="tc${cls||""}${(a==="p"?fprojs:ftags).has(k)?" on":""}" data-${a}="${esc(k)}"${col?` style="--tc:${col}"`:""}>${col?"<i></i>":""}<span>${esc(l)}</span><em>${cnt}</em></button>`;
+  box.innerHTML=`<button class="tc all${ftags.size||fprojs.size?"":" on"}" data-t=""><span>Alle</span><em>${n}</em></button>`+names.map(x=>c("t",x,x,tasks.filter(t=>tgs(t).includes(x)).length,tcol(x))).join("")+(none&&names.length?c("t","__none","Ohne Tag",none):"")+(pn.length?'<span class="tsep"></span>'+pn.map(x=>c("p",x,x,tasks.filter(t=>t.proj===x).length,pcol(x)," pj")).join(""):"");
   box.scrollLeft=sl;$("grp").value=grp;
 }
-$("tchips").onclick=e=>{const b=e.target.closest(".tc");if(!b)return;const k=b.dataset.t;if(!k)ftags.clear();else if(ftags.has(k))ftags.delete(k);else ftags.add(k);render()};
+$("tchips").onclick=e=>{const b=e.target.closest(".tc");if(!b)return;if("p" in b.dataset){const k=b.dataset.p;if(fprojs.has(k))fprojs.delete(k);else fprojs.add(k)}else{const k=b.dataset.t;if(!k){ftags.clear();fprojs.clear()}else if(ftags.has(k))ftags.delete(k);else ftags.add(k)}render()};
 $("grp").onchange=e=>{grp=e.target.value;render()};
 /* Tag-Auswahl im Aufgaben-Dialog */
 function drawTags(){
@@ -603,40 +720,51 @@ $("f_sw").onclick=e=>{const s=e.target.closest("[data-sw]");if(s&&colorFor)setDr
 $("f_tagin").oninput=drawTags;
 $("f_tagin").onkeydown=e=>{if(e.key==="Enter"||e.key===","){e.preventDefault();addTag($("f_tagin").value)}else if(e.key==="Backspace"&&!e.target.value&&selTags.length){selTags.pop();drawTags()}};
 /* Tags verwalten */
-function openMan(){palOpen=null;$("tm_new").value="";drawMan();$("dlt").showModal()}
+function openMan(){palOpen=null;$("tm_new").value="";$("tm_pnew").value="";drawMan();$("dlt").showModal()}
+const sw10=(sel,k)=>TCK.map(c=>`<button class="sw${sel===c?" on":""}" data-sw="${c}" style="--tc:${TC[c]}" aria-label="${c}"></button>`).join("");
+function mrow(k,n,i,cnt){const col=k==="p"?pcol(n):tcol(n),ck=k==="p"?pcolorKey(n):colorKey(n);return`<div class="tm" style="--tc:${col}"><button class="dotb${k==="p"?" sq":""}" data-pal="${k}${i}" aria-label="Farbe ändern"></button><input value="${esc(n)}" data-ren="${k}${i}" maxlength="30" aria-label="Name"><small>${cnt}</small><button class="x" data-del="${k}${i}" aria-label="Löschen">✕</button></div>`+(palOpen===k+":"+n?`<div class="swatches">${sw10(ck)}</div>`:"")}
 function drawMan(){
-  const names=allTags(),cnt=n=>tasks.filter(t=>tgs(t).includes(n)).length;
-  $("tm_list").innerHTML=names.length?names.map((n,i)=>`<div class="tm" style="--tc:${tcol(n)}"><button class="dotb" data-pal="${i}" aria-label="Farbe ändern"></button><input value="${esc(n)}" data-ren="${i}" maxlength="30" aria-label="Name"><small>${cnt(n)}</small><button class="x" data-del="${i}" aria-label="Tag löschen">✕</button></div>`+(palOpen===n?`<div class="swatches">${TCK.map(k=>`<button class="sw${colorKey(n)===k?" on":""}" data-sw="${k}" style="--tc:${TC[k]}" aria-label="${k}"></button>`).join("")}</div>`:"")).join(""):'<div class="none">Noch keine Tags. Lege unten den ersten an.</div>';
+  const tn=allTags(),pn=allProjs();
+  $("tm_list").innerHTML=tn.length?tn.map((n,i)=>mrow("t",n,i,tasks.filter(t=>tgs(t).includes(n)).length)).join(""):'<div class="none">Noch keine Tags.</div>';
+  $("tm_plist").innerHTML=pn.length?pn.map((n,i)=>mrow("p",n,i,tasks.filter(t=>t.proj===n).length)).join(""):'<div class="none">Noch keine Projekte.</div>';
 }
-async function renameTag(o,nw){
+const manName=key=>(key[0]==="p"?allProjs():allTags())[+key.slice(1)];
+async function renameItem(k,o,nw){
   nw=nw.trim().slice(0,30);if(!nw||nw===o){drawMan();return}
-  const ex=allTags().find(x=>x!==o&&x.toLowerCase()===nw.toLowerCase()),target=ex||nw,col=colorKey(o);
-  let nr=fullReg();if(ex)nr=nr.filter(x=>x.n!==o);else nr=nr.map(x=>x.n===o?{n:target,c:col}:x);
-  const ch=tasks.filter(t=>tgs(t).includes(o)).map(t=>{const a=[...new Set(tgs(t).map(x=>x===o?target:x))];return{...t,tags:a,area:a[0]||""}});
-  if(ftags.delete(o))ftags.add(target);
+  const isP=k==="p",ex=(isP?allProjs():allTags()).find(x=>x!==o&&x.toLowerCase()===nw.toLowerCase()),target=ex||nw,col=isP?pcolorKey(o):colorKey(o);
+  let nr=fullReg();
+  if(ex)nr=nr.filter(x=>!(!!x.p===isP&&x.n===o));else nr=nr.map(x=>!!x.p===isP&&x.n===o?{...x,n:target,c:col}:x);
+  let ch;
+  if(isP){ch=tasks.filter(t=>t.proj===o).map(t=>({...t,proj:target}));if(fprojs.delete(o))fprojs.add(target)}
+  else{ch=tasks.filter(t=>tgs(t).includes(o)).map(t=>{const a=[...new Set(tgs(t).map(x=>x===o?target:x))];return{...t,tags:a,area:a[0]||""}});if(ftags.delete(o))ftags.add(target)}
   await saveReg(nr);await saveMany(ch);palOpen=null;drawMan();
 }
-async function removeTag(n){
-  const k=tasks.filter(t=>tgs(t).includes(n)).length;
-  if(!confirm(k?`„${n}“ von ${k} ${k===1?"Aufgabe":"Aufgaben"} entfernen und Tag löschen?`:`Tag „${n}“ löschen?`))return;
-  const ch=tasks.filter(t=>tgs(t).includes(n)).map(t=>{const a=tgs(t).filter(x=>x!==n);return{...t,tags:a,area:a[0]||""}});
-  ftags.delete(n);palOpen=null;
-  await saveReg(fullReg().filter(x=>x.n!==n));await saveMany(ch);drawMan();
+async function removeItem(k,n){
+  const isP=k==="p",aff=tasks.filter(t=>isP?t.proj===n:tgs(t).includes(n)),c=aff.length,w=isP?"Projekt":"Tag";
+  if(!confirm(c?`${w} „${n}“ löschen? Er wird bei ${c} ${c===1?"Aufgabe":"Aufgaben"} entfernt.`:`${w} „${n}“ löschen?`))return;
+  const ch=aff.map(t=>isP?{...t,proj:""}:(a=>({...t,tags:a,area:a[0]||""}))(tgs(t).filter(x=>x!==n)));
+  if(isP)fprojs.delete(n);else ftags.delete(n);palOpen=null;
+  await saveReg(fullReg().filter(x=>!(!!x.p===isP&&x.n===n)));await saveMany(ch);drawMan();
 }
 $("tman").onclick=openMan;
 $("tm_close").onclick=()=>$("dlt").close();
-$("tm_list").onclick=e=>{const names=allTags();
-  const p=e.target.closest("[data-pal]");if(p){const n=names[+p.dataset.pal];palOpen=palOpen===n?null:n;drawMan();return}
-  const s=e.target.closest("[data-sw]");if(s&&palOpen){saveReg(fullReg().map(x=>x.n===palOpen?{...x,c:s.dataset.sw}:x));drawMan();return}
-  const d=e.target.closest("[data-del]");if(d)removeTag(names[+d.dataset.del])};
-$("tm_list").onchange=e=>{const r=e.target.closest("[data-ren]");if(r)renameTag(allTags()[+r.dataset.ren],r.value)};
-const manAdd=()=>{const name=$("tm_new").value.trim().slice(0,30);if(!name)return;if(!allTags().some(x=>x.toLowerCase()===name.toLowerCase())){const nr=fullReg();nr.push({n:name,c:nextColor()});saveReg(nr)}$("tm_new").value="";drawMan()};
-$("tm_add").onclick=manAdd;
-$("tm_new").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();manAdd()}};
+const manClick=e=>{
+  const p=e.target.closest("[data-pal]");if(p){const k=p.dataset.pal[0],n=manName(p.dataset.pal);palOpen=palOpen===k+":"+n?null:k+":"+n;drawMan();return}
+  const sw=e.target.closest("[data-sw]");if(sw&&palOpen){const k=palOpen[0],n=palOpen.slice(2);saveReg(fullReg().map(x=>(!!x.p===(k==="p")&&x.n===n)?{...x,c:sw.dataset.sw}:x));drawMan();return}
+  const d=e.target.closest("[data-del]");if(d)removeItem(d.dataset.del[0],manName(d.dataset.del))};
+const manRen=e=>{const r=e.target.closest("[data-ren]");if(r)renameItem(r.dataset.ren[0],manName(r.dataset.ren),r.value)};
+$("tm_list").onclick=manClick;$("tm_plist").onclick=manClick;$("tm_list").onchange=manRen;$("tm_plist").onchange=manRen;
+const manAdd=k=>{const inp=$(k==="p"?"tm_pnew":"tm_new"),name=inp.value.trim().slice(0,30);if(!name)return;
+  const list=k==="p"?allProjs():allTags();
+  if(!list.some(x=>x.toLowerCase()===name.toLowerCase())){const nr=fullReg();nr.push(k==="p"?{n:name,c:nextPColor(),p:1}:{n:name,c:nextColor()});saveReg(nr)}
+  inp.value="";drawMan()};
+$("tm_add").onclick=()=>manAdd("t");$("tm_padd").onclick=()=>manAdd("p");
+$("tm_new").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();manAdd("t")}};
+$("tm_pnew").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();manAdd("p")}};
 function enter(){const m=$("main");m.classList.add("enter");clearTimeout(enterT);enterT=setTimeout(()=>m.classList.remove("enter"),1300);animateNums()}
 function animateNums(){if(reduced())return;document.querySelectorAll("[data-n]").forEach(el=>{const n=+el.dataset.n;if(!n)return;const t0=performance.now(),step=t=>{const k=Math.min(1,(t-t0)/800),e=1-Math.pow(1-k,3);el.textContent=Math.round(n*e);if(k<1)requestAnimationFrame(step)};requestAnimationFrame(step)})}
 function rel(t){const d=dn(t.end)-today();return d<0?`${-d} ${-d===1?"Tag":"Tage"} überfällig`:d===0?"heute":d===1?"morgen":d<=14?`in ${d} Tagen`:fd(t.end)}
-function hrow(t,i){return`<div class="hrow" data-id="${t.id}" style="--i:${Math.min(i,8)}"><button class="ring ${t.status}" data-adv="${t.id}" aria-label="Status: ${ST[t.status]}. Weiterschalten"></button><div class="hm"><div class="ht">${esc(t.title)}</div><div class="hs">${[...tgs(t),t.who].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}</div></div><span class="hd ${isLate(t)?"late":""}">${rel(t)}</span></div>`}
+function hrow(t,i){return`<div class="hrow" data-id="${t.id}" style="--i:${Math.min(i,8)}"><button class="ring ${t.status}" data-adv="${t.id}" aria-label="Status: ${ST[t.status]}. Weiterschalten"></button><div class="hm"><div class="ht">${esc(t.title)}</div><div class="hs">${[t.proj,...tgs(t),t.who].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}</div></div><span class="hd ${isLate(t)?"late":""}">${rel(t)}</span></div>`}
 function home(){
   const T=today(),n=tasks.length,d=tasks.filter(t=>t.status==="done").length,pct=n?Math.round(d/n*100):0;
   const doing=tasks.filter(t=>t.status==="doing").length,over=tasks.filter(isLate).sort((a,b)=>dn(a.end)-dn(b.end)),blk=tasks.filter(isBlocked).length;
@@ -647,10 +775,12 @@ function home(){
   const bars=areas.map(a=>{const L=tasks.filter(t=>tgs(t).includes(a)),x=L.filter(t=>t.status==="done").length;return`<div class="pr" style="--tc:${tcol(a)}"><span>${esc(a)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
   const names=[...new Set(["Melanie","Lasse",...tasks.map(t=>t.who).filter(Boolean)])],cnt=w=>tasks.filter(t=>t.status!=="done"&&t.who===w).length,mx=Math.max(1,...names.map(cnt));
   const who=names.map(w=>`<div class="pr"><span>${esc(w)}</span><div class="pb ${avc(w)}"><i style="width:${Math.round(cnt(w)/mx*100)}%"></i></div><em>${cnt(w)}</em></div>`).join("");
+  const pjs=allProjs().filter(n=>tasks.some(t=>t.proj===n)),pbars=pjs.map(n=>{const L=tasks.filter(t=>t.proj===n),x=L.filter(t=>t.status==="done").length;return`<div class="pr" style="--tc:${pcol(n)}"><span>${esc(n)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
   let k=1;const P=(cls,h,c,body)=>`<section class="pnl ${cls}" style="--i:${k++}"><h3><span>${h}</span><em>${c}</em></h3>${body}</section>`;
   return`<div class="home"><section class="hero" style="--i:0"><div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn"><span data-n="${pct}">${pct}</span><i>%</i></div></div><div class="hbody"><div class="hh">${d} von ${n} erledigt</div><div class="hsub">${sub}</div><div class="hst"><div><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="${over.length?"hot":""}"><b data-n="${over.length}">${over.length}</b><span>überfällig</span></div><div><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div></div>${nx?`<div class="hnext"><small>Nächste Frist</small><strong>${esc(nx.title)}</strong><span>${[nx.area,rel(nx)].filter(Boolean).map(esc).join(" · ")}</span></div>`:""}</section>`+
     (over.length?P("hot","Überfällig",over.length,over.slice(0,6).map(hrow).join("")):"")+
     P("","Diese Woche",week.length,week.length?week.slice(0,7).map(hrow).join(""):'<div class="none">Für die nächsten 7 Tage ist nichts geplant.</div>')+
+    (pjs.length?P("","Projekte",pjs.length,pbars):"")+
     P("","Tags",areas.length,bars||'<div class="none">Noch keine Tags.</div>')+
     P("","Offene Aufgaben pro Person",open,who)+`</div>`}
 
@@ -671,7 +801,7 @@ function after(o){
   const g=document.querySelector(".gwrap");
   if(o.v===view){$("main").scrollTop=o.m;scrollTo(0,o.y);if(g&&o.g!=null){g.scrollLeft=o.g;g.scrollTop=o.gy||0}}
   else if(g)gToday(false);
-  if(g){g.onscroll=stickyLabels;stickyLabels()}
+  if(g){g.onscroll=stickyLabels;stickyLabels();ganttDrag()}
 }
 function render(){
   $("sub").textContent=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
@@ -695,14 +825,14 @@ const avc=w=>/^melanie/i.test(w)?"am":/^lasse/i.test(w)?"al":"ao";
 const cl=t=>{const a=t.checklist||[];return a.length?`<span class="ckc">${a.filter(x=>x.d).length}/${a.length}</span>`:""};
 function card(t,s,i=0){
   const a=t.checklist||[],k=a.filter(x=>x.d).length,late=isLate(t);
-  const tg=tgs(t).map(chip).join("")+(isBlocked(t)?'<span class="blk">blockiert</span>':"");
-  return`<div class="card ${s}${t.id===lastMoved?" pop":""}" draggable="true" data-id="${t.id}" style="--i:${Math.min(i,8)}"><div class="ch"><button class="ring ${s}" data-adv="${t.id}" aria-label="Status: ${ST[s]}. Weiterschalten"></button><div class="t">${esc(t.title)}</div>${t.who?`<i class="av ${avc(t.who)}" title="${esc(t.who)}">${esc((t.who.trim()[0]||"").toUpperCase())}</i>`:""}</div>${tg?`<div class="tg">${tg}</div>`:""}${a.length?`<div class="cb"><i style="width:${Math.round(k/a.length*100)}%"></i></div>`:""}<div class="cm"><span class="${late?"late":""}">${fd(t.start)}–${fd(t.end)}</span>${cl(t)}</div></div>`}
+  const tg=projChip(t)+tgs(t).map(chip).join("")+(isBlocked(t)?'<span class="blk">blockiert</span>':"");
+  return`<div class="card ${s}${t.id===lastMoved?" pop":""}" draggable="true" data-id="${t.id}" style="--i:${Math.min(i,8)}"><div class="ch"><button class="ring ${s}" data-adv="${t.id}" aria-label="Status: ${ST[s]}. Weiterschalten"></button><div class="t">${esc(t.title)}</div>${t.who?`<i class="av ${avc(t.who)}" title="${esc(t.who)}">${esc((t.who.trim()[0]||"").toUpperCase())}</i>`:""}</div>${tg?`<div class="tg">${tg}</div>`:""}${a.length?`<div class="cb"><i style="width:${Math.round(k/a.length*100)}%"></i></div>`:""}<div class="cm"><span class="${late?"late":""}">${dr(t)}</span><span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${cl(t)}</span></div></div>`}
 function board(list){
   return`<div class="board">`+Object.keys(ST).map(s=>{const L=list.filter(t=>t.status===s);
     return`<div class="colm" data-s="${s}"><h3><i class="dt ${s}"></i><span>${ST[s]}</span><em>${L.length}</em></h3>`+(L.length?L.map((t,i)=>card(t,s,i)).join(""):'<div class="none">Keine Aufgaben</div>')+`</div>`}).join("")+`</div>`;
 }
 function table(list){
-  const row=t=>`<tr class="row" data-id="${t.id}"><td>${esc(t.title)} ${isBlocked(t)?'<span class="blk">blockiert</span>':""}</td><td>${tgs(t).map(chip).join("")}</td><td>${esc(t.who)}</td><td>${fd(t.start)}</td><td class="${isLate(t)?"late":""}">${fd(t.end)}</td><td><span class="st ${t.status}">${ST[t.status]}</span></td></tr>`;
+  const row=t=>`<tr class="row" data-id="${t.id}"><td>${esc(t.title)} ${isBlocked(t)?'<span class="blk">blockiert</span>':""}<span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}</span></td><td>${projChip(t)}${tgs(t).map(chip).join("")}</td><td>${esc(t.who)}</td><td>${fd(t.start)}</td><td class="${isLate(t)?"late":""}">${fd(t.end)}</td><td><span class="st ${t.status}">${ST[t.status]}</span></td></tr>`;
   return`<div class="wrap"><table><tr><th>Aufgabe</th><th>Tags</th><th>Ressource</th><th>Start</th><th>Ende</th><th>Status</th></tr>`+
   groups(list).map(g=>(g.l!=null?`<tr class="grp"><td colspan="6"><i class="dt" style="background:${g.c}"></i>${esc(g.l)}<em>${g.L.length}</em></td></tr>`:"")+g.L.map(row).join("")).join("")+`</table></div>`;
 }
@@ -716,9 +846,9 @@ function gantt(list){
   const dp=d=>{const x=fromDn(d);return[x.getUTCFullYear(),x.getUTCMonth(),x.getUTCDate(),x.getUTCDay()]};
   const dim=(y,m)=>new Date(Date.UTC(y,m+1,0)).getUTCDate();
   const tx=(x,y,c,t)=>`<text class="${c}" x="${x}" y="${y}" text-anchor="middle">${t}</text>`;
-  let X,W,HEAD,hd="",gd="",tdx;
+  let X,W,HEAD,PPD,hd="",gd="",tdx;
   if(mode==="day"){
-    const U=38,d0=mn-3,d1=Math.max(mx+14,d0+30);HEAD=68;W=(d1-d0+1)*U;X=d=>(d-d0)*U;tdx=X(T)+U/2;
+    const U=38,d0=mn-3,d1=Math.max(mx+14,d0+30);HEAD=68;PPD=U;W=(d1-d0+1)*U;X=d=>(d-d0)*U;tdx=X(T)+U/2;
     let seg=null;const segs=[];
     for(let d=d0;d<=d1;d++){
       const[y,m,dd,w]=dp(d),x=X(d),we=w===0||w===6;
@@ -730,7 +860,7 @@ function gantt(list){
     }
     segs.forEach(g=>{hd+=`<line class="gs2" x1="${g.x}" x2="${g.x}" y1="0" y2="28"/><text class="l1" data-a="${g.x}" data-b="${g.x+g.w}" x="${g.x+10}" y="18">${g.w>=150?MONL[g.m]+" "+g.y:MON[g.m]+" "+String(g.y).slice(2)}</text>`});
   }else if(mode==="month"){
-    const U=64,mi=d=>{const[y,m]=dp(d);return y*12+m},m0=mi(mn)-1,m1=Math.max(mi(mx)+3,m0+11);HEAD=52;W=(m1-m0+1)*U;
+    const U=64,mi=d=>{const[y,m]=dp(d);return y*12+m},m0=mi(mn)-1,m1=Math.max(mi(mx)+3,m0+11);HEAD=52;PPD=U/30.44;W=(m1-m0+1)*U;
     X=d=>{const[y,m,dd]=dp(d);return(y*12+m-m0+(dd-1)/dim(y,m))*U};tdx=X(T);
     let ys=null;const segs=[];
     for(let k=m0;k<=m1;k++){
@@ -741,7 +871,7 @@ function gantt(list){
     }
     segs.forEach(g=>{hd+=`<line class="gs2" x1="${g.x}" x2="${g.x}" y1="0" y2="28"/><text class="l1" data-a="${g.x}" data-b="${g.x+g.w}" x="${g.x+10}" y="18">${g.y}</text>`});
   }else{
-    const U=150,y0=dp(mn)[0],y1=Math.max(dp(mx)[0]+1,y0+4),cy=dp(T)[0];HEAD=52;W=(y1-y0+1)*U;
+    const U=150,y0=dp(mn)[0],y1=Math.max(dp(mx)[0]+1,y0+4),cy=dp(T)[0];HEAD=52;PPD=U/365.25;W=(y1-y0+1)*U;
     X=d=>{const y=dp(d)[0],len=dim(y,1)===29?366:365;return(y-y0+(d-Date.UTC(y,0,1)/864e5)/len)*U};tdx=X(T);
     let ds=null;const segs=[];
     for(let y=y0;y<=y1;y++){
@@ -755,18 +885,20 @@ function gantt(list){
   items.forEach(it=>{if(it.g)gd+=`<rect style="fill:color-mix(in srgb,${it.g.c} 16%,var(--card))" x="0" y="${it.y}" width="${W}" height="${GH}"/>`;gd+=`<line class="gs1" x1="0" x2="${W}" y1="${it.y}" y2="${it.y}"/>`});
   gd+=`<line class="gs1" x1="0" x2="${W}" y1="${BH}" y2="${BH}"/>`;
   const col={todo:"var(--todo)",doing:"var(--doing)",done:"var(--done)"},pos={};
-  items.forEach(it=>{if(!it.t)return;const t=it.t,x1=X(dn(t.start)),x2=X(dn(t.end)+1);pos[t.id]={x:x1,w:Math.max(x2-x1,8),y:it.y}});
+  items.forEach(it=>{if(!it.t)return;const t=it.t,x1=X(dn(t.start)),x2=X(dn(t.end)+1);pos[t.id]=t.ms?{x:x1+(x2-x1)/2-9,w:18,y:it.y}:{x:x1,w:Math.max(x2-x1,8),y:it.y}});
   gd+=`<line x1="${tdx}" x2="${tdx}" y1="0" y2="${BH}" stroke="var(--bad)" stroke-width="1.6" stroke-dasharray="3 3"/>`;
   list.forEach(t=>(t.deps||[]).forEach(id=>{const a=pos[id],b=pos[t.id];if(!a)return;
     const x1=a.x+a.w,y1=a.y+ROW/2,x2=b.x,y2=b.y+ROW/2,mx2=Math.max(x1+8,x2-8);
     gd+=`<path d="M${x1} ${y1}H${mx2}V${y2}H${x2}" fill="none" stroke="var(--mut)" stroke-width="1.4" marker-end="url(#ar)"/>`}));
-  list.forEach(t=>{const p=pos[t.id],inside=p.w>=t.title.length*6.7+20;
-    gd+=`<g data-id="${t.id}" style="cursor:pointer"${t.status==="done"?' opacity=".72"':""}><rect x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="${col[t.status]}"/>`+
-      (inside?`<text class="bt ${t.status}" x="${p.x+11}" y="${p.y+ROW/2+4.2}">${esc(t.title)}</text>`:`<text class="bo" x="${p.x+p.w+8}" y="${p.y+ROW/2+4.2}">${esc(t.title)}</text>`)+`</g>`});
+  list.forEach(t=>{const p=pos[t.id],inside=!t.ms&&p.w>=t.title.length*6.7+20,cy=p.y+ROW/2;
+    const body=t.ms?`<path d="M${p.x+9} ${cy-10}l10 10l-10 10l-10-10z" fill="${col[t.status]}"/>`:`<rect x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="${col[t.status]}"/>`;
+    const lbl=inside?`<text class="bt ${t.status}" x="${p.x+11}" y="${cy+4.2}">${esc(t.title)}</text>`:`<text class="bo" x="${p.x+p.w+10}" y="${cy+4.2}">${esc(t.title)}</text>`;
+    const hd2=t.ms?"":`<rect data-h="s" class="gh1" x="${p.x}" y="${p.y+8}" width="7" height="${ROW-16}"/><rect data-h="e" class="gh1" x="${p.x+p.w-7}" y="${p.y+8}" width="7" height="${ROW-16}"/>`;
+    gd+=`<g data-id="${t.id}" class="gbar"${t.status==="done"?' opacity=".72"':""}>${body}${lbl}${hd2}<circle data-h="dep" class="gdep" cx="${p.x+p.w+(t.ms?1:0)}" cy="${cy}" r="5"/></g>`});
   const rows=items.map(it=>it.g?`<div class="gr gh2" style="--tc:${it.g.c}"><i class="dt" style="background:${it.g.c}"></i><span>${esc(it.g.l)}</span><em>${it.g.L.length}</em></div>`:`<div class="gr" data-id="${it.t.id}" title="${esc(it.t.title)}"><i class="dt ${it.t.status}"></i><span>${esc(it.t.title)}</span></div>`).join("");
   const seg=[["day","Tage"],["month","Monate"],["year","Jahre"]].map(([k,l])=>`<button data-gm="${k}" class="${k===mode?"on":""}">${l}</button>`).join("");
   return`<div class="gctl"><div class="seg">${seg}</div><button class="btn ghost sm" data-gtoday>Heute</button></div>`+
-  `<div class="gwrap"><div class="gl"><div class="glh" style="--hd:${HEAD}px"></div>${rows}</div><div class="gs" style="width:${W}px"><svg class="gh" width="${W}" height="${HEAD}">${hd}</svg><svg class="gb" width="${W}" height="${BH}" data-tx="${tdx}"><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--mut)"/></marker></defs>${gd}</svg></div></div>`;
+  `<div class="gwrap"><div class="gl"><div class="glh" style="--hd:${HEAD}px"></div>${rows}</div><div class="gs" style="width:${W}px"><svg class="gh" width="${W}" height="${HEAD}">${hd}</svg><svg class="gb" width="${W}" height="${BH}" data-tx="${tdx}" data-ppd="${PPD}"><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--mut)"/></marker></defs>${gd}</svg></div></div>`;
 }
 function bind(){
   document.querySelectorAll("[data-id]").forEach(el=>el.onclick=e=>{if(e.target.dataset.adv)return;openDlg(el.dataset.id)});
@@ -777,7 +909,7 @@ function bind(){
   document.querySelectorAll(".card").forEach(c=>c.ondragstart=e=>e.dataTransfer.setData("text/plain",c.dataset.id));
   document.querySelectorAll(".colm").forEach(c=>{
     c.ondragover=e=>{e.preventDefault();c.classList.add("over")};c.ondragleave=()=>c.classList.remove("over");
-    c.ondrop=e=>{e.preventDefault();c.classList.remove("over");const t=byId(e.dataTransfer.getData("text/plain"));if(t&&t.status!==c.dataset.s)saveTask({...t,status:c.dataset.s})}});
+    c.ondrop=e=>{e.preventDefault();c.classList.remove("over");const t=byId(e.dataTransfer.getData("text/plain"));if(t&&t.status!==c.dataset.s)setStatus(t,c.dataset.s)}});
 }
 
 /* Ressource: Auswahl oder Freitext */
@@ -795,25 +927,38 @@ $("ck_add").onclick=()=>{cklist.push({t:"",d:false});drawCk();const a=$("f_ck").
 
 /* Dialog */
 function openDlg(id){
-  editing=id?byId(id):null;const t=editing||{title:"",tags:ftags.size===1&&!ftags.has("__none")?[...ftags]:[],who:"",status:"todo",start:iso(new Date()),end:iso(new Date(Date.now()+6*864e5)),deps:[],notes:""};
+  editing=id?byId(id):null;const t=editing||{title:"",tags:ftags.size===1&&!ftags.has("__none")?[...ftags]:[],who:"",proj:fprojs.size===1?[...fprojs][0]:"",status:"todo",start:iso(new Date()),end:iso(new Date(Date.now()+6*864e5)),deps:[],notes:""};
   $("dt").textContent=editing?"Aufgabe bearbeiten":"Neue Aufgabe";
   $("f_title").value=t.title;selTags=[...tgs(t)];regDraft=reg.map(x=>({...x}));colorFor=null;$("f_tagin").value="";drawTags();$("f_who").value=t.who||"";setWho();$("f_status").value=t.status;syncSeg();
-  $("f_start").value=t.start;$("f_end").value=t.end;$("f_notes").value=t.notes||"";
+  $("f_start").value=t.start;$("f_end").value=t.end;initExtra(t);$("f_notes").value=t.notes||"";
   const others=tasks.filter(x=>!editing||x.id!==editing.id);
   $("f_deps").innerHTML=others.length?others.map(x=>`<label><input type="checkbox" value="${x.id}" ${(t.deps||[]).includes(x.id)?"checked":""}>${esc(x.title)}</label>`).join(""):'<span style="color:var(--mut);font-size:13px">Noch keine anderen Aufgaben.</span>';
   cklist=(t.checklist||[]).map(x=>({...x}));drawCk();
   $("b_del").style.display=editing?"":"none";
   $("dlg").showModal();setTimeout(()=>$("f_title").focus(),50);
 }
+function syncMs(){const on=$("f_ms").checked;$("f_end").closest(".g2").classList.toggle("ms",on);$("f_end").parentElement.style.display=on?"none":""}
+function initExtra(t){
+  const pn=allProjs();$("f_proj").innerHTML='<option value="">Kein Projekt</option>'+pn.map(n=>`<option>${esc(n)}</option>`).join("")+'<option value="__new">Neues Projekt …</option>';
+  $("f_proj").value=t.proj||"";$("f_projnew").value="";$("f_projnew").style.display="none";
+  $("f_rec").value=t.rec?t.rec.n+t.rec.u:"";$("f_rechint").style.display=t.rec?"":"none";
+  $("f_ms").checked=!!t.ms;syncMs()}
+$("f_ms").onchange=syncMs;
+$("f_rec").onchange=()=>{$("f_rechint").style.display=$("f_rec").value?"":"none"};
+$("f_proj").onchange=()=>{const n=$("f_proj").value==="__new";$("f_projnew").style.display=n?"":"none";if(n)$("f_projnew").focus()};
 $("b_save").onclick=async()=>{
   const title=$("f_title").value.trim();if(!title){$("f_title").focus();return}
   if($("f_tagin").value.trim())addTag($("f_tagin").value);
-  let s=$("f_start").value,e=$("f_end").value;if(!s)s=iso(new Date());if(!e||dn(e)<dn(s))e=s;
-  const t={id:editing?editing.id:"t"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),title,tags:selTags.slice(),area:selTags[0]||"",who:$("f_who").value.trim(),
+  let s=$("f_start").value,e=$("f_end").value;if(!s)s=iso(new Date());const ms=$("f_ms").checked;if(!e||dn(e)<dn(s)||ms)e=s;
+  let proj=$("f_proj").value;if(proj==="__new")proj=$("f_projnew").value.trim().slice(0,30);
+  {const ex=allProjs().find(x=>x.toLowerCase()===proj.toLowerCase());if(ex)proj=ex}
+  const rm=/^(\d+)([dwmy])$/.exec($("f_rec").value),rec=rm?{n:+rm[1],u:rm[2]}:null;
+  const t={...(editing||{}),id:editing?editing.id:newId(),title,tags:selTags.slice(),area:selTags[0]||"",proj,rec,ms,who:$("f_who").value.trim(),
     status:$("f_status").value,start:s,end:e,notes:$("f_notes").value,checklist:cklist.filter(x=>x.t.trim()),deps:[...document.querySelectorAll("#f_deps input:checked")].map(i=>i.value)};
   $("dlg").close();
-  {const r=regDraft;if(r){selTags.forEach(n=>{if(!r.some(x=>x.n===n))r.push({n,c:colorKey(n)})});if(JSON.stringify(r)!==JSON.stringify(reg))saveReg(r)}}
-  await saveTask(t);
+  let sp=null;if(t.status==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);t.spawned=sp.id}
+  {const r=regDraft;if(r){if(proj&&!r.some(x=>x.p&&x.n===proj))r.push({n:proj,c:nextPColor(),p:1});selTags.forEach(n=>{if(!r.some(x=>!x.p&&x.n===n))r.push({n,c:colorKey(n)})});if(JSON.stringify(r)!==JSON.stringify(reg))saveReg(r)}}
+  await saveTask(t);if(sp)await saveTask(sp);
 };
 $("b_cancel").onclick=()=>$("dlg").close();
 $("dlg").addEventListener("close",()=>{regDraft=null;colorFor=null});

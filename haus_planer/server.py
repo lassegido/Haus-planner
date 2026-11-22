@@ -82,12 +82,24 @@ def clean_tags(lst):
         if not isinstance(x, dict):
             continue
         n = str(x.get("n", "")).strip()[:30]
-        if not n or n.lower() in seen:
+        key = (bool(x.get("p")), n.lower())
+        if not n or key in seen:
             continue
-        seen.add(n.lower())
+        seen.add(key)
         c = x.get("c")
-        out.append({"n": n, "c": c if c in COLORS else ""})
+        out.append({"n": n, "c": c if c in COLORS else "", **({"p": 1} if x.get("p") else {})})
     return out[:100]
+
+
+def clean_rec(r):
+    if isinstance(r, dict) and r.get("u") in ("d", "w", "m", "y"):
+        try:
+            n = int(r.get("n", 1))
+        except (TypeError, ValueError):
+            return None
+        if 1 <= n <= 60:
+            return {"n": n, "u": r["u"]}
+    return None
 
 
 def clean(t):
@@ -108,7 +120,7 @@ def clean(t):
     if not isinstance(tags, list):
         tags = [t.get("area")] if t.get("area") else []
     tags = [n for n in dict.fromkeys(str(x).strip()[:30] for x in tags if isinstance(x, str)) if n][:20]
-    return {"id": i, "title": title, "area": (tags[0] if tags else str(t.get("area", ""))[:60]), "tags": tags, "who": str(t.get("who", ""))[:60],
+    return {"id": i, "title": title, "area": (tags[0] if tags else str(t.get("area", ""))[:60]), "tags": tags, "proj": str(t.get("proj", "") or "")[:30], "ms": bool(t.get("ms")), "rec": clean_rec(t.get("rec")), "spawned": str(t.get("spawned", "") or "")[:40], "who": str(t.get("who", ""))[:60],
             "status": st if st in ("todo", "doing", "done") else "todo", "start": s, "end": e,
             "notes": str(t.get("notes", ""))[:4000], "deps": deps, "checklist": ck}
 
