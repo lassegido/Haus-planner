@@ -1,5 +1,10 @@
 # Änderungen
 
+## 1.15.0
+- Technische Umbenennung: Slug, Ordner und Sensor-IDs heißen jetzt `planner` (Sensoren: `sensor.planner_offen`, `_in_arbeit`, `_ueberfaellig`, `_heute_faellig`); der Spiegel liegt unter `share/planner/`
+- Für Home Assistant ist das ein neues Add-on: beim ersten Start übernimmt es Aufgaben, Tags und Dateianhänge automatisch aus dem alten Spiegel `share/haus_planer/`
+- Exportdateien heißen jetzt `planner-…`
+
 ## 1.14.0
 - Die App heißt jetzt „Planner“ (Titel, Startbild, Seitenleiste, App-Symbol, Exporte, Erinnerungen, Sensornamen). Slug, Datenordner und Sensor-IDs (`sensor.haus_planner_*`) bleiben unverändert, Daten und Automationen funktionieren weiter
 

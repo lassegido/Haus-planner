@@ -1263,9 +1263,9 @@ $("main").addEventListener("click",e=>{
   const dy=e.target.closest("[data-day]");if(dy&&!e.target.closest("[data-id]")){calSel=dy.dataset.day;render()}});
 function ics(){
   const esc2=x=>String(x||"").replace(/\\/g,"\\\\").replace(/;/g,"\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n"),c=d=>d.replace(/-/g,""),stp=new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z";
-  const ev=tasks.filter(t=>t.status!=="done").map(t=>["BEGIN:VEVENT","UID:"+t.id+"@haus-planner","DTSTAMP:"+stp,"DTSTART;VALUE=DATE:"+c(t.start),"DTEND;VALUE=DATE:"+c(iso(fromDn(dn(t.end)+1))),"SUMMARY:"+esc2(t.title),...(t.notes?["DESCRIPTION:"+esc2(t.notes)]:[]),...(t.who?["CATEGORIES:"+esc2(t.who)]:[]),"END:VEVENT"].join("\r\n"));
+  const ev=tasks.filter(t=>t.status!=="done").map(t=>["BEGIN:VEVENT","UID:"+t.id+"@planner","DTSTAMP:"+stp,"DTSTART;VALUE=DATE:"+c(t.start),"DTEND;VALUE=DATE:"+c(iso(fromDn(dn(t.end)+1))),"SUMMARY:"+esc2(t.title),...(t.notes?["DESCRIPTION:"+esc2(t.notes)]:[]),...(t.who?["CATEGORIES:"+esc2(t.who)]:[]),"END:VEVENT"].join("\r\n"));
   return["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Planner//DE","CALSCALE:GREGORIAN","X-WR-CALNAME:Planner",...ev,"END:VCALENDAR"].join("\r\n")+"\r\n"}
-$("x_ics").onclick=()=>dl("haus-planner-"+stamp()+".ics",new Blob([ics()],{type:"text/calendar"}));
+$("x_ics").onclick=()=>dl("planner-"+stamp()+".ics",new Blob([ics()],{type:"text/calendar"}));
 /* KI-Assistent */
 function aiPrompt(){
   const t=$("f_title").value.trim(),notes=$("f_notes").value.trim(),have=cklist.map(c=>c.t).filter(Boolean),tags=selTags.join(", "),pv=$("f_proj").value,proj=pv&&pv!=="__new"?pv:"";
@@ -1675,7 +1675,7 @@ async function dl(name,data){try{const d=await window.claude.use("downloads");if
 const stamp=()=>iso(new Date()),fdl=s=>fromDn(dn(s)).toLocaleDateString("de-DE",{timeZone:"UTC"});
 $("exp").onclick=()=>$("dlx").showModal();
 $("x_close").onclick=()=>$("dlx").close();
-$("x_json").onclick=()=>dl("haus-planner-backup-"+stamp()+".json",new Blob([JSON.stringify({version:2,exportiert:new Date().toISOString(),tasks:RAW,tags:reg},null,2)],{type:"application/json"}));
+$("x_json").onclick=()=>dl("planner-backup-"+stamp()+".json",new Blob([JSON.stringify({version:2,exportiert:new Date().toISOString(),tasks:RAW,tags:reg},null,2)],{type:"application/json"}));
 $("x_imp").onclick=()=>$("imp").click();
 $("imp").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const j=JSON.parse(await f.text()),arr=Array.isArray(j)?j:j.tasks;if(!Array.isArray(arr))throw 0;if(!confirm(arr.length+" Aufgaben einspielen? Vorhandene mit gleicher ID werden überschrieben."))return;await saveMany(arr.filter(t=>t&&t.id&&t.title&&t.start&&t.end));if(Array.isArray(j.tags)&&j.tags.length)await saveReg(mergeReg(j.tags));$("dlx").close()}catch(x){alert("Die Datei konnte nicht gelesen werden.")}e.target.value=""};
 $("x_pdf").onclick=()=>{
@@ -1705,7 +1705,7 @@ $("x_pdf").onclick=()=>{
     list.forEach(t=>(t.deps||[]).forEach(i=>{const a=pos[i],b=pos[t.id];if(!a)return;const x1=a.x+a.w,y1=a.yy+rh/2,x2=b.x,y2=b.yy+rh/2,mx=Math.max(x1+2,x2-2);doc.line(x1,y1,mx,y1);doc.line(mx,y1,mx,y2);doc.line(mx,y2,x2,y2);doc.triangle(x2,y2,x2-1.4,y2-.9,x2-1.4,y2+.9,"F")}));
     const tx=X0+(T-d0+.5)*sc;doc.setDrawColor(211,85,38);doc.line(tx,top-2,tx,top+n*rh);
   }
-  dl("haus-planner-"+stamp()+".pdf",doc.output("arraybuffer"));
+  dl("planner-"+stamp()+".pdf",doc.output("arraybuffer"));
 };
 /* Excel-Export (ExcelJS wird erst bei Bedarf geladen) */
 function loadJs(src){return new Promise((ok,no)=>{if(window.ExcelJS)return ok();const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=()=>no(new Error("Excel-Bibliothek konnte nicht geladen werden"));document.head.appendChild(s)})}
@@ -1825,7 +1825,7 @@ async function buildXlsx(){
 $("x_xlsx").onclick=async()=>{
   try{$("note").textContent="Excel-Datei wird erstellt …";await loadJs("https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js");
     const buf=await buildXlsx();$("note").textContent="";
-    await dl("haus-planner-"+stamp()+".xlsx",new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}))
+    await dl("planner-"+stamp()+".xlsx",new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}))
   }catch(e){$("note").textContent="Excel-Export fehlgeschlagen: "+((e&&(e.message||e.code))||e)}
 };
 

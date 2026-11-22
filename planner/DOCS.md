@@ -6,8 +6,8 @@ Aufgaben, Board, Liste und Zeitstrahl für zu Hause. Läuft komplett lokal auf d
 
 - **Hauptspeicher:** `/data/tasks.json` im Add-on. Dieser Ordner bleibt bei **Update** und **Neu bauen** erhalten.
 - **Tägliche Kopien:** `/data/backups` (die letzten 30 Tage).
-- **Spiegel außerhalb des Add-ons:** Bei jeder Änderung wird zusätzlich nach `share/haus_planer/` kopiert (`tasks-latest.json` und tägliche Kopien). Der Ordner ist über die Samba-Freigabe `share` erreichbar und bleibt sogar nach einer Deinstallation erhalten.
-- **Automatische Wiederherstellung:** Findet das Add-on beim Start keine Daten, aber `share/haus_planer/tasks-latest.json`, spielt es diese Datei selbst wieder ein.
+- **Spiegel außerhalb des Add-ons:** Bei jeder Änderung wird zusätzlich nach `share/planner/` kopiert (`tasks-latest.json` und tägliche Kopien). Der Ordner ist über die Samba-Freigabe `share` erreichbar und bleibt sogar nach einer Deinstallation erhalten.
+- **Automatische Wiederherstellung:** Findet das Add-on beim Start keine Daten, aber `share/planner/tasks-latest.json` (oder den alten Spiegel `share/haus_planer/tasks-latest.json` aus Version 1.13 und älter), spielt es diese Datei selbst wieder ein, samt Dateianhängen.
 - Außerdem sind die Daten in euren normalen Home-Assistant-Backups enthalten.
 
 ## Update einspielen
@@ -23,7 +23,7 @@ Die Aufgaben bleiben dabei erhalten. **Nicht deinstallieren**, um zu aktualisier
 ## Wiederherstellen
 
 - **Aus einer Backup-Datei:** In der App **Export → Backup einspielen** und die JSON-Datei wählen.
-- **Aus dem Spiegel:** Die gewünschte Datei aus `share/haus_planer/` in der App über „Backup einspielen" laden.
+- **Aus dem Spiegel:** Die gewünschte Datei aus `share/planner/` in der App über „Backup einspielen" laden.
 
 ## Von unterwegs
 
@@ -38,7 +38,7 @@ Zugriff von außen nur über Nabu Casa oder ein VPN (z. B. Tailscale).
 
 ## Sensoren
 
-Der Planner legt in Home Assistant vier Sensoren an, die jede Minute aktualisiert werden: `sensor.haus_planner_offen`, `sensor.haus_planner_in_arbeit`, `sensor.haus_planner_ueberfaellig` und `sensor.haus_planner_heute_faellig`. Das Attribut `aufgaben` enthält die Titel. Abschalten mit `sensors: false` in der Konfiguration.
+Der Planner legt in Home Assistant vier Sensoren an, die jede Minute aktualisiert werden: `sensor.planner_offen`, `sensor.planner_in_arbeit`, `sensor.planner_ueberfaellig` und `sensor.planner_heute_faellig`. Das Attribut `aufgaben` enthält die Titel. Abschalten mit `sensors: false` in der Konfiguration.
 
 ## KI-Assistent
 
@@ -60,7 +60,7 @@ Achtung: Dieser Port hat **keine Anmeldung**. Jeder im Heimnetz kann ihn öffnen
 
 ## Daten und Grenzen
 
-- Alle Aufgaben liegen in `/data/tasks.json` (Format-Version 2) und werden bei jedem Speichern nach `/share/haus_planer/` gespiegelt.
+- Alle Aufgaben liegen in `/data/tasks.json` (Format-Version 2) und werden bei jedem Speichern nach `/share/planner/` gespiegelt.
 - Sicherungen: 30 Tage täglich, 24 Monate je eine pro Monat (`tasks-monat-JJJJ-MM.json`), in `/data/backups` und im Share.
 - Bearbeiten zwei Personen dieselbe Aufgabe gleichzeitig, fragt die App beim Speichern nach, statt still zu überschreiben.
 - Richtwert: bis etwa 500 aktive Aufgaben bleibt alles flüssig. Erledigtes lässt sich in den Einstellungen archivieren; Archivierte zählen nicht zu den aktiven.

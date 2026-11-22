@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Erzeugt die App-Symbole in haus_planer/icons/ (benötigt Playwright mit Chromium)."""
+"""Erzeugt die App-Symbole in planner/icons/ (benötigt Playwright mit Chromium)."""
 import os
 from playwright.sync_api import sync_playwright
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, "haus_planer", "icons")
+OUT = os.path.join(ROOT, "planner", "icons")
 os.makedirs(OUT, exist_ok=True)
 SVG = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#2D6786"/>'
        '<g transform="translate(88 88) scale(14)" fill="none" stroke="#F5F3EB" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'

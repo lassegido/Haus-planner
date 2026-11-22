@@ -1,6 +1,6 @@
 name: Planner
-version: "1.14.0"
-slug: haus_planer
+version: "1.15.0"
+slug: planner
 description: Aufgaben, Kanban-Board und Gantt-Zeitstrahl für zu Hause
 arch:
   - aarch64

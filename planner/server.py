@@ -3,9 +3,10 @@ from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs, unquote
 
 # /data bleibt bei Updates und Neu-Bauen des Add-ons erhalten.
-# Zusätzlich wird jede Änderung nach /share/haus_planer gespiegelt (überlebt sogar Deinstallation).
+# Zusätzlich wird jede Änderung nach /share/planner gespiegelt (überlebt sogar Deinstallation).
 D = os.environ.get("DATA_DIR", "/data")
-SHARE = os.environ.get("SHARE_DIR", "/share/haus_planer")
+SHARE = os.environ.get("SHARE_DIR", "/share/planner")
+LEGACY_SHARE = os.environ.get("LEGACY_SHARE_DIR", "/share/haus_planer")  # alter Spiegel (bis 1.13)
 INDEX = os.environ.get("INDEX", "/app/index.html")
 VERFILE = os.environ.get("VERSION_FILE", "/app/VERSION")
 PORT = int(os.environ.get("PORT", "8099"))
@@ -58,12 +59,23 @@ def load():
         except Exception as e:
             print("Datendatei defekt, wird beiseite gelegt:", e, flush=True)
             shutil.copyfile(DATA, DATA + ".defekt-" + time.strftime("%Y%m%d%H%M%S"))
-    mirror = os.path.join(SHARE, "tasks-latest.json")
-    if os.path.exists(mirror):
+    for src in (SHARE, LEGACY_SHARE):
+        mirror = os.path.join(src, "tasks-latest.json")
+        if not os.path.exists(mirror):
+            continue
         try:
             state["tasks"], state["rev"], state["tags"] = read_file(mirror)
-            print("Daten aus dem Share-Spiegel wiederhergestellt (%d Aufgaben)" % len(state["tasks"]), flush=True)
+            print("Daten aus dem Share-Spiegel %s wiederhergestellt (%d Aufgaben)" % (src, len(state["tasks"])), flush=True)
+            if src != SHARE:
+                legacy_files = os.path.join(src, "files")
+                if os.path.isdir(legacy_files):
+                    try:
+                        shutil.copytree(legacy_files, os.path.join(SHARE, "files"), dirs_exist_ok=True)
+                        shutil.copytree(legacy_files, FILES, dirs_exist_ok=True)
+                    except Exception as e:
+                        print("Dateianhänge nicht übernommen:", e, flush=True)
             save()
+            return
         except Exception as e:
             print("Share-Spiegel nicht lesbar:", e, flush=True)
 
@@ -311,7 +323,7 @@ def notify(message):
 
 
 def put_sensor(key, name, value, icon, titles):
-    ha_call("POST", "/states/sensor.haus_planner_" + key,
+    ha_call("POST", "/states/sensor.planner_" + key,
             {"state": str(value), "attributes": {"friendly_name": name, "unit_of_measurement": "Aufgaben", "icon": icon, "aufgaben": titles[:20]}})
 
 
