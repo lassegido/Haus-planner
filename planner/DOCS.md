@@ -34,7 +34,7 @@ Zugriff von außen nur über Nabu Casa oder ein VPN (z. B. Tailscale).
 1. Im Planner **Einstellungen → Home Assistant → Erinnerung** öffnen.
 2. Die Geräte auswählen, die erinnert werden sollen (alle Benachrichtigungsdienste der Home-Assistant-App werden automatisch gefunden). Mehrere sind möglich.
 3. Unter **Uhrzeit** die Zeit der täglichen Erinnerung wählen (Standard 08:00, in der Zeitzone von Home Assistant). Sie kommt nur, wenn etwas heute fällig oder überfällig ist.
-4. Speichern und das Add-on neu starten. In der App unter **Einstellungen** gibt es einen Knopf „Testbenachrichtigung senden".
+4. Mit **Testnachricht senden** auf derselben Seite prüfen, ob es ankommt. Ein Neustart ist nicht nötig.
 
 ## Sensoren
 
