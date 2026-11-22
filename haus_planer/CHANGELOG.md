@@ -1,5 +1,11 @@
 # Änderungen
 
+## 1.12.0
+- Zeitraum per Kalender: ein Feld statt zwei Datumsfelder, Start und Ende nacheinander antippen; dazu „Heute“, „Diese Woche“, „Nächste Woche“
+- „Verantwortlich“ erlaubt mehrere Personen (Antippen zum An- und Abwählen, neue Personen per „+ Person“); Filter, Gruppierung und Zähler berücksichtigen alle
+- Spalte und Status heißen wieder „Offen“ (statt „Zu starten“)
+- Aufgabendialog neu geordnet: oben Titel, Zeitraum, Verantwortlich, Status, Tags, Projekt; Checkliste, Notizen, Wiederholen/Abhängigkeiten, Dateien und Verlauf als aufklappbare Gruppen, die sich bei Inhalt von selbst öffnen
+- Heutiges Datum richtet sich nach deiner Zeitzone
 ## 1.11.0
 - Neu: feine Linienicons neben den Tags (Board, Liste, Filter, Start). Sie werden automatisch zugeordnet: zuerst über Stichworte, mit eingetragenem KI-Schlüssel wählt die KI das passende Symbol; gespeichert im Tag-Verzeichnis, nicht von Hand wählbar
 - Gleichzeitiges Bearbeiten: Wurde eine Aufgabe in der Zwischenzeit von jemand anderem geändert, wird nicht stillschweigend überschrieben, sondern gefragt („Trotzdem speichern“)

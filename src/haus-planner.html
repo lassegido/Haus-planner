@@ -609,6 +609,42 @@ td.late{background:none;padding:.4rem .8rem;border-radius:0}
 .tc .ti{width:1rem;height:1rem;margin-right:-.05rem}
 .pr .pn{display:inline-flex;align-items:center;gap:.4rem}.pr .pn .ti{width:1rem;height:1rem}
 .more{display:block;width:100%;margin:.2rem 0 .6rem}
+
+/* 1.12: Aufgabendialog */
+#dlg .tin{font-size:1.2rem;font-weight:650;height:3.2rem}
+.rangebtn{display:flex;align-items:center;gap:.6rem;width:100%;min-height:3rem;padding:.5rem .9rem;border:1px solid var(--line2);border-radius:.9rem;background:var(--surf);color:var(--tx);font-size:1rem;text-align:left}
+.rangebtn .ri{flex:none;width:1.25rem;height:1.25rem;fill:none;stroke:var(--mut);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.rangebtn span{flex:1;font-weight:600}.rangebtn em{font-style:normal;color:var(--mut);font-size:.88rem}
+.chev{flex:none;width:1rem;height:1rem;fill:none;stroke:var(--faint);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+.rangebtn[aria-expanded=true] .chev,.dsec[open] summary .chev{transform:rotate(90deg)}
+.rp{margin-top:.5rem;padding:.6rem .6rem .7rem;background:var(--bg);border:1px solid var(--line);border-radius:1rem}.rp[hidden]{display:none}
+.rph{display:flex;align-items:center;justify-content:space-between;margin-bottom:.3rem}.rph b{font-weight:650}
+.rph button{display:grid;place-items:center;width:2.4rem;height:2.4rem;border:0;border-radius:50%;background:none;color:var(--tx)}
+.rph svg{width:1.2rem;height:1.2rem;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.rpw,.rpg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.rpw span{text-align:center;font-size:.75rem;color:var(--mut);padding:.2rem 0}
+.rpg button{height:2.5rem;border:0;background:none;color:var(--tx);font-size:.95rem;border-radius:0}
+.rpg button.rin{background:var(--acc-soft);color:var(--tagc)}
+.rpg button.rst,.rpg button.ren{background:var(--acc);color:var(--on-acc);font-weight:700}
+.rpg button.rst{border-radius:.7rem 0 0 .7rem}.rpg button.ren{border-radius:0 .7rem .7rem 0}.rpg button.rst.ren{border-radius:.7rem}
+.rpg button.rtd:not(.rst):not(.ren){font-weight:800;color:var(--acc)}
+@media (hover:hover){.rpg button:not(.rin):hover{background:var(--wk);border-radius:.7rem}}
+.rpq{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
+.rpq button{border:1px solid var(--line2);background:var(--surf);color:var(--tx);border-radius:2rem;padding:.4rem .85rem;font-size:.85rem}
+.rpn{margin-top:.5rem;font-size:.8rem;color:var(--mut)}
+.wchips{display:flex;flex-wrap:wrap;gap:.5rem}
+.wch{display:inline-flex;align-items:center;gap:.45rem;min-height:2.5rem;padding:.3rem .85rem .3rem .4rem;border:1px solid var(--line2);border-radius:2rem;background:var(--surf);color:var(--tx);font-size:.95rem}
+.wch .av{width:1.6rem;height:1.6rem;font-size:.75rem;opacity:.5}
+.wch.on{border-color:var(--acc);background:var(--acc-soft);color:var(--tagc);font-weight:600}.wch.on .av{opacity:1}
+.wch{flex:none;white-space:nowrap}.wch.wadd{flex-direction:row;padding:.3rem .9rem;color:var(--mut);border-style:dashed}.wch.wadd svg{width:1rem;height:1rem;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.avs{display:inline-flex;flex:none;margin-left:auto}.avs .av+.av{margin-left:-.28rem;box-shadow:0 0 0 2px var(--card)}
+.dsecs{margin-top:1.5rem;border-top:1px solid var(--line)}
+.dsec{border-bottom:1px solid var(--line)}
+.dsec summary{list-style:none;display:flex;align-items:center;gap:.6rem;min-height:3.2rem;cursor:pointer;font-weight:600}
+.dsec summary::-webkit-details-marker{display:none}
+.dsec summary span{flex:1}.dsec summary em{font-style:normal;font-weight:500;color:var(--mut);font-size:.9rem}
+.dsec .dbody{padding:0 0 1rem}.dsec .dbody>label:first-child{margin-top:.1rem}
+#dlg label.sl{margin-top:1.1rem}
 </style>
 </head>
 <body>
@@ -645,7 +681,7 @@ td.late{background:none;padding:.4rem .8rem;border-radius:0}
 </div>
 </div>
 
-<div id="selbar" role="toolbar" aria-label="Auswahl"><span id="selcnt">Aufgaben antippen</span><button data-bs="todo">Zu starten</button><button data-bs="doing">In Arbeit</button><button data-bs="done">Erledigt</button><select id="selwho" aria-label="Zuständig setzen"></select><select id="selproj" aria-label="Projekt setzen"></select><button data-ba="arch">Archivieren</button><button data-ba="del">Löschen</button><button data-ba="x">Fertig</button></div>
+<div id="selbar" role="toolbar" aria-label="Auswahl"><span id="selcnt">Aufgaben antippen</span><button data-bs="todo">Offen</button><button data-bs="doing">In Arbeit</button><button data-bs="done">Erledigt</button><select id="selwho" aria-label="Zuständig setzen"></select><select id="selproj" aria-label="Projekt setzen"></select><button data-ba="arch">Archivieren</button><button data-ba="del">Löschen</button><button data-ba="x">Fertig</button></div>
 <dialog id="dls">
   <div class="sh"><button class="sback" id="s_back" type="button" hidden aria-label="Zurück"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button><div class="dh" id="s_title">Einstellungen</div></div>
   <div id="s_body"></div>
@@ -679,40 +715,40 @@ td.late{background:none;padding:.4rem .8rem;border-radius:0}
 </dialog>
 <dialog id="dlg">
   <div id="dt"></div>
-  <label for="f_title">Titel</label><input id="f_title" autocomplete="off" placeholder="Was ist zu tun?">
+  <input id="f_title" class="tin" autocomplete="off" placeholder="Was ist zu tun?" aria-label="Titel">
+  <label>Zeitraum</label>
+  <button type="button" class="rangebtn" id="f_range" aria-expanded="false"><svg class="ri" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v3.5M15.5 3.5v3.5"/></svg><span id="f_rtxt"></span><em id="f_rlen"></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+  <div class="rp" id="f_rp" hidden></div>
+  <input type="hidden" id="f_start"><input type="hidden" id="f_end">
+  <label class="cbl"><input type="checkbox" id="f_ms"><span>Meilenstein (ein einzelner Tag)</span></label>
+  <label>Verantwortlich</label>
+  <div class="wchips" id="f_whoseg"></div>
+  <input id="f_who" placeholder="Name eingeben, mit Enter hinzufügen" maxlength="30" style="display:none;margin-top:.5rem" aria-label="Name">
+  <label>Status</label>
+  <div class="seg3 st3" id="f_stseg"><button type="button" data-s="todo">Offen</button><button type="button" data-s="doing">In Arbeit</button><button type="button" data-s="done">Erledigt</button></div>
+  <input type="hidden" id="f_status" value="todo">
   <label for="f_tagin">Tags</label>
   <div class="tpick" id="f_tpick"><span id="f_tsel" style="display:contents"></span><input id="f_tagin" placeholder="Tag hinzufügen …" enterkeyhint="done" autocomplete="off"></div>
   <div class="tsug" id="f_tsug"></div><div id="f_sw"></div>
   <label for="f_proj">Projekt</label>
   <select id="f_proj"></select><input id="f_projnew" placeholder="Projektname" maxlength="30" style="display:none;margin-top:.5rem" aria-label="Neues Projekt">
-  <label>Zuständig</label>
-  <div class="seg3 who" id="f_whoseg"><button type="button" data-w="">Niemand</button><button type="button" data-w="Melanie">Melanie</button><button type="button" data-w="Lasse">Lasse</button><button type="button" data-w="__o">Andere</button></div>
-  <input type="hidden" id="f_whosel">
-  <input id="f_who" list="whos" placeholder="Name eingeben" style="display:none;margin-top:.5rem" aria-label="Name">
-  <datalist id="whos"></datalist>
-  <label>Status</label>
-  <div class="seg3 st3" id="f_stseg"><button type="button" data-s="todo">Zu starten</button><button type="button" data-s="doing">In Arbeit</button><button type="button" data-s="done">Erledigt</button></div>
-  <input type="hidden" id="f_status" value="todo">
-  <div class="g2">
-    <div><label for="f_start">Start</label><input type="date" id="f_start"></div>
-    <div><label for="f_end">Ende</label><input type="date" id="f_end"></div>
-  </div>
-  <label class="cbl"><input type="checkbox" id="f_ms"><span>Meilenstein (ein einzelner Tag)</span></label>
-  <label for="f_rec">Wiederholen</label>
+  <div class="dsecs">
+  <details class="dsec" id="d_ck"><summary><span>Checkliste</span><em></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><div id="f_ck"></div><button class="btn ghost" id="ck_add" type="button"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Punkt hinzufügen</button><div class="aiw" id="ai_row"><button class="btn ghost sm" id="ai_btn" type="button">Mit KI ausfüllen</button><span class="hint">Notizen und Checkliste vorschlagen</span></div>
+  <div class="aibox" id="ai_box" style="display:none"><div class="aih">Vorschlag</div><div id="ai_notes"></div><div id="ai_items"></div><div class="aia"><button class="btn sm" id="ai_ok" type="button">Übernehmen</button><button class="btn ghost sm" id="ai_no" type="button">Verwerfen</button></div></div></div></details>
+  <details class="dsec" id="d_nt"><summary><span>Notizen</span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><textarea id="f_notes" rows="3" placeholder="Maße, Material, Ansprechpartner …"></textarea></div></details>
+  <details class="dsec" id="d_pl"><summary><span>Wiederholen und Abhängigkeiten</span><em></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><label for="f_rec">Wiederholen</label>
   <select id="f_rec"><option value="">Nie</option><option value="1d">Täglich</option><option value="1w">Wöchentlich</option><option value="2w">Alle 2 Wochen</option><option value="1m">Monatlich</option><option value="3m">Vierteljährlich</option><option value="1y">Jährlich</option></select>
-  <div class="hint" id="f_rechint" style="display:none">Beim Erledigen wird die nächste Aufgabe automatisch angelegt.</div>
-  <label>Abhängig von <span class="lh">muss vorher fertig sein</span></label><div class="deps" id="f_deps"></div>
-  <label>Checkliste</label><div id="f_ck"></div><button class="btn ghost" id="ck_add" type="button"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Punkt hinzufügen</button>
-  <div class="aiw" id="ai_row"><button class="btn ghost sm" id="ai_btn" type="button">Mit KI ausfüllen</button><span class="hint">Notizen und Checkliste vorschlagen</span></div>
-  <div class="aibox" id="ai_box" style="display:none"><div class="aih">Vorschlag</div><div id="ai_notes"></div><div id="ai_items"></div><div class="aia"><button class="btn sm" id="ai_ok" type="button">Übernehmen</button><button class="btn ghost sm" id="ai_no" type="button">Verwerfen</button></div></div>
-  <label for="f_notes">Notizen</label><textarea id="f_notes" rows="3" placeholder="Maße, Material, Ansprechpartner …"></textarea>
-  <div id="f_filesec"><label>Fotos und Dateien</label><div class="fls" id="f_files"></div><button class="btn ghost" id="fl_btn" type="button" style="margin-top:.6rem">Foto oder Datei hinzufügen</button><input type="file" id="fl_in" multiple hidden accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"></div>
-  <div id="f_logsec"><label>Verlauf und Kommentare</label><div class="lgin"><input id="lg_in" placeholder="Kommentar schreiben …" maxlength="500" autocomplete="off"><button class="btn ghost" id="lg_add" type="button">Senden</button></div><div class="lg" id="lg_list"></div></div>
+  <div class="hint" id="f_rechint" style="display:none">Beim Erledigen wird die nächste Aufgabe automatisch angelegt.</div><label class="sl">Abhängig von <span class="lh">muss vorher fertig sein</span></label><label>Abhängig von <span class="lh">muss vorher fertig sein</span></label><div class="deps" id="f_deps"></div></div></details>
+  <details class="dsec" id="f_filesec"><summary><span>Fotos und Dateien</span><em></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><div class="fls" id="f_files"></div><button class="btn ghost" id="fl_btn" type="button" style="margin-top:.6rem">Foto oder Datei hinzufügen</button><input type="file" id="fl_in" multiple hidden accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"></div></details>
+  <details class="dsec" id="f_logsec"><summary><span>Verlauf und Kommentare</span><em></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><div class="lgin"><input id="lg_in" placeholder="Kommentar schreiben …" maxlength="500" autocomplete="off"><button class="btn ghost" id="lg_add" type="button">Senden</button></div><div class="lg" id="lg_list"></div></div></details>
+  </div>
   <div class="acts"><button class="btn del" id="b_del" type="button" aria-label="Löschen"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg><span>Löschen</span></button><span class="sp"></span><button class="btn ghost" id="b_cancel" type="button">Abbrechen</button><button class="btn" id="b_save" type="button">Speichern</button></div>
 </dialog>
 
 <script>
-const ST={todo:"Zu starten",doing:"In Arbeit",done:"Erledigt"},NEXT={todo:"doing",doing:"done",done:"todo"};
+const wl=t=>String(t.who||"").split(",").map(x=>x.trim()).filter(Boolean);
+const allWho=()=>[...new Set(["Melanie","Lasse",...tasks.flatMap(wl)])];
+const ST={todo:"Offen",doing:"In Arbeit",done:"Erledigt"},NEXT={todo:"doing",doing:"done",done:"todo"};
 let RAW=[],tasks=[],selMode=false,sel=new Set(),haInfo=null,purged=false,reg=[],ftags=new Set(),fprojs=new Set(),grp="none",selTags=[],regDraft=null,colorFor=null,palOpen=null,view="home",col=null,editing=null,loaded=false;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -980,8 +1016,8 @@ function applySel(){
   const b=$("selbar");b.classList.toggle("on",selMode);b.classList.toggle("has",sel.size>0);$("selbtn").classList.toggle("on",selMode);
   $("selcnt").textContent=sel.size?sel.size+" ausgewählt":"Aufgaben antippen";
   if(selMode){
-    const whos=[...new Set(["Melanie","Lasse",...tasks.map(t=>t.who).filter(Boolean)])];
-    $("selwho").innerHTML='<option value="">Zuständig …</option><option value="__none">Niemand</option>'+whos.map(w=>`<option>${esc(w)}</option>`).join("");
+    const whos=allWho();
+    $("selwho").innerHTML='<option value="">Verantwortlich …</option><option value="__none">Niemand</option>'+whos.map(w=>`<option>${esc(w)}</option>`).join("");
     $("selproj").innerHTML='<option value="">Projekt …</option><option value="__none">Ohne Projekt</option>'+allProjs().map(p=>`<option>${esc(p)}</option>`).join("");
   }
 }
@@ -1000,7 +1036,7 @@ $("selbar").onclick=async e=>{
   else if(b.dataset.ba==="del"){const d=iso(new Date());await saveMany(L.map(t=>({...t,del:true,delAt:d,arch:false})));toast(L.length+" im Papierkorb",()=>saveMany(L))}
   sel.clear();applySel()};
 $("selwho").onchange=async()=>{const v=$("selwho").value,L=selList();if(!v||!L.length)return;
-  await saveMany(L.map(t=>lg(t,{...t,who:v==="__none"?"":v})));toast(L.length+" Aufgaben: "+(v==="__none"?"niemand zuständig":v));sel.clear();applySel()};
+  await saveMany(L.map(t=>lg(t,{...t,who:v==="__none"?"":v})));toast(L.length+" Aufgaben: "+(v==="__none"?"niemand verantwortlich":v));sel.clear();applySel()};
 $("selproj").onchange=async()=>{const v=$("selproj").value,L=selList();if(!v||!L.length)return;
   await saveMany(L.map(t=>lg(t,{...t,proj:v==="__none"?"":v})));toast(L.length+" Aufgaben: "+(v==="__none"?"ohne Projekt":v));sel.clear();applySel()};
 
@@ -1030,7 +1066,7 @@ function diffLog(o,n){
   const L=(o.log||[]).slice(),me=prefGet("me")||"",now=new Date().toISOString().slice(0,16),add=x=>L.push({t:now,a:me,k:"h",x});
   if(o.status!==n.status)add("Status: "+ST[o.status]+" → "+ST[n.status]);
   if(o.start!==n.start||o.end!==n.end)add("Zeitraum: "+dr(o)+" → "+dr(n));
-  if((o.who||"")!==(n.who||""))add("Zuständig: "+(n.who||"niemand"));
+  if((o.who||"")!==(n.who||""))add("Verantwortlich: "+(n.who||"niemand"));
   if((o.proj||"")!==(n.proj||""))add("Projekt: "+(n.proj||"keins"));
   if(o.title!==n.title)add("Titel geändert");
   return L.slice(-120)}
@@ -1094,7 +1130,7 @@ function cal(list){
 $("main").addEventListener("click",e=>{
   const cm=e.target.closest("[data-cm]");
   if(cm){const v=+cm.dataset.cm,T=iso(new Date());if(!v){calM=T.slice(0,7);calSel=T}else{const[y,m]=calM.split("-").map(Number),d=new Date(Date.UTC(y,m-1+v,1));calM=iso(d).slice(0,7);calSel=calM+"-01"}render();return}
-  const nd=e.target.closest("[data-newday]");if(nd){openDlg();$("f_start").value=nd.dataset.newday;$("f_end").value=nd.dataset.newday;return}
+  const nd=e.target.closest("[data-newday]");if(nd){openDlg();$("f_start").value=nd.dataset.newday;$("f_end").value=nd.dataset.newday;drawRange();return}
   const dy=e.target.closest("[data-day]");if(dy&&!e.target.closest("[data-id]")){calSel=dy.dataset.day;render()}});
 function ics(){
   const esc2=x=>String(x||"").replace(/\\/g,"\\\\").replace(/;/g,"\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n"),c=d=>d.replace(/-/g,""),stp=new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z";
@@ -1162,8 +1198,8 @@ const tagOk=t=>(!ftags.size||[...ftags].some(k=>k==="__none"?!tgs(t).length:tgs(
 function groups(list){
   if(grp==="none")return[{l:null,L:list}];
   const key=t=>grp==="tag"?(tgs(t)[0]||""):grp==="proj"?(t.proj||""):(t.who||"");
-  const order=grp==="tag"?allTags():grp==="proj"?allProjs():[...new Set(["Melanie","Lasse",...tasks.map(t=>t.who).filter(Boolean)])];
-  const m=new Map();list.forEach(t=>{const k=key(t);if(!m.has(k))m.set(k,[]);m.get(k).push(t)});
+  const order=grp==="tag"?allTags():grp==="proj"?allProjs():allWho();
+  const m=new Map();list.forEach(t=>{const ks=grp==="who"?(wl(t).length?wl(t):[""]):[key(t)];ks.forEach(k=>{if(!m.has(k))m.set(k,[]);m.get(k).push(t)})});
   const ks=[...m.keys()].filter(Boolean).sort((a,b)=>{const i=order.indexOf(a),j=order.indexOf(b);return(i<0?999:i)-(j<0?999:j)||a.localeCompare(b,"de")});
   if(m.has(""))ks.push("");
   const pc=w=>/^melanie/i.test(w)?TC.brick:/^lasse/i.test(w)?TC.sea:TC.sky;
@@ -1258,7 +1294,7 @@ function home(){
   const sub=over.length?`${over.length} ${over.length===1?"Aufgabe ist":"Aufgaben sind"} überfällig.`:week.length?`${week.length} ${week.length===1?"Aufgabe":"Aufgaben"} in den nächsten 7 Tagen.`:open?"Nichts Dringendes.":"Alles erledigt.";
   const areas=allTags().filter(a=>tasks.some(t=>tgs(t).includes(a)));
   const bars=areas.map(a=>{const L=tasks.filter(t=>tgs(t).includes(a)),x=L.filter(t=>t.status==="done").length;return`<div class="pr" style="--tc:${tcol(a)}"><span class="pn">${tIc(a)}${esc(a)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
-  const names=[...new Set(["Melanie","Lasse",...tasks.map(t=>t.who).filter(Boolean)])],cnt=w=>tasks.filter(t=>t.status!=="done"&&t.who===w).length,mx=Math.max(1,...names.map(cnt));
+  const names=allWho(),cnt=w=>tasks.filter(t=>t.status!=="done"&&wl(t).includes(w)).length,mx=Math.max(1,...names.map(cnt));
   const who=names.map(w=>`<div class="pr"><span>${esc(w)}</span><div class="pb ${avc(w)}"><i style="width:${Math.round(cnt(w)/mx*100)}%"></i></div><em>${cnt(w)}</em></div>`).join("");
   const pjs=allProjs().filter(n=>tasks.some(t=>t.proj===n)),pbars=pjs.map(n=>{const L=tasks.filter(t=>t.proj===n),x=L.filter(t=>t.status==="done").length;return`<div class="pr" style="--tc:${pcol(n)}"><span>${esc(n)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
   let k=1;const P=(cls,h,c,body)=>`<section class="pnl ${cls}" style="--i:${k++}"><h3><span>${h}</span><em>${c}</em></h3>${body}</section>`;
@@ -1271,7 +1307,7 @@ function home(){
 
 function filtered(){
   const q=$("q").value.toLowerCase(),w=$("fw").value;
-  return tasks.filter(t=>tagOk(t)&&(!w||(w==="__none"?!t.who:t.who===w))&&(!q||(t.title+" "+tgs(t).join(" ")+" "+(t.who||"")).toLowerCase().includes(q)))
+  return tasks.filter(t=>tagOk(t)&&(!w||(w==="__none"?!t.who:wl(t).includes(w)))&&(!q||(t.title+" "+tgs(t).join(" ")+" "+(t.who||"")).toLowerCase().includes(q)))
     .sort((x,y)=>dn(x.start)-dn(y.start)||dn(x.end)-dn(y.end));
 }
 let renderedView=null;
@@ -1295,13 +1331,12 @@ function render(){
   $("sub").textContent=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
   const n=tasks.length,d=tasks.filter(t=>t.status==="done").length,pct=n?Math.round(d/n*100):0;
   const doing=tasks.filter(t=>t.status==="doing").length,late=tasks.filter(isLate).length,blk=tasks.filter(isBlocked).length,op=n-d-doing;
-  $("kpis").innerHTML=view==="home"?"":`<div class="kp"><div class="kn"><b><span data-n="${pct}">${pct}</span><i>%</i></b><span>erledigt · ${d} von ${n}</span></div><div class="kn"><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="kn ${late?"hot":""}"><b data-n="${late}">${late}</b><span>überfällig</span></div><div class="kn"><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div>${n?`<div class="stripe" title="Erledigt · In Arbeit · Zu starten"><i class="s-x" style="flex:${d}"></i><i class="s-d" style="flex:${doing}"></i><i class="s-o" style="flex:${op}"></i></div>`:""}`;
+  $("kpis").innerHTML=view==="home"?"":`<div class="kp"><div class="kn"><b><span data-n="${pct}">${pct}</span><i>%</i></b><span>erledigt · ${d} von ${n}</span></div><div class="kn"><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="kn ${late?"hot":""}"><b data-n="${late}">${late}</b><span>überfällig</span></div><div class="kn"><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div>${n?`<div class="stripe" title="Erledigt · In Arbeit · Offen"><i class="s-x" style="flex:${d}"></i><i class="s-d" style="flex:${doing}"></i><i class="s-o" style="flex:${op}"></i></div>`:""}`;
   document.body.dataset.view=view;$("ttl").textContent=view==="home"?"Start":{board:"Board",list:"Liste",gantt:"Zeitstrahl",cal:"Kalender"}[view];
-    const whos=[...new Set(["Melanie","Lasse",...tasks.map(t=>t.who).filter(Boolean)])],curw=$("fw").value;
+    const whos=allWho(),curw=$("fw").value;
   $("fw").innerHTML='<option value="">Alle Personen</option>'+whos.map(a=>`<option ${a===curw?"selected":""}>${esc(a)}</option>`).join("")+`<option value="__none" ${curw==="__none"?"selected":""}>Nicht zugewiesen</option>`;
-  $("whos").innerHTML=whos.map(a=>`<option value="${esc(a)}">`).join("");
   const fw2=$("fw").value,ch=(attr,val,label,c,on)=>`<button data-${attr}="${esc(val)}" class="${on?"on":""}"><span>${attr==="cw"&&val&&val!=="__none"?`<i class="wd ${avc(val)}"></i>`:""}${esc(label)}</span><em>${c}</em></button>`;
-  $("chips").innerHTML=`<div class="cg"><h4>Wer</h4>${ch("cw","","Alle",n,!fw2)}${whos.map(w=>ch("cw",w,w,tasks.filter(t=>t.who===w).length,w===fw2)).join("")}${ch("cw","__none","Nicht zugewiesen",tasks.filter(t=>!t.who).length,fw2==="__none")}</div>`;
+  $("chips").innerHTML=`<div class="cg"><h4>Wer</h4>${ch("cw","","Alle",n,!fw2)}${whos.map(w=>ch("cw",w,w,tasks.filter(t=>wl(t).includes(w)).length,w===fw2)).join("")}${ch("cw","__none","Nicht zugewiesen",tasks.filter(t=>!t.who).length,fw2==="__none")}</div>`;
   drawTbar();migrateReg();if(!iconTried)setTimeout(iconSync,1200);
   $("main").classList.toggle("g",view==="gantt"&&n>0);
   const old=snap(),list=filtered();
@@ -1314,7 +1349,7 @@ const cl=t=>{const a=t.checklist||[];return a.length?`<span class="ckc">${a.filt
 function card(t,s,i=0){
   const a=t.checklist||[],k=a.filter(x=>x.d).length,late=isLate(t);
   const tg=projChip(t)+tgs(t).map(chip).join("")+(isBlocked(t)?'<span class="blk">blockiert</span>':"");
-  return`<div class="card ${s}${t.id===lastMoved?" pop":""}" draggable="true" data-id="${t.id}" style="--i:${Math.min(i,8)}"><div class="ch"><button class="ring ${s}" data-adv="${t.id}" aria-label="Status: ${ST[s]}. Weiterschalten"></button><div class="t">${esc(t.title)}</div>${t.who?`<i class="av ${avc(t.who)}" title="${esc(t.who)}">${esc((t.who.trim()[0]||"").toUpperCase())}</i>`:""}</div>${tg?`<div class="tg">${tg}</div>`:""}${a.length?`<div class="cb"><i style="width:${Math.round(k/a.length*100)}%"></i></div>`:""}<div class="cm"><span class="${late?"late":""}">${dr(t)}</span><span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}${cl(t)}</span></div></div>`}
+  return`<div class="card ${s}${t.id===lastMoved?" pop":""}" draggable="true" data-id="${t.id}" style="--i:${Math.min(i,8)}"><div class="ch"><button class="ring ${s}" data-adv="${t.id}" aria-label="Status: ${ST[s]}. Weiterschalten"></button><div class="t">${esc(t.title)}</div>${wl(t).length?`<span class="avs" title="${esc(wl(t).join(", "))}">${wl(t).slice(0,3).map(n=>`<i class="av ${avc(n)}">${esc(n[0].toUpperCase())}</i>`).join("")}${wl(t).length>3?`<i class="av ao">+${wl(t).length-3}</i>`:""}</span>`:""}</div>${tg?`<div class="tg">${tg}</div>`:""}${a.length?`<div class="cb"><i style="width:${Math.round(k/a.length*100)}%"></i></div>`:""}<div class="cm"><span class="${late?"late":""}">${dr(t)}</span><span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}${cl(t)}</span></div></div>`}
 let showDone=false;const DONE_MAX=20;
 function board(list){
   return`<div class="board">`+Object.keys(ST).map(s=>{let L=list.filter(t=>t.status===s);const all=L.length;
@@ -1403,10 +1438,60 @@ function bind(){
 }
 
 /* Ressource: Auswahl oder Freitext */
-function setWho(){const v=$("f_who").value.trim(),sel=$("f_whosel");sel.value=(v===""||v==="Melanie"||v==="Lasse")?v:"__o";$("f_who").style.display=sel.value==="__o"?"":"none";syncSeg()}
-$("f_whoseg").onclick=e=>{const b=e.target.closest("[data-w]");if(!b)return;const v=b.dataset.w;$("f_whosel").value=v;if(v==="__o"){$("f_who").value="";$("f_who").style.display="";$("f_who").focus()}else{$("f_who").value=v;$("f_who").style.display="none"}syncSeg()};
+/* Verantwortlich: Mehrfachauswahl */
+let selWho=[];
+function drawWho(){
+  const names=[...new Set([...allWho(),...selWho])];
+  $("f_whoseg").innerHTML=names.map(n=>`<button type="button" class="wch ${avc(n)}${selWho.includes(n)?" on":""}" data-w="${esc(n)}" aria-pressed="${selWho.includes(n)}"><i class="av ${avc(n)}">${esc(n[0].toUpperCase())}</i>${esc(n)}</button>`).join("")+'<button type="button" class="wch wadd" data-w="__add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Person</button>';
+}
+function addWho(){const v=$("f_who").value.replace(/,/g," ").trim().slice(0,30);$("f_who").value="";$("f_who").style.display="none";if(v&&!selWho.some(x=>x.toLowerCase()===v.toLowerCase())){const ex=allWho().find(x=>x.toLowerCase()===v.toLowerCase());selWho.push(ex||v)}drawWho()}
+$("f_whoseg").onclick=e=>{const b=e.target.closest("[data-w]");if(!b)return;const v=b.dataset.w;
+  if(v==="__add"){$("f_who").style.display="";$("f_who").focus();return}
+  selWho=selWho.includes(v)?selWho.filter(x=>x!==v):[...selWho,v];drawWho()};
+$("f_who").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();e.stopPropagation();addWho()}};
+$("f_who").onblur=()=>{if($("f_who").value.trim())addWho()};
 $("f_stseg").onclick=e=>{const b=e.target.closest("[data-s]");if(!b)return;$("f_status").value=b.dataset.s;syncSeg()};
-function syncSeg(){document.querySelectorAll("#f_whoseg button").forEach(b=>b.classList.toggle("on",b.dataset.w===$("f_whosel").value));document.querySelectorAll("#f_stseg button").forEach(b=>b.classList.toggle("on",b.dataset.s===$("f_status").value))}
+function syncSeg(){document.querySelectorAll("#f_stseg button").forEach(b=>b.classList.toggle("on",b.dataset.s===$("f_status").value))}
+/* Zeitraum: Kalender mit einem Zug für Start und Ende */
+const MONS=["Jan.","Feb.","März","Apr.","Mai","Juni","Juli","Aug.","Sept.","Okt.","Nov.","Dez."];
+let rpM=new Date(),rpStep=0;
+const tdy=()=>{const d=new Date();return iso(new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())))};
+const fdd=k=>{const d=fromDn(dn(k));return d.getUTCDate()+". "+MONS[d.getUTCMonth()]+(d.getUTCFullYear()!==new Date().getFullYear()?" "+d.getUTCFullYear():"")};
+function drawRange(){
+  const s0=$("f_start").value,e0=$("f_end").value||s0,one=s0===e0,n=dn(e0)-dn(s0)+1;
+  $("f_rtxt").textContent=s0?(one?fdd(s0):fdd(s0)+" – "+fdd(e0)):"Zeitraum wählen";
+  $("f_rlen").textContent=s0?($("f_ms").checked?"Meilenstein":n+(n===1?" Tag":" Tage")):"";
+}
+function rpOpen(on){const p=$("f_rp");p.hidden=!on;$("f_range").setAttribute("aria-expanded",on);
+  if(on){rpM=fromDn(dn($("f_start").value||tdy()));rpM=new Date(Date.UTC(rpM.getUTCFullYear(),rpM.getUTCMonth(),1));rpStep=0;drawRp();p.scrollIntoView({block:"nearest",behavior:"smooth"})}}
+function drawRp(){
+  const s0=$("f_start").value,e0=$("f_end").value||s0,y=rpM.getUTCFullYear(),m=rpM.getUTCMonth(),off=(new Date(Date.UTC(y,m,1)).getUTCDay()+6)%7,days=new Date(Date.UTC(y,m+1,0)).getUTCDate(),today=tdy();
+  let h=`<div class="rph"><button type="button" data-rp="-1" aria-label="Vorheriger Monat"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button><b>${MONL[m]} ${y}</b><button type="button" data-rp="1" aria-label="Nächster Monat"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button></div><div class="rpw">${["Mo","Di","Mi","Do","Fr","Sa","So"].map(x=>`<span>${x}</span>`).join("")}</div><div class="rpg">`+"<span></span>".repeat(off);
+  for(let d=1;d<=days;d++){const k=iso(new Date(Date.UTC(y,m,d)));h+=`<button type="button" data-d="${k}" class="${k===today?"rtd ":""}${k>=s0&&k<=e0?"rin ":""}${k===s0?"rst ":""}${k===e0?"ren":""}">${d}</button>`}
+  h+=`</div><div class="rpq"><button type="button" data-q="today">Heute</button><button type="button" data-q="week">Diese Woche</button><button type="button" data-q="next">Nächste Woche</button></div><div class="rpn">${rpStep?"Jetzt das Ende antippen":"Start antippen, dann Ende"}</div>`;
+  $("f_rp").innerHTML=h;
+}
+function setRange(a,b){$("f_start").value=a;$("f_end").value=b;if(a===b&&!$("f_ms").checked){}drawRange()}
+$("f_range").onclick=()=>rpOpen($("f_rp").hidden);
+$("f_rp").onclick=e=>{
+  const nav=e.target.closest("[data-rp]");if(nav){rpM=new Date(Date.UTC(rpM.getUTCFullYear(),rpM.getUTCMonth()+ +nav.dataset.rp,1));drawRp();return}
+  const q=e.target.closest("[data-q]");if(q){const t0=dn(tdy()),mo=t0-((fromDn(t0).getUTCDay()+6)%7),a=q.dataset.q==="today"?t0:q.dataset.q==="week"?mo:mo+7;
+    setRange(iso(fromDn(a)),iso(fromDn(q.dataset.q==="today"?a:a+6)));if($("f_ms").checked)setRange($("f_start").value,$("f_start").value);rpOpen(false);return}
+  const d=e.target.closest("[data-d]");if(!d)return;const k=d.dataset.d;
+  if($("f_ms").checked){setRange(k,k);rpOpen(false);return}
+  if(!rpStep){setRange(k,k);rpStep=1;drawRp()}
+  else{const s0=$("f_start").value;k<s0?setRange(k,s0):setRange(s0,k);rpStep=0;rpOpen(false)}};
+$("f_rp").onmouseover=e=>{if(!rpStep)return;const d=e.target.closest("[data-d]");if(!d)return;const s0=$("f_start").value,k=d.dataset.d;
+  document.querySelectorAll("#f_rp [data-d]").forEach(b=>{const x=b.dataset.d;b.classList.toggle("rin",x>=(k<s0?k:s0)&&x<=(k<s0?s0:k))})};
+/* Gruppen im Dialog: Zusammenfassung rechts, automatisch geöffnet wenn gefüllt */
+function sumDlg(){
+  const set=(id,t)=>{const e=document.querySelector("#"+id+" summary em");if(e)e.textContent=t||""};
+  const ck=cklist.filter(x=>x.t.trim()),dd=ck.filter(x=>x.d).length;set("d_ck",ck.length?dd+"/"+ck.length:"");
+  const nd=document.querySelectorAll("#f_deps input:checked").length,r=$("f_rec").value;set("d_pl",[r?"wiederholt":"",nd?nd+" Abhängigkeit"+(nd>1?"en":""):""].filter(Boolean).join(" · "));
+  set("f_filesec",(editing&&(editing.files||[]).length)?String(editing.files.length):"");
+  set("f_logsec",(editing&&(editing.log||[]).length)?String(editing.log.length):"");
+}
+$("dlg").addEventListener("input",sumDlg);$("dlg").addEventListener("click",()=>setTimeout(sumDlg,0));
 /* Checkliste */
 let cklist=[];
 function drawCk(){const box=$("f_ck");box.innerHTML=cklist.map((c,i)=>`<div class="ck"><input type="checkbox" data-i="${i}" ${c.d?"checked":""}><input class="ct" data-i="${i}" value="${esc(c.t)}" placeholder="Punkt"><button class="x" type="button" data-r="${i}">✕</button></div>`).join("");
@@ -1417,17 +1502,17 @@ $("ck_add").onclick=()=>{cklist.push({t:"",d:false});drawCk();const a=$("f_ck").
 
 /* Dialog */
 function openDlg(id){
-  editing=id?byId(id):null;const t=editing||{title:"",tags:ftags.size===1&&!ftags.has("__none")?[...ftags]:[],who:"",proj:fprojs.size===1?[...fprojs][0]:"",status:"todo",start:iso(new Date()),end:iso(new Date(Date.now()+6*864e5)),deps:[],notes:""};
+  editing=id?byId(id):null;const t=editing||{title:"",tags:ftags.size===1&&!ftags.has("__none")?[...ftags]:[],who:"",proj:fprojs.size===1?[...fprojs][0]:"",status:"todo",start:tdy(),end:iso(fromDn(dn(tdy())+6)),deps:[],notes:""};
   $("dt").textContent=editing?"Aufgabe bearbeiten":"Neue Aufgabe";
-  $("f_title").value=t.title;selTags=[...tgs(t)];regDraft=reg.map(x=>({...x}));colorFor=null;$("f_tagin").value="";drawTags();$("f_who").value=t.who||"";setWho();$("f_status").value=t.status;syncSeg();
-  $("f_start").value=t.start;$("f_end").value=t.end;initExtra(t);$("f_notes").value=t.notes||"";
+  $("f_title").value=t.title;selTags=[...tgs(t)];regDraft=reg.map(x=>({...x}));colorFor=null;$("f_tagin").value="";drawTags();selWho=wl(t);$("f_who").value="";$("f_who").style.display="none";drawWho();$("f_status").value=t.status;syncSeg();
+  $("f_start").value=t.start;$("f_end").value=t.end;initExtra(t);rpOpen(false);drawRange();$("f_notes").value=t.notes||"";
   const others=tasks.filter(x=>!editing||x.id!==editing.id);
   $("f_deps").innerHTML=others.length?others.map(x=>`<label><input type="checkbox" value="${x.id}" ${(t.deps||[]).includes(x.id)?"checked":""}>${esc(x.title)}</label>`).join(""):'<span style="color:var(--mut);font-size:13px">Noch keine anderen Aufgaben.</span>';
   cklist=(t.checklist||[]).map(x=>({...x}));drawCk();drawLog();drawFiles();aiRes=null;drawAi();$("ai_row").style.display=aiAvail()?"":"none";
   $("b_del").style.display=editing?"":"none";
   $("dlg").showModal();setTimeout(()=>$("f_title").focus(),50);
 }
-function syncMs(){const on=$("f_ms").checked;$("f_end").closest(".g2").classList.toggle("ms",on);$("f_end").parentElement.style.display=on?"none":""}
+function syncMs(){if($("f_ms").checked)$("f_end").value=$("f_start").value;drawRange()}
 function initExtra(t){
   const pn=allProjs();$("f_proj").innerHTML='<option value="">Kein Projekt</option>'+pn.map(n=>`<option>${esc(n)}</option>`).join("")+'<option value="__new">Neues Projekt …</option>';
   $("f_proj").value=t.proj||"";tintProj();$("f_projnew").value="";$("f_projnew").style.display="none";
@@ -1439,12 +1524,12 @@ function tintProj(){const v=$("f_proj").value;$("f_proj").style.setProperty("--t
 $("f_proj").onchange=()=>{tintProj();const n=$("f_proj").value==="__new";$("f_projnew").style.display=n?"":"none";if(n)$("f_projnew").focus()};
 $("b_save").onclick=async()=>{
   const title=$("f_title").value.trim();if(!title){$("f_title").focus();return}
-  if($("f_tagin").value.trim())addTag($("f_tagin").value);
+  if($("f_tagin").value.trim())addTag($("f_tagin").value);if($("f_who").value.trim())addWho();
   let s=$("f_start").value,e=$("f_end").value;if(!s)s=iso(new Date());const ms=$("f_ms").checked;if(!e||dn(e)<dn(s)||ms)e=s;
   let proj=$("f_proj").value;if(proj==="__new")proj=$("f_projnew").value.trim().slice(0,30);
   {const ex=allProjs().find(x=>x.toLowerCase()===proj.toLowerCase());if(ex)proj=ex}
   const rm=/^(\d+)([dwmy])$/.exec($("f_rec").value),rec=rm?{n:+rm[1],u:rm[2]}:null;
-  const t={...(editing||{}),id:editing?editing.id:newId(),title,tags:selTags.slice(),area:selTags[0]||"",proj,rec,ms,who:$("f_who").value.trim(),
+  const t={...(editing||{}),id:editing?editing.id:newId(),title,tags:selTags.slice(),area:selTags[0]||"",proj,rec,ms,who:selWho.join(", "),
     status:$("f_status").value,start:s,end:e,notes:$("f_notes").value,checklist:cklist.filter(x=>x.t.trim()),deps:[...document.querySelectorAll("#f_deps input:checked")].map(i=>i.value)};
   $("dlg").close();
   let sp=null;if(t.status==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);t.spawned=sp.id}
@@ -1532,19 +1617,19 @@ async function buildXlsx(){
     const dn_=`(LEN(LOWER(I${r}))-LEN(SUBSTITUTE(LOWER(I${r}),"[x]","")))/3`,op_=`(LEN(I${r})-LEN(SUBSTITUTE(I${r},"[ ]","")))/3`;
     row.getCell(11).value={formula:`IF(I${r}="","",${dn_}&"/"&(${dn_}+${op_}))`};
     row.getCell(12).value={formula:`IF(OR(B${r}="",H${r}="",E${r}=""),"",IF(SUMPRODUCT(($A$${R0}:$A$${R1}<>"")*ISNUMBER(SEARCH(","&$A$${R0}:$A$${R1}&",",","&SUBSTITUTE(H${r}," ","")&","))*ISNUMBER($F$${R0}:$F$${R1})*($F$${R0}:$F$${R1}>=E${r}))>0,"Start vor Ende des Vorgängers",""))`};
-    row.getCell(13).value={formula:`IF(AND($B${r}<>"",OR($G${r}="Zu starten",$G${r}="")),MAX(M$4:M${r-1})+1,"")`};
+    row.getCell(13).value={formula:`IF(AND($B${r}<>"",OR($G${r}="Offen",$G${r}="")),MAX(M$4:M${r-1})+1,"")`};
     row.getCell(14).value={formula:`IF(AND($B${r}<>"",$G${r}="In Arbeit"),MAX(N$4:N${r-1})+1,"")`};
     row.getCell(15).value={formula:`IF(AND($B${r}<>"",$G${r}="Erledigt"),MAX(O$4:O${r-1})+1,"")`};
     for(let c=1;c<=12;c++){const cell=row.getCell(c);cell.border=box;cell.font={size:11,color:{argb:(c===1||c===11)?C.grey:"FF1B201C"}};cell.alignment={vertical:"top",wrapText:(c===2||c===9||c===10||c===12),horizontal:(c===1||c===11)?"center":undefined}}
     row.getCell(5).numFmt="dd.mm.yyyy";row.getCell(6).numFmt="dd.mm.yyyy";row.getCell(8).numFmt="@";
-    row.getCell(7).dataValidation={type:"list",allowBlank:true,formulae:['"Zu starten,In Arbeit,Erledigt"']};
+    row.getCell(7).dataValidation={type:"list",allowBlank:true,formulae:['"Offen,In Arbeit,Erledigt"']};
     row.getCell(4).dataValidation={type:"list",allowBlank:true,showErrorMessage:false,formulae:['"Melanie,Lasse"']};
   }
   ws.autoFilter=`A4:L${R1}`;
   ws.addConditionalFormatting({ref:`G${R0}:G${R1}`,rules:[
     {type:"expression",formulae:[`$G${R0}="Erledigt"`],style:cf(C.done)},
     {type:"expression",formulae:[`$G${R0}="In Arbeit"`],style:cf(C.doing)},
-    {type:"expression",formulae:[`AND($B${R0}<>"",OR($G${R0}="Zu starten",$G${R0}=""))`],style:cf(C.todo)}]});
+    {type:"expression",formulae:[`AND($B${R0}<>"",OR($G${R0}="Offen",$G${R0}=""))`],style:cf(C.todo)}]});
   ws.addConditionalFormatting({ref:`F${R0}:F${R1}`,rules:[{type:"expression",formulae:[`AND(ISNUMBER($F${R0}),$F${R0}<TODAY(),$G${R0}<>"Erledigt")`],style:{font:{bold:true,color:{argb:C.bad}}}}]});
   ws.addConditionalFormatting({ref:`L${R0}:L${R1}`,rules:[{type:"expression",formulae:[`$L${R0}<>""`],style:{font:{bold:true,color:{argb:C.bad}}}}]});
   ws.addConditionalFormatting({ref:`B${R0}:B${R1}`,rules:[{type:"expression",formulae:[`$G${R0}="Erledigt"`],style:{font:{strike:true,color:{argb:C.grey}}}}]});
@@ -1554,7 +1639,7 @@ async function buildXlsx(){
   wb2.columns=[{width:4,hidden:true},{width:38},{width:2},{width:4,hidden:true},{width:38}];
   wb2.getCell("B1").value="Board";wb2.getCell("B1").font={bold:true,size:18};
   wb2.getCell("B2").value="Wird automatisch aus der Liste befüllt. Status in der Liste ändern, um eine Karte zu verschieben.";wb2.getCell("B2").font={italic:true,color:{argb:C.grey},size:10};
-  const cols=[["A","B","Zu starten","M",C.todo],["D","E","In Arbeit","N",C.doing],["G","H","Erledigt","O",C.done]];
+  const cols=[["A","B","Offen","M",C.todo],["D","E","In Arbeit","N",C.doing],["G","H","Erledigt","O",C.done]];
   const SL=40;
   cols.forEach(([ix,cd,name,hc,colr])=>{
     hdr(wb2.getCell(cd+"4"),null);wb2.getCell(cd+"4").value={formula:`"${name} ("&MAX(${L}$${hc}$${R0}:$${hc}$${R1})&")"`};
@@ -1591,7 +1676,7 @@ async function buildXlsx(){
     m.value={formula:k===0?`${cl}4`:`IF(DAY(${cl}4)=1,${cl}4,"")`};m.numFmt="mmm";m.font={size:8,bold:true};
   }
   for(let r=R0;r<=R1;r++){
-    const row=wg.getRow(r),f=[`${L}A${r}`,`IF(${L}B${r}="","",${L}B${r})`,`IF(${L}D${r}="","",${L}D${r})`,`IF(${L}E${r}="","",${L}E${r})`,`IF(${L}E${r}="","",IF(${L}F${r}="",${L}E${r},${L}F${r}))`,`IF(${L}B${r}="","",IF(${L}G${r}="","Zu starten",${L}G${r}))`,`IF(${L}H${r}="","",${L}H${r}&IF(${L}L${r}="",""," (!)"))`];
+    const row=wg.getRow(r),f=[`${L}A${r}`,`IF(${L}B${r}="","",${L}B${r})`,`IF(${L}D${r}="","",${L}D${r})`,`IF(${L}E${r}="","",${L}E${r})`,`IF(${L}E${r}="","",IF(${L}F${r}="",${L}E${r},${L}F${r}))`,`IF(${L}B${r}="","",IF(${L}G${r}="","Offen",${L}G${r}))`,`IF(${L}H${r}="","",${L}H${r}&IF(${L}L${r}="",""," (!)"))`];
     f.forEach((x,i)=>{const c=row.getCell(i+1);c.value={formula:x};c.font={size:10};c.border={bottom:edge};if(i===3||i===4)c.numFmt="dd.mm.yy"});
   }
   const rg=`${F1}${R0}:${F2}${R1}`,hd=`${F1}$4`,inb=`AND($D${R0}<>"",${hd}>=$D${R0},${hd}<=$E${R0})`;
