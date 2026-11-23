@@ -66,6 +66,7 @@ try:
     check("KI-Schlüssel gespeichert", c == 200 and j["ha"]["ai"] and j["ha"]["aiapp"] and j["ha"]["model"] == "gemini-flash-latest")
     raw = urllib.request.urlopen("http://127.0.0.1:8096/api/tasks").read().decode()
     check("KI-Schlüssel wird nie ausgeliefert", key not in raw and key not in json.dumps(j))
+    check("Neues Schlüsselformat mit Punkt (AQ.…) wird angenommen", call("api/ha-settings", {"ai_key": "AQ.Ab8Testschluessel_neuesFormat-1234567890"})[0] == 200)
     check("KI-Schlüssel entfernbar", call("api/ha-settings", {"ai_key": ""})[1]["ha"]["ai"] is False)
 finally:
     sv.kill()

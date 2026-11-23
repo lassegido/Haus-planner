@@ -285,7 +285,7 @@ def ha_info():
 
 
 AI_MODELS = ("gemini-flash-lite-latest", "gemini-flash-latest")
-AI_KEY = re.compile(r"[A-Za-z0-9_\-]{20,200}")
+AI_KEY = re.compile(r"[A-Za-z0-9._\-]{20,200}")  # altes Format AIza…, neues Format AQ.…
 
 
 def ai_key():

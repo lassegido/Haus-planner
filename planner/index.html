@@ -1286,7 +1286,7 @@ function drawSettings(){
   }else if(sPage==="ki"){
     const hi=haInfo||{},on=!!hi.ai;
     h=grp(srow("","Status",on?"Aktiv":"Aus",null,false)+srow(`data-act="kitest"${on?"":" disabled"}`,"Verbindung testen",null,null,false))
-     +`<p class="sgt">Gemini-Schlüssel</p><div class="sgrp kin"><input id="ki_key" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" placeholder="${hi.aiapp?"Neuen Schlüssel einfügen":"AIza…"}" aria-label="Gemini-Schlüssel"></div>`
+     +`<p class="sgt">Gemini-Schlüssel</p><div class="sgrp kin"><input id="ki_key" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" placeholder="${hi.aiapp?"Neuen Schlüssel einfügen":"AQ.… oder AIza…"}" aria-label="Gemini-Schlüssel"></div>`
      +(kiMsg?`<p class="scap kimsg${kiMsg[1]?" bad":" ok"}">${esc(kiMsg[0])}</p>`:"")
      +grp(srow('data-act="kipaste"',"Aus Zwischenablage einfügen",null,null,false)+srow('data-act="kisave"',"<b class=\"acc\">Schlüssel sichern</b>",null,null,false))
      +cap("Kostenlos erstellen unter aistudio.google.com/apikey (Google-Konto, ohne Kreditkarte). Der Schlüssel bleibt auf deinem Home Assistant und wird hier nie wieder angezeigt.")
@@ -1327,7 +1327,7 @@ $("s_body").onclick=async e=>{
   else if(d.act==="kipaste"){try{const t=await navigator.clipboard.readText();$("ki_key").value=t.replace(/\s+/g,"");toast(t.trim()?"Eingefügt, jetzt sichern":"Zwischenablage ist leer")}catch(e){$("ki_key").focus();toast("Bitte lange ins Feld tippen und „Einsetzen“ wählen")}}
   else if(d.act==="kisave"){const k=$("ki_key").value.replace(/\s+/g,"").replace(/^["'„“]+|["'„“”]+$/g,"");
     if(!k){kiMsg=["Erst den Schlüssel ins Feld einfügen.",1];drawSettings();return}
-    if(!/^[A-Za-z0-9_-]{20,200}$/.test(k)){kiMsg=[`Das sieht nicht nach einem vollständigen Gemini-Schlüssel aus (${k.length} Zeichen). Er beginnt meist mit „AIza“ und hat 39 Zeichen.`,1];drawSettings();return}
+    if(!/^[A-Za-z0-9._-]{20,200}$/.test(k)){kiMsg=[`Das sieht nicht nach einem vollständigen Gemini-Schlüssel aus (${k.length} Zeichen). Er beginnt mit „AIza“ oder „AQ.“ und enthält keine Leerzeichen.`,1];drawSettings();return}
     kiMsg=["Sichere und teste die Verbindung …",0];drawSettings();
     try{const r=await fetch("api/ha-settings",{method:"POST",headers:{"Content-Type":"application/json","X-Planner":"1"},body:JSON.stringify({ai_key:k})}),j=await r.json().catch(()=>({}));
       if(!r.ok){kiMsg=[j.error||"Speichern fehlgeschlagen ("+r.status+").",1];drawSettings();return}

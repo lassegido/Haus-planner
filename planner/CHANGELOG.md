@@ -1,5 +1,8 @@
 # Änderungen
 
+## 1.27.3
+- KI-Schlüssel im neuen Google-Format („AQ.…“, mit Punkt) wird jetzt angenommen. Bisher wurde nur das alte Format „AIza…“ akzeptiert.
+
 ## 1.27.2
 - KI-Seite: Nach „Schlüssel sichern“ steht das Ergebnis direkt unter dem Feld, und die Verbindung wird gleich getestet. Ein unvollständiger Schlüssel wird mit Hinweis abgewiesen.
 - Hinweise (z. B. „Rückgängig“) erscheinen jetzt auch über geöffneten Blättern. Vorher lagen sie dahinter und waren unsichtbar.
