@@ -692,9 +692,12 @@ body.glres{cursor:col-resize;user-select:none}
 .pr.p2{background:var(--p2);color:#14303F}
 .pr.p3{background:var(--p3);color:#14303F}
 .card[data-pr="1"],tr.row[data-pr="1"]{--pc:var(--p1)}.card[data-pr="2"],tr.row[data-pr="2"]{--pc:var(--p2)}.card[data-pr="3"],tr.row[data-pr="3"]{--pc:var(--p3)}
-.card[data-pr]{border-left:4px solid var(--pc)}
-tr.row[data-pr] td:first-child{box-shadow:inset 4px 0 0 var(--pc)}
-@media (max-width:699px){tr.row[data-pr] td:first-child{box-shadow:none}tr.row[data-pr]{border-left:4px solid var(--pc)}}
+.card[data-pr],tr.row[data-pr]{position:relative}
+.card[data-pr]::before,tr.row[data-pr] td:first-child::before{content:"";position:absolute;left:0;top:.8rem;bottom:.8rem;width:4px;border-radius:0 4px 4px 0;background:var(--pc);pointer-events:none}
+tr.row[data-pr] td:first-child{position:relative}
+@media (max-width:699px){tr.row[data-pr] td:first-child::before{display:none}tr.row[data-pr]::before{content:"";position:absolute;left:0;top:.8rem;bottom:.8rem;width:4px;border-radius:0 4px 4px 0;background:var(--pc)}}
+.card .tag.proj,tr.row .tag.proj,td .tag.proj{box-shadow:none;background:none;color:var(--tx);font-weight:600;padding:0}
+.card .tag.proj::before,tr.row .tag.proj::before,td .tag.proj::before{border-radius:.15rem}
 .tc.prc[data-r="1"]{--tc:var(--p1)}.tc.prc[data-r="2"]{--tc:var(--p2)}.tc.prc[data-r="3"]{--tc:var(--p3)}
 .tg .pr{margin-right:0}
 .gr .pr{flex:none;overflow:visible;text-overflow:clip;margin-right:.1rem}
@@ -737,7 +740,7 @@ tr.row[data-pr] td:first-child{box-shadow:inset 4px 0 0 var(--pc)}
 </div>
 </div>
 
-<div id="selbar" role="toolbar" aria-label="Auswahl"><span id="selcnt">Aufgaben antippen</span><button data-bs="todo">Offen</button><button data-bs="doing">In Arbeit</button><button data-bs="done">Erledigt</button><select id="selwho" aria-label="Zuständig setzen"></select><select id="selproj" aria-label="Projekt setzen"></select><button data-ba="arch">Archivieren</button><button data-ba="del">Löschen</button><button data-ba="x">Fertig</button></div>
+<div id="selbar" role="toolbar" aria-label="Auswahl"><span id="selcnt">Aufgaben antippen</span><button data-bs="todo">Offen</button><button data-bs="doing">In Arbeit</button><button data-bs="done">Erledigt</button><select id="selprio" aria-label="Priorität setzen"></select><select id="seltag" aria-label="Tag hinzufügen"></select><select id="selwho" aria-label="Zuständig setzen"></select><select id="selproj" aria-label="Projekt setzen"></select><button data-ba="arch">Archivieren</button><button data-ba="del">Löschen</button><button data-ba="x">Fertig</button></div>
 <dialog id="dls">
   <div class="sh"><button class="sback" id="s_back" type="button" hidden aria-label="Zurück"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button><div class="dh" id="s_title">Einstellungen</div></div>
   <div id="s_body"></div>
@@ -1099,6 +1102,8 @@ function applySel(){
   if(selMode){
     const whos=allWho();
     $("selwho").innerHTML='<option value="">Verantwortlich …</option><option value="__none">Niemand</option>'+whos.map(w=>`<option>${esc(w)}</option>`).join("");
+    $("selprio").innerHTML='<option value="">Priorität …</option><option value="0">Keine Priorität</option><option value="1">Prio 1</option><option value="2">Prio 2</option><option value="3">Prio 3</option>';
+    $("seltag").innerHTML='<option value="">Tag hinzufügen …</option>'+allTags().map(n=>`<option>${esc(n)}</option>`).join("");
     $("selproj").innerHTML='<option value="">Projekt …</option><option value="__none">Ohne Projekt</option>'+allProjs().map(p=>`<option>${esc(p)}</option>`).join("");
   }
 }
@@ -1118,6 +1123,10 @@ $("selbar").onclick=async e=>{
   sel.clear();applySel()};
 $("selwho").onchange=async()=>{const v=$("selwho").value,L=selList();if(!v||!L.length)return;
   await saveMany(L.map(t=>lg(t,{...t,who:v==="__none"?"":v})));toast(L.length+" Aufgaben: "+(v==="__none"?"niemand verantwortlich":v));sel.clear();applySel()};
+$("selprio").onchange=async()=>{const v=$("selprio").value,L=selList();if(v===""||!L.length)return;
+  await saveMany(L.map(t=>lg(t,{...t,prio:+v})));toast(L.length+" Aufgaben: "+(+v?"Prio "+v:"keine Priorität"));sel.clear();applySel()};
+$("seltag").onchange=async()=>{const v=$("seltag").value,L=selList();if(!v||!L.length)return;
+  await saveMany(L.map(t=>{const a=[...new Set([...tgs(t),v])];return lg(t,{...t,tags:a,area:a[0]||""})}));toast(L.length+" Aufgaben: Tag „"+v+"“ hinzugefügt");sel.clear();applySel()};
 $("selproj").onchange=async()=>{const v=$("selproj").value,L=selList();if(!v||!L.length)return;
   await saveMany(L.map(t=>lg(t,{...t,proj:v==="__none"?"":v})));toast(L.length+" Aufgaben: "+(v==="__none"?"ohne Projekt":v));sel.clear();applySel()};
 

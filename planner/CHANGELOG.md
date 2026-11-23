@@ -1,5 +1,9 @@
 # Änderungen
 
+## 1.18.2
+- Karten und Liste: Projektmarken ohne überlappenden Rahmen, einheitlich mit Farbpunkt; der Prio-Randstreifen ist jetzt ein kurzer, abgerundeter Strich statt Kantenlinie
+- Mehrfachauswahl („Auswählen“): zusätzlich Priorität setzen und Tag hinzufügen für alle angehakten Aufgaben
+
 ## 1.18.1
 - Priorität mit Farbcodierung: Prio 1 dunkles Ziegelrot (kritisch), Prio 2 Ocker, Prio 3 Salbeigrün (nicht kritisch). Farbige Marke, Randstreifen an Karten und Listenzeilen, farbige Filter-Chips
 
