@@ -1,5 +1,8 @@
 # Änderungen
 
+## 1.17.0
+- Zeitstrahl: Die Breite der Aufgabenbeschriftung links lässt sich am Griff (kleiner senkrechter Balken im Kopf) ziehen, auch mit dem Finger. Zu lange Titel werden mit „…“ gekürzt, nie umgebrochen und laufen nicht ins Diagramm. Doppeltippen auf den Griff setzt die Breite zurück; die Breite wird auf dem Gerät gemerkt
+
 ## 1.16.1
 - Vollbild in der Home-Assistant-App: Der Planner nimmt den Sicherheitsabstand der Home-Leiste selbst auf und füllt die Fläche bis zum unteren Rand, wie ein Dashboard. Die Navigationsleiste sitzt dabei über der Home-Leiste. Bei neueren Home-Assistant-Versionen meldet sich der Planner zusätzlich über deren Schnittstelle für Sicherheitsabstände an
 

@@ -134,7 +134,7 @@ tr.row{cursor:pointer}
 .seg button{border:0;background:none;padding:.4rem 1.1rem;min-height:2.4rem;border-radius:.65rem;color:var(--mut);font-weight:600;text-align:center}
 .seg button.on{background:var(--tx);color:var(--bg)}
 .gwrap{display:flex;flex:1;min-height:15rem;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:1rem;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-.gl{position:sticky;left:0;z-index:3;flex:0 0 9rem;flex:0 0 clamp(7rem,26cqw,15rem);background:var(--card);border-right:1px solid var(--line2)}
+.gl{position:sticky;left:0;z-index:3;flex:0 0 9rem;flex:0 0 var(--glw,clamp(7rem,26cqw,15rem));background:var(--card);border-right:1px solid var(--line2)}
 .glh{position:sticky;top:0;z-index:4;height:var(--hd);background:var(--card);border-bottom:1px solid var(--line2)}
 .gr{height:42px;display:flex;align-items:center;gap:.6rem;padding:0 .9rem;font-size:.9rem;border-bottom:1px solid var(--line)}
 .gr span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -672,6 +672,13 @@ td.late{background:none;padding:.4rem .8rem;border-radius:0}
   .tbar{flex-wrap:wrap;row-gap:.5rem}
   .tchips{flex:1 1 100%;min-width:0}
 }
+/* 1.17: Breite der Beschriftung im Zeitstrahl */
+.gl{min-width:3.2rem}
+.gr span{min-width:0;flex:1 1 auto}.gr.gh2 em{flex:none}
+.glg{position:absolute;top:0;bottom:0;right:-9px;width:18px;z-index:6;cursor:col-resize;touch-action:none}
+.glg::after{content:"";position:absolute;left:7px;top:calc(var(--hd,52px)/2 - 14px);width:4px;height:28px;border-radius:2px;background:var(--faint);opacity:.75}
+.glg:hover::after,.glg.on::after{background:var(--acc);opacity:1}
+body.glres{cursor:col-resize;user-select:none}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"></head>
 <body>
@@ -1365,6 +1372,19 @@ function filtered(){
 }
 let renderedView=null;
 const snap=()=>({v:renderedView,y:scrollY,m:$("main").scrollTop,b:(document.querySelector(".board")||{}).scrollLeft,g:(document.querySelector(".gwrap")||{}).scrollLeft,gy:(document.querySelector(".gwrap")||{}).scrollTop});
+function glResize(){
+  const g=document.querySelector(".gwrap"),h=g&&g.querySelector(".glg"),gl=g&&g.querySelector(".gl");if(!h)return;
+  const lim=w=>Math.round(Math.max(52,Math.min(w,g.clientWidth*.7)));
+  const set=w=>{if(w==null){g.style.removeProperty("--glw")}else g.style.setProperty("--glw",lim(w)+"px")};
+  const saved=parseFloat(prefGet("glw"));if(saved>0)set(saved);
+  let st=null;
+  h.onpointerdown=e=>{e.preventDefault();e.stopPropagation();st={x:e.clientX,w:gl.offsetWidth};h.setPointerCapture(e.pointerId);h.classList.add("on");document.body.classList.add("glres")};
+  h.onpointermove=e=>{if(!st)return;set(st.w+e.clientX-st.x)};
+  const end=()=>{if(!st)return;st=null;h.classList.remove("on");document.body.classList.remove("glres");prefSet("glw",String(gl.offsetWidth))};
+  h.onpointerup=end;h.onpointercancel=end;
+  h.ondblclick=()=>{set(null);prefSet("glw","")};
+  h.onclick=e=>e.stopPropagation();
+}
 function gToday(smooth){const g=document.querySelector(".gwrap"),sv=g&&g.querySelector(".gb");if(!sv)return;const l=g.querySelector(".gl").offsetWidth;g.scrollTo({left:Math.max(0,(+sv.dataset.tx||0)-(g.clientWidth-l)*.3),behavior:smooth?"smooth":"auto"})}
 function stickyLabels(){const g=document.querySelector(".gwrap");if(!g)return;const x0=g.scrollLeft;g.querySelectorAll(".l1").forEach(t=>{const a=+t.dataset.a,b=+t.dataset.b,w=t.getComputedTextLength?t.getComputedTextLength():60;t.setAttribute("x",Math.max(a+10,Math.min(x0+10,b-w-10)))})}
 function after(o){
@@ -1375,7 +1395,7 @@ function after(o){
   const g=document.querySelector(".gwrap");
   if(o.v===view){$("main").scrollTop=o.m;scrollTo(0,o.y);if(g&&o.g!=null){g.scrollLeft=o.g;g.scrollTop=o.gy||0}}
   else if(g)gToday(false);
-  if(g){g.onscroll=stickyLabels;stickyLabels();ganttDrag()}
+  if(g){g.onscroll=stickyLabels;stickyLabels();ganttDrag();glResize()}
 }
 function render(){
   tasks=RAW.filter(t=>!t.arch&&!t.del).map(t=>t.status==="backlog"?{...t,status:"todo"}:t);
@@ -1476,7 +1496,7 @@ function gantt(list){
   const rows=items.map(it=>it.g?`<div class="gr gh2" style="--tc:${it.g.c}"><i class="dt" style="background:${it.g.c}"></i><span>${esc(it.g.l)}</span><em>${it.g.L.length}</em></div>`:`<div class="gr" data-id="${it.t.id}" title="${esc(it.t.title)}"><i class="dt ${it.t.status}"></i><span>${esc(it.t.title)}</span></div>`).join("");
   const seg=[["day","Tage"],["month","Monate"],["year","Jahre"]].map(([k,l])=>`<button data-gm="${k}" class="${k===mode?"on":""}">${l}</button>`).join("");
   return`<div class="gctl"><div class="seg">${seg}</div><button class="btn ghost sm" data-gtoday>Heute</button></div>`+
-  `<div class="gwrap"><div class="gl"><div class="glh" style="--hd:${HEAD}px"></div>${rows}</div><div class="gs" style="width:${W}px"><svg class="gh" width="${W}" height="${HEAD}">${hd}</svg><svg class="gb" width="${W}" height="${BH}" data-tx="${tdx}" data-ppd="${PPD}"><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--mut)"/></marker></defs>${gd}</svg></div></div>`;
+  `<div class="gwrap"><div class="gl"><div class="glh" style="--hd:${HEAD}px"></div>${rows}<div class="glg" style="--hd:${HEAD}px" role="separator" aria-label="Breite der Beschriftung ändern" title="Ziehen zum Ändern, Doppeltippen zum Zurücksetzen"></div></div><div class="gs" style="width:${W}px"><svg class="gh" width="${W}" height="${HEAD}">${hd}</svg><svg class="gb" width="${W}" height="${BH}" data-tx="${tdx}" data-ppd="${PPD}"><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--mut)"/></marker></defs>${gd}</svg></div></div>`;
 }
 function bind(){
   document.querySelectorAll("[data-id]").forEach(el=>el.onclick=e=>{if(e.target.dataset.adv)return;openDlg(el.dataset.id)});
