@@ -1,5 +1,13 @@
 # Änderungen
 
+## 1.25.0
+- Zeilen nach rechts wischen = erledigt (bei erledigten: wieder öffnen), nach links wischen = Papierkorb, jeweils mit Rückgängig. Gilt für die Liste und die Startseite.
+- Aufgabe gedrückt halten öffnet ein Menü: Auswählen, Bearbeiten, Duplizieren, Status, Papierkorb.
+- Bestätigungen (endgültig löschen, Papierkorb leeren, Tag oder Projekt löschen, Import) erscheinen als Aktionsblatt von unten.
+- Aufgaben-Dialog, Einstellungen, Archiv und Tag-Verwaltung lassen sich nach unten ziehen schließen. Beim Aufgaben-Dialog fragt ein Blatt nach, wenn du etwas geändert hast.
+- Nach unten ziehen aktualisiert, weiter ziehen blendet die Suche ein.
+- Haptisches Feedback bei Wischen, Abhaken, Auswählen und Menü (soweit Gerät und App es zulassen).
+
 ## 1.24.0
 - KI-Assistent wieder da, jetzt mit Google Gemini (kostenloser Schlüssel von aistudio.google.com/apikey, Option `gemini_api_key`). Gleiche Funktionen: Notizen und Checkliste vorschlagen, Tag-Symbole zuordnen.
 - Aufgabe gedrückt halten wählt sie aus und startet die Mehrfachauswahl, weitere Aufgaben tippst du einfach an.
