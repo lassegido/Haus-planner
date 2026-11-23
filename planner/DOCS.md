@@ -44,11 +44,12 @@ Der Planner legt in Home Assistant fünf Sensoren an, die jede Minute aktualisie
 
 ## KI-Assistent (Google Gemini, kostenlos)
 
-In jeder Aufgabe schlägt „Mit KI ausfüllen" Notizen und Checklistenpunkte vor. Du entscheidest, was übernommen wird. Neue Tags bekommen außerdem ein passendes Symbol.
+In jeder Aufgabe schlägt „Mit KI ausfüllen“ Notizen und Checklistenpunkte vor. Du entscheidest, was übernommen wird. Neue Tags bekommen außerdem ein passendes Symbol.
 
 1. Auf [aistudio.google.com/apikey](https://aistudio.google.com/apikey) mit dem Google-Konto einen API-Schlüssel erstellen (kostenlos, ohne Kreditkarte).
-2. Im Add-on unter **Konfiguration** bei `gemini_api_key` eintragen und neu starten.
-3. Der kostenlose Tarif hat Tageslimits (bei Flash-Lite grob einige hundert Anfragen pro Tag, Google ändert das gelegentlich). Der Planner begrenzt selbst auf 40 Anfragen pro Stunde. Es wird nur der Aufgabentext gesendet. Im kostenlosen Tarif darf Google die Eingaben außerhalb der EU zur Produktverbesserung nutzen, in der EU/dem EWR nicht.
+2. Im Planner: **⋯ → Einstellungen → KI-Assistent**, Schlüssel einfügen, **Sichern**, dann **Verbindung testen**. Alternativ geht es in der Add-on-Konfiguration bei `gemini_api_key`; der Schlüssel aus dem Planner hat Vorrang.
+3. Der Schlüssel liegt nur auf deinem Home Assistant (`/data/settings.json`) und wird nie an den Browser zurückgegeben.
+4. Der kostenlose Tarif hat Tageslimits (bei Flash-Lite grob einige hundert Anfragen pro Tag, Google ändert das gelegentlich). Der Planner begrenzt selbst auf 40 Anfragen pro Stunde. Gesendet wird nur der Aufgabentext.
 
 ## Auf den Home-Bildschirm (App-Symbol, Vollbild)
 
@@ -57,7 +58,7 @@ Der Zugriff über Home Assistant (Ingress) braucht dessen Anmeldung und lässt s
 1. Im Add-on unter **Netzwerk** den Port `8099` eintragen (z. B. 8099) und speichern.
 2. Auf dem iPhone in Safari `http://<IP-von-Home-Assistant>:8099` öffnen, dann **Teilen → Zum Home-Bildschirm**.
 
-Achtung: Dieser Port hat **keine Anmeldung**. Jeder im Heimnetz kann ihn öffnen. Nur aktivieren, wenn dein Netz vertrauenswürdig ist, und nie ins Internet weiterleiten.
+Achtung: Dieser Port hat **keine Anmeldung**. Erlaubt sind nur Aufrufe über eine IP-Adresse, `homeassistant.local`, Namen ohne Punkt, typische Heimnetz-Endungen (`.local`, `.lan`, `.fritz.box`, `.home.arpa` …) und die in Home Assistant eingetragene interne und externe Adresse. Das schützt vor fremden Webseiten (DNS-Rebinding). Jeder im Heimnetz kann ihn öffnen. Nur aktivieren, wenn dein Netz vertrauenswürdig ist, und nie ins Internet weiterleiten.
 
 
 ## Daten und Grenzen

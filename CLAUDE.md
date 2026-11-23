@@ -22,9 +22,21 @@ Haus-Aufgaben-Tool von Lasse und Melanie (Kanban, Liste, Gantt). Sprache der Obe
 
 - **Datenhaltung nicht verändern, ohne Rücksicht auf bestehende Daten.** Echte Aufgaben liegen im Add-on unter `/data/tasks.json` und gespiegelt unter `/share/planner/`. Änderungen am Datenformat nur abwärtskompatibel (alte Dateien müssen lesbar bleiben, `clean()` in `server.py` ergänzen statt Felder zu entfernen).
 - Nie Daten aus `/data` oder `/share` ins Repository einchecken. Das Repository ist öffentlich.
-- Name überall **Planner**. Ordner, Slug und Sensor-IDs heißen `planner`. Der alte Slug war `haus_planer`; dessen Spiegel `/share/haus_planer/` übernimmt der Server beim ersten Start einmalig. Das GitHub-Repository heißt noch `Haus-planner` (Umbenennung steht bei Lasse aus; solange die URL in `repository.yaml` nicht ändern).
+- Name überall **Planner**. Ordner, Slug und Sensor-IDs heißen `planner`. Der alte Slug war `haus_planer`; dessen Spiegel `/share/haus_planer/` übernimmt der Server beim ersten Start einmalig. Das GitHub-Repository heißt `lassegido/planner` (die alte Adresse `Haus-planner` leitet GitHub weiter; in Home Assistant eingetragene alte URL funktioniert deshalb weiter).
 - `slug` in `config.yaml` (`planner`) nicht mehr ändern, sonst ist es für Home Assistant ein neues Add-on mit leerem Datenordner. Die Browser-Einstellungen heißen weiterhin `haus-*` (localStorage), damit gespeicherte Einstellungen nicht verloren gehen.
 - Oberfläche muss auf Handy, iPad (hochkant und quer) und Desktop funktionieren. Keine festen Pixelbreiten für das Layout, Schriftgrößen relativ.
-- Farben: Portofino-Palette (D35526, FDAF54, F5F3EB, 6CB6E4, 387CA3). Offen = Himmelblau, In Arbeit = Orange, Erledigt = Meerblau, Überfällig = Ziegelrot. Kein typischer KI-Look (keine Verläufe, kein Glas, keine Emojis in der Oberfläche).
 - Home-Assistant-Add-on: Ingress, deshalb in `index.html` nur **relative** Pfade (`api/tasks`, nicht `/api/tasks`).
 - Dem Nutzer nach jedem Update sagen: Version in HA unter *Add-on-Store → ⋮ → Nach Updates suchen* → *Aktualisieren*; ehrlich benennen, was nur im Test-Browser und nicht auf echten Geräten geprüft wurde.
+
+## Gestaltungskonzept (ab 1.27, verbindlich)
+
+Grundlage: Apple Human Interface Guidelines (Farbe, Dark Mode), WCAG 2.2 (Kontrast), NN/g (wenige Farben, feste Bedeutung).
+
+- **iOS-Muster:** Große Überschrift, darunter eine Zeile Zusammenfassung. Rechts höchstens drei runde Knöpfe: Suche, Filter (mit Zähler), ⋯-Menü. Sortieren, Gruppieren, Auswählen, Tags, Archiv, Export und Einstellungen liegen im ⋯-Menü, nicht als Leiste. Nie zweizeilige Bedienleisten.
+- **Blätter:** Kopfzeile Abbrechen · Titel · Fertig/Speichern (oben, nicht unten), gruppierte Felder auf `--grp`, Löschen als rote Zeile ganz unten. Nach unten wischen schließt.
+- **Listen auf dem Handy:** gruppierte iOS-Liste (`.igrp`), Ring links, Titel, eine Metazeile, Fälligkeit rechts. Wischen rechts = erledigt, links = Papierkorb.
+- **Farbe:** Pro Farbwelt genau eine Akzentfarbe (`--acc`) für Bedienelemente. Statusfarben sind fest und in jeder Farbwelt gleich: Offen = Himmelblau, In Arbeit = Orange, Erledigt = Meerblau, Überfällig = Ziegelrot. Status nie nur über Farbe zeigen (Ring, Halbkreis, Haken). Keine Akzentfarbe, die wie ein Status aussieht (darum keine rote Akzentfarbe).
+- **Anpassung nur kuratiert:** Darstellung (Automatisch/Hell/Dunkel), Farbwelt (Portofino, Salbei, Beere, Graphit), Schrift (Figtree, Systemschrift, Fraunces + Figtree). Keine freien Farbwähler. Neue Farbwelten nur mit Hell- und Dunkel-Werten und nach Kontrastprüfung: Text ≥ 4,5 : 1 auf `--bg` und `--grp`, Platzhalter ≥ 3 : 1, Akzent als Textknopf ≥ 4,5 : 1.
+- **Bedienbarkeit:** Tippflächen ≥ 44 pt (2,85 rem), Eingabefelder ≥ 16 px Schrift (sonst zoomt iOS), Tastatur nur bei neuen Aufgaben automatisch öffnen.
+- **Tempo:** Karten und Zeilen mit `content-visibility:auto`; Touch-Handler auf `document` passiv lassen.
+- **Sicherheit:** Server prüft Host-Header (Schutz vor DNS-Rebinding), Schreibzugriffe brauchen `X-Planner: 1`, KI-Schlüssel wird nie an den Browser ausgeliefert. `tools/test_server.py` muss grün sein.

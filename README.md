@@ -6,8 +6,8 @@ Aufgaben, Kanban-Board, Liste und Zeitstrahl (Gantt) für zu Hause. Läuft als H
 
 1. **Repository anlegen:** Auf github.com ein kostenloses Konto erstellen, dann *New repository* → Name `planner` → **Public** → ohne README anlegen. (Öffentlich ist nötig, damit Home Assistant es ohne Zugangsdaten laden kann. Es steht kein persönlicher Inhalt drin.)
 2. **Code hochladen:** Das ZIP entpacken und den **Inhalt** des Ordners `planner` (also `planner`, `src`, `tools`, `repository.yaml`, `README.md`, `CLAUDE.md`) auf der Repository-Seite per *Add file → Upload files* hineinziehen und *Commit changes* klicken.
-3. **URL prüfen:** In `repository.yaml` steht bereits `https://github.com/lassegido/Haus-planner`. Passt der Name nicht zu deinem Konto, die Datei öffnen → Stift-Symbol → anpassen → *Commit changes*.
-4. **In Home Assistant hinzufügen:** *Einstellungen → Add-ons → Add-on-Store → ⋮ (oben rechts) → Repositories* → `https://github.com/lassegido/Haus-planner` einfügen → *Hinzufügen*. Unten erscheint **Planner** → *Installieren* → *Starten* → *In Seitenleiste anzeigen*.
+3. **URL prüfen:** In `repository.yaml` steht bereits `https://github.com/lassegido/planner`. Passt der Name nicht zu deinem Konto, die Datei öffnen → Stift-Symbol → anpassen → *Commit changes*.
+4. **In Home Assistant hinzufügen:** *Einstellungen → Add-ons → Add-on-Store → ⋮ (oben rechts) → Repositories* → `https://github.com/lassegido/planner` einfügen → *Hinzufügen*. Unten erscheint **Planner** → *Installieren* → *Starten* → *In Seitenleiste anzeigen*.
 
 ## Daten vom bisherigen lokalen Add-on übernehmen
 

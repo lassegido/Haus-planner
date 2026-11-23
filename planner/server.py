@@ -1,4 +1,4 @@
-import base64, datetime, hashlib, json, os, re, secrets, shutil, socket, struct, threading, time, urllib.error, urllib.request
+import base64, datetime, hashlib, ipaddress, json, os, re, secrets, shutil, socket, struct, threading, time, urllib.error, urllib.request
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs, unquote
 
@@ -184,25 +184,42 @@ def drop_files(tid, fid=None):
             pass
 
 
+def as_list(x):
+    return x if isinstance(x, list) else []
+
+
+def real_date(x):
+    # Format JJJJ-MM-TT und ein echtes Kalenderdatum (kein 2026-13-45)
+    if not DATE.fullmatch(x):
+        return False
+    try:
+        datetime.date.fromisoformat(x)
+        return True
+    except ValueError:
+        return False
+
+
 def clean(t):
     if not isinstance(t, dict):
         return None
     i = str(t.get("id", ""))
     s, e = str(t.get("start", "")), str(t.get("end", ""))
-    if not ID.fullmatch(i) or not DATE.fullmatch(s) or not DATE.fullmatch(e):
+    if not ID.fullmatch(i) or not real_date(s) or not real_date(e):
         return None
+    if e < s:
+        e = s
     title = str(t.get("title", "")).strip()[:200]
     if not title:
         return None
     st = t.get("status")
-    deps = [str(x) for x in t.get("deps", []) if isinstance(x, str) and ID.fullmatch(x) and x != i][:50]
+    deps = [str(x) for x in as_list(t.get("deps")) if isinstance(x, str) and ID.fullmatch(x) and x != i][:50]
     ck = [{"t": str(c.get("t", ""))[:200], "d": bool(c.get("d"))}
-          for c in t.get("checklist", []) if isinstance(c, dict)][:100]
+          for c in as_list(t.get("checklist")) if isinstance(c, dict)][:100]
     tags = t.get("tags")
     if not isinstance(tags, list):
         tags = [t.get("area")] if t.get("area") else []
     tags = [n for n in dict.fromkeys(str(x).strip()[:30] for x in tags if isinstance(x, str)) if n][:20]
-    return {"id": i, "title": title, "area": (tags[0] if tags else str(t.get("area", ""))[:60]), "tags": tags, "proj": str(t.get("proj", "") or "")[:30], "ms": bool(t.get("ms")), "rec": clean_rec(t.get("rec")), "spawned": str(t.get("spawned", "") or "")[:40], "who": str(t.get("who", ""))[:60],
+    return {"id": i, "title": title, "area": (tags[0] if tags else str(t.get("area", ""))[:60]), "tags": tags, "proj": str(t.get("proj", "") or "")[:30], "ms": bool(t.get("ms")), "rec": clean_rec(t.get("rec")), "spawned": str(t.get("spawned", "") or "")[:40], "who": str(t.get("who", "") or "")[:200],
             "status": st if st in ("todo", "doing", "done") else "todo", "prio": (t.get("prio") if t.get("prio") in (1, 2, 3) else 0), "start": s, "end": e,
             "notes": str(t.get("notes", ""))[:4000], "deps": deps, "checklist": ck,
             "arch": bool(t.get("arch")), "del": bool(t.get("del")), "delAt": str(t.get("delAt", "") or "")[:10],
@@ -231,6 +248,10 @@ def save_app_settings(d):
     tmp = SETTINGS + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(d, f, ensure_ascii=False)
+    try:
+        os.chmod(tmp, 0o600)  # enthält ggf. den KI-Schlüssel
+    except Exception:
+        pass
     os.replace(tmp, SETTINGS)
 
 
@@ -259,7 +280,25 @@ def ha_info():
     o = options()
     return {"api": bool(TOKEN), "notify": services(), "time": remind_time(),
             "sensors": bool(o.get("sensors", True)),
-            "ai": bool(str(o.get("gemini_api_key") or "").strip()), "model": str(o.get("ai_model") or "gemini-flash-lite-latest")}
+            "ai": bool(ai_key()), "model": ai_model(), "aiapp": bool(app_settings().get("ai_key")),
+            "aicfg": bool(str(o.get("gemini_api_key") or "").strip())}
+
+
+AI_MODELS = ("gemini-flash-lite-latest", "gemini-flash-latest")
+AI_KEY = re.compile(r"[A-Za-z0-9_\-]{20,200}")
+
+
+def ai_key():
+    k = str(app_settings().get("ai_key") or "").strip()
+    return k or str(options().get("gemini_api_key") or "").strip()
+
+
+def ai_model():
+    m = app_settings().get("ai_model")
+    if m in AI_MODELS:
+        return m
+    m = str(options().get("ai_model") or "")
+    return m if m in AI_MODELS else AI_MODELS[0]
 
 
 GEMINI = os.environ.get("GEMINI_URL", "https://generativelanguage.googleapis.com/v1beta/models")
@@ -278,13 +317,10 @@ def ai_limit():
 
 def ai_call(prompt, raw=False):
     ai_limit()
-    o = options()
-    key = str(o.get("gemini_api_key") or "").strip()
+    key = ai_key()
     if not key:
         raise RuntimeError("Kein Gemini-Schlüssel eingetragen")
-    model = str(o.get("ai_model") or "gemini-flash-lite-latest")
-    if not re.fullmatch(r"[A-Za-z0-9._-]+", model):
-        raise RuntimeError("Ungültiges Modell")
+    model = ai_model()
     body = {"system_instruction": {"parts": [{"text": AI_SYSTEM}]},
             "contents": [{"role": "user", "parts": [{"text": prompt[:4000]}]}],
             "generationConfig": {"maxOutputTokens": 2000, "responseMimeType": "application/json"}}
@@ -300,6 +336,8 @@ def ai_call(prompt, raw=False):
             msg = ""
         if e.code == 429:
             raise RuntimeError("Gemini-Tageslimit erreicht, bitte später erneut versuchen")
+        if e.code in (400, 401, 403) and "key" in msg.lower():
+            raise RuntimeError("Der Gemini-Schlüssel wird nicht akzeptiert")
         raise RuntimeError("Gemini %s %s" % (e.code, msg[:120]))
     text = ""
     for c in (j.get("candidates") or [])[:1]:
@@ -326,7 +364,12 @@ def init_tz():
     name = None
     if TOKEN:
         try:
-            name = (ha_call("GET", "/config") or {}).get("time_zone")
+            cfg = ha_call("GET", "/config") or {}
+            name = cfg.get("time_zone")
+            for k in ("internal_url", "external_url"):
+                hn = urlparse(str(cfg.get(k) or "")).hostname
+                if hn:
+                    TRUSTED_HOSTS.add(hn.lower())
         except Exception as e:
             print("HA-Zeitzone nicht lesbar:", e, flush=True)
     name = name or os.environ.get("TZ")
@@ -603,9 +646,45 @@ def ha_loop():
         time.sleep(60)
 
 
+INGRESS_IP = "172.30.32.2"  # Home-Assistant-Ingress (Supervisor)
+LOCAL_SUFFIX = (".local", ".lan", ".home", ".home.arpa", ".internal", ".localdomain", ".fritz.box", ".box", ".intranet", ".localhost")
+TRUSTED_HOSTS = set()  # Adressen aus der Home-Assistant-Konfiguration (interne/externe URL)
+
+
+def host_ok(client_ip, host_header):
+    # Schutz gegen DNS-Rebinding: Eine fremde Webseite, deren Name plötzlich auf das Heimnetz zeigt,
+    # schickt ihren eigenen Namen im Host-Header. Erlaubt sind Ingress, IP-Adressen und Namen aus dem Heimnetz.
+    if client_ip == INGRESS_IP:
+        return True
+    h = (host_header or "").strip().lower()
+    if h.startswith("["):
+        h = h[1:h.find("]")] if "]" in h else ""
+    elif h.count(":") == 1:
+        h = h.rsplit(":", 1)[0]
+    if not h:
+        return False
+    try:
+        ipaddress.ip_address(h)
+        return True
+    except ValueError:
+        pass
+    return h == "localhost" or "." not in h or h.endswith(LOCAL_SUFFIX) or h in TRUSTED_HOSTS
+
+
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
+
+    def guard(self):
+        if host_ok(self.client_address[0], self.headers.get("Host")):
+            return True
+        self.out(403, {"error": "Zugriff über diese Adresse ist nicht erlaubt"})
+        return False
+
+    def end_headers(self):
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Referrer-Policy", "no-referrer")
+        super().end_headers()
 
     def out(self, code, body, ctype="application/json"):
         b = body if isinstance(body, bytes) else json.dumps(body, ensure_ascii=False).encode()
@@ -617,6 +696,8 @@ class H(BaseHTTPRequestHandler):
         self.wfile.write(b)
 
     def do_GET(self):
+        if not self.guard():
+            return
         u = urlparse(self.path)
         if u.path.endswith("/api/ha-notify"):
             try:
@@ -671,7 +752,6 @@ class H(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", ty)
             self.send_header("Content-Length", str(len(b)))
-            self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Content-Security-Policy", "sandbox")
             self.send_header("Cache-Control", "private, max-age=3600")
             fn = re.sub(r"[^A-Za-z0-9._-]", "_", meta["n"])
@@ -684,7 +764,7 @@ class H(BaseHTTPRequestHandler):
 
     def body(self, limit=2_000_000):
         n = int(self.headers.get("Content-Length", "0"))
-        if n > limit:
+        if n < 0 or n > limit:
             raise ValueError
         return json.loads(self.rfile.read(n))
 
@@ -697,7 +777,7 @@ class H(BaseHTTPRequestHandler):
         return False
 
     def do_POST(self):
-        if not self.csrf_ok():
+        if not self.guard() or not self.csrf_ok():
             return
         pu = urlparse(self.path)
         path = pu.path
@@ -748,6 +828,16 @@ class H(BaseHTTPRequestHandler):
                 st["notify"] = [str(x)[:80] for x in data["notify"][:12] if re.fullmatch(r"[A-Za-z0-9_]+", str(x))]
             if isinstance(data.get("time"), str) and re.fullmatch(r"([01][0-9]|2[0-3]):[0-5][0-9]", data["time"]):
                 st["time"] = data["time"]
+            if isinstance(data.get("ai_key"), str):
+                k = data["ai_key"].strip()
+                if not k:
+                    st.pop("ai_key", None)
+                elif AI_KEY.fullmatch(k):
+                    st["ai_key"] = k
+                else:
+                    return self.out(400, {"error": "Das sieht nicht wie ein Gemini-Schlüssel aus"})
+            if data.get("ai_model") in AI_MODELS:
+                st["ai_model"] = data["ai_model"]
             save_app_settings(st)
             return self.out(200, {"ok": True, "ha": ha_info()})
         if path.endswith("/api/ha-test"):
@@ -790,7 +880,7 @@ class H(BaseHTTPRequestHandler):
             self.out(200, {"rev": state["rev"], "count": len(items), "v": items[0]["v"]})
 
     def do_DELETE(self):
-        if not self.csrf_ok():
+        if not self.guard() or not self.csrf_ok():
             return
         mf = re.search(r"/api/file/([A-Za-z0-9_-]{1,40})/([a-f0-9]{12})$", urlparse(self.path).path)
         if mf:

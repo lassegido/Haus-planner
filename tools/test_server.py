@@ -11,10 +11,12 @@ sv = subprocess.Popen([sys.executable, root + "/planner/server.py"], env=env, st
 time.sleep(1.5)
 
 
-def call(path, data=None, method=None, hdr=True):
+def call(path, data=None, method=None, hdr=True, host=None):
     h = {"Content-Type": "application/json"}
     if hdr:
         h["X-Planner"] = "1"
+    if host:
+        h["Host"] = host
     r = urllib.request.Request("http://127.0.0.1:8096/" + path, data=None if data is None else json.dumps(data).encode(), headers=h, method=method)
     try:
         with urllib.request.urlopen(r) as x:
@@ -42,6 +44,29 @@ try:
     del t["prio"]
     call("api/task", t)
     check("Alte Aufgabe ohne Priorität lesbar", call("api/tasks")[1]["tasks"][0]["prio"] == 0)
+    # Sicherheit: fremder Hostname (DNS-Rebinding) wird abgewiesen, Heimnetz-Namen und IPs nicht
+    check("Fremder Hostname wird abgewiesen (403)", call("api/tasks", host="evil.example.com")[0] == 403)
+    check("Schreiben über fremden Hostnamen abgewiesen", call("api/task", t, host="evil.example.com:8099")[0] == 403)
+    check("homeassistant.local erlaubt", call("api/tasks", host="homeassistant.local:8099")[0] == 200)
+    check("IP-Adresse erlaubt", call("api/tasks", host="192.168.178.20:8099")[0] == 200)
+    check("Name ohne Punkt erlaubt", call("api/tasks", host="homeassistant:8099")[0] == 200)
+    r = urllib.request.urlopen("http://127.0.0.1:8096/api/tasks")
+    check("Header nosniff gesetzt", r.headers.get("X-Content-Type-Options") == "nosniff")
+    # Datenprüfung
+    check("Unmögliches Datum wird abgewiesen", call("api/task", {**t, "id": "t2", "start": "2026-13-45"})[0] == 400)
+    check("Falscher Typ bei Abhängigkeiten stürzt nicht ab", call("api/task", {**t, "id": "t3", "deps": 5, "checklist": "x"})[0] == 200)
+    call("api/task", {**t, "id": "t4", "start": "2026-03-10", "end": "2026-03-01"})
+    t4 = [x for x in call("api/tasks")[1]["tasks"] if x["id"] == "t4"][0]
+    check("Ende vor Start wird korrigiert", t4["end"] == "2026-03-10")
+    check("Mehrere Personen werden nicht abgeschnitten", call("api/task", {**t, "id": "t5", "who": "Lasse, Melanie, Oma Gisela, Opa Heinz, Handwerker Müller"})[0] == 200 and [x for x in call("api/tasks")[1]["tasks"] if x["id"] == "t5"][0]["who"].endswith("Müller"))
+    # KI-Schlüssel aus der App: wird gespeichert, aber nie ausgeliefert
+    check("Ungültiger KI-Schlüssel abgewiesen", call("api/ha-settings", {"ai_key": "abc"})[0] == 400)
+    key = "AIzaTestSchluessel_1234567890abcdef"
+    c, j = call("api/ha-settings", {"ai_key": key, "ai_model": "gemini-flash-latest"})
+    check("KI-Schlüssel gespeichert", c == 200 and j["ha"]["ai"] and j["ha"]["aiapp"] and j["ha"]["model"] == "gemini-flash-latest")
+    raw = urllib.request.urlopen("http://127.0.0.1:8096/api/tasks").read().decode()
+    check("KI-Schlüssel wird nie ausgeliefert", key not in raw and key not in json.dumps(j))
+    check("KI-Schlüssel entfernbar", call("api/ha-settings", {"ai_key": ""})[1]["ha"]["ai"] is False)
 finally:
     sv.kill()
 sys.exit(0 if ok else 1)

@@ -1,5 +1,17 @@
 # Änderungen
 
+## 1.27.0
+Neu gestaltet nach iOS-Mustern (Apple-Richtlinien, WCAG-Kontrast):
+- Kopfzeile aufgeräumt: Titel, eine Zeile Zusammenfassung, rechts nur Suche, Filter und ⋯. Sortieren, Gruppieren, Auswählen, Tags, Archiv, Export und Einstellungen stecken im ⋯-Menü (mit Untermenüs). Keine zweizeiligen Leisten mehr.
+- Liste auf dem Handy als gruppierte iOS-Liste mit Ring, Titel, Metazeile und Fälligkeit.
+- Alle Blätter einheitlich: oben Abbrechen · Titel · Fertig/Speichern, Felder in Gruppen, Löschen als rote Zeile unten. Notizen direkt unter dem Titel, Meilenstein als Schalter. Beim Öffnen einer bestehenden Aufgabe springt die Tastatur nicht mehr auf.
+- Auswahlmodus mit drei klaren Aktionen (Status, Person, Mehr).
+- Startseite: Personenwahl als Segment-Umschalter. Fortschrittsbalken bei Projekten, Tags und Personen wieder sichtbar (Fehler seit 1.18).
+- Erscheinungsbild auf drei kuratierte Optionen reduziert: Darstellung, Farbwelt (Portofino, Salbei, Beere, Graphit) und Schrift (Figtree, Systemschrift, Fraunces mit Figtree). Alle Farbwelten auf Kontrast geprüft; Statusfarben bleiben überall gleich. Die freie Akzentfarbe entfällt.
+- Tippflächen mindestens 44 pt, Eingabefelder mindestens 16 px (kein Zoomen beim Antippen auf dem iPhone).
+- KI-Assistent: eigene Seite in den Einstellungen mit Status, Verbindungstest, Modellwahl und Feld für den Gemini-Schlüssel (wird nur auf dem Home Assistant gespeichert und nie angezeigt).
+- Sicherheit: Schutz gegen DNS-Rebinding auf Port 8099 (fremde Hostnamen werden abgewiesen), zusätzliche Sicherheits-Header, strengere Prüfung von Datum, Abhängigkeiten und Checkliste, Ende vor Start wird korrigiert, mehrere Verantwortliche werden nicht mehr nach 60 Zeichen abgeschnitten.
+
 ## 1.26.1
 - Aktionsblatt: Die dicken blauen Linien (Fokusrahmen) sind weg, die Felder heben sich im Dunkelmodus klarer ab, „In den Papierkorb“ ist besser lesbar.
 - Dunkelmodus: Karten und Spalten im Board haben mehr Kontrast, Datumsangaben und Nebentexte sind heller.
