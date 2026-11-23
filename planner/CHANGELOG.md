@@ -1,5 +1,11 @@
 # Änderungen
 
+## 1.26.0
+- Deutlich flüssiger bei vielen Aufgaben: Liste und Board bauen sich etwa sechsmal schneller auf (nur sichtbare Karten werden gezeichnet), Datumsangaben werden zwischengespeichert, nach dem Speichern wird nicht mehr doppelt neu gezeichnet.
+- Wischen und Ziehen blockieren das normale Scrollen nicht mehr.
+- Menü beim Gedrückthalten auf drei Einträge gekürzt: Bearbeiten, Auswählen, Papierkorb. Status ändern geht per Wischen oder Tippen auf den Kreis.
+- Zeitstrahl: Prio-Marke aus der schmalen Beschriftung entfernt, damit mehr vom Titel lesbar bleibt. Leerer Abstand unter „Priorität“ im Aufgaben-Dialog entfernt.
+
 ## 1.25.0
 - Zeilen nach rechts wischen = erledigt (bei erledigten: wieder öffnen), nach links wischen = Papierkorb, jeweils mit Rückgängig. Gilt für die Liste und die Startseite.
 - Aufgabe gedrückt halten öffnet ein Menü: Auswählen, Bearbeiten, Duplizieren, Status, Papierkorb.

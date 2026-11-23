@@ -26,7 +26,8 @@ async function pull(force){
     $("note").textContent="";
     if(j.version)$("ver").textContent="Add-on-Version "+j.version;
     haInfo=j.ha||null;
-    if(j.tasks){RAW=j.tasks;reg=j.tags||[];regLoaded=true;rev=j.rev;loaded=true;render()}
+    if(j.tasks){const sg=a=>JSON.stringify(a.map(t=>{const {v,...r}=t;return r})),same=loaded&&sg(RAW)===sg(j.tasks)&&JSON.stringify(reg)===JSON.stringify(j.tags||[]);
+      RAW=j.tasks;reg=j.tags||[];regLoaded=true;rev=j.rev;loaded=true;if(!same)render()}
   }catch(e){$("note").textContent="Keine Verbindung zum Server – Änderungen werden evtl. nicht gespeichert."}
 }
 async function saveTask(t,o){
