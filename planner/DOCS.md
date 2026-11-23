@@ -42,14 +42,6 @@ Zugriff von außen nur über Nabu Casa oder ein VPN (z. B. Tailscale).
 
 Der Planner legt in Home Assistant fünf Sensoren an, die jede Minute aktualisiert werden: `sensor.planner_offen`, `sensor.planner_in_arbeit`, `sensor.planner_ueberfaellig`, `sensor.planner_heute_faellig` und `sensor.planner_prio1` (offene Aufgaben mit Prio 1). Das Attribut `aufgaben` enthält die Titel. Abschalten mit `sensors: false` in der Konfiguration.
 
-## KI-Assistent
-
-In jeder Aufgabe schlägt „Mit KI ausfüllen" Notizen und Checklistenpunkte vor. Du entscheidest, was übernommen wird.
-
-1. Unter [console.anthropic.com](https://console.anthropic.com) einen API-Schlüssel erstellen.
-2. Im Add-on unter **Konfiguration** bei `anthropic_api_key` eintragen und neu starten.
-3. Die Nutzung kostet Geld (abgerechnet von Anthropic, pro Anfrage meist nur Bruchteile eines Cents mit dem Standardmodell `claude-haiku-5-5`). Es wird nur der Aufgabentext gesendet, keine anderen Daten.
-
 ## Auf den Home-Bildschirm (App-Symbol, Vollbild)
 
 Der Zugriff über Home Assistant (Ingress) braucht dessen Anmeldung und lässt sich nicht als eigene App ablegen. Dafür gibt es einen optionalen direkten Port:

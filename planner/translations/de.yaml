@@ -4,14 +4,6 @@ configuration:
     description: >-
       Legt vier Sensoren an (offen, in Arbeit, überfällig, heute fällig),
       etwa für Dashboards und Automationen.
-  anthropic_api_key:
-    name: Anthropic-API-Schlüssel
-    description: >-
-      Optional. Schaltet den KI-Assistenten im Planner frei. Ohne Schlüssel bleibt
-      die KI aus.
-  ai_model:
-    name: KI-Modell
-    description: Modell für den KI-Assistenten. Haiku ist am günstigsten, Opus am stärksten.
 network:
   8099/tcp: >-
     Direkter Zugriff im Heimnetz (ohne Anmeldung), vorbelegt mit 8099. Damit läuft der

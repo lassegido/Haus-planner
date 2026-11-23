@@ -520,15 +520,9 @@ body.selmode #toast{bottom:5.2rem}
 .fl .x{position:absolute;top:.25rem;right:.25rem;width:1.6rem;height:1.6rem;border-radius:50%;border:0;background:rgba(20,48,63,.7);color:#fff;font-size:.75rem;padding:0}
 .fl.doc .x{position:static;background:none;color:var(--mut);width:auto}
 
-/* 1.7: KI-Vorschlag */
-.aiw{display:flex;align-items:center;gap:.7rem;margin-top:1.2rem}.aiw .hint{margin:0;font-size:.78rem;color:var(--mut)}.aiw .btn{white-space:nowrap;flex:none}
-.aibox{margin-top:.7rem;border:1px solid var(--line2);border-left:4px solid var(--acc);border-radius:.8rem;background:var(--bg);padding:.8rem .9rem}
-.aih{font:700 .72rem/1 var(--disp);letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:.5rem}
-#ai_notes{font-size:.92rem;line-height:1.45;margin-bottom:.4rem;white-space:pre-wrap}
-#dlg label.aii{text-transform:none;display:flex;gap:.6rem;align-items:flex-start;margin:.3rem 0;font:450 .92rem/1.35 var(--fb);letter-spacing:0;color:var(--tx);cursor:pointer}
-#dlg label.aii input{width:1.1rem;height:1.1rem;flex:none;margin-top:.12rem;accent-color:var(--sea);padding:0}
-.aia{display:flex;gap:.5rem;margin-top:.7rem}
 
+
+.hpick{display:flex;gap:.45rem;flex-wrap:wrap;margin:0 0 1rem}.hpick button{border:1px solid var(--line2);background:var(--surf);color:var(--mut);border-radius:999px;padding:.5rem 1rem;font:600 .86rem/1 var(--fb);min-height:2.4rem}.hpick button.on{background:var(--tx);border-color:var(--tx);color:var(--surf)}
 /* 1.8: Auswahlfelder, Farben je Feldtyp, Schrift */
 #dlg input:not([type=checkbox]):not([type=radio]):not([type=file]):not(#f_tagin):not(.ct),#dlg select{min-height:2.9rem}
 .seg3 button{min-height:2.3rem}
@@ -723,7 +717,6 @@ td .pjh{margin-left:0}
 .dt{background:transparent;box-shadow:inset 0 0 0 .14rem var(--sky)}
 .dt.doing{background:linear-gradient(90deg,transparent 50%,var(--sun) 50%);box-shadow:inset 0 0 0 .14rem var(--sun)}
 .dt.done{background:var(--sea);box-shadow:none}
-.wdgt{width:100%;margin-top:.8rem;font:.7rem/1.35 ui-monospace,Menlo,monospace;border:1px solid var(--line2);border-radius:.8rem;background:var(--bg);color:var(--mut);padding:.6rem;resize:none}
 .st::before{width:.7rem;height:.7rem;background:transparent;box-shadow:inset 0 0 0 .14rem var(--c)}
 .st.doing::before{background:linear-gradient(90deg,transparent 50%,var(--c) 50%)}.st.done::before{background:var(--c)}
 .scap+.sgrp{margin-top:.8rem}
@@ -824,8 +817,7 @@ td .pjh{margin-left:0}
   <label for="f_proj">Projekt</label>
   <select id="f_proj"></select><input id="f_projnew" placeholder="Projektname" maxlength="30" style="display:none;margin-top:.5rem" aria-label="Neues Projekt">
   <div class="dsecs">
-  <details class="dsec" id="d_ck"><summary><span>Checkliste</span><em></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><div id="f_ck"></div><button class="btn ghost" id="ck_add" type="button"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Punkt hinzufügen</button><div class="aiw" id="ai_row"><button class="btn ghost sm" id="ai_btn" type="button">Mit KI ausfüllen</button><span class="hint">Notizen und Checkliste vorschlagen</span></div>
-  <div class="aibox" id="ai_box" style="display:none"><div class="aih">Vorschlag</div><div id="ai_notes"></div><div id="ai_items"></div><div class="aia"><button class="btn sm" id="ai_ok" type="button">Übernehmen</button><button class="btn ghost sm" id="ai_no" type="button">Verwerfen</button></div></div></div></details>
+  <details class="dsec" id="d_ck"><summary><span>Checkliste</span><em></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><div id="f_ck"></div><button class="btn ghost" id="ck_add" type="button"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Punkt hinzufügen</button></div></details>
   <details class="dsec" id="d_nt"><summary><span>Notizen</span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><textarea id="f_notes" rows="3" placeholder="Maße, Material, Ansprechpartner …"></textarea></div></details>
   <details class="dsec" id="d_pl"><summary><span>Wiederholen und Abhängigkeiten</span><em></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><label for="f_rec">Wiederholen</label>
   <select id="f_rec"><option value="">Nie</option><option value="1d">Täglich</option><option value="1w">Wöchentlich</option><option value="2w">Alle 2 Wochen</option><option value="1m">Monatlich</option><option value="3m">Vierteljährlich</option><option value="1y">Jährlich</option></select>
@@ -890,8 +882,6 @@ async function saveReg(l){
   else{lsSetReg();render()}
 }
 async function saveMany(list){for(const t of list)await saveTask(t)}
-const aiAvail=()=>true;
-async function aiJson(prompt,raw){const sm=await window.claude.use("sample");if(!sm)throw new Error("Die KI ist hier nicht verfügbar");return sm.json(prompt)}
 
 /* Anzeige */
 /* Startseite, Hilfen, Bewegung */
@@ -1075,11 +1065,8 @@ function drawSettings(){
       h+=`<p class="sgt">Home Assistant</p>`+grp(
         srow("",`Verbindung`,hi.api?"Aktiv":"Nicht verfügbar",null,false)
        +(hi.api?srow('data-go="rem"',`Erinnerung`,n?"Täglich "+esc(hi.time)+" Uhr":"Aus"):srow("",`Erinnerung`,"Aus",null,false))
-       +srow("",`KI-Assistent`,hi.ai?esc(hi.model):"Aus",null,false)
        +srow("","Sensoren",hi.sensors?"Aktiv":"Aus",null,false)
-       +srow(`data-act="hatest"${hi.api&&n?"":" disabled"}`,"Testnachricht senden",null,null,false)
-       +srow('data-go="wdg"',"Homescreen-Widget","Einrichten"))
-       +(hi.ai?"":cap("Den KI-Assistenten schaltest du in Home Assistant unter Add-on → Konfiguration frei (API-Schlüssel eintragen)."))}
+       +srow(`data-act="hatest"${hi.api&&n?"":" disabled"}`,"Testnachricht senden",null,null,false))}
     if(matchMedia("(hover:hover)").matches)h+=`<p class="sgt">Hilfe</p>`+grp(srow('data-go="keys"',"Tastaturkürzel"));
   }else if(sPage==="rem"){
     const sel=new Set((haInfo&&haInfo.notify)||[]),av=haAvail;
@@ -1088,13 +1075,6 @@ function drawSettings(){
       h=(names.length?grp(names.map(x=>sopt(`data-set="ntf:${x}"`,esc(ntfName(x)),sel.has(x))).join("")):cap("Es wurde kein Gerät gefunden. Installiere die Home-Assistant-App auf dem Handy und melde dich an."))
        +cap("Wähle die Geräte, die täglich an fällige und überfällige Aufgaben erinnert werden. Ohne Auswahl ist die Erinnerung aus.")
        +grp(srow('data-go="remt"',"Uhrzeit",esc((haInfo&&haInfo.time)||"08:00")+" Uhr")+srow(`data-act="hatest"${sel.size?"":" disabled"}`,"Testnachricht senden",null,null,false))}
-  }else if(sPage==="wdg"){
-    const base="http://"+location.hostname+":8099";
-    h=cap("Das Widget zeigt deine Aufgaben: überfällig, heute, diese und nächste Woche. Es ist nur eine Anzeige, den Status änderst du im Planner.")
-     +`<p class="sgt">So geht's</p>`+cap("1. App „Scriptable“ aus dem App Store installieren (kostenlos).<br>2. Unten „Skript kopieren“ tippen.<br>3. In Scriptable oben rechts auf + tippen, den Text einfügen und das Skript „Planner“ nennen.<br>4. Auf dem Homescreen lange drücken, Widget „Scriptable“ hinzufügen, bearbeiten und das Skript „Planner“ wählen. Im Feld „Parameter“ kannst du einen anderen Namen eintragen, sonst gilt „Ich bin“.")
-     +grp(srow('data-act="wdgcopy"',"Skript kopieren",wdgSrc===null?"Lade …":null,null,false))
-     +cap("Das Widget ruft "+esc(base)+" ab und funktioniert im Heimnetz. Unterwegs zeigt es den letzten Stand.")
-     +`<textarea id="wdgtxt" class="wdgt" readonly rows="5" aria-label="Skript">${esc(wdgSrc||"")}</textarea>`;
   }else if(sPage==="remt"){
     h=grp(REMT.map(t=>sopt(`data-set="rtime:${t}"`,t+" Uhr",t===(haInfo&&haInfo.time))).join(""));
   }else if(sPage==="theme"){
@@ -1112,14 +1092,12 @@ function drawSettings(){
   }
   $("s_body").innerHTML=h;
 }
-let wdgSrc=null;
-async function loadWdg(){try{const r=await fetch("api/widget-script");wdgSrc=(await r.text()).replace("__BASE__","http://"+location.hostname+":8099").replace("__WHO__",(prefGet("me")||"").replace(/["\\]/g,""))}catch(e){wdgSrc=""}if(sPage==="wdg")drawSettings()}
 function openSettings(){sPage="main";drawSettings();$("dls").showModal();$("dls").scrollTop=0}
 $("cfg").onclick=openSettings;$("s_close").onclick=()=>$("dls").close();
 $("s_back").onclick=()=>{sPage=sPage==="remt"?"rem":"main";drawSettings();$("dls").scrollTop=0};
 $("s_body").onclick=async e=>{
   const b=e.target.closest("button");if(!b||b.disabled)return;const d=b.dataset;
-  if(d.go){sPage=d.go;if(d.go==="rem"&&haAvail===null)loadAvail();if(d.go==="wdg"&&wdgSrc===null)loadWdg();drawSettings();$("dls").scrollTop=0;return}
+  if(d.go){sPage=d.go;if(d.go==="rem"&&haAvail===null)loadAvail();drawSettings();$("dls").scrollTop=0;return}
   if(d.set){const i=d.set.indexOf(":"),k=d.set.slice(0,i),v=d.set.slice(i+1);
     if(k==="theme"){prefSet("theme",v);applyTheme()}else if(k==="des"){prefSet("design",v);prefSet("acc","");applyTheme()}
     else if(k==="ntf"){const cur=new Set((haInfo&&haInfo.notify)||[]);cur.has(v)?cur.delete(v):cur.add(v);await haSave({notify:[...cur]})}
@@ -1128,8 +1106,6 @@ $("s_body").onclick=async e=>{
     drawSettings();return}
   if(d.act==="arch"){const L=tasks.filter(t=>t.status==="done");if(!L.length)return;await saveMany(L.map(t=>({...t,arch:true})));$("dls").close();toast(L.length+" erledigte archiviert",()=>saveMany(L))}
   else if(d.act==="open"){$("dls").close();openArch()}
-  else if(d.act==="wdgcopy"){const ta=$("wdgtxt");if(!wdgSrc){toast("Skript nicht geladen");return}
-    try{await navigator.clipboard.writeText(wdgSrc);toast("Skript kopiert")}catch(_){ta.removeAttribute("readonly");ta.focus();ta.select();toast("Text markiert, bitte kopieren")}}
   else if(d.act==="hatest"){try{const r=await api("api/ha-test",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});$("dls").close();toast(r.ok?"Testnachricht gesendet":"Fehlgeschlagen: "+r.error)}catch(e){toast("Server nicht erreichbar")}}
 };
 
@@ -1268,29 +1244,6 @@ function ics(){
   const ev=tasks.filter(t=>t.status!=="done").map(t=>["BEGIN:VEVENT","UID:"+t.id+"@planner","DTSTAMP:"+stp,"DTSTART;VALUE=DATE:"+c(t.start),"DTEND;VALUE=DATE:"+c(iso(fromDn(dn(t.end)+1))),"SUMMARY:"+esc2(t.title),...(t.notes?["DESCRIPTION:"+esc2(t.notes)]:[]),...(t.prio?["PRIORITY:"+[0,1,5,9][t.prio]]:[]),...((t.who||t.proj)?["CATEGORIES:"+[t.who,t.proj].filter(Boolean).map(esc2).join(",")]:[]),"END:VEVENT"].join("\r\n"));
   return["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Planner//DE","CALSCALE:GREGORIAN","X-WR-CALNAME:Planner",...ev,"END:VCALENDAR"].join("\r\n")+"\r\n"}
 $("x_ics").onclick=()=>dl("planner-"+stamp()+".ics",new Blob([ics()],{type:"text/calendar"}));
-/* KI-Assistent */
-function aiPrompt(){
-  const t=$("f_title").value.trim(),notes=$("f_notes").value.trim(),have=cklist.map(c=>c.t).filter(Boolean),tags=selTags.join(", "),pv=$("f_proj").value,proj=pv&&pv!=="__new"?pv:"";
-  return"Du hilfst einem Paar beim Planen von Aufgaben rund ums Haus. Schreibe auf Deutsch, knapp und praktisch.\nAufgabe: "+t+"\n"+(tags?"Tags: "+tags+"\n":"")+(proj?"Projekt: "+proj+"\n":"")+(notes?"Vorhandene Notizen (nicht wiederholen): "+notes+"\n":"")+(have.length?"Vorhandene Checklistenpunkte (nicht wiederholen): "+have.join("; ")+"\n":"")
-   +'Antworte ausschließlich mit einem JSON-Objekt, ohne Erklärung und ohne Code-Block: {"notes":"1 bis 3 kurze Sätze: was ist zu tun, worauf achten","checklist":["3 bis 8 kurze Schritte im Imperativ"]}'}
-let aiRes=null;
-async function aiRun(){
-  if(!$("f_title").value.trim()){toast("Bitte zuerst einen Titel eingeben");$("f_title").focus();return}
-  const b=$("ai_btn");b.disabled=true;b.textContent="KI denkt nach …";
-  try{const r=await aiJson(aiPrompt()),notes=String(r&&r.notes||"").trim().slice(0,1000),items=(Array.isArray(r&&r.checklist)?r.checklist:[]).map(x=>String(x).trim().slice(0,120)).filter(Boolean).slice(0,10);
-    if(!notes&&!items.length)throw new Error("Keine brauchbare Antwort");aiRes={notes,items};drawAi()}
-  catch(e){toast("KI nicht erreichbar: "+((e&&(e.message||e.code))||"unbekannt"))}
-  b.disabled=false;b.textContent="Mit KI ausfüllen"}
-function drawAi(){
-  const box=$("ai_box");if(!aiRes){box.style.display="none";return}box.style.display="";
-  $("ai_notes").textContent=aiRes.notes;
-  $("ai_items").innerHTML=aiRes.items.map((x,i)=>`<label class="aii"><input type="checkbox" data-ai="${i}" checked><span>${esc(x)}</span></label>`).join("")}
-$("ai_btn").onclick=aiRun;
-$("ai_no").onclick=()=>{aiRes=null;drawAi()};
-$("ai_ok").onclick=()=>{
-  if(!aiRes)return;const on=[...document.querySelectorAll("#ai_items input:checked")].map(i=>aiRes.items[+i.dataset.ai]);
-  if(aiRes.notes){const n=$("f_notes");n.value=(n.value.trim()?n.value.trim()+"\n\n":"")+aiRes.notes}
-  on.forEach(x=>cklist.push({t:x,d:false}));drawCk();aiRes=null;drawAi()};
 /* Tags */
 const TC={sky:"#6CB6E4",sun:"#FDAF54",sea:"#387CA3",brick:"#D35526",mint:"#6CC49A",rose:"#E58BAE",lilac:"#9D86DB",sand:"#C9B77A",slate:"#7C93A3",lemon:"#D9CB3F"},TCK=Object.keys(TC);
 const tgs=t=>Array.isArray(t.tags)?t.tags:(t.area?[t.area]:[]);
@@ -1299,22 +1252,13 @@ const hashC=n=>{let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))>>>0;return TCK
 const autoC=n=>{const i=allTags().indexOf(n);return i<0?hashC(n):TCK[i%TCK.length]};
 const colorKey=n=>{const c=(cur().find(x=>!x.p&&x.n===n)||{}).c;return TC[c]?c:autoC(n)};
 const tcol=n=>TC[colorKey(n)];
-/* Tag-Symbole: feine Linienicons, automatisch zugeordnet (Stichworte offline, KI verfeinert) */
+/* Tag-Symbole: feine Linienicons, automatisch zugeordnet (per Stichwort) */
 const ICN=["bad", "kueche", "sofa", "bett", "kind", "tuer", "pflanze", "baum", "sonne", "treppe", "dach", "fenster", "flamme", "blitz", "tropfen", "werkzeug", "roller", "boden", "dokument", "muenze", "schild", "auto", "wagen", "eimer", "karton", "pfote", "herz", "koffer", "geschenk", "schloss", "wlan", "birne", "waschmaschine", "kalender", "tonne", "stuhl", "tag"];
 const ICN_KW=[[/bad|dusche|wc|toilette|sanit|badezimmer/,"bad"],[/k(ü|ue)che|kochen|herd|geschirr|spül|spuel|backofen/,"kueche"],[/wohnzimmer|sofa|couch|wohnen/,"sofa"],[/schlaf|bett|matratze/,"bett"],[/kind|baby|kita|schule|spiel|nachwuchs|familie/,"kind"],[/flur|diele|t(ü|ue)r|eingang|garderobe/,"tuer"],[/baum|obst|wald|hecke|zaun/,"baum"],[/garten|beet|pflanz|rasen|blume|unkraut|gem(ü|ue)se|mähen|maehen/,"pflanze"],[/terrasse|balkon|sommer|grill|sonne|markise/,"sonne"],[/keller|treppe|stufe/,"treppe"],[/dach|schornstein|giebel|dachboden|speicher/,"dach"],[/fenster|rolll|jalousie|verglas/,"fenster"],[/heiz|ofen|kamin|w(ä|ae)rme|therme|brenner/,"flamme"],[/strom|elektr|steckdose|solar|photovoltaik|energie|sicherung|akku/,"blitz"],[/wasser|rohr|leitung|abfluss|pool|regen|tropf|dichtung/,"tropfen"],[/farbe|streich|maler|tapet|lack|renovier/,"roller"],[/boden|fliese|parkett|laminat|teppich|estrich|silikon|fuge/,"boden"],[/b(ü|ue)ro|papier|dokument|unterlagen|post\b|brief|beh(ö|oe)rde|antrag|formular|ablage/,"dokument"],[/steuer|geld|finanz|budget|rechnung|kosten|bank|sparen|kredit|miete/,"muenze"],[/versicher|recht|vertrag|garantie|gew(ä|ae)hrleistung/,"schild"],[/auto|garage|fahrzeug|reifen|carport|laden|tüv|tuev|werkstatt/,"auto"],[/einkauf|besorg|shopping|bestell|baumarkt/,"wagen"],[/putz|reinig|sauber|aufr(ä|ae)um|ordnung|fenster putzen/,"eimer"],[/umzug|karton|kiste|lager|stauraum|vorrat|keller aus/,"karton"],[/tier|hund|katze|vogel|fisch/,"pfote"],[/gesund|arzt|medizin|vorsorge|apotheke|fitness|erholung|pflege/,"herz"],[/urlaub|reise|ferien|koffer|trip|ausflug/,"koffer"],[/geburtstag|feier|fest\b|geschenk|party|weihnacht|besuch|einladung/,"geschenk"],[/sicher|schloss|alarm|einbruch|kamera|schl(ü|ue)ssel/,"schloss"],[/internet|wlan|netz|router|smart|computer|\bit\b|handy|drucker|fernseh/,"wlan"],[/licht|lampe|leucht|beleucht/,"birne"],[/wasch|w(ä|ae)sche|trockner|spülmaschine/,"waschmaschine"],[/termin|kalender|planung|frist|wartung|regelm/,"kalender"],[/m(ü|ue)ll|abfall|entsorg|sperrm|tonne|recycl/,"tonne"],[/m(ö|oe)bel|stuhl|schrank|regal|tisch|ikea|einrichtung/,"stuhl"],[/technik|ger(ä|ae)t|reparatur|werkzeug|bau|handwerk|montage|umbau|sanier|defekt|kaputt/,"werkzeug"]];
 const tagIconAuto=n=>{const l=String(n).toLowerCase();for(const [r,k] of ICN_KW)if(r.test(l))return k;return "tag"};
 const tagIconStored=n=>{const i=(cur().find(x=>!x.p&&x.n===n)||{}).i;return ICN.includes(i)?i:""};
 const tagIcon=n=>tagIconStored(n)||tagIconAuto(n);
 const tIc=n=>`<svg class="ti" aria-hidden="true"><use href="#i-${tagIcon(n)}"/></svg>`;
-let iconTried=false;
-async function iconSync(){
-  if(iconTried||!regLoaded||!loaded)return;
-  const names=allTags().filter(n=>!tagIconStored(n));if(!names.length||!aiAvail())return;
-  iconTried=true;
-  try{const r=await aiJson("Ordne jedem Tag genau ein passendes Symbol aus der Liste zu, das den Bereich im Haushalt am besten verdeutlicht. Tags: "+JSON.stringify(names)+". Symbole: "+ICN.join(", ")+'. Antworte nur als JSON-Objekt der Form {"Tag":"symbol"}.',true);
-    if(!r||typeof r!=="object")return;
-    const m={};names.forEach(n=>{const k=r[n];m[n]=ICN.includes(k)?k:tagIconAuto(n)});
-    saveReg(fullReg().map(x=>!x.p&&m[x.n]?{...x,i:m[x.n]}:x))}catch(e){}}
 const chip=n=>`<span class="tag" style="--tc:${tcol(n)}">${tIc(n)}${esc(n)}</span>`;
 function allTags(){const out=cur().filter(x=>!x.p).map(x=>x.n);[...new Set(tasks.flatMap(tgs))].filter(n=>!out.includes(n)).sort((a,b)=>a.localeCompare(b,"de")).forEach(n=>out.push(n));return out}
 const nextColor=()=>{const used=new Set(allTags().map(colorKey));return TCK.find(k=>!used.has(k))||TCK[allTags().length%TCK.length]};
@@ -1370,6 +1314,19 @@ function fToggle(a,v){
 }
 $("fbtn").onclick=()=>{drawF();$("dlf").showModal();$("dlf").scrollTop=0};
 $("f_ok").onclick=()=>$("dlf").close();
+/* Filter-Blatt: nach unten ziehen schließt es, ohne etwas zu ändern (Filter gelten nur, wenn du sie aktiv wählst) */
+(()=>{const d=$("dlf");let y0=null,dy=0,t0=0,drag=false;
+  const sheet=()=>matchMedia("(max-width:699px)").matches;
+  d.addEventListener("touchstart",e=>{if(!sheet()||e.touches.length!==1){y0=null;return}y0=e.touches[0].clientY;dy=0;drag=false;t0=Date.now();d.style.transition="none"},{passive:true});
+  d.addEventListener("touchmove",e=>{if(y0===null)return;const m=e.touches[0].clientY-y0;
+    if(!drag){if(m>6&&d.scrollTop<=0)drag=true;else return}
+    dy=Math.max(0,m);e.preventDefault();d.style.transform="translateY("+dy+"px)"},{passive:false});
+  d.addEventListener("touchend",()=>{if(y0===null)return;y0=null;if(!drag)return;drag=false;
+    const fast=dy/Math.max(1,Date.now()-t0)>0.6;d.style.transition="transform .2s ease-out";
+    if(dy>110||(fast&&dy>40)){d.style.transform="translateY(100%)";setTimeout(()=>{d.close();d.style.transform="";d.style.transition=""},190)}
+    else{d.style.transform="";setTimeout(()=>{d.style.transition=""},210)}});
+  d.addEventListener("touchcancel",()=>{y0=null;drag=false;d.style.transform="";d.style.transition=""});
+})();
 $("f_reset").onclick=()=>{fClear();render()};
 $("fbody").onclick=e=>{const b=e.target.closest("[data-fa]");if(!b)return;fToggle(b.dataset.fa,b.dataset.fv);render()};
 $("tchips").onclick=e=>{const b=e.target.closest("[data-a]");if(!b)return;if(b.dataset.a==="all")fClear();else fToggle(b.dataset.a,b.dataset.v);render()};
@@ -1445,7 +1402,7 @@ function enter(){const m=$("main");m.classList.add("enter");clearTimeout(enterT)
 function animateNums(){if(reduced())return;document.querySelectorAll("[data-n]").forEach(el=>{const n=+el.dataset.n;if(!n)return;const t0=performance.now(),step=t=>{const k=Math.min(1,(t-t0)/800),e=1-Math.pow(1-k,3);el.textContent=Math.round(n*e);if(k<1)requestAnimationFrame(step)};requestAnimationFrame(step)})}
 function rel(t){const d=dn(t.end)-today();return d<0?`${-d} ${-d===1?"Tag":"Tage"} überfällig`:d===0?"heute":d===1?"morgen":d<=14?`in ${d} Tagen`:fd(t.end)}
 function hrow(t,i){return`<div class="hrow" data-id="${t.id}" style="--i:${Math.min(i,8)}"><button class="ring ${t.status}" data-adv="${t.id}" aria-label="Status: ${ST[t.status]}. Weiterschalten"></button><div class="hm"><div class="ht">${esc(t.title)}</div><div class="hs">${[t.proj,...tgs(t),t.who].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}</div></div><span class="hd ${isLate(t)?"late":""}">${rel(t)}</span></div>`}
-function home(){
+function homeBody(tasks,allT){
   const T=today(),n=tasks.length,d=tasks.filter(t=>t.status==="done").length,pct=n?Math.round(d/n*100):0;
   const doing=tasks.filter(t=>t.status==="doing").length,over=tasks.filter(isLate).sort((a,b)=>dn(a.end)-dn(b.end)),blk=tasks.filter(isBlocked).length;
   const week=tasks.filter(t=>t.status!=="done"&&!isLate(t)&&dn(t.start)<=T+7&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end)||dn(a.start)-dn(b.start));
@@ -1453,7 +1410,7 @@ function home(){
   const sub=over.length?`${over.length} ${over.length===1?"Aufgabe ist":"Aufgaben sind"} überfällig.`:week.length?`${week.length} ${week.length===1?"Aufgabe":"Aufgaben"} in den nächsten 7 Tagen.`:open?"Nichts Dringendes.":"Alles erledigt.";
   const areas=allTags().filter(a=>tasks.some(t=>tgs(t).includes(a)));
   const bars=areas.map(a=>{const L=tasks.filter(t=>tgs(t).includes(a)),x=L.filter(t=>t.status==="done").length;return`<div class="pr" style="--tc:${tcol(a)}"><span class="pn">${tIc(a)}${esc(a)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
-  const names=allWho(),cnt=w=>tasks.filter(t=>t.status!=="done"&&wl(t).includes(w)).length,mx=Math.max(1,...names.map(cnt));
+  const names=allWho(),cnt=w=>allT.filter(t=>t.status!=="done"&&wl(t).includes(w)).length,mx=Math.max(1,...names.map(cnt));
   const who=names.map(w=>`<div class="pr"><span>${esc(w)}</span><div class="pb ${avc(w)}"><i style="width:${Math.round(cnt(w)/mx*100)}%"></i></div><em>${cnt(w)}</em></div>`).join("");
   const pjs=allProjs().filter(n=>tasks.some(t=>t.proj===n)),pbars=pjs.map(n=>{const L=tasks.filter(t=>t.proj===n),x=L.filter(t=>t.status==="done").length;return`<div class="pr" style="--tc:${pcol(n)}"><span>${esc(n)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
   let k=1;const P=(cls,h,c,body)=>`<section class="pnl ${cls}" style="--i:${k++}"><h3><span>${h}</span><em>${c}</em></h3>${body}</section>`;
@@ -1464,6 +1421,12 @@ function home(){
     P("","Tags",areas.length,bars||'<div class="none">Noch keine Tags.</div>')+
     P("","Offen pro Person",open,who)+`</div>`}
 
+const homeW=()=>{let v=null;try{v=localStorage.getItem("haus-hwho")}catch(_){}const me=prefGet("me")||"";return v||me||"__all"};
+function home(){
+  const hw=homeW(),me=prefGet("me")||"",who=allWho(),opts=[...(me?[me]:[]),...who.filter(w=>w!==me)];
+  const sc=hw==="__all"?tasks:tasks.filter(t=>wl(t).includes(hw));
+  const pick=`<div class="hpick" role="group" aria-label="Aufgaben von">`+opts.map(w=>`<button type="button" data-hw="${esc(w)}" class="${w===hw?"on":""}">${w===me?"Meine":esc(w)}</button>`).join("")+`<button type="button" data-hw="__all" class="${hw==="__all"?"on":""}">Alle</button></div>`;
+  return homeBody(sc,tasks).replace('<div class="home">','<div class="home">'+pick)}
 function filtered(){
   const q=$("q").value.toLowerCase(),w=$("fw").value;
   return tasks.filter(t=>tagOk(t)&&(!w||(w==="__none"?!t.who:wl(t).includes(w)))&&(!q||(t.title+" "+tgs(t).join(" ")+" "+(t.who||"")).toLowerCase().includes(q)))
@@ -1509,7 +1472,7 @@ function render(){
   $("fw").innerHTML='<option value="">Alle Personen</option>'+whos.map(a=>`<option ${a===curw?"selected":""}>${esc(a)}</option>`).join("")+`<option value="__none" ${curw==="__none"?"selected":""}>Nicht zugewiesen</option>`;
   const fw2=$("fw").value,ch=(attr,val,label,c,on)=>`<button data-${attr}="${esc(val)}" class="${on?"on":""}"><span>${attr==="cw"&&val&&val!=="__none"?`<i class="wd ${avc(val)}"></i>`:""}${esc(label)}</span><em>${c}</em></button>`;
   $("chips").innerHTML=`<div class="cg"><h4>Wer</h4>${ch("cw","","Alle",n,!fw2)}${whos.map(w=>ch("cw",w,w,tasks.filter(t=>wl(t).includes(w)).length,w===fw2)).join("")}${ch("cw","__none","Nicht zugewiesen",tasks.filter(t=>!t.who).length,fw2==="__none")}</div>`;
-  drawTbar();migrateReg();if(!iconTried)setTimeout(iconSync,1200);
+  drawTbar();migrateReg();
   $("main").classList.toggle("g",view==="gantt"&&n>0);
   const old=snap(),list=filtered();
   if(!n){$("main").innerHTML='<div class="empty">Noch keine Aufgaben.<br><br><button class="btn" onclick="openDlg()">Erste Aufgabe anlegen</button></div>';return}
@@ -1686,7 +1649,7 @@ function openDlg(id){
   $("f_start").value=t.start;$("f_end").value=t.end;initExtra(t);rpOpen(false);drawRange();$("f_notes").value=t.notes||"";
   const others=tasks.filter(x=>!editing||x.id!==editing.id);
   $("f_deps").innerHTML=others.length?others.map(x=>`<label><input type="checkbox" value="${x.id}" ${(t.deps||[]).includes(x.id)?"checked":""}>${esc(x.title)}</label>`).join(""):'<span style="color:var(--mut);font-size:13px">Noch keine anderen Aufgaben.</span>';
-  cklist=(t.checklist||[]).map(x=>({...x}));drawCk();drawLog();drawFiles();aiRes=null;drawAi();$("ai_row").style.display=aiAvail()?"":"none";
+  cklist=(t.checklist||[]).map(x=>({...x}));drawCk();drawLog();drawFiles();
   $("b_del").style.display=editing?"":"none";
   $("dlg").showModal();setTimeout(()=>$("f_title").focus(),50);
 }
@@ -1882,6 +1845,7 @@ $("x_xlsx").onclick=async()=>{
 };
 
 $("ftog").onclick=()=>{const f=$("filters");f.classList.toggle("open");if(f.classList.contains("open"))$("q").focus()};
+$("main").addEventListener("click",e=>{const b=e.target.closest("[data-hw]");if(!b)return;try{localStorage.setItem("haus-hwho",b.dataset.hw)}catch(_){}render()});
 $("q").oninput=render;$("fw").onchange=render;
 $("chips").onclick=e=>{const b=e.target.closest("button");if(!b)return;if("cw" in b.dataset)$("fw").value=b.dataset.cw;render()};
 $("tabs").onclick=e=>{const bt=e.target.closest("button"),v=bt&&bt.dataset.v;if(!v)return;view=v;[...$("tabs").children].forEach(b=>b.classList.toggle("on",b.dataset.v===v));render()};

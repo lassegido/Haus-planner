@@ -55,8 +55,6 @@ async function saveMany(list){
   catch(e){$("note").textContent="Speichern fehlgeschlagen."}
   pull(true);
 }
-const aiAvail=()=>!!(haInfo&&haInfo.ai);
-async function aiJson(prompt,raw){const r=await api("api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,raw:!!raw})});if(!r.ok)throw new Error(r.error||"KI-Fehler");return r.data}
 function init(){
   pull(true);setInterval(()=>pull(),5000);
   document.addEventListener("visibilitychange",()=>{if(!document.hidden)pull()});

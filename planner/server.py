@@ -14,7 +14,6 @@ DATA = os.path.join(D, "tasks.json")
 BK = os.path.join(D, "backups")
 FILES = os.path.join(D, "files")
 ICONS = os.environ.get("ICONS_DIR", os.path.join(os.path.dirname(INDEX), "icons"))
-ANTHROPIC = os.environ.get("ANTHROPIC_URL", "https://api.anthropic.com/v1/messages")
 FID = re.compile(r"[a-f0-9]{12}")
 SAFE = ("image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf")
 LOCK = threading.Lock()
@@ -259,53 +258,7 @@ def services():
 def ha_info():
     o = options()
     return {"api": bool(TOKEN), "notify": services(), "time": remind_time(),
-            "sensors": bool(o.get("sensors", True)),
-            "ai": bool(str(o.get("anthropic_api_key") or "").strip()), "model": str(o.get("ai_model") or "claude-haiku-5-5")}
-
-
-AI_SYSTEM = "Du bist ein sachkundiger Helfer für Heim- und Gartenprojekte. Antworte immer auf Deutsch und genau im verlangten JSON-Format."
-
-
-AI_CALLS = []
-
-
-def ai_limit():
-    # höchstens 40 KI-Anfragen pro Stunde, schützt vor ungewollten Kosten
-    now = time.time()
-    AI_CALLS[:] = [x for x in AI_CALLS if now - x < 3600]
-    if len(AI_CALLS) >= 40:
-        raise RuntimeError("Zu viele KI-Anfragen, bitte später erneut versuchen")
-    AI_CALLS.append(now)
-
-
-def ai_call(prompt, raw=False):
-    ai_limit()
-    o = options()
-    key = str(o.get("anthropic_api_key") or "").strip()
-    if not key:
-        raise RuntimeError("Kein API-Schlüssel eingetragen")
-    body = {"model": str(o.get("ai_model") or "claude-haiku-5-5"), "max_tokens": 900, "system": AI_SYSTEM,
-            "messages": [{"role": "user", "content": prompt[:4000]}]}
-    req = urllib.request.Request(ANTHROPIC, method="POST", data=json.dumps(body).encode(),
-                                 headers={"x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json"})
-    try:
-        with urllib.request.urlopen(req, timeout=60) as r:
-            j = json.load(r)
-    except urllib.error.HTTPError as e:
-        try:
-            msg = json.load(e).get("error", {}).get("message", "")
-        except Exception:
-            msg = ""
-        raise RuntimeError("Anthropic %s %s" % (e.code, msg[:120]))
-    text = "".join(c.get("text", "") for c in j.get("content", []) if c.get("type") == "text")
-    a, z = text.find("{"), text.rfind("}")
-    if a < 0 or z < a:
-        raise RuntimeError("Unerwartete Antwort")
-    d = json.loads(text[a:z + 1])
-    if raw:  # freie Zuordnungen (z. B. Tag -> Symbol), nur kurze Texte
-        return {str(k)[:60]: str(v)[:40] for k, v in list(d.items())[:100]}
-    items = [str(x).strip()[:120] for x in d.get("checklist", []) if str(x).strip()] if isinstance(d.get("checklist"), list) else []
-    return {"notes": str(d.get("notes", "")).strip()[:1000], "checklist": items[:10]}
+            "sensors": bool(o.get("sensors", True))}
 
 
 def ha_call(method, path, body=None):
@@ -586,36 +539,6 @@ def ha_tick():
             json.dump({"last": today}, f)
 
 
-def widget_data(who):
-    # eigene Aufgaben für das Homescreen-Widget: überfällig, heute, diese Woche, nächste Woche
-    now = datetime.datetime.now(ha["tz"]) if ha["tz"] else datetime.datetime.now()
-    today = now.date()
-    sun = today + datetime.timedelta(days=6 - today.weekday())
-    nsun = sun + datetime.timedelta(days=7)
-    who = who.strip()[:60]
-    names = [("late", "Überfällig"), ("today", "Heute"), ("week", "Diese Woche"), ("next", "Nächste Woche")]
-    out = {k: [] for k, _ in names}
-    with LOCK:
-        tasks = list(state["tasks"].values())
-    for t in tasks:
-        if t.get("del") or t.get("arch") or t.get("status") == "done":
-            continue
-        if who and who not in [x.strip() for x in str(t.get("who", "")).split(",")]:
-            continue
-        s, e = datetime.date.fromisoformat(t["start"]), datetime.date.fromisoformat(t["end"])
-        d = max(s, today)
-        k = "late" if e < today else "today" if d == today else "week" if d <= sun else "next" if d <= nsun else None
-        if k:
-            out[k].append((t.get("prio") or 9, e, t["title"], t))
-    groups = []
-    for k, label in names:
-        L = sorted(out[k], key=lambda x: (x[0], x[1], x[2]))
-        if L:
-            groups.append({"k": k, "t": label, "tasks": [{"id": x[3]["id"], "title": x[2], "status": x[3]["status"], "end": x[3]["end"], "prio": x[3].get("prio") or 0}
-                                                       for x in L[:30]]})
-    return {"who": who, "today": today.isoformat(), "groups": groups}
-
-
 def ha_loop():
     time.sleep(5)
     init_tz()
@@ -655,14 +578,6 @@ class H(BaseHTTPRequestHandler):
                 return self.out(200, {"ok": True, "services": out})
             except Exception as e:
                 return self.out(200, {"ok": False, "error": str(e)[:200], "services": []})
-        if u.path.endswith("/api/widget"):
-            return self.out(200, widget_data(parse_qs(u.query).get("who", [""])[0]))
-        if u.path.endswith("/api/widget-script"):
-            try:
-                with open(os.path.join(os.path.dirname(INDEX), "widget.js"), "rb") as f:
-                    return self.out(200, f.read(), "text/plain")
-            except Exception:
-                return self.out(404, {"error": "nicht gefunden"})
         if u.path.endswith("/api/tasks"):
             q = parse_qs(u.query).get("rev", [""])[0]
             with LOCK:
@@ -764,14 +679,6 @@ class H(BaseHTTPRequestHandler):
             data = self.body(25_000_000 if path.endswith("/api/import") else 2_000_000)
         except Exception:
             return self.out(400, {"error": "ungültige Anfrage"})
-        if path.endswith("/api/ai"):
-            try:
-                p = data.get("prompt") if isinstance(data, dict) else None
-                if not isinstance(p, str) or not p.strip():
-                    raise RuntimeError("Leere Anfrage")
-                return self.out(200, {"ok": True, "data": ai_call(p, bool(data.get("raw")))})
-            except Exception as e:
-                return self.out(200, {"ok": False, "error": str(e)[:200]})
         if path.endswith("/api/ha-settings"):
             if not isinstance(data, dict):
                 return self.out(400, {"error": "Ungültig"})

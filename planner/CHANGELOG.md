@@ -1,5 +1,10 @@
 # Änderungen
 
+## 1.23.0
+- Homescreen-Widget und KI-Assistent entfernt (inklusive der Optionen `anthropic_api_key` und `ai_model`). Tag-Symbole werden weiter automatisch per Stichwort zugeordnet.
+- Filter-Blatt: auf dem Handy nach unten ziehen schließt es, ohne etwas zu ändern.
+- Startseite zeigt zuerst deine Aufgaben („Ich bin“ in den Einstellungen). Oben wechselst du auf Melanie, eine andere Person oder Alle; die Wahl bleibt gespeichert.
+
 ## 1.22.0
 - Neue Statussymbole: „In Arbeit“ ist ein halb gefüllter Kreis, „Offen“ ein leerer Ring, „Erledigt“ ein Haken. Auch die kleinen Statuspunkte (Zeitstrahl, Statusmarken) folgen dem
 - Homescreen-Widget für iPhone (mit der kostenlosen App Scriptable): zeigt deine Aufgaben überfällig, heute, diese und nächste Woche. Einrichtung unter Einstellungen → Home Assistant → Homescreen-Widget (Skript kopieren). Nur Anzeige, nutzt den direkten Zugang auf Port 8099 im Heimnetz
