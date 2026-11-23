@@ -1,5 +1,9 @@
 # Änderungen
 
+## 1.26.1
+- Aktionsblatt: Die dicken blauen Linien (Fokusrahmen) sind weg, die Felder heben sich im Dunkelmodus klarer ab, „In den Papierkorb“ ist besser lesbar.
+- Dunkelmodus: Karten und Spalten im Board haben mehr Kontrast, Datumsangaben und Nebentexte sind heller.
+
 ## 1.26.0
 - Deutlich flüssiger bei vielen Aufgaben: Liste und Board bauen sich etwa sechsmal schneller auf (nur sichtbare Karten werden gezeichnet), Datumsangaben werden zwischengespeichert, nach dem Speichern wird nicht mehr doppelt neu gezeichnet.
 - Wischen und Ziehen blockieren das normale Scrollen nicht mehr.

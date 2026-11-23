@@ -26,8 +26,8 @@ fit();addEventListener('resize',fit)}catch(e){d.classList.add('emb')}})();</scri
 --bt:#14303F;--wk:#EDE9DC;
 --fb:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--disp:var(--fb);--bl:#8497A3;
 --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px);--sar:env(safe-area-inset-right,0px);--pad:clamp(14px,2.2vw,30px);--side-w:5.6rem;color-scheme:light}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1E27;--surf:#142A36;--card:#17303D;--tx:#F5F3EB;--mut:#93AAB8;--faint:#52697A;--line:#213947;--line2:#2D4959;--brick-ink:#F2815A;--acc:#6CB6E4;--on-acc:#0E1E27;--acc-soft:#1B3A4C;--tagc:#9CD2F0;--focus:#6CB6E4;--side:#0A171E;--side-mut:#8FB0C2;--wk:#112733;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0E1E27;--surf:#142A36;--card:#17303D;--tx:#F5F3EB;--mut:#93AAB8;--faint:#52697A;--line:#213947;--line2:#2D4959;--brick-ink:#F2815A;--acc:#6CB6E4;--on-acc:#0E1E27;--acc-soft:#1B3A4C;--tagc:#9CD2F0;--focus:#6CB6E4;--side:#0A171E;--side-mut:#8FB0C2;--wk:#112733;color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1E27;--surf:#142A36;--card:#17303D;--tx:#F5F3EB;--mut:#93AAB8;--faint:#6E8798;--line:#213947;--line2:#2D4959;--brick-ink:#F2815A;--acc:#6CB6E4;--on-acc:#0E1E27;--acc-soft:#1B3A4C;--tagc:#9CD2F0;--focus:#6CB6E4;--side:#0A171E;--side-mut:#8FB0C2;--wk:#112733;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E1E27;--surf:#142A36;--card:#17303D;--tx:#F5F3EB;--mut:#93AAB8;--faint:#6E8798;--line:#213947;--line2:#2D4959;--brick-ink:#F2815A;--acc:#6CB6E4;--on-acc:#0E1E27;--acc-soft:#1B3A4C;--tagc:#9CD2F0;--focus:#6CB6E4;--side:#0A171E;--side-mut:#8FB0C2;--wk:#112733;color-scheme:dark}
 html.emb{--sat:0px;--sab:0px;--sal:0px;--sar:0px}
 *{box-sizing:border-box}
 html{font-size:clamp(15px,13.6px + .22vw,17px);-webkit-text-size-adjust:100%;height:100%;overflow:hidden;background:var(--bg)}
@@ -554,6 +554,16 @@ html{overscroll-behavior-y:contain}
 /* Prio-Marke braucht in der schmalen Zeitstrahl-Beschriftung keinen Platz, der Streifen zeigt sie */
 .gl .pr{display:none}.prh:empty{display:none}
 @media (max-width:699px){.card,tr.row,.hrow{content-visibility:auto;contain-intrinsic-size:auto 6.5rem}}
+/* 1.26.1: Aktionsblatt klarer, Fokusrahmen aus */
+#dsh::backdrop{background:rgba(5,14,20,.55)}
+#dsh .shg{background:var(--card);box-shadow:0 0 0 1px var(--line2)}
+#dsh button.cancel{background:var(--card);box-shadow:0 0 0 1px var(--line2)}
+#dsh button.bad{color:var(--brick-ink)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .card{background:var(--card);border-color:var(--line2)}:root:not([data-theme="light"]) .colm{background:var(--surf)}}
+:root[data-theme="dark"] .card{background:var(--card);border-color:var(--line2)}:root[data-theme="dark"] .colm{background:var(--surf)}
+#dsh button:focus,#dsh button:focus-visible{outline:none}
+#dsh button:active:not(:disabled){background:var(--acc-soft)}
+#dsh .sht{color:var(--mut);padding:.9rem 1rem .7rem}
 /* 1.8: Auswahlfelder, Farben je Feldtyp, Schrift */
 #dlg input:not([type=checkbox]):not([type=radio]):not([type=file]):not(#f_tagin):not(.ct),#dlg select{min-height:2.9rem}
 .seg3 button{min-height:2.3rem}
