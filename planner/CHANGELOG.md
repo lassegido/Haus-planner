@@ -1,5 +1,14 @@
 # Änderungen
 
+## 1.28.0
+Schneller im Alltag:
+- **Schnelleingabe:** Auf der Startseite oben tippen und mit Enter anlegen, auch im Titel einer neuen Aufgabe. Erkannt werden Datum (heute, morgen, Sa, 12.12., in 3 Tagen, nächste Woche, bis Fr), #Tag, +Projekt, @Person und !1 bis !3. Eine Vorschau zeigt vorher, was erkannt wurde.
+- **Startseite rund um „Heute“:** Kacheln für Heute, 7 Tage, In Arbeit und Überfällig mit Zahlen. Antippen zeigt die Liste darunter, abhakbar und wischbar. Die Übersicht (Fortschritt, Projekte, Tags, Personen) folgt darunter.
+- **Per Sprache:** Neuer Endpunkt `api/quick` für einen Siri-Kurzbefehl und Home-Assistant-Assist. Anleitung in der Dokumentation, Siri liest die Bestätigung vor.
+- **Einstieg:** Beim ersten Start fragt die App, wer das Gerät nutzt, und zeigt einen Tipp. Nach dem Speichern einer Änderung oder dem Anlegen gibt es „Rückgängig“.
+- **KI sparsam:** Tageslimit des Planners (Flash-Lite 100, Flash 15 Anfragen), höchstens 20 pro Stunde, Zähler übersteht Neustarts. Meldet Google ein Limit, ruht die KI bis zum nächsten Tag. Tag-Symbole werden je Tag nur einmal angefragt. Verbrauch steht in Einstellungen → KI-Assistent.
+- **Fehler behoben:** „Heute“ wurde in UTC berechnet, kurz nach Mitternacht galt deshalb noch der Vortag.
+
 ## 1.27.3
 - KI-Schlüssel im neuen Google-Format („AQ.…“, mit Punkt) wird jetzt angenommen. Bisher wurde nur das alte Format „AIza…“ akzeptiert.
 

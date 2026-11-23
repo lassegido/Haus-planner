@@ -5,7 +5,7 @@ import json, os, subprocess, sys, tempfile, time, urllib.request, urllib.error
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 d = tempfile.mkdtemp()
 env = dict(os.environ, DATA_DIR=d + "/d", SHARE_DIR=d + "/s", LEGACY_SHARE_DIR=d + "/l", INDEX=root + "/planner/index.html",
-           VERSION_FILE=root + "/planner/VERSION", PORT="8096")
+           VERSION_FILE=root + "/planner/VERSION", PORT="8096", GEMINI_URL="http://127.0.0.1:9/v1beta/models")
 os.makedirs(d + "/d")
 sv = subprocess.Popen([sys.executable, root + "/planner/server.py"], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 time.sleep(1.5)
@@ -67,6 +67,20 @@ try:
     raw = urllib.request.urlopen("http://127.0.0.1:8096/api/tasks").read().decode()
     check("KI-Schlüssel wird nie ausgeliefert", key not in raw and key not in json.dumps(j))
     check("Neues Schlüsselformat mit Punkt (AQ.…) wird angenommen", call("api/ha-settings", {"ai_key": "AQ.Ab8Testschluessel_neuesFormat-1234567890"})[0] == 200)
+    c, j = call("api/quick", {"text": "Rasen mähen morgen #Garten !2 @Melanie"})
+    check("Schnelleingabe per Sprache legt Aufgabe an", c == 200 and j["task"]["title"] == "Rasen mähen" and j["task"]["tags"] == ["Garten"] and j["task"]["prio"] == 2 and j["task"]["who"] == "Melanie" and "morgen" in j["speech"])
+    check("Schnelleingabe ohne Header abgewiesen", call("api/quick", {"text": "x"}, hdr=False)[0] == 403)
+    check("Leere Schnelleingabe abgewiesen", call("api/quick", {"text": "  "})[0] == 400)
+    # KI-Grenzen: Tageslimit und Stundenlimit greifen, Zähler ist sichtbar
+    call("api/ha-settings", {"ai_key": key, "ai_model": "gemini-flash-lite-latest"})
+    import datetime as _dt
+    json.dump({"day": _dt.date.today().isoformat(), "n": 100, "blocked": False}, open(d + "/d/ai_usage.json", "w"))
+    j = call("api/ai", {"prompt": "x"})[1]
+    check("KI-Tageslimit greift", j["ok"] is False and "Tageslimit" in j["error"])
+    check("KI-Verbrauch wird angezeigt", call("api/tasks")[1]["ha"]["aiuse"] == {"used": 100, "limit": 100, "blocked": False})
+    json.dump({"day": _dt.date.today().isoformat(), "n": 0, "blocked": False}, open(d + "/d/ai_usage.json", "w"))
+    errs = [call("api/ai", {"prompt": "x"})[1].get("error", "") for _ in range(21)]
+    check("KI-Stundenlimit greift nach 20 Anfragen", "Stunde" in errs[-1] and not any("Stunde" in e for e in errs[:20]))
     check("KI-Schlüssel entfernbar", call("api/ha-settings", {"ai_key": ""})[1]["ha"]["ai"] is False)
 finally:
     sv.kill()

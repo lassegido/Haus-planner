@@ -42,6 +42,73 @@ Zugriff von außen nur über Nabu Casa oder ein VPN (z. B. Tailscale).
 
 Der Planner legt in Home Assistant fünf Sensoren an, die jede Minute aktualisiert werden: `sensor.planner_offen`, `sensor.planner_in_arbeit`, `sensor.planner_ueberfaellig`, `sensor.planner_heute_faellig` und `sensor.planner_prio1` (offene Aufgaben mit Prio 1). Das Attribut `aufgaben` enthält die Titel. Abschalten mit `sensors: false` in der Konfiguration.
 
+## Schnelleingabe
+
+Auf der Startseite oben einfach tippen und mit Enter anlegen, oder im Titel einer neuen Aufgabe. Erkannt wird:
+
+| Eingabe | Bedeutung |
+|---|---|
+| `heute`, `morgen`, `übermorgen`, `Sa`, `Freitag`, `12.12.`, `in 3 Tagen`, `nächste Woche`, `Wochenende` | Datum |
+| `bis Fr` | von heute bis zu diesem Tag |
+| `#Garten` | Tag (Anfang genügt, `#gart` findet „Garten“; Leerzeichen als `_`) |
+| `+Schöner_Wohnen` | Projekt |
+| `@Melanie` | verantwortlich (mehrere möglich) |
+| `!1`, `!2`, `!3` | Priorität |
+
+Beispiel: `Zaun streichen Sa #Garten !1 @Melanie`. Unter dem Feld siehst du vor dem Anlegen, was erkannt wurde.
+
+## Per Sprache: Siri-Kurzbefehl
+
+Braucht den direkten Port 8099 (siehe unten) und funktioniert im Heimnetz.
+
+1. App **Kurzbefehle** → **+** → Aktion **Diktieren** (Sprache Deutsch).
+2. Aktion **Inhalt von URL abrufen**: URL `http://<IP-von-Home-Assistant>:8099/api/quick`, Methode **POST**, Header `X-Planner` = `1`, Hauptteil **JSON** mit Feld `text` = *Diktierter Text* (optional Feld `who` = `Lasse`).
+3. Aktion **Wörterbuchwert abrufen**: Schlüssel `speech`, dann **Text sprechen**.
+4. Kurzbefehl „Planner“ nennen. Dann: „Hey Siri, Planner“ → „Rasen mähen Samstag Hashtag Garten“. Siri antwortet z. B. „‚Rasen mähen‘ ist für Sa, 28.11. eingetragen.“
+
+Tipp: Gesprochen wird „Hashtag Garten“ oft als „#Garten“ erkannt. Ohne Tag geht es immer.
+
+## Per Sprache: Home Assistant Assist
+
+In `configuration.yaml` (IP anpassen):
+
+```yaml
+rest_command:
+  planner_neu:
+    url: "http://<IP-von-Home-Assistant>:8099/api/quick"
+    method: POST
+    headers:
+      X-Planner: "1"
+    content_type: "application/json"
+    payload: '{"text": {{ text | tojson }}}'
+
+intent_script:
+  PlannerNeu:
+    action:
+      - action: rest_command.planner_neu
+        data:
+          text: "{{ text }}"
+    speech:
+      text: "Steht im Planner."
+```
+
+Und `custom_sentences/de/planner.yaml`:
+
+```yaml
+language: "de"
+intents:
+  PlannerNeu:
+    data:
+      - sentences:
+          - "(Planner|Aufgabe) {text}"
+          - "neue Aufgabe {text}"
+lists:
+  text:
+    wildcard: true
+```
+
+Danach Home Assistant neu starten und zu Assist sagen: „Neue Aufgabe Dachrinne reinigen morgen“.
+
 ## KI-Assistent (Google Gemini, kostenlos)
 
 In jeder Aufgabe schlägt „Mit KI ausfüllen“ Notizen und Checklistenpunkte vor. Du entscheidest, was übernommen wird. Neue Tags bekommen außerdem ein passendes Symbol.

@@ -281,7 +281,7 @@ def ha_info():
     return {"api": bool(TOKEN), "notify": services(), "time": remind_time(),
             "sensors": bool(o.get("sensors", True)),
             "ai": bool(ai_key()), "model": ai_model(), "aiapp": bool(app_settings().get("ai_key")),
-            "aicfg": bool(str(o.get("gemini_api_key") or "").strip())}
+            "aicfg": bool(str(o.get("gemini_api_key") or "").strip()), "aiuse": ai_usage_info()}
 
 
 AI_MODELS = ("gemini-flash-lite-latest", "gemini-flash-latest")
@@ -306,13 +306,58 @@ AI_SYSTEM = "Du bist ein sachkundiger Helfer für Heim- und Gartenprojekte. Antw
 AI_CALLS = []
 
 
+AI_DAY = {"gemini-flash-lite-latest": 100, "gemini-flash-latest": 15}  # deutlich unter Googles Gratis-Kontingent
+AI_USAGE = os.path.join(D, "ai_usage.json")
+AI_LOCK = threading.Lock()
+
+
+def ai_today():
+    now = datetime.datetime.now(ha["tz"]) if ha["tz"] else datetime.datetime.now()
+    return now.strftime("%Y-%m-%d")
+
+
+def ai_usage():
+    try:
+        with open(AI_USAGE, encoding="utf-8") as f:
+            u = json.load(f)
+    except Exception:
+        u = {}
+    if u.get("day") != ai_today():
+        u = {"day": ai_today(), "n": 0, "blocked": False}
+    return u
+
+
+def ai_usage_info():
+    u = ai_usage()
+    return {"used": u.get("n", 0), "limit": AI_DAY.get(ai_model(), 15), "blocked": bool(u.get("blocked"))}
+
+
 def ai_limit():
-    # höchstens 40 KI-Anfragen pro Stunde (schont das kostenlose Kontingent)
-    now = time.time()
-    AI_CALLS[:] = [x for x in AI_CALLS if now - x < 3600]
-    if len(AI_CALLS) >= 40:
-        raise RuntimeError("Zu viele KI-Anfragen, bitte später erneut versuchen")
-    AI_CALLS.append(now)
+    # Schutz vor Kosten und gesperrtem Gratis-Kontingent: max. 20 pro Stunde und ein Tageslimit je Modell.
+    # Meldet Google „Limit erreicht“ (429), ruht die KI bis zum nächsten Tag.
+    with AI_LOCK:
+        now = time.time()
+        AI_CALLS[:] = [x for x in AI_CALLS if now - x < 3600]
+        u = ai_usage()
+        if u.get("blocked"):
+            raise RuntimeError("Google meldet das Tageslimit. Die KI ruht bis morgen.")
+        if u["n"] >= AI_DAY.get(ai_model(), 15):
+            raise RuntimeError("Tageslimit des Planners erreicht (%d Anfragen). Morgen geht es weiter." % u["n"])
+        if len(AI_CALLS) >= 20:
+            raise RuntimeError("Zu viele KI-Anfragen in einer Stunde, bitte später erneut versuchen")
+        AI_CALLS.append(now)
+        u["n"] += 1
+        ai_usage_save(u)
+
+
+def ai_usage_save(u):
+    try:
+        tmp = AI_USAGE + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(u, f)
+        os.replace(tmp, AI_USAGE)
+    except Exception as e:
+        print("KI-Zähler nicht gespeichert:", e, flush=True)
 
 
 def ai_call(prompt, raw=False):
@@ -335,7 +380,11 @@ def ai_call(prompt, raw=False):
         except Exception:
             msg = ""
         if e.code == 429:
-            raise RuntimeError("Gemini-Tageslimit erreicht, bitte später erneut versuchen")
+            with AI_LOCK:
+                u = ai_usage()
+                u["blocked"] = True
+                ai_usage_save(u)
+            raise RuntimeError("Google meldet das Limit. Die KI ruht bis morgen.")
         if e.code in (400, 401, 403) and "key" in msg.lower():
             raise RuntimeError("Der Gemini-Schlüssel wird nicht akzeptiert")
         raise RuntimeError("Gemini %s %s" % (e.code, msg[:120]))
@@ -646,6 +695,137 @@ def ha_loop():
         time.sleep(60)
 
 
+
+# ---- Schnelleingabe (gleiche Regeln wie im Browser): „Zaun streichen Sa #Garten +Haus !1 @Melanie“
+QWD = (("mo", "montag"), ("di", "dienstag"), ("mi", "mittwoch"), ("do", "donnerstag"), ("fr", "freitag"), ("sa", "samstag"), ("so", "sonntag"))
+WDS = ("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
+
+
+def _qn(x):
+    return re.sub(r"[.,;:!?]+$", "", str(x or "")).lower()
+
+
+def _qname(x, names):
+    x = re.sub(r"[.,;:!?]+$", "", x.replace("_", " ")).strip()
+    lo = x.lower()
+    for n in names:
+        if n.lower() == lo:
+            return n
+    pre = [n for n in names if n.lower().startswith(lo)]
+    if len(pre) == 1:
+        return pre[0]
+    return x[:1].upper() + x[1:]
+
+
+def _qdate_at(w, i, today):
+    td = datetime.timedelta
+    x, raw = _qn(w[i]), re.sub(r"[,;:!?]+$", "", w[i])
+    nxt = _qn(w[i + 1]) if i + 1 < len(w) else ""
+    if x == "heute":
+        return today, 1
+    if x == "morgen":
+        return today + td(1), 1
+    if x in ("übermorgen", "uebermorgen"):
+        return today + td(2), 1
+    if x == "wochenende":
+        return today + td((5 - today.weekday()) % 7), 1
+    if x in ("nächste", "naechste") and nxt == "woche":
+        return today + td(7 - today.weekday()), 2
+    if x == "in" and re.fullmatch(r"\d{1,3}", nxt) and i + 2 < len(w):
+        k, u = int(nxt), _qn(w[i + 2])
+        if u in ("tag", "tagen"):
+            return today + td(k), 3
+        if u in ("woche", "wochen"):
+            return today + td(7 * k), 3
+    for idx, (a, b) in enumerate(QWD):
+        if x == b or raw.rstrip(".") == a.capitalize():
+            return today + td((idx - today.weekday()) % 7), 1
+    m = re.fullmatch(r"(\d{1,2})\.(\d{1,2})\.(\d{2}|\d{4})?", raw)
+    if m:
+        y = int(m.group(3)) if m.group(3) else today.year
+        if y < 100:
+            y += 2000
+        try:
+            d = datetime.date(y, int(m.group(2)), int(m.group(1)))
+        except ValueError:
+            return None
+        if not m.group(3) and d < today:
+            try:
+                d = datetime.date(y + 1, d.month, d.day)
+            except ValueError:
+                pass
+        return d, 1
+    return None
+
+
+def parse_quick(text, today, tags, projs, people):
+    w = str(text or "").split()
+    o = {"tags": [], "who": [], "proj": "", "prio": 0, "date": None, "until": False}
+    keep = []
+    i = 0
+    while i < len(w):
+        x = w[i]
+        m = re.fullmatch(r"(?:!|[pP])([1-3])", x)
+        if x.startswith("#") and len(x) > 1:
+            n = _qname(x[1:], tags)
+            if n and n not in o["tags"]:
+                o["tags"].append(n[:30])
+        elif x.startswith("+") and len(x) > 1:
+            o["proj"] = _qname(x[1:], projs)[:30]
+        elif x.startswith("@") and len(x) > 1:
+            n = _qname(x[1:], people)
+            if n and n not in o["who"]:
+                o["who"].append(n[:30])
+        elif m:
+            o["prio"] = int(m.group(1))
+        elif re.fullmatch(r"!{1,3}", x):
+            o["prio"] = 4 - len(x)
+        else:
+            r = None
+            if keep:
+                if _qn(x) == "bis" and i + 1 < len(w):
+                    r = _qdate_at(w, i + 1, today)
+                    if r:
+                        o["date"], o["until"] = r[0], True
+                        i += r[1] + 1
+                        continue
+                r = _qdate_at(w, i, today)
+            if r:
+                o["date"], o["until"] = r[0], False
+                i += r[1]
+                continue
+            keep.append(x)
+        i += 1
+    o["title"] = " ".join(keep)[:200]
+    return o
+
+
+def quick_task(text, who_default=""):
+    now = datetime.datetime.now(ha["tz"]) if ha["tz"] else datetime.datetime.now()
+    today = now.date()
+    with LOCK:
+        tl = list(state["tasks"].values())
+        tags = [x["n"] for x in state["tags"] if not x.get("p")] + sorted({n for t in tl for n in t.get("tags", [])})
+        projs = [x["n"] for x in state["tags"] if x.get("p")] + sorted({t.get("proj") for t in tl if t.get("proj")})
+    tags, projs = list(dict.fromkeys(tags)), list(dict.fromkeys(projs))
+    people = ["Lasse", "Melanie"] + sorted({p.strip() for t in tl for p in str(t.get("who", "")).split(",") if p.strip()})
+    q = parse_quick(text, today, tags, projs, list(dict.fromkeys(people)))
+    if not q["title"]:
+        raise ValueError("Kein Titel erkannt")
+    d = q["date"]
+    if d is None:
+        s = e = today
+    elif q["until"]:
+        s, e = min(today, d), d
+    else:
+        s = e = d
+    who = q["who"] or ([who_default] if who_default else [])
+    t = clean({"id": "q" + secrets.token_hex(5), "title": q["title"], "tags": q["tags"], "proj": q["proj"], "who": ", ".join(who),
+               "status": "todo", "prio": q["prio"], "start": s.isoformat(), "end": e.isoformat()})
+    when = "heute" if e == today else "morgen" if e == today + datetime.timedelta(1) else "%s, %s" % (WDS[e.weekday()], e.strftime("%d.%m."))
+    speech = "„%s“ ist %s %s eingetragen." % (t["title"], "bis" if q["until"] else "für", when)
+    return t, speech
+
 INGRESS_IP = "172.30.32.2"  # Home-Assistant-Ingress (Supervisor)
 LOCAL_SUFFIX = (".local", ".lan", ".home", ".home.arpa", ".internal", ".localdomain", ".fritz.box", ".box", ".intranet", ".localhost")
 TRUSTED_HOSTS = set()  # Adressen aus der Home-Assistant-Konfiguration (interne/externe URL)
@@ -820,6 +1000,21 @@ class H(BaseHTTPRequestHandler):
                 return self.out(200, {"ok": True, "data": ai_call(p, bool(data.get("raw")))})
             except Exception as e:
                 return self.out(200, {"ok": False, "error": str(e)[:200]})
+        if path.endswith("/api/quick"):
+            # Für Siri-Kurzbefehle und Home-Assistant-Sprachsteuerung: {"text": "Zaun streichen Sa #Garten", "who": "Lasse"}
+            try:
+                txt = data.get("text") if isinstance(data, dict) else None
+                if not isinstance(txt, str) or not txt.strip():
+                    raise ValueError("Leerer Text")
+                t, speech = quick_task(txt[:300], str(data.get("who") or "")[:30])
+            except Exception as e:
+                return self.out(400, {"ok": False, "error": str(e)[:200], "speech": "Das habe ich nicht verstanden."})
+            with LOCK:
+                t["v"] = 1
+                state["tasks"][t["id"]] = t
+                state["rev"] += 1
+                save()
+            return self.out(200, {"ok": True, "task": t, "speech": speech})
         if path.endswith("/api/ha-settings"):
             if not isinstance(data, dict):
                 return self.out(400, {"error": "Ungültig"})
