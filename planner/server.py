@@ -1,4 +1,4 @@
-import datetime, json, os, re, secrets, shutil, threading, time, urllib.error, urllib.request
+import base64, datetime, hashlib, json, os, re, secrets, shutil, socket, struct, threading, time, urllib.error, urllib.request
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs, unquote
 
@@ -30,6 +30,8 @@ OPTS = os.path.join(D, "options.json")
 HASTATE = os.path.join(D, "ha_state.json")
 SETTINGS = os.path.join(D, "settings.json")  # Auswahl aus der App (Erinnerung), hat Vorrang vor der Add-on-Konfiguration
 SUP = os.environ.get("SUPERVISOR_URL", "http://supervisor/core/api")
+SUPBASE = os.environ.get("SUPERVISOR_BASE", "http://supervisor")
+WS_URL = os.environ.get("HA_WS_URL", "ws://supervisor/core/websocket")
 TOKEN = os.environ.get("SUPERVISOR_TOKEN", "")
 ha = {"tz": None, "last": ""}
 
@@ -354,12 +356,203 @@ def reminder_text(due, late):
     return txt
 
 
-def notify(message):
+def notify(message, data=None):
     sv = services()
     if not sv:
         raise RuntimeError("Kein Benachrichtigungsdienst eingetragen")
     for s in sv:
-        ha_call("POST", "/services/notify/" + s, {"title": "Planner", "message": message})
+        body = {"title": "Planner", "message": message}
+        if data:
+            body["data"] = data
+        ha_call("POST", "/services/notify/" + s, body)
+
+
+NTAG = "planner-faellig"
+panel = {"url": None}
+
+
+def panel_url():
+    # Adresse des Planner-Bereichs in Home Assistant, damit ein Antippen der Mitteilung direkt dorthin führt
+    if panel["url"] is None:
+        panel["url"] = ""
+        try:
+            req = urllib.request.Request(SUPBASE + "/addons/self/info", headers={"Authorization": "Bearer " + TOKEN})
+            with urllib.request.urlopen(req, timeout=10) as r:
+                slug = (json.load(r).get("data") or {}).get("slug", "")
+            if re.fullmatch(r"[A-Za-z0-9_]+", slug):
+                panel["url"] = "/hassio/ingress/" + slug
+        except Exception as e:
+            print("Planner-Adresse nicht lesbar:", e, flush=True)
+    return panel["url"]
+
+
+def can_complete(t, tasks):
+    # Wiederkehrende Aufgaben (legen die nächste an) und blockierte Aufgaben werden nur in der App erledigt
+    if t.get("rec") and not t.get("spawned"):
+        return False
+    return all(tasks.get(d, {}).get("status") == "done" or d not in tasks for d in t.get("deps", []))
+
+
+def reminder_data(due, late, tasks, quiet=False):
+    cand = sorted(late + due, key=lambda t: (t.get("prio") or 9, t["end"]))
+    acts = [{"action": "PLANNER_DONE_" + t["id"], "title": ("Erledigt: " + t["title"])[:30]} for t in cand if can_complete(t, tasks)][:4]
+    d = {"tag": NTAG, "actions": acts}
+    u = panel_url()
+    if u:
+        d["url"] = u
+        d["clickAction"] = u
+    if quiet:
+        d["push"] = {"interruption-level": "passive"}
+    return d
+
+
+def complete_task(tid):
+    with LOCK:
+        t = state["tasks"].get(tid)
+        if not t or t.get("del") or t.get("status") == "done" or not can_complete(t, state["tasks"]):
+            return None
+        n = dict(t)
+        n["status"] = "done"
+        n["log"] = (t.get("log") or []) + [{"t": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M"), "a": "iPhone", "k": "h", "x": "Status: Erledigt (Mitteilung)"}]
+        n["log"] = n["log"][-120:]
+        n["v"] = t.get("v", 0) + 1
+        state["tasks"][tid] = n
+        state["rev"] += 1
+        save()
+        return n["title"]
+
+
+def refresh_notification():
+    now = datetime.datetime.now(ha["tz"]) if ha["tz"] else datetime.datetime.now()
+    with LOCK:
+        tasks = dict(state["tasks"])
+    act, due, late, doing = stats(list(tasks.values()), now.strftime("%Y-%m-%d"))
+    if due or late:
+        notify(reminder_text(due, late), reminder_data(due, late, tasks, quiet=True))
+    else:
+        for s in services():
+            ha_call("POST", "/services/notify/" + s, {"message": "clear_notification", "data": {"tag": NTAG}})
+
+
+# ---- Verbindung zu Home Assistant (WebSocket), um Knopfdrücke in Mitteilungen zu empfangen
+def _recv(sock, n):
+    buf = b""
+    while len(buf) < n:
+        c = sock.recv(n - len(buf))
+        if not c:
+            raise ConnectionError("Verbindung beendet")
+        buf += c
+    return buf
+
+
+def ws_send(sock, payload, op=1):
+    b = payload if isinstance(payload, bytes) else payload.encode()
+    mask = os.urandom(4)
+    n = len(b)
+    head = bytes([0x80 | op]) + (bytes([0x80 | n]) if n < 126 else bytes([0x80 | 126]) + struct.pack(">H", n) if n < 65536 else bytes([0x80 | 127]) + struct.pack(">Q", n))
+    sock.sendall(head + mask + bytes(c ^ mask[i % 4] for i, c in enumerate(b)))
+
+
+def ws_recv(sock):
+    # liefert eine vollständige Textnachricht; Ping wird beantwortet
+    data = b""
+    while True:
+        b0, b1 = _recv(sock, 2)
+        n = b1 & 0x7F
+        if n == 126:
+            n = struct.unpack(">H", _recv(sock, 2))[0]
+        elif n == 127:
+            n = struct.unpack(">Q", _recv(sock, 8))[0]
+        if n > 4_000_000:
+            raise ConnectionError("Nachricht zu groß")
+        mk = _recv(sock, 4) if b1 & 0x80 else None
+        pl = _recv(sock, n) if n else b""
+        if mk:
+            pl = bytes(c ^ mk[i % 4] for i, c in enumerate(pl))
+        op = b0 & 0x0F
+        if op == 8:
+            raise ConnectionError("Verbindung geschlossen")
+        if op == 9:
+            ws_send(sock, pl, 10)
+            continue
+        if op == 10:
+            continue
+        data += pl
+        if b0 & 0x80:
+            return data.decode("utf-8", "replace")
+
+
+def ws_open(url):
+    from urllib.parse import urlparse as up
+    u = up(url)
+    sock = socket.create_connection((u.hostname, u.port or 80), timeout=15)
+    key = base64.b64encode(os.urandom(16)).decode()
+    sock.sendall(("GET %s HTTP/1.1\r\nHost: %s\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: %s\r\nSec-WebSocket-Version: 13\r\n\r\n"
+                  % (u.path or "/", u.netloc, key)).encode())
+    head = b""
+    while b"\r\n\r\n" not in head:
+        head += _recv(sock, 1)
+    if b" 101 " not in head.split(b"\r\n")[0] + b" ":
+        raise ConnectionError("WebSocket abgelehnt")
+    want = base64.b64encode(hashlib.sha1((key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()).digest())
+    if want not in head:
+        raise ConnectionError("WebSocket-Antwort ungültig")
+    return sock
+
+
+def handle_action(action):
+    m = re.fullmatch(r"PLANNER_DONE_([A-Za-z0-9_-]{1,40})", action or "")
+    if not m:
+        return
+    title = complete_task(m.group(1))
+    print("Mitteilung: Aufgabe erledigt:", title, flush=True)
+    try:
+        refresh_notification()
+    except Exception as e:
+        print("Mitteilung nicht aktualisiert:", e, flush=True)
+
+
+def ws_session():
+    sock = ws_open(WS_URL)
+    try:
+        sock.settimeout(90)
+        first = json.loads(ws_recv(sock))
+        if first.get("type") != "auth_required":
+            raise ConnectionError("unerwartete Antwort")
+        ws_send(sock, json.dumps({"type": "auth", "access_token": TOKEN}))
+        if json.loads(ws_recv(sock)).get("type") != "auth_ok":
+            raise ConnectionError("Anmeldung bei Home Assistant fehlgeschlagen")
+        ws_send(sock, json.dumps({"id": 1, "type": "subscribe_events", "event_type": "mobile_app_notification_action"}))
+        print("Verbindung zu Home Assistant für Mitteilungs-Knöpfe steht", flush=True)
+        wsok["ok"] = True
+        while True:
+            try:
+                msg = json.loads(ws_recv(sock))
+            except socket.timeout:
+                ws_send(sock, b"", 9)
+                continue
+            if msg.get("type") == "event":
+                handle_action(str(((msg.get("event") or {}).get("data") or {}).get("action", "")))
+    finally:
+        try:
+            sock.close()
+        except Exception:
+            pass
+
+
+wsok = {"ok": False}
+
+
+def ws_loop():
+    wait = 5
+    while True:
+        wsok["ok"] = False
+        try:
+            ws_session()
+        except Exception as e:
+            print("HA-Verbindung (Mitteilungs-Knöpfe):", e, flush=True)
+        wait = 5 if wsok["ok"] else min(wait * 2, 60)
+        time.sleep(wait)
 
 
 def put_sensor(key, name, value, icon, titles):
@@ -387,7 +580,7 @@ def ha_tick():
     when = remind_time()
     if services() and now.strftime("%H:%M") >= when and ha["last"] != today:
         if due or late:
-            notify(reminder_text(due, late))
+            notify(reminder_text(due, late), reminder_data(due, late, {t["id"]: t for t in tasks}))
         ha["last"] = today
         with open(HASTATE, "w", encoding="utf-8") as f:
             json.dump({"last": today}, f)
@@ -617,4 +810,6 @@ if __name__ == "__main__":
         save()  # bestehende Daten beim Start einmal in den Share-Spiegel kopieren
     print("Planner %s läuft auf Port %d, Daten in %s" % (version(), PORT, D), flush=True)
     threading.Thread(target=ha_loop, daemon=True).start()
+    if TOKEN:
+        threading.Thread(target=ws_loop, daemon=True).start()
     ThreadingHTTPServer(("0.0.0.0", PORT), H).serve_forever()

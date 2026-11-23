@@ -1,5 +1,10 @@
 # Änderungen
 
+## 1.21.0
+- Erinnerungen mit Knöpfen: Die tägliche Mitteilung auf dem iPhone zeigt beim langen Drücken bis zu vier Knöpfe „Erledigt: …“ (Prio 1 zuerst). Ein Druck erledigt die Aufgabe, trägt es im Verlauf ein und aktualisiert die Mitteilung (verschwindet, wenn nichts mehr fällig ist). Ein Antippen öffnet den Planner. Wiederkehrende und blockierte Aufgaben haben keinen Knopf
+- Neu: dauerhafte Verbindung des Add-ons zu Home Assistant, um die Knopfdrücke zu empfangen (verbindet sich bei Störungen von selbst neu)
+- Neuer Test `tools/test_ha.py` mit nachgebautem Home Assistant
+
 ## 1.20.0
 - Filter überarbeitet: Statt der langen Chip-Leiste gibt es einen Knopf „Filter“ mit Zähler. Er öffnet ein Blatt mit Projekt, Priorität, Tag und Verantwortlich (mehrere gleichzeitig wählbar, Aufgabenzahl live, „Zurücksetzen“). Aktive Filter stehen als kleine Chips unter der Leiste und lassen sich mit × entfernen. Neu: Filter „Ohne Projekt“ und „Ohne Prio“
 - Projekt steht jetzt als farbige Kopfzeile über dem Titel (Board und Liste) und nicht mehr neben den Tags

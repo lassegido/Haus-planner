@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+"""Test der Mitteilungs-Knöpfe mit einem nachgebauten Home Assistant. Aufruf: python3 tools/test_ha.py"""
+import base64, hashlib, importlib.util, json, os, socket, struct, subprocess, sys, tempfile, threading, time
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+spec = importlib.util.spec_from_file_location("srv", root + "/planner/server.py")
+srv = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(srv)
+
+posts = []
+
+
+class Mock(BaseHTTPRequestHandler):
+    def log_message(self, *a):
+        pass
+
+    def reply(self, obj):
+        b = json.dumps(obj).encode()
+        self.send_response(200)
+        self.send_header("Content-Length", str(len(b)))
+        self.end_headers()
+        self.wfile.write(b)
+
+    def do_GET(self):
+        self.reply({"data": {"slug": "abc123_planner"}} if "addons" in self.path else {"time_zone": "Europe/Berlin"})
+
+    def do_POST(self):
+        n = int(self.headers.get("Content-Length") or 0)
+        posts.append((self.path, json.loads(self.rfile.read(n) or b"{}")))
+        self.reply({})
+
+
+def frame(text):
+    b = text.encode()
+    return bytes([0x81, len(b)]) + b if len(b) < 126 else bytes([0x81, 126]) + struct.pack(">H", len(b)) + b
+
+
+def ws_mock(listener, done):
+    c, _ = listener.accept()
+    head = b""
+    while b"\r\n\r\n" not in head:
+        head += c.recv(1)
+    key = [l for l in head.decode().split("\r\n") if l.lower().startswith("sec-websocket-key")][0].split(":")[1].strip()
+    acc = base64.b64encode(hashlib.sha1((key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()).digest()).decode()
+    c.sendall(("HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: %s\r\n\r\n" % acc).encode())
+    c.sendall(frame(json.dumps({"type": "auth_required"})))
+    auth = json.loads(srv.ws_recv(c))
+    assert auth["access_token"] == "tok"
+    c.sendall(frame(json.dumps({"type": "auth_ok"})))
+    sub = json.loads(srv.ws_recv(c))
+    assert sub["event_type"] == "mobile_app_notification_action"
+    time.sleep(8)  # erst die tägliche Erinnerung abwarten
+    c.sendall(frame(json.dumps({"type": "event", "event": {"data": {"action": "PLANNER_DONE_t1"}}})))
+    c.sendall(frame(json.dumps({"type": "event", "event": {"data": {"action": "PLANNER_DONE_../etc"}}})))
+    time.sleep(3)
+    done.set()
+
+
+d = tempfile.mkdtemp()
+os.makedirs(d + "/d")
+today = time.strftime("%Y-%m-%d")
+json.dump({"schema": 2, "rev": 1, "tags": [], "tasks": [
+    {"id": "t1", "title": "Rauchmelder tauschen", "start": "2020-01-01", "end": "2020-01-02", "status": "todo", "prio": 1, "v": 0},
+    {"id": "t2", "title": "Wiederkehrend", "start": "2020-01-01", "end": "2020-01-02", "status": "todo", "rec": {"every": 1, "unit": "w"}, "v": 0}]}, open(d + "/d/tasks.json", "w"))
+json.dump({"notify": ["mobile_app_test"], "time": "00:00"}, open(d + "/d/settings.json", "w"))
+http = HTTPServer(("127.0.0.1", 8095), Mock)
+threading.Thread(target=http.serve_forever, daemon=True).start()
+lst = socket.socket()
+lst.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+lst.bind(("127.0.0.1", 8094))
+lst.listen(1)
+done = threading.Event()
+threading.Thread(target=ws_mock, args=(lst, done), daemon=True).start()
+env = dict(os.environ, DATA_DIR=d + "/d", SHARE_DIR=d + "/s", LEGACY_SHARE_DIR=d + "/l", INDEX=root + "/planner/index.html",
+           VERSION_FILE=root + "/planner/VERSION", PORT="8093", SUPERVISOR_URL="http://127.0.0.1:8095/core", SUPERVISOR_BASE="http://127.0.0.1:8095",
+           HA_WS_URL="ws://127.0.0.1:8094/ws", SUPERVISOR_TOKEN="tok")
+sv = subprocess.Popen([sys.executable, root + "/planner/server.py"], env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+ok = True
+
+
+def check(name, cond):
+    global ok
+    print(("OK   " if cond else "FEHL ") + name)
+    ok = ok and cond
+
+
+try:
+    done.wait(30)
+    time.sleep(1)
+    rem = [b for p, b in posts if "/services/notify/mobile_app_test" in p and b.get("message") != "clear_notification" and "data" in b]
+    first = rem[0]["data"] if rem else {}
+    acts = [a["action"] for a in first.get("actions", [])]
+    check("Erinnerung hat Knopf für t1", "PLANNER_DONE_t1" in acts)
+    check("Wiederkehrende Aufgabe hat keinen Knopf", "PLANNER_DONE_t2" not in acts)
+    check("Antippen öffnet den Planner", first.get("url") == "/hassio/ingress/abc123_planner")
+    t = {x["id"]: x for x in json.load(open(d + "/d/tasks.json"))["tasks"]}
+    check("Knopfdruck erledigt die Aufgabe", t["t1"]["status"] == "done" and t["t1"]["v"] == 1 and t["t1"]["log"])
+    check("Anderes bleibt unverändert", t["t2"]["status"] == "todo")
+    left = [b for p, b in posts if "/services/notify/mobile_app_test" in p][-1]
+    check("Mitteilung wird danach aktualisiert", "PLANNER_DONE_t1" not in json.dumps(left))
+finally:
+    sv.kill()
+    print(sv.stdout.read().decode()[-600:])
+sys.exit(0 if ok else 1)

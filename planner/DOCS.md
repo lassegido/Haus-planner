@@ -36,6 +36,8 @@ Zugriff von außen nur über Nabu Casa oder ein VPN (z. B. Tailscale).
 3. Unter **Uhrzeit** die Zeit der täglichen Erinnerung wählen (Standard 08:00, in der Zeitzone von Home Assistant). Sie kommt nur, wenn etwas heute fällig oder überfällig ist.
 4. Mit **Testnachricht senden** auf derselben Seite prüfen, ob es ankommt. Ein Neustart ist nicht nötig.
 
+**Direkt abhaken:** Auf dem iPhone die Erinnerung lang drücken (oder nach unten ziehen). Dann erscheinen bis zu vier Knöpfe „Erledigt: …“ für die wichtigsten fälligen Aufgaben, Prio 1 zuerst. Ein Druck setzt die Aufgabe auf erledigt und aktualisiert die Mitteilung. Ein Antippen der Mitteilung öffnet den Planner. Wiederkehrende und blockierte Aufgaben haben keinen Knopf, die erledigt man in der App. Voraussetzung ist, dass das Add-on mit Home Assistant verbunden ist (im Add-on-Protokoll steht dann „Verbindung zu Home Assistant für Mitteilungs-Knöpfe steht“).
+
 ## Sensoren
 
 Der Planner legt in Home Assistant fünf Sensoren an, die jede Minute aktualisiert werden: `sensor.planner_offen`, `sensor.planner_in_arbeit`, `sensor.planner_ueberfaellig`, `sensor.planner_heute_faellig` und `sensor.planner_prio1` (offene Aufgaben mit Prio 1). Das Attribut `aufgaben` enthält die Titel. Abschalten mit `sensors: false` in der Konfiguration.
