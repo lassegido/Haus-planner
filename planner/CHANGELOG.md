@@ -1,5 +1,9 @@
 # Änderungen
 
+## 1.27.2
+- KI-Seite: Nach „Schlüssel sichern“ steht das Ergebnis direkt unter dem Feld, und die Verbindung wird gleich getestet. Ein unvollständiger Schlüssel wird mit Hinweis abgewiesen.
+- Hinweise (z. B. „Rückgängig“) erscheinen jetzt auch über geöffneten Blättern. Vorher lagen sie dahinter und waren unsichtbar.
+
 ## 1.27.1
 - KI-Schlüssel: Das Feld ist jetzt ein normales, sichtbares Textfeld statt eines Passwortfelds (auf dem iPhone ließ sich dort schlecht einfügen und man sah nichts). Dazu ein Knopf „Aus Zwischenablage einfügen“; Leerzeichen, Zeilenumbrüche und Anführungszeichen werden entfernt.
 - Wischen zum Schließen startet nicht mehr in Eingabefeldern, damit langes Drücken zum Einsetzen funktioniert.

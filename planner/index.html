@@ -930,6 +930,9 @@ h1,.pnl h3,.colm h3{font-family:var(--disp)}
 
 .kin input{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:max(16px,.95rem);letter-spacing:.01em}
 .srow b.acc{color:var(--acc);font-weight:650}
+
+#toast[popover]{top:auto;right:auto;margin:0;border:0;overflow:visible;width:auto;height:auto}
+.kimsg{font-weight:550}.kimsg.ok{color:var(--acc)}.kimsg.bad{color:var(--brick-ink)}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"></head>
 <body>
@@ -1102,7 +1105,7 @@ function init(){
 let lastMoved=null,tt,enterT;
 const greet=()=>{const h=new Date().getHours();return h<5?"Gute Nacht":h<11?"Guten Morgen":h<17?"Guten Tag":"Guten Abend"};
 const reduced=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
-function toast(msg,undo,label,ms){const el=$("toast");el.innerHTML="<span></span>"+(undo?"<button>"+(label||"Rückgängig")+"</button>":"");el.firstChild.textContent=msg;if(undo)el.querySelector("button").onclick=()=>{undo();el.classList.remove("on")};el.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("on"),ms||4500)}
+function toast(msg,undo,label,ms){const el=$("toast");el.innerHTML="<span></span>"+(undo?"<button>"+(label||"Rückgängig")+"</button>":"");el.firstChild.textContent=msg;if(undo)el.querySelector("button").onclick=()=>{undo();el.classList.remove("on")};if(el.showPopover){if(!el.hasAttribute("popover"))el.setAttribute("popover","manual");try{el.hidePopover()}catch(_){}try{el.showPopover()}catch(_){}}el.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("on"),ms||4500)}
 async function advance(id){
   const t=byId(id);if(!t)return;const prev=t.status,next=NEXT[prev];hap(8);lastMoved=id;
   const sp=await setStatus(t,next);
@@ -1252,6 +1255,8 @@ async function loadAvail(){try{const r=await api("api/ha-notify");haAvail=r.serv
 const sopt=(a,l,on,x,st)=>`<button class="srow opt${on?" on":""}" ${a}>${x||""}<span${st?` style="${st}"`:""}>${l}</span>${on?CK:""}</button>`;
 function dpHtml(l,d){const dk=isDark(),v=l?(dk?d:l):null,c=v?[v[0],v[9],v[11]]:dk?["#0E1E27","#0A171E","#6CB6E4"]:["#F5F3EB","#2D6786","#387CA3"];return `<span class="dp" style="background:${c[0]}"><i style="background:${c[1]}"></i><b style="background:${c[2]}"></b><u style="background:${c[2]}"></u></span>`}
 const dsx_=k=>(DES.find(x=>x[0]===k)||DES[0])[0];
+let kiMsg=null;
+async function kiCheck(){try{await aiJson('Antworte nur mit diesem JSON: {"notes":"ok","checklist":[]}');return null}catch(e){return(e&&e.message)||String(e)}}
 function drawSettings(){
   const th=prefGet("theme")||"auto",ac=prefGet("acc")||"",ds=prefGet("design")||"porto",fk=prefGet("font")||"figtree",me=prefGet("me")||"";
   $("s_back").hidden=sPage==="main";$("s_title").textContent=sPage==="main"?"Einstellungen":STT[sPage];
@@ -1282,6 +1287,7 @@ function drawSettings(){
     const hi=haInfo||{},on=!!hi.ai;
     h=grp(srow("","Status",on?"Aktiv":"Aus",null,false)+srow(`data-act="kitest"${on?"":" disabled"}`,"Verbindung testen",null,null,false))
      +`<p class="sgt">Gemini-Schlüssel</p><div class="sgrp kin"><input id="ki_key" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" placeholder="${hi.aiapp?"Neuen Schlüssel einfügen":"AIza…"}" aria-label="Gemini-Schlüssel"></div>`
+     +(kiMsg?`<p class="scap kimsg${kiMsg[1]?" bad":" ok"}">${esc(kiMsg[0])}</p>`:"")
      +grp(srow('data-act="kipaste"',"Aus Zwischenablage einfügen",null,null,false)+srow('data-act="kisave"',"<b class=\"acc\">Schlüssel sichern</b>",null,null,false))
      +cap("Kostenlos erstellen unter aistudio.google.com/apikey (Google-Konto, ohne Kreditkarte). Der Schlüssel bleibt auf deinem Home Assistant und wird hier nie wieder angezeigt.")
      +(hi.aiapp?grp(srow('data-act="kidel"',"<span class=\"bad\">Schlüssel entfernen</span>",null,null,false)):"")
@@ -1308,7 +1314,7 @@ $("s_body").addEventListener("keydown",e=>{if(e.target.id==="ki_key"&&e.key==="E
 $("s_back").onclick=()=>{sPage=sPage==="remt"?"rem":"main";drawSettings();$("dls").scrollTop=0};
 $("s_body").onclick=async e=>{
   const b=e.target.closest("button");if(!b||b.disabled)return;const d=b.dataset;
-  if(d.go){sPage=d.go;if(d.go==="rem"&&haAvail===null)loadAvail();drawSettings();$("dls").scrollTop=0;return}
+  if(d.go){sPage=d.go;if(d.go==="ki")kiMsg=null;if(d.go==="rem"&&haAvail===null)loadAvail();drawSettings();$("dls").scrollTop=0;return}
   if(d.set){const i=d.set.indexOf(":"),k=d.set.slice(0,i),v=d.set.slice(i+1);
     if(k==="theme"){prefSet("theme",v);applyTheme()}else if(k==="des"){prefSet("design",v);prefSet("acc","");applyTheme()}
     else if(k==="ntf"){const cur=new Set((haInfo&&haInfo.notify)||[]);cur.has(v)?cur.delete(v):cur.add(v);await haSave({notify:[...cur]})}
@@ -1319,13 +1325,18 @@ $("s_body").onclick=async e=>{
   if(d.act==="arch"){const L=tasks.filter(t=>t.status==="done");if(!L.length)return;await saveMany(L.map(t=>({...t,arch:true})));$("dls").close();toast(L.length+" erledigte archiviert",()=>saveMany(L))}
   else if(d.act==="open"){$("dls").close();openArch()}
   else if(d.act==="kipaste"){try{const t=await navigator.clipboard.readText();$("ki_key").value=t.replace(/\s+/g,"");toast(t.trim()?"Eingefügt, jetzt sichern":"Zwischenablage ist leer")}catch(e){$("ki_key").focus();toast("Bitte lange ins Feld tippen und „Einsetzen“ wählen")}}
-  else if(d.act==="kisave"){const k=$("ki_key").value.replace(/\s+/g,"").replace(/^["'„“]+|["'„“”]+$/g,"");if(!k){$("ki_key").focus();toast("Erst den Schlüssel einfügen");return}
+  else if(d.act==="kisave"){const k=$("ki_key").value.replace(/\s+/g,"").replace(/^["'„“]+|["'„“”]+$/g,"");
+    if(!k){kiMsg=["Erst den Schlüssel ins Feld einfügen.",1];drawSettings();return}
+    if(!/^[A-Za-z0-9_-]{20,200}$/.test(k)){kiMsg=[`Das sieht nicht nach einem vollständigen Gemini-Schlüssel aus (${k.length} Zeichen). Er beginnt meist mit „AIza“ und hat 39 Zeichen.`,1];drawSettings();return}
+    kiMsg=["Sichere und teste die Verbindung …",0];drawSettings();
     try{const r=await fetch("api/ha-settings",{method:"POST",headers:{"Content-Type":"application/json","X-Planner":"1"},body:JSON.stringify({ai_key:k})}),j=await r.json().catch(()=>({}));
-      if(!r.ok){toast(j.error||"Speichern fehlgeschlagen");return}if(j.ha)haInfo=j.ha;drawSettings();toast("Schlüssel gesichert")}catch(e){toast("Server nicht erreichbar")}}
-  else if(d.act==="kidel"){if(!await confirmSheet("Gemini-Schlüssel entfernen?","Entfernen"))return;await haSave({ai_key:""});drawSettings();toast("Schlüssel entfernt")}
-  else if(d.act==="kitest"){b.disabled=true;const old=b.querySelector("span").textContent;b.querySelector("span").textContent="Teste …";
-    try{await aiJson('Antworte nur mit diesem JSON: {"notes":"ok","checklist":[]}');toast("Die KI antwortet")}catch(e){toast("KI-Fehler: "+(e.message||e))}
-    b.disabled=false;b.querySelector("span").textContent=old}
+      if(!r.ok){kiMsg=[j.error||"Speichern fehlgeschlagen ("+r.status+").",1];drawSettings();return}
+      if(j.ha)haInfo=j.ha;const err=await kiCheck();
+      kiMsg=err?["Gesichert, aber der Test schlägt fehl: "+err,1]:["Gesichert. Die KI antwortet, alles bereit.",0]}
+    catch(e){kiMsg=["Der Planner-Server ist nicht erreichbar.",1]}
+    drawSettings()}
+  else if(d.act==="kidel"){if(!await confirmSheet("Gemini-Schlüssel entfernen?","Entfernen"))return;await haSave({ai_key:""});kiMsg=["Schlüssel entfernt.",0];drawSettings()}
+  else if(d.act==="kitest"){kiMsg=["Teste …",0];drawSettings();const err=await kiCheck();kiMsg=err?["Test fehlgeschlagen: "+err,1]:["Die KI antwortet, alles bereit.",0];drawSettings()}
   else if(d.act==="hatest"){try{const r=await api("api/ha-test",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});$("dls").close();toast(r.ok?"Testnachricht gesendet":"Fehlgeschlagen: "+r.error)}catch(e){toast("Server nicht erreichbar")}}
 };
 
