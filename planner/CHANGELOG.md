@@ -1,5 +1,8 @@
 # Änderungen
 
+## 1.16.1
+- Vollbild in der Home-Assistant-App: Der Planner nimmt den Sicherheitsabstand der Home-Leiste selbst auf und füllt die Fläche bis zum unteren Rand, wie ein Dashboard. Die Navigationsleiste sitzt dabei über der Home-Leiste. Bei neueren Home-Assistant-Versionen meldet sich der Planner zusätzlich über deren Schnittstelle für Sicherheitsabstände an
+
 ## 1.16.0
 - Erinnerung ohne Tippen: In den Einstellungen des Planners wählst du unter Home Assistant → Erinnerung die Geräte aus einer Liste (alle gefundenen Benachrichtigungsdienste, z. B. dein iPhone) und die Uhrzeit aus einer Liste. Die Auswahl wird im Add-on gespeichert und hat Vorrang vor der alten Konfiguration
 - Konfiguration in Home Assistant: Die Felder Benachrichtigungsdienst und Uhrzeit entfallen; das KI-Modell ist eine Auswahlliste (Haiku, Sonnet, Opus); der Port 8099 ist vorbelegt. Nur der API-Schlüssel muss getippt werden, und nur wer die KI nutzen will

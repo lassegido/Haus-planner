@@ -7,7 +7,15 @@
 <meta name="theme-color" content="#F5F3EB" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0E1E27" media="(prefers-color-scheme: dark)">
 <title>Planner</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>try{if(self!==top)document.documentElement.classList.add('emb')}catch(e){document.documentElement.classList.add('emb')}</script>
+<script>(function(){var d=document.documentElement;try{if(self===top)return;d.classList.add('emb');
+/* Eingebettet in Home Assistant: HA lässt unten einen Rand (Sicherheitsabstand der Home-Leiste). Wir nehmen ihn selbst auf und füllen die Fläche bis zum Rand. */
+var f=null,msg=0;try{f=window.frameElement}catch(e){}
+function px(v){v=parseFloat(v);return isFinite(v)&&v>0?v:0}
+function fit(){var m=0;if(f){try{var o=f.style.getPropertyValue('padding-bottom'),pr=f.style.getPropertyPriority('padding-bottom');f.style.removeProperty('padding-bottom');m=px(getComputedStyle(f).paddingBottom);f.style.setProperty('padding-bottom','0','important')}catch(e){}}
+d.style.setProperty('--sab',Math.max(m,msg)+'px')}
+addEventListener('message',function(e){var x=e.data;if(x&&x.type==='home-assistant/properties'&&x.safeAreaInsets){msg=px(x.safeAreaInsets.bottom);fit()}});
+if(f){try{parent.postMessage({type:'home-assistant/subscribe-properties',handleSafeArea:true},'*')}catch(e){}}
+fit();addEventListener('resize',fit)}catch(e){d.classList.add('emb')}})();</script>
 <style>
 :root{
 --bg:#F5F3EB;--surf:#FFFEFA;--card:#FFFEFA;--tx:#14303F;--mut:#587080;--faint:#9FB0B9;--line:#E6E1D2;--line2:#D6D0BC;
@@ -655,7 +663,6 @@ td.late{background:none;padding:.4rem .8rem;border-radius:0}
   main.g{padding-bottom:calc(5.6rem + var(--sab))}
   .side{left:.5rem;right:.5rem;bottom:calc(.5rem + var(--sab))}
   .board{grid-auto-columns:92%!important}
-  html.emb .side{bottom:.5rem}
   .card{padding:.8rem .9rem .75rem}
 }
 /* 1.15.1: Liste und Filterleiste auf dem Handy */
