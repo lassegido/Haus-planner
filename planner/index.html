@@ -150,7 +150,7 @@ tr.row{cursor:pointer}
 /* Dialoge */
 dialog{border:0;padding:0;background:var(--surf);color:var(--tx)}
 dialog::backdrop{background:rgba(10,28,38,.5)}
-#dlg,#dlt,#dls,#dla{margin:0 0 0 auto;height:100vh;height:100dvh;max-height:none;width:min(30rem,100vw);border-radius:1.4rem 0 0 1.4rem;overflow:auto;padding:1.5rem 1.5rem 0;box-shadow:-1rem 0 3rem rgba(10,28,38,.25);animation:slideX .24s ease-out}
+#dlg,#dlt,#dls,#dla,#dlf{margin:0 0 0 auto;height:100vh;height:100dvh;max-height:none;width:min(30rem,100vw);border-radius:1.4rem 0 0 1.4rem;overflow:auto;padding:1.5rem 1.5rem 0;box-shadow:-1rem 0 3rem rgba(10,28,38,.25);animation:slideX .24s ease-out}
 #dlx{margin:auto;width:min(27rem,92vw);border-radius:1.4rem;padding:1.5rem;box-shadow:0 2rem 4rem rgba(10,28,38,.35);animation:pop .18s ease-out}
 @keyframes slideX{from{transform:translateX(2rem);opacity:0}}
 @keyframes pop{from{transform:scale(.96);opacity:0}}
@@ -162,7 +162,7 @@ label{display:block;font-size:.76rem;font-weight:650;color:var(--mut);margin:1re
 .deps label{display:flex;gap:.6rem;align-items:center;margin:.25rem 0;font-size:.95rem;font-weight:450;color:var(--tx);letter-spacing:0}
 .deps input,.ck input[type=checkbox]{width:1.1rem;height:1.1rem;flex:none;accent-color:var(--sea);padding:0}
 .acts{display:flex;gap:.5rem;margin-top:1.3rem}.acts .sp{flex:1}
-#dlg .acts,#dlt .acts,#dls .acts,#dla .acts{position:sticky;bottom:0;background:var(--surf);padding:.9rem 0 calc(.9rem + var(--sab));margin-top:1rem;border-top:1px solid var(--line)}
+#dlg .acts,#dlt .acts,#dls .acts,#dla .acts,#dlf .acts{position:sticky;bottom:0;background:var(--surf);padding:.9rem 0 calc(.9rem + var(--sab));margin-top:1rem;border-top:1px solid var(--line)}
 .ck{display:flex;gap:.6rem;align-items:center;margin-bottom:.4rem}
 .ck .x{background:none;border:0;color:var(--mut);font-size:1rem;padding:.3rem .5rem}
 .xb{display:block;width:100%;margin-top:.7rem;text-align:left;padding:.8rem 1rem}
@@ -234,8 +234,8 @@ label{display:block;font-size:.76rem;font-weight:650;color:var(--mut);margin:1re
   tr.row td{display:inline-block;border:0;padding:0 .8rem 0 0;font-size:.82rem;color:var(--mut);background:none!important}
   tr.row td:first-child{display:block;font-size:1.02rem;font-weight:600;color:var(--tx);padding:0 0 .4rem}
   tr.row td:nth-child(4){display:none}tr.row td:nth-child(5)::before{content:"bis "}
-  #dlg,#dlt,#dls,#dla{margin:auto 0 0;height:auto;max-height:94vh;max-height:94dvh;width:100%;max-width:100%;border-radius:1.5rem 1.5rem 0 0;padding:1.2rem 1.1rem 0;animation:slideY .24s ease-out}
-  #dlg::before,#dlt::before,#dls::before,#dla::before{content:"";display:block;width:2.4rem;height:.28rem;border-radius:.2rem;background:var(--line2);margin:-.4rem auto .8rem}
+  #dlg,#dlt,#dls,#dla,#dlf{margin:auto 0 0;height:auto;max-height:94vh;max-height:94dvh;width:100%;max-width:100%;border-radius:1.5rem 1.5rem 0 0;padding:1.2rem 1.1rem 0;animation:slideY .24s ease-out}
+  #dlg::before,#dlt::before,#dls::before,#dla::before,#dlf::before{content:"";display:block;width:2.4rem;height:.28rem;border-radius:.2rem;background:var(--line2);margin:-.4rem auto .8rem}
   #dlx{margin:auto 0 0;width:100%;max-width:100%;border-radius:1.5rem 1.5rem 0 0;padding-bottom:calc(1.2rem + var(--sab));animation:slideY .24s ease-out}
 }
 /* iPad hochkant / schmale Fenster: Rail bleibt, Kopf kompakter */
@@ -428,7 +428,7 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
 .ic{display:inline-flex;align-items:center;gap:.5rem;color:var(--mut)}
 td .ic{margin-left:.4rem}
 .tm .dotb.sq{border-radius:.5rem}
-#dlt label,#dls label,#dla label{font:700 .7rem/1 var(--disp);letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin:1.4rem 0 .5rem}
+#dlt label,#dls label,#dla label,#dlf label{font:700 .7rem/1 var(--disp);letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin:1.4rem 0 .5rem}
 #dlg label.cbl{display:flex;align-items:center;gap:.7rem;margin:1rem 0 0;font:500 .95rem var(--fb);letter-spacing:0;text-transform:none;color:var(--tx);cursor:pointer}
 #dlg label.cbl input{width:1.2rem;height:1.2rem;flex:none;accent-color:var(--sea);padding:0}
 .g2.ms{grid-template-columns:minmax(0,1fr)}
@@ -569,7 +569,7 @@ body.selmode #toast{bottom:5.2rem}
 th{font-size:.8rem;font-weight:600;border-bottom:1px solid var(--line2)}
 tr.grp td,.gr.gh2{font-size:.85rem;font-weight:650}
 .cg h4,.hnext small,.aih{font-size:.8rem;font-weight:600}
-#dlg label,#dlt label,#dla label{font:600 .82rem/1.2 var(--disp);color:var(--mut);margin:1.25rem 0 .45rem}
+#dlg label,#dlt label,#dla label,#dlf label{font:600 .82rem/1.2 var(--disp);color:var(--mut);margin:1.25rem 0 .45rem}
 .colm{background:var(--wk);border-top:0;border-radius:1rem}
 .colm.over{box-shadow:inset 0 0 0 2px var(--acc)}
 .card{border-radius:.8rem;transition:border-color .12s,background .12s}
@@ -704,6 +704,20 @@ tr.row[data-pr] td:first-child{position:relative}
 #srt.tgrp{max-width:10rem}
 .pr4 button{padding:.4rem .15rem}
 .prh{margin:.4rem .2rem 0;font-size:.82rem;color:var(--mut);min-height:1.1em}
+/* 1.20: Filter-Blatt, Projekt als Kopfzeile */
+.tflt{flex:none;display:inline-flex;align-items:center;gap:.45rem;height:2.4rem;padding:0 .9rem;border:1px solid var(--line2);background:var(--surf);color:var(--tx);border-radius:2rem;font-weight:600;font-size:.88rem}
+.tflt svg{width:1.05rem;height:1.05rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.tflt b{font-weight:700;font-size:.72rem;min-width:1.2rem;height:1.2rem;border-radius:1rem;background:var(--brick);color:#fff;display:inline-grid;place-items:center;padding:0 .3rem}.tflt b:empty{display:none}
+.tflt.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.tchips{flex-wrap:wrap;overflow:visible;gap:.4rem}.tchips:empty{display:none}
+.tchips .tc em{font-size:1rem;line-height:1;color:var(--mut)}
+.tclr{flex:none;border:0;background:none;color:var(--mut);font-weight:600;font-size:.82rem;padding:.3rem .4rem;text-decoration:underline;text-underline-offset:2px}
+.fch{display:flex;flex-wrap:wrap;gap:.45rem}
+#f_reset:disabled{opacity:.4}
+.pjh{display:flex;align-items:center;gap:.4rem;margin:0 0 .35rem 2.15rem;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:color-mix(in srgb,var(--tc) 55%,var(--tx))}
+.pjh i{width:.5rem;height:.5rem;border-radius:.15rem;background:var(--tc);flex:none}
+td .pjh{margin-left:0}
+@media (max-width:699px){.tchips{order:10}}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"></head>
 <body>
@@ -735,7 +749,7 @@ tr.row[data-pr] td:first-child{position:relative}
   </header>
   <section class="kpis" id="kpis"></section>
   <div id="note"></div>
-  <div class="tbar" id="tbar"><div class="tchips" id="tchips"></div><select class="tgrp" id="grp" aria-label="Gruppieren"><option value="none">Gruppieren</option><option value="tag">Nach Tag</option><option value="proj">Nach Projekt</option><option value="who">Nach Person</option><option value="prio">Nach Priorität</option></select><select class="tgrp" id="srt" aria-label="Sortieren"><option value="date">Sort: Datum</option><option value="prio">Sort: Prio</option></select><button class="tsel" id="selbtn" type="button" aria-label="Mehrere auswählen" title="Mehrere auswählen (S)"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.2l2.5 2.5 4.5-5"/></svg><span>Auswählen</span></button><button class="tgear" id="tman" aria-label="Tags verwalten" title="Tags verwalten"><svg viewBox="0 0 24 24"><path d="M20 13.2 13.2 20a2 2 0 0 1-2.8 0L3.5 13.1V4.5a1 1 0 0 1 1-1h8.6L20 10.4a2 2 0 0 1 0 2.8z"/><circle cx="8.2" cy="8.2" r="1.3"/></svg></button></div>
+  <div class="tbar" id="tbar"><button class="tflt" id="fbtn" type="button" aria-label="Filter"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span>Filter</span><b id="fcnt"></b></button><div class="tchips" id="tchips"></div><select class="tgrp" id="grp" aria-label="Gruppieren"><option value="none">Gruppieren</option><option value="tag">Nach Tag</option><option value="proj">Nach Projekt</option><option value="who">Nach Person</option><option value="prio">Nach Priorität</option></select><select class="tgrp" id="srt" aria-label="Sortieren"><option value="date">Sort: Datum</option><option value="prio">Sort: Prio</option></select><button class="tsel" id="selbtn" type="button" aria-label="Mehrere auswählen" title="Mehrere auswählen (S)"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.2l2.5 2.5 4.5-5"/></svg><span>Auswählen</span></button><button class="tgear" id="tman" aria-label="Tags verwalten" title="Tags verwalten"><svg viewBox="0 0 24 24"><path d="M20 13.2 13.2 20a2 2 0 0 1-2.8 0L3.5 13.1V4.5a1 1 0 0 1 1-1h8.6L20 10.4a2 2 0 0 1 0 2.8z"/><circle cx="8.2" cy="8.2" r="1.3"/></svg></button></div>
   <main id="main"></main>
 </div>
 </div>
@@ -745,6 +759,11 @@ tr.row[data-pr] td:first-child{position:relative}
   <div class="sh"><button class="sback" id="s_back" type="button" hidden aria-label="Zurück"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button><div class="dh" id="s_title">Einstellungen</div></div>
   <div id="s_body"></div>
   <div class="acts"><span class="sp"></span><button class="btn" id="s_close" type="button">Fertig</button></div>
+</dialog>
+<dialog id="dlf">
+  <div class="sh"><div class="dh">Filter</div></div>
+  <div id="fbody"></div>
+  <div class="acts"><button class="btn ghost" id="f_reset" type="button">Zurücksetzen</button><span class="sp"></span><button class="btn" id="f_ok" type="button">Anzeigen</button></div>
 </dialog>
 <dialog id="dla">
   <div class="dh">Archiv und Papierkorb</div>
@@ -1290,7 +1309,7 @@ const pcol=n=>TC[pcolorKey(n)];
 const nextPColor=()=>{const used=new Set(allProjs().map(pcolorKey));return TCK.find(k=>!used.has(k))||TCK[allProjs().length%TCK.length]};
 const projChip=t=>t.proj?`<span class="tag proj" style="--tc:${pcol(t.proj)}">${esc(t.proj)}</span>`:"";
 const fullReg=()=>[...allTags().map(n=>{const o={n,c:colorKey(n)},i=tagIconStored(n);if(i)o.i=i;return o}),...allProjs().map(n=>({n,c:pcolorKey(n),p:1}))];
-const tagOk=t=>(!ftags.size||[...ftags].some(k=>k==="__none"?!tgs(t).length:tgs(t).includes(k)))&&(!fprojs.size||fprojs.has(t.proj))&&(!fprios.size||fprios.has(t.prio||0));
+const tagOk=t=>(!ftags.size||[...ftags].some(k=>k==="__none"?!tgs(t).length:tgs(t).includes(k)))&&(!fprojs.size||[...fprojs].some(k=>k==="__none"?!t.proj:t.proj===k))&&(!fprios.size||fprios.has(t.prio||0));
 function groups(list){
   if(grp==="none")return[{l:null,L:list}];
   const key=t=>grp==="tag"?(tgs(t)[0]||""):grp==="proj"?(t.proj||""):grp==="prio"?(t.prio?"Prio "+t.prio:""):(t.who||"");
@@ -1303,14 +1322,41 @@ function groups(list){
 }
 let migrated=false,regLoaded=false;
 function migrateReg(){if(migrated||!regLoaded||!tasks.length)return;migrated=true;if(allTags().some(n=>!reg.some(x=>!x.p&&x.n===n))||allProjs().some(n=>!reg.some(x=>x.p&&x.n===n)))saveReg(fullReg())}
+const fCount=()=>ftags.size+fprojs.size+fprios.size+($("fw").value?1:0);
 function drawTbar(){
-  const names=allTags(),pn=allProjs(),n=tasks.length,none=tasks.filter(t=>!tgs(t).length).length,box=$("tchips"),sl=box.scrollLeft;
-  ftags=new Set([...ftags].filter(x=>x==="__none"||names.includes(x)));fprojs=new Set([...fprojs].filter(x=>pn.includes(x)));
-  const c=(a,k,l,cnt,col,cls)=>`<button class="tc${cls||""}${(a==="p"?fprojs:ftags).has(k)?" on":""}" data-${a}="${esc(k)}"${col?` style="--tc:${col}"`:""}>${col?(a==="t"&&k!=="__none"?tIc(k):"<i></i>"):""}<span>${esc(l)}</span><em>${cnt}</em></button>`;
-  box.innerHTML=`<button class="tc all${ftags.size||fprojs.size||fprios.size?"":" on"}" data-t=""><span>Alle</span><em>${n}</em></button>`+names.map(x=>c("t",x,x,tasks.filter(t=>tgs(t).includes(x)).length,tcol(x))).join("")+(none&&names.length?c("t","__none","Ohne Tag",none):"")+(pn.length?'<span class="tsep"></span>'+pn.map(x=>c("p",x,x,tasks.filter(t=>t.proj===x).length,pcol(x)," pj")).join(""):"")+'<span class="tsep"></span>'+[1,2,3].map(r=>`<button class="tc prc${fprios.has(r)?" on":""}" data-r="${r}"><i></i><span>Prio ${r}</span><em>${tasks.filter(t=>t.prio===r).length}</em></button>`).join("");
-  box.scrollLeft=sl;$("grp").value=grp;$("srt").value=sortm;
+  const names=allTags(),pn=allProjs(),box=$("tchips");
+  ftags=new Set([...ftags].filter(x=>x==="__none"||names.includes(x)));fprojs=new Set([...fprojs].filter(x=>x==="__none"||pn.includes(x)));
+  const ac=(a,k,l,col,pre)=>`<button class="tc on" data-a="${a}" data-v="${esc(k)}"${col?` style="--tc:${col}"`:""}>${pre||""}<span>${esc(l)}</span><em>×</em></button>`;
+  const w=$("fw").value,act=[...fprojs].map(k=>ac("p",k,k==="__none"?"Ohne Projekt":k,k==="__none"?"var(--faint)":pcol(k),"<i></i>")).concat([...ftags].map(k=>ac("t",k,k==="__none"?"Ohne Tag":k,k==="__none"?"var(--faint)":tcol(k),k==="__none"?"<i></i>":tIc(k))),[...fprios].sort().map(r=>ac("r",String(r),r?"Prio "+r:"Ohne Prio",r?`var(--p${r})`:"var(--faint)","<i></i>")),w?[ac("w",w,w==="__none"?"Nicht zugewiesen":w,"var(--sea)","<i></i>")]:[]);
+  if(act.length>1)act.push('<button class="tclr" data-a="all">Alle entfernen</button>');
+  box.innerHTML=act.join("");
+  const n=fCount();$("fcnt").textContent=n||"";$("fbtn").classList.toggle("on",n>0);
+  $("grp").value=grp;$("srt").value=sortm;
+  if($("dlf").open)drawF();
 }
-$("tchips").onclick=e=>{const b=e.target.closest(".tc");if(!b)return;if("r" in b.dataset){const k=+b.dataset.r;if(fprios.has(k))fprios.delete(k);else fprios.add(k)}else if("p" in b.dataset){const k=b.dataset.p;if(fprojs.has(k))fprojs.delete(k);else fprojs.add(k)}else{const k=b.dataset.t;if(!k){ftags.clear();fprojs.clear();fprios.clear()}else if(ftags.has(k))ftags.delete(k);else ftags.add(k)}render()};
+function drawF(){
+  const names=allTags(),pn=allProjs(),none=tasks.filter(t=>!tgs(t).length).length,noP=tasks.filter(t=>!t.proj).length,whos=allWho(),w=$("fw").value;
+  const ch=(a,k,l,cnt,on,col,pre)=>`<button class="tc${on?" on":""}" data-fa="${a}" data-fv="${esc(k)}"${col?` style="--tc:${col}"`:""}>${pre===undefined?(col?"<i></i>":""):pre}<span>${esc(l)}</span><em>${cnt}</em></button>`;
+  let h="";
+  if(pn.length)h+=`<label>Projekt</label><div class="fch">`+pn.map(x=>ch("p",x,x,tasks.filter(t=>t.proj===x).length,fprojs.has(x),pcol(x))).join("")+(noP&&noP<tasks.length?ch("p","__none","Ohne Projekt",noP,fprojs.has("__none"),"var(--faint)"):"")+"</div>";
+  h+=`<label>Priorität</label><div class="fch">`+[1,2,3].map(r=>ch("r",String(r),"Prio "+r,tasks.filter(t=>t.prio===r).length,fprios.has(r),`var(--p${r})`)).join("")+ch("r","0","Ohne Prio",tasks.filter(t=>!t.prio).length,fprios.has(0),"var(--faint)")+"</div>";
+  if(names.length)h+=`<label>Tag</label><div class="fch">`+names.map(x=>ch("t",x,x,tasks.filter(t=>tgs(t).includes(x)).length,ftags.has(x),tcol(x),tIc(x))).join("")+(none?ch("t","__none","Ohne Tag",none,ftags.has("__none"),"var(--faint)"):"")+"</div>";
+  if(whos.length)h+=`<label>Verantwortlich</label><div class="fch">`+whos.map(x=>ch("w",x,x,tasks.filter(t=>wl(t).includes(x)).length,w===x,null)).join("")+ch("w","__none","Nicht zugewiesen",tasks.filter(t=>!t.who).length,w==="__none",null)+"</div>";
+  $("fbody").innerHTML=h;
+  const c=filtered().length;$("f_ok").textContent=c===1?"1 Aufgabe anzeigen":c+" Aufgaben anzeigen";$("f_reset").disabled=!fCount();
+}
+function fClear(){ftags.clear();fprojs.clear();fprios.clear();$("fw").value=""}
+function fToggle(a,v){
+  if(a==="p")fprojs.has(v)?fprojs.delete(v):fprojs.add(v);
+  else if(a==="t")ftags.has(v)?ftags.delete(v):ftags.add(v);
+  else if(a==="r"){const k=+v;fprios.has(k)?fprios.delete(k):fprios.add(k)}
+  else if(a==="w")$("fw").value=$("fw").value===v?"":v;
+}
+$("fbtn").onclick=()=>{drawF();$("dlf").showModal();$("dlf").scrollTop=0};
+$("f_ok").onclick=()=>$("dlf").close();
+$("f_reset").onclick=()=>{fClear();render()};
+$("fbody").onclick=e=>{const b=e.target.closest("[data-fa]");if(!b)return;fToggle(b.dataset.fa,b.dataset.fv);render()};
+$("tchips").onclick=e=>{const b=e.target.closest("[data-a]");if(!b)return;if(b.dataset.a==="all")fClear();else fToggle(b.dataset.a,b.dataset.v);render()};
 $("grp").onchange=e=>{grp=e.target.value;render()};
 $("srt").onchange=e=>{sortm=e.target.value;try{localStorage.setItem("haus-sort",sortm)}catch(_){}render()};
 /* Tag-Auswahl im Aufgaben-Dialog */
@@ -1451,16 +1497,18 @@ function render(){
   $("main").classList.toggle("g",view==="gantt"&&n>0);
   const old=snap(),list=filtered();
   if(!n){$("main").innerHTML='<div class="empty">Noch keine Aufgaben.<br><br><button class="btn" onclick="openDlg()">Erste Aufgabe anlegen</button></div>';return}
+  if(view!=="home"&&!list.length){$("main").innerHTML='<div class="empty">Keine Aufgaben mit diesen Filtern.<br><br><button class="btn ghost" id="fclr">Filter zurücksetzen</button></div>';$("fclr").onclick=()=>{fClear();$("q").value="";render()};applySel();return}
   $("main").innerHTML=view==="home"?home():view==="board"?board(list):view==="list"?table(list):view==="cal"?cal(list):gantt(list);
   bind();after(old);applySel();
 }
 const avc=w=>/^melanie/i.test(w)?"am":/^lasse/i.test(w)?"al":"ao";
+const pjh=t=>t.proj?`<div class="pjh" style="--tc:${pcol(t.proj)}"><i></i>${esc(t.proj)}</div>`:"";
 const pb=t=>t.prio?`<span class="pr p${t.prio}" title="Prio ${t.prio}">P${t.prio}</span>`:"";
 const cl=t=>{const a=t.checklist||[];return a.length?`<span class="ckc">${a.filter(x=>x.d).length}/${a.length}</span>`:""};
 function card(t,s,i=0){
   const a=t.checklist||[],k=a.filter(x=>x.d).length,late=isLate(t);
-  const tg=pb(t)+projChip(t)+tgs(t).map(chip).join("")+(isBlocked(t)?'<span class="blk">blockiert</span>':"");
-  return`<div class="card ${s}${t.id===lastMoved?" pop":""}"${t.prio?` data-pr="${t.prio}"`:""} draggable="true" data-id="${t.id}" style="--i:${Math.min(i,8)}"><div class="ch"><button class="ring ${s}" data-adv="${t.id}" aria-label="Status: ${ST[s]}. Weiterschalten"></button><div class="t">${esc(t.title)}</div>${wl(t).length?`<span class="avs" title="${esc(wl(t).join(", "))}">${wl(t).slice(0,3).map(n=>`<i class="av ${avc(n)}">${esc(n[0].toUpperCase())}</i>`).join("")}${wl(t).length>3?`<i class="av ao">+${wl(t).length-3}</i>`:""}</span>`:""}</div>${tg?`<div class="tg">${tg}</div>`:""}${a.length?`<div class="cb"><i style="width:${Math.round(k/a.length*100)}%"></i></div>`:""}<div class="cm"><span class="${late?"late":""}">${dr(t)}</span><span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}${cl(t)}</span></div></div>`}
+  const tg=pb(t)+tgs(t).map(chip).join("")+(isBlocked(t)?'<span class="blk">blockiert</span>':"");
+  return`<div class="card ${s}${t.id===lastMoved?" pop":""}"${t.prio?` data-pr="${t.prio}"`:""} draggable="true" data-id="${t.id}" style="--i:${Math.min(i,8)}">${pjh(t)}<div class="ch"><button class="ring ${s}" data-adv="${t.id}" aria-label="Status: ${ST[s]}. Weiterschalten"></button><div class="t">${esc(t.title)}</div>${wl(t).length?`<span class="avs" title="${esc(wl(t).join(", "))}">${wl(t).slice(0,3).map(n=>`<i class="av ${avc(n)}">${esc(n[0].toUpperCase())}</i>`).join("")}${wl(t).length>3?`<i class="av ao">+${wl(t).length-3}</i>`:""}</span>`:""}</div>${tg?`<div class="tg">${tg}</div>`:""}${a.length?`<div class="cb"><i style="width:${Math.round(k/a.length*100)}%"></i></div>`:""}<div class="cm"><span class="${late?"late":""}">${dr(t)}</span><span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}${cl(t)}</span></div></div>`}
 let showDone=false;const DONE_MAX=20;
 function board(list){
   return`<div class="board">`+Object.keys(ST).map(s=>{let L=list.filter(t=>t.status===s);const all=L.length;
@@ -1468,7 +1516,7 @@ function board(list){
     return`<div class="colm" data-s="${s}"><h3><i class="dt ${s}"></i><span>${ST[s]}</span><em>${all}</em></h3>`+(L.length?L.map((t,i)=>card(t,s,i)).join(""):'<div class="none">Keine Aufgaben</div>')+(cut?`<button class="btn ghost sm more" onclick="showDone=true;render()">Alle ${all} anzeigen</button>`:"")+`</div>`}).join("")+`</div>`;
 }
 function table(list){
-  const row=t=>`<tr class="row" data-id="${t.id}"${t.prio?` data-pr="${t.prio}"`:""}><td>${pb(t)}${esc(t.title)} ${isBlocked(t)?'<span class="blk">blockiert</span>':""}<span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}</span></td><td>${projChip(t)}${tgs(t).map(chip).join("")}</td><td>${esc(t.who)}</td><td>${fd(t.start)}</td><td class="${isLate(t)?"late":""}">${fd(t.end)}</td><td><span class="st ${t.status}">${ST[t.status]}</span></td></tr>`;
+  const row=t=>`<tr class="row" data-id="${t.id}"${t.prio?` data-pr="${t.prio}"`:""}><td>${pjh(t)}${pb(t)}${esc(t.title)} ${isBlocked(t)?'<span class="blk">blockiert</span>':""}<span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}</span></td><td>${tgs(t).map(chip).join("")}</td><td>${esc(t.who)}</td><td>${fd(t.start)}</td><td class="${isLate(t)?"late":""}">${fd(t.end)}</td><td><span class="st ${t.status}">${ST[t.status]}</span></td></tr>`;
   return`<div class="wrap"><table><tr><th>Aufgabe</th><th>Tags</th><th>Ressource</th><th>Start</th><th>Ende</th><th>Status</th></tr>`+
   groups(list).map(g=>(g.l!=null?`<tr class="grp"><td colspan="6"><i class="dt" style="background:${g.c}"></i>${esc(g.l)}<em>${g.L.length}</em></td></tr>`:"")+g.L.map(row).join("")).join("")+`</table></div>`;
 }
@@ -1616,7 +1664,7 @@ $("ck_add").onclick=()=>{cklist.push({t:"",d:false});drawCk();const a=$("f_ck").
 
 /* Dialog */
 function openDlg(id){
-  editing=id?byId(id):null;const t=editing||{title:"",tags:ftags.size===1&&!ftags.has("__none")?[...ftags]:[],who:"",proj:fprojs.size===1?[...fprojs][0]:"",status:"todo",start:tdy(),end:iso(fromDn(dn(tdy())+6)),deps:[],notes:""};
+  editing=id?byId(id):null;const t=editing||{title:"",tags:ftags.size===1&&!ftags.has("__none")?[...ftags]:[],who:"",proj:fprojs.size===1&&!fprojs.has("__none")?[...fprojs][0]:"",status:"todo",start:tdy(),end:iso(fromDn(dn(tdy())+6)),deps:[],notes:""};
   $("dt").textContent=editing?"Aufgabe bearbeiten":"Neue Aufgabe";
   $("f_title").value=t.title;selTags=[...tgs(t)];regDraft=reg.map(x=>({...x}));colorFor=null;$("f_tagin").value="";drawTags();selWho=wl(t);$("f_who").value="";$("f_who").style.display="none";drawWho();$("f_status").value=t.status;syncSeg();$("f_prio").value=t.prio||0;syncPr();
   $("f_start").value=t.start;$("f_end").value=t.end;initExtra(t);rpOpen(false);drawRange();$("f_notes").value=t.notes||"";

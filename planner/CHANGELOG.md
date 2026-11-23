@@ -1,5 +1,9 @@
 # Änderungen
 
+## 1.20.0
+- Filter überarbeitet: Statt der langen Chip-Leiste gibt es einen Knopf „Filter“ mit Zähler. Er öffnet ein Blatt mit Projekt, Priorität, Tag und Verantwortlich (mehrere gleichzeitig wählbar, Aufgabenzahl live, „Zurücksetzen“). Aktive Filter stehen als kleine Chips unter der Leiste und lassen sich mit × entfernen. Neu: Filter „Ohne Projekt“ und „Ohne Prio“
+- Projekt steht jetzt als farbige Kopfzeile über dem Titel (Board und Liste) und nicht mehr neben den Tags
+
 ## 1.19.0
 - Sicherheit: Schreibzugriffe auf den Server (Aufgaben ändern, löschen, importieren, KI, Erinnerungen) funktionieren nur noch aus dem Planner selbst. Fremde Webseiten im Browser können über das Heimnetz keine Aufgaben mehr verändern oder löschen
 - Sicherheit: KI-Anfragen sind auf 40 pro Stunde begrenzt, damit keine unbeabsichtigten Kosten entstehen
