@@ -1,5 +1,9 @@
 # Änderungen
 
+## 1.27.1
+- KI-Schlüssel: Das Feld ist jetzt ein normales, sichtbares Textfeld statt eines Passwortfelds (auf dem iPhone ließ sich dort schlecht einfügen und man sah nichts). Dazu ein Knopf „Aus Zwischenablage einfügen“; Leerzeichen, Zeilenumbrüche und Anführungszeichen werden entfernt.
+- Wischen zum Schließen startet nicht mehr in Eingabefeldern, damit langes Drücken zum Einsetzen funktioniert.
+
 ## 1.27.0
 Neu gestaltet nach iOS-Mustern (Apple-Richtlinien, WCAG-Kontrast):
 - Kopfzeile aufgeräumt: Titel, eine Zeile Zusammenfassung, rechts nur Suche, Filter und ⋯. Sortieren, Gruppieren, Auswählen, Tags, Archiv, Export und Einstellungen stecken im ⋯-Menü (mit Untermenüs). Keine zweizeiligen Leisten mehr.

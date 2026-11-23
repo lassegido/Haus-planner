@@ -829,7 +829,7 @@ class H(BaseHTTPRequestHandler):
             if isinstance(data.get("time"), str) and re.fullmatch(r"([01][0-9]|2[0-3]):[0-5][0-9]", data["time"]):
                 st["time"] = data["time"]
             if isinstance(data.get("ai_key"), str):
-                k = data["ai_key"].strip()
+                k = re.sub(r"\s+", "", data["ai_key"]).strip("\"'„“”")
                 if not k:
                     st.pop("ai_key", None)
                 elif AI_KEY.fullmatch(k):

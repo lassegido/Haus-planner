@@ -927,6 +927,9 @@ h1,.pnl h3,.colm h3{font-family:var(--disp)}
 
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .seg3 [data-s=todo].on{background:color-mix(in srgb,var(--sky) 20%,var(--grp));color:var(--sky)}:root:not([data-theme="light"]) .seg3 [data-s=doing].on{background:color-mix(in srgb,var(--sun) 20%,var(--grp));color:var(--sun)}:root:not([data-theme="light"]) .seg3 [data-s=done].on{background:color-mix(in srgb,var(--sky) 14%,var(--grp));color:#8FC6E8}}
 :root[data-theme="dark"] .seg3 [data-s=todo].on{background:color-mix(in srgb,var(--sky) 20%,var(--grp));color:var(--sky)}:root[data-theme="dark"] .seg3 [data-s=doing].on{background:color-mix(in srgb,var(--sun) 20%,var(--grp));color:var(--sun)}:root[data-theme="dark"] .seg3 [data-s=done].on{background:color-mix(in srgb,var(--sky) 14%,var(--grp));color:#8FC6E8}
+
+.kin input{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:max(16px,.95rem);letter-spacing:.01em}
+.srow b.acc{color:var(--acc);font-weight:650}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"></head>
 <body>
@@ -1278,7 +1281,8 @@ function drawSettings(){
   }else if(sPage==="ki"){
     const hi=haInfo||{},on=!!hi.ai;
     h=grp(srow("","Status",on?"Aktiv":"Aus",null,false)+srow(`data-act="kitest"${on?"":" disabled"}`,"Verbindung testen",null,null,false))
-     +`<p class="sgt">Gemini-Schlüssel</p><div class="sgrp kin"><input id="ki_key" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${hi.aiapp?"Neuen Schlüssel einfügen":"Schlüssel einfügen"}" aria-label="Gemini-Schlüssel"><button class="tb b" data-act="kisave" type="button">Sichern</button></div>`
+     +`<p class="sgt">Gemini-Schlüssel</p><div class="sgrp kin"><input id="ki_key" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" placeholder="${hi.aiapp?"Neuen Schlüssel einfügen":"AIza…"}" aria-label="Gemini-Schlüssel"></div>`
+     +grp(srow('data-act="kipaste"',"Aus Zwischenablage einfügen",null,null,false)+srow('data-act="kisave"',"<b class=\"acc\">Schlüssel sichern</b>",null,null,false))
      +cap("Kostenlos erstellen unter aistudio.google.com/apikey (Google-Konto, ohne Kreditkarte). Der Schlüssel bleibt auf deinem Home Assistant und wird hier nie wieder angezeigt.")
      +(hi.aiapp?grp(srow('data-act="kidel"',"<span class=\"bad\">Schlüssel entfernen</span>",null,null,false)):"")
      +`<p class="sgt">Modell</p>`+grp([["gemini-flash-lite-latest","Flash-Lite","schnell, größtes Gratis-Kontingent"],["gemini-flash-latest","Flash","gründlicher, kleineres Kontingent"]].map(([k,l,d])=>sopt(`data-set="aimodel:${k}"`,`${l}<small>${d}</small>`,(hi.model||"gemini-flash-lite-latest")===k)).join(""))
@@ -1300,6 +1304,7 @@ function drawSettings(){
 }
 function openSettings(){sPage="main";drawSettings();$("dls").showModal();$("dls").scrollTop=0}
 $("cfg").onclick=openSettings;$("s_close").onclick=()=>$("dls").close();
+$("s_body").addEventListener("keydown",e=>{if(e.target.id==="ki_key"&&e.key==="Enter"){e.preventDefault();const b=document.querySelector('#s_body [data-act="kisave"]');if(b)b.click()}});
 $("s_back").onclick=()=>{sPage=sPage==="remt"?"rem":"main";drawSettings();$("dls").scrollTop=0};
 $("s_body").onclick=async e=>{
   const b=e.target.closest("button");if(!b||b.disabled)return;const d=b.dataset;
@@ -1313,7 +1318,8 @@ $("s_body").onclick=async e=>{
     drawSettings();return}
   if(d.act==="arch"){const L=tasks.filter(t=>t.status==="done");if(!L.length)return;await saveMany(L.map(t=>({...t,arch:true})));$("dls").close();toast(L.length+" erledigte archiviert",()=>saveMany(L))}
   else if(d.act==="open"){$("dls").close();openArch()}
-  else if(d.act==="kisave"){const k=$("ki_key").value.trim();if(!k){$("ki_key").focus();return}
+  else if(d.act==="kipaste"){try{const t=await navigator.clipboard.readText();$("ki_key").value=t.replace(/\s+/g,"");toast(t.trim()?"Eingefügt, jetzt sichern":"Zwischenablage ist leer")}catch(e){$("ki_key").focus();toast("Bitte lange ins Feld tippen und „Einsetzen“ wählen")}}
+  else if(d.act==="kisave"){const k=$("ki_key").value.replace(/\s+/g,"").replace(/^["'„“]+|["'„“”]+$/g,"");if(!k){$("ki_key").focus();toast("Erst den Schlüssel einfügen");return}
     try{const r=await fetch("api/ha-settings",{method:"POST",headers:{"Content-Type":"application/json","X-Planner":"1"},body:JSON.stringify({ai_key:k})}),j=await r.json().catch(()=>({}));
       if(!r.ok){toast(j.error||"Speichern fehlgeschlagen");return}if(j.ha)haInfo=j.ha;drawSettings();toast("Schlüssel gesichert")}catch(e){toast("Server nicht erreichbar")}}
   else if(d.act==="kidel"){if(!await confirmSheet("Gemini-Schlüssel entfernen?","Entfernen"))return;await haSave({ai_key:""});drawSettings();toast("Schlüssel entfernt")}
@@ -2033,7 +2039,7 @@ function swipeClose(id,guard){
   const d=$(id);let y0=null,dy=0,t0=0,drag=false;
   const sheetOn=()=>matchMedia("(max-width:699px)").matches;
   const scr=n=>{for(;n&&n!==d;n=n.parentElement)if(n.scrollTop>0)return true;return false};
-  d.addEventListener("touchstart",e=>{if(!sheetOn()||e.touches.length!==1||e.target.closest(".gwrap")){y0=null;return}y0=e.touches[0].clientY;dy=0;drag=false;t0=Date.now();d.style.transition="none";if(scr(e.target))y0=null},{passive:true});
+  d.addEventListener("touchstart",e=>{if(!sheetOn()||e.touches.length!==1||e.target.closest(".gwrap,input,textarea,select")){y0=null;return}y0=e.touches[0].clientY;dy=0;drag=false;t0=Date.now();d.style.transition="none";if(scr(e.target))y0=null},{passive:true});
   d.addEventListener("touchmove",e=>{if(y0===null)return;const m=e.touches[0].clientY-y0;
     if(!drag){if(m>6&&d.scrollTop<=0)drag=true;else return}
     dy=Math.max(0,m);e.preventDefault();d.style.transform="translateY("+dy+"px)"},{passive:false});
