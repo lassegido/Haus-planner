@@ -685,6 +685,18 @@ body.glres{cursor:col-resize;user-select:none}
   body[data-view=gantt] main.g{display:block;overflow:visible;flex:none;height:auto;padding-bottom:calc(var(--pad) + var(--sab))}
   body[data-view=gantt] .gwrap{display:flex;overflow-x:auto;overflow-y:hidden;overscroll-behavior-y:auto;min-height:0;flex:none}
 }
+/* 1.18.0: Priorität, Zeitstrahl-Beschriftung */
+.gl{align-self:flex-start;min-height:100%}
+.pr{display:inline-flex;align-items:center;flex:none;font-size:.68rem;font-weight:750;line-height:1;padding:.2rem .36rem;border-radius:.4rem;letter-spacing:.02em;margin-right:.35rem;vertical-align:.08em}
+.pr.p1{background:var(--tx);color:var(--bg)}
+.pr.p2{box-shadow:inset 0 0 0 1.5px var(--tx);color:var(--tx)}
+.pr.p3{background:var(--line);color:var(--mut)}
+.tg .pr{margin-right:0}
+.gr .pr{flex:none;overflow:visible;text-overflow:clip;margin-right:.1rem}
+.tc.prc{--tc:var(--tx)}
+#srt.tgrp{max-width:10rem}
+.pr4 button{padding:.4rem .15rem}
+.prh{margin:.4rem .2rem 0;font-size:.82rem;color:var(--mut);min-height:1.1em}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"></head>
 <body>
@@ -716,7 +728,7 @@ body.glres{cursor:col-resize;user-select:none}
   </header>
   <section class="kpis" id="kpis"></section>
   <div id="note"></div>
-  <div class="tbar" id="tbar"><div class="tchips" id="tchips"></div><select class="tgrp" id="grp" aria-label="Gruppieren"><option value="none">Gruppieren</option><option value="tag">Nach Tag</option><option value="proj">Nach Projekt</option><option value="who">Nach Person</option></select><button class="tsel" id="selbtn" type="button" aria-label="Mehrere auswählen" title="Mehrere auswählen (S)"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.2l2.5 2.5 4.5-5"/></svg><span>Auswählen</span></button><button class="tgear" id="tman" aria-label="Tags verwalten" title="Tags verwalten"><svg viewBox="0 0 24 24"><path d="M20 13.2 13.2 20a2 2 0 0 1-2.8 0L3.5 13.1V4.5a1 1 0 0 1 1-1h8.6L20 10.4a2 2 0 0 1 0 2.8z"/><circle cx="8.2" cy="8.2" r="1.3"/></svg></button></div>
+  <div class="tbar" id="tbar"><div class="tchips" id="tchips"></div><select class="tgrp" id="grp" aria-label="Gruppieren"><option value="none">Gruppieren</option><option value="tag">Nach Tag</option><option value="proj">Nach Projekt</option><option value="who">Nach Person</option><option value="prio">Nach Priorität</option></select><select class="tgrp" id="srt" aria-label="Sortieren"><option value="date">Sort: Datum</option><option value="prio">Sort: Prio</option></select><button class="tsel" id="selbtn" type="button" aria-label="Mehrere auswählen" title="Mehrere auswählen (S)"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.2l2.5 2.5 4.5-5"/></svg><span>Auswählen</span></button><button class="tgear" id="tman" aria-label="Tags verwalten" title="Tags verwalten"><svg viewBox="0 0 24 24"><path d="M20 13.2 13.2 20a2 2 0 0 1-2.8 0L3.5 13.1V4.5a1 1 0 0 1 1-1h8.6L20 10.4a2 2 0 0 1 0 2.8z"/><circle cx="8.2" cy="8.2" r="1.3"/></svg></button></div>
   <main id="main"></main>
 </div>
 </div>
@@ -767,6 +779,10 @@ body.glres{cursor:col-resize;user-select:none}
   <label>Status</label>
   <div class="seg3 st3" id="f_stseg"><button type="button" data-s="todo">Offen</button><button type="button" data-s="doing">In Arbeit</button><button type="button" data-s="done">Erledigt</button></div>
   <input type="hidden" id="f_status" value="todo">
+  <label>Priorität</label>
+  <div class="seg3 pr4" id="f_prseg"><button type="button" data-p="0">Keine</button><button type="button" data-p="1">Prio 1</button><button type="button" data-p="2">Prio 2</button><button type="button" data-p="3">Prio 3</button></div>
+  <p class="prh" id="f_prh"></p>
+  <input type="hidden" id="f_prio" value="0">
   <label for="f_tagin">Tags</label>
   <div class="tpick" id="f_tpick"><span id="f_tsel" style="display:contents"></span><input id="f_tagin" placeholder="Tag hinzufügen …" enterkeyhint="done" autocomplete="off"></div>
   <div class="tsug" id="f_tsug"></div><div id="f_sw"></div>
@@ -789,7 +805,7 @@ body.glres{cursor:col-resize;user-select:none}
 const wl=t=>String(t.who||"").split(",").map(x=>x.trim()).filter(Boolean);
 const allWho=()=>[...new Set(["Melanie","Lasse",...tasks.flatMap(wl)])];
 const ST={todo:"Offen",doing:"In Arbeit",done:"Erledigt"},NEXT={todo:"doing",doing:"done",done:"todo"};
-let RAW=[],tasks=[],selMode=false,sel=new Set(),haInfo=null,haAvail=null,purged=false,reg=[],ftags=new Set(),fprojs=new Set(),grp="none",selTags=[],regDraft=null,colorFor=null,palOpen=null,view="home",col=null,editing=null,loaded=false;
+let RAW=[],tasks=[],selMode=false,sel=new Set(),haInfo=null,haAvail=null,purged=false,reg=[],ftags=new Set(),fprojs=new Set(),grp="none",fprios=new Set(),sortm=(()=>{try{return localStorage.getItem("haus-sort")||"date"}catch(e){return"date"}})(),selTags=[],regDraft=null,colorFor=null,palOpen=null,view="home",col=null,editing=null,loaded=false;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const iso=d=>d.toISOString().slice(0,10);
@@ -1134,6 +1150,7 @@ function diffLog(o,n){
   if(o.start!==n.start||o.end!==n.end)add("Zeitraum: "+dr(o)+" → "+dr(n));
   if((o.who||"")!==(n.who||""))add("Verantwortlich: "+(n.who||"niemand"));
   if((o.proj||"")!==(n.proj||""))add("Projekt: "+(n.proj||"keins"));
+  if((o.prio||0)!==(n.prio||0))add("Priorität: "+(n.prio?"Prio "+n.prio:"keine"));
   if(o.title!==n.title)add("Titel geändert");
   return L.slice(-120)}
 const fts=t=>{const d=new Date(t+"Z");return isNaN(d)?"":d.toLocaleString("de-DE",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})};
@@ -1260,16 +1277,16 @@ const pcol=n=>TC[pcolorKey(n)];
 const nextPColor=()=>{const used=new Set(allProjs().map(pcolorKey));return TCK.find(k=>!used.has(k))||TCK[allProjs().length%TCK.length]};
 const projChip=t=>t.proj?`<span class="tag proj" style="--tc:${pcol(t.proj)}">${esc(t.proj)}</span>`:"";
 const fullReg=()=>[...allTags().map(n=>{const o={n,c:colorKey(n)},i=tagIconStored(n);if(i)o.i=i;return o}),...allProjs().map(n=>({n,c:pcolorKey(n),p:1}))];
-const tagOk=t=>(!ftags.size||[...ftags].some(k=>k==="__none"?!tgs(t).length:tgs(t).includes(k)))&&(!fprojs.size||fprojs.has(t.proj));
+const tagOk=t=>(!ftags.size||[...ftags].some(k=>k==="__none"?!tgs(t).length:tgs(t).includes(k)))&&(!fprojs.size||fprojs.has(t.proj))&&(!fprios.size||fprios.has(t.prio||0));
 function groups(list){
   if(grp==="none")return[{l:null,L:list}];
-  const key=t=>grp==="tag"?(tgs(t)[0]||""):grp==="proj"?(t.proj||""):(t.who||"");
-  const order=grp==="tag"?allTags():grp==="proj"?allProjs():allWho();
+  const key=t=>grp==="tag"?(tgs(t)[0]||""):grp==="proj"?(t.proj||""):grp==="prio"?(t.prio?"Prio "+t.prio:""):(t.who||"");
+  const order=grp==="tag"?allTags():grp==="proj"?allProjs():grp==="prio"?["Prio 1","Prio 2","Prio 3"]:allWho();
   const m=new Map();list.forEach(t=>{const ks=grp==="who"?(wl(t).length?wl(t):[""]):[key(t)];ks.forEach(k=>{if(!m.has(k))m.set(k,[]);m.get(k).push(t)})});
   const ks=[...m.keys()].filter(Boolean).sort((a,b)=>{const i=order.indexOf(a),j=order.indexOf(b);return(i<0?999:i)-(j<0?999:j)||a.localeCompare(b,"de")});
   if(m.has(""))ks.push("");
   const pc=w=>/^melanie/i.test(w)?TC.brick:/^lasse/i.test(w)?TC.sea:TC.sky;
-  return ks.map(k=>({l:k||(grp==="tag"?"Ohne Tag":grp==="proj"?"Ohne Projekt":"Nicht zugewiesen"),c:k?(grp==="tag"?tcol(k):grp==="proj"?pcol(k):pc(k)):"#9FB0B9",L:m.get(k)}))
+  return ks.map(k=>({l:k||(grp==="tag"?"Ohne Tag":grp==="proj"?"Ohne Projekt":grp==="prio"?"Ohne Priorität":"Nicht zugewiesen"),c:k?(grp==="tag"?tcol(k):grp==="proj"?pcol(k):grp==="prio"?"#14303F":pc(k)):"#9FB0B9",L:m.get(k)}))
 }
 let migrated=false,regLoaded=false;
 function migrateReg(){if(migrated||!regLoaded||!tasks.length)return;migrated=true;if(allTags().some(n=>!reg.some(x=>!x.p&&x.n===n))||allProjs().some(n=>!reg.some(x=>x.p&&x.n===n)))saveReg(fullReg())}
@@ -1277,11 +1294,12 @@ function drawTbar(){
   const names=allTags(),pn=allProjs(),n=tasks.length,none=tasks.filter(t=>!tgs(t).length).length,box=$("tchips"),sl=box.scrollLeft;
   ftags=new Set([...ftags].filter(x=>x==="__none"||names.includes(x)));fprojs=new Set([...fprojs].filter(x=>pn.includes(x)));
   const c=(a,k,l,cnt,col,cls)=>`<button class="tc${cls||""}${(a==="p"?fprojs:ftags).has(k)?" on":""}" data-${a}="${esc(k)}"${col?` style="--tc:${col}"`:""}>${col?(a==="t"&&k!=="__none"?tIc(k):"<i></i>"):""}<span>${esc(l)}</span><em>${cnt}</em></button>`;
-  box.innerHTML=`<button class="tc all${ftags.size||fprojs.size?"":" on"}" data-t=""><span>Alle</span><em>${n}</em></button>`+names.map(x=>c("t",x,x,tasks.filter(t=>tgs(t).includes(x)).length,tcol(x))).join("")+(none&&names.length?c("t","__none","Ohne Tag",none):"")+(pn.length?'<span class="tsep"></span>'+pn.map(x=>c("p",x,x,tasks.filter(t=>t.proj===x).length,pcol(x)," pj")).join(""):"");
-  box.scrollLeft=sl;$("grp").value=grp;
+  box.innerHTML=`<button class="tc all${ftags.size||fprojs.size||fprios.size?"":" on"}" data-t=""><span>Alle</span><em>${n}</em></button>`+names.map(x=>c("t",x,x,tasks.filter(t=>tgs(t).includes(x)).length,tcol(x))).join("")+(none&&names.length?c("t","__none","Ohne Tag",none):"")+(pn.length?'<span class="tsep"></span>'+pn.map(x=>c("p",x,x,tasks.filter(t=>t.proj===x).length,pcol(x)," pj")).join(""):"")+'<span class="tsep"></span>'+[1,2,3].map(r=>`<button class="tc prc${fprios.has(r)?" on":""}" data-r="${r}"><span>Prio ${r}</span><em>${tasks.filter(t=>t.prio===r).length}</em></button>`).join("");
+  box.scrollLeft=sl;$("grp").value=grp;$("srt").value=sortm;
 }
-$("tchips").onclick=e=>{const b=e.target.closest(".tc");if(!b)return;if("p" in b.dataset){const k=b.dataset.p;if(fprojs.has(k))fprojs.delete(k);else fprojs.add(k)}else{const k=b.dataset.t;if(!k){ftags.clear();fprojs.clear()}else if(ftags.has(k))ftags.delete(k);else ftags.add(k)}render()};
+$("tchips").onclick=e=>{const b=e.target.closest(".tc");if(!b)return;if("r" in b.dataset){const k=+b.dataset.r;if(fprios.has(k))fprios.delete(k);else fprios.add(k)}else if("p" in b.dataset){const k=b.dataset.p;if(fprojs.has(k))fprojs.delete(k);else fprojs.add(k)}else{const k=b.dataset.t;if(!k){ftags.clear();fprojs.clear();fprios.clear()}else if(ftags.has(k))ftags.delete(k);else ftags.add(k)}render()};
 $("grp").onchange=e=>{grp=e.target.value;render()};
+$("srt").onchange=e=>{sortm=e.target.value;try{localStorage.setItem("haus-sort",sortm)}catch(_){}render()};
 /* Tag-Auswahl im Aufgaben-Dialog */
 function drawTags(){
   $("f_tsel").innerHTML=selTags.map((n,i)=>`<span class="tag rm${colorFor===n?" sel":""}" data-pick="${i}" style="--tc:${tcol(n)}"><span>${esc(n)}</span><b data-rm="${i}" aria-label="Entfernen">×</b></span>`).join("");
@@ -1374,7 +1392,7 @@ function home(){
 function filtered(){
   const q=$("q").value.toLowerCase(),w=$("fw").value;
   return tasks.filter(t=>tagOk(t)&&(!w||(w==="__none"?!t.who:wl(t).includes(w)))&&(!q||(t.title+" "+tgs(t).join(" ")+" "+(t.who||"")).toLowerCase().includes(q)))
-    .sort((x,y)=>dn(x.start)-dn(y.start)||dn(x.end)-dn(y.end));
+    .sort((x,y)=>(sortm==="prio"?((x.prio||9)-(y.prio||9)):0)||dn(x.start)-dn(y.start)||dn(x.end)-dn(y.end));
 }
 let renderedView=null;
 const snap=()=>({v:renderedView,y:scrollY,m:$("main").scrollTop,b:(document.querySelector(".board")||{}).scrollLeft,g:(document.querySelector(".gwrap")||{}).scrollLeft,gy:(document.querySelector(".gwrap")||{}).scrollTop});
@@ -1424,10 +1442,11 @@ function render(){
   bind();after(old);applySel();
 }
 const avc=w=>/^melanie/i.test(w)?"am":/^lasse/i.test(w)?"al":"ao";
+const pb=t=>t.prio?`<span class="pr p${t.prio}" title="Prio ${t.prio}">P${t.prio}</span>`:"";
 const cl=t=>{const a=t.checklist||[];return a.length?`<span class="ckc">${a.filter(x=>x.d).length}/${a.length}</span>`:""};
 function card(t,s,i=0){
   const a=t.checklist||[],k=a.filter(x=>x.d).length,late=isLate(t);
-  const tg=projChip(t)+tgs(t).map(chip).join("")+(isBlocked(t)?'<span class="blk">blockiert</span>':"");
+  const tg=pb(t)+projChip(t)+tgs(t).map(chip).join("")+(isBlocked(t)?'<span class="blk">blockiert</span>':"");
   return`<div class="card ${s}${t.id===lastMoved?" pop":""}" draggable="true" data-id="${t.id}" style="--i:${Math.min(i,8)}"><div class="ch"><button class="ring ${s}" data-adv="${t.id}" aria-label="Status: ${ST[s]}. Weiterschalten"></button><div class="t">${esc(t.title)}</div>${wl(t).length?`<span class="avs" title="${esc(wl(t).join(", "))}">${wl(t).slice(0,3).map(n=>`<i class="av ${avc(n)}">${esc(n[0].toUpperCase())}</i>`).join("")}${wl(t).length>3?`<i class="av ao">+${wl(t).length-3}</i>`:""}</span>`:""}</div>${tg?`<div class="tg">${tg}</div>`:""}${a.length?`<div class="cb"><i style="width:${Math.round(k/a.length*100)}%"></i></div>`:""}<div class="cm"><span class="${late?"late":""}">${dr(t)}</span><span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}${cl(t)}</span></div></div>`}
 let showDone=false;const DONE_MAX=20;
 function board(list){
@@ -1436,7 +1455,7 @@ function board(list){
     return`<div class="colm" data-s="${s}"><h3><i class="dt ${s}"></i><span>${ST[s]}</span><em>${all}</em></h3>`+(L.length?L.map((t,i)=>card(t,s,i)).join(""):'<div class="none">Keine Aufgaben</div>')+(cut?`<button class="btn ghost sm more" onclick="showDone=true;render()">Alle ${all} anzeigen</button>`:"")+`</div>`}).join("")+`</div>`;
 }
 function table(list){
-  const row=t=>`<tr class="row" data-id="${t.id}"><td>${esc(t.title)} ${isBlocked(t)?'<span class="blk">blockiert</span>':""}<span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}</span></td><td>${projChip(t)}${tgs(t).map(chip).join("")}</td><td>${esc(t.who)}</td><td>${fd(t.start)}</td><td class="${isLate(t)?"late":""}">${fd(t.end)}</td><td><span class="st ${t.status}">${ST[t.status]}</span></td></tr>`;
+  const row=t=>`<tr class="row" data-id="${t.id}"><td>${pb(t)}${esc(t.title)} ${isBlocked(t)?'<span class="blk">blockiert</span>':""}<span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}</span></td><td>${projChip(t)}${tgs(t).map(chip).join("")}</td><td>${esc(t.who)}</td><td>${fd(t.start)}</td><td class="${isLate(t)?"late":""}">${fd(t.end)}</td><td><span class="st ${t.status}">${ST[t.status]}</span></td></tr>`;
   return`<div class="wrap"><table><tr><th>Aufgabe</th><th>Tags</th><th>Ressource</th><th>Start</th><th>Ende</th><th>Status</th></tr>`+
   groups(list).map(g=>(g.l!=null?`<tr class="grp"><td colspan="6"><i class="dt" style="background:${g.c}"></i>${esc(g.l)}<em>${g.L.length}</em></td></tr>`:"")+g.L.map(row).join("")).join("")+`</table></div>`;
 }
@@ -1499,7 +1518,7 @@ function gantt(list){
     const lbl=inside?`<text class="bt ${t.status}" x="${p.x+11}" y="${cy+4.2}">${esc(t.title)}</text>`:`<text class="bo" x="${p.x+p.w+10}" y="${cy+4.2}">${esc(t.title)}</text>`;
     const hd2=t.ms?"":`<rect data-h="s" class="gh1" x="${p.x}" y="${p.y+8}" width="7" height="${ROW-16}"/><rect data-h="e" class="gh1" x="${p.x+p.w-7}" y="${p.y+8}" width="7" height="${ROW-16}"/>`;
     gd+=`<g data-id="${t.id}" class="gbar"${t.status==="done"?' opacity=".72"':""}>${body}${lbl}${hd2}<circle data-h="dep" class="gdep" cx="${p.x+p.w+(t.ms?1:0)}" cy="${cy}" r="5"/></g>`});
-  const rows=items.map(it=>it.g?`<div class="gr gh2" style="--tc:${it.g.c}"><i class="dt" style="background:${it.g.c}"></i><span>${esc(it.g.l)}</span><em>${it.g.L.length}</em></div>`:`<div class="gr" data-id="${it.t.id}" title="${esc(it.t.title)}"><i class="dt ${it.t.status}"></i><span>${esc(it.t.title)}</span></div>`).join("");
+  const rows=items.map(it=>it.g?`<div class="gr gh2" style="--tc:${it.g.c}"><i class="dt" style="background:${it.g.c}"></i><span>${esc(it.g.l)}</span><em>${it.g.L.length}</em></div>`:`<div class="gr" data-id="${it.t.id}" title="${esc(it.t.title)}"><i class="dt ${it.t.status}"></i>${pb(it.t)}<span>${esc(it.t.title)}</span></div>`).join("");
   const seg=[["day","Tage"],["month","Monate"],["year","Jahre"]].map(([k,l])=>`<button data-gm="${k}" class="${k===mode?"on":""}">${l}</button>`).join("");
   return`<div class="gctl"><div class="seg">${seg}</div><button class="btn ghost sm" data-gtoday>Heute</button></div>`+
   `<div class="gwrap"><div class="gl"><div class="glh" style="--hd:${HEAD}px"></div>${rows}<div class="glg" style="--hd:${HEAD}px" role="separator" aria-label="Breite der Beschriftung ändern" title="Ziehen zum Ändern, Doppeltippen zum Zurücksetzen"></div></div><div class="gs" style="width:${W}px"><svg class="gh" width="${W}" height="${HEAD}">${hd}</svg><svg class="gb" width="${W}" height="${BH}" data-tx="${tdx}" data-ppd="${PPD}"><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--mut)"/></marker></defs>${gd}</svg></div></div>`;
@@ -1530,6 +1549,9 @@ $("f_whoseg").onclick=e=>{const b=e.target.closest("[data-w]");if(!b)return;cons
 $("f_who").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();e.stopPropagation();addWho()}};
 $("f_who").onblur=()=>{if($("f_who").value.trim())addWho()};
 $("f_stseg").onclick=e=>{const b=e.target.closest("[data-s]");if(!b)return;$("f_status").value=b.dataset.s;syncSeg()};
+const PRN={0:"",1:"Prio 1: zuerst erledigen, dringend oder wichtig",2:"Prio 2: normal, als Nächstes",3:"Prio 3: wenn Zeit ist"};
+$("f_prseg").onclick=e=>{const b=e.target.closest("[data-p]");if(!b)return;$("f_prio").value=b.dataset.p;syncPr()};
+function syncPr(){const v=$("f_prio").value;document.querySelectorAll("#f_prseg button").forEach(b=>b.classList.toggle("on",b.dataset.p===v));$("f_prh").textContent=PRN[v]||""}
 function syncSeg(){document.querySelectorAll("#f_stseg button").forEach(b=>b.classList.toggle("on",b.dataset.s===$("f_status").value))}
 /* Zeitraum: Kalender mit einem Zug für Start und Ende */
 const MONS=["Jan.","Feb.","März","Apr.","Mai","Juni","Juli","Aug.","Sept.","Okt.","Nov.","Dez."];
@@ -1583,7 +1605,7 @@ $("ck_add").onclick=()=>{cklist.push({t:"",d:false});drawCk();const a=$("f_ck").
 function openDlg(id){
   editing=id?byId(id):null;const t=editing||{title:"",tags:ftags.size===1&&!ftags.has("__none")?[...ftags]:[],who:"",proj:fprojs.size===1?[...fprojs][0]:"",status:"todo",start:tdy(),end:iso(fromDn(dn(tdy())+6)),deps:[],notes:""};
   $("dt").textContent=editing?"Aufgabe bearbeiten":"Neue Aufgabe";
-  $("f_title").value=t.title;selTags=[...tgs(t)];regDraft=reg.map(x=>({...x}));colorFor=null;$("f_tagin").value="";drawTags();selWho=wl(t);$("f_who").value="";$("f_who").style.display="none";drawWho();$("f_status").value=t.status;syncSeg();
+  $("f_title").value=t.title;selTags=[...tgs(t)];regDraft=reg.map(x=>({...x}));colorFor=null;$("f_tagin").value="";drawTags();selWho=wl(t);$("f_who").value="";$("f_who").style.display="none";drawWho();$("f_status").value=t.status;syncSeg();$("f_prio").value=t.prio||0;syncPr();
   $("f_start").value=t.start;$("f_end").value=t.end;initExtra(t);rpOpen(false);drawRange();$("f_notes").value=t.notes||"";
   const others=tasks.filter(x=>!editing||x.id!==editing.id);
   $("f_deps").innerHTML=others.length?others.map(x=>`<label><input type="checkbox" value="${x.id}" ${(t.deps||[]).includes(x.id)?"checked":""}>${esc(x.title)}</label>`).join(""):'<span style="color:var(--mut);font-size:13px">Noch keine anderen Aufgaben.</span>';
@@ -1609,7 +1631,7 @@ $("b_save").onclick=async()=>{
   {const ex=allProjs().find(x=>x.toLowerCase()===proj.toLowerCase());if(ex)proj=ex}
   const rm=/^(\d+)([dwmy])$/.exec($("f_rec").value),rec=rm?{n:+rm[1],u:rm[2]}:null;
   const t={...(editing||{}),id:editing?editing.id:newId(),title,tags:selTags.slice(),area:selTags[0]||"",proj,rec,ms,who:selWho.join(", "),
-    status:$("f_status").value,start:s,end:e,notes:$("f_notes").value,checklist:cklist.filter(x=>x.t.trim()),deps:[...document.querySelectorAll("#f_deps input:checked")].map(i=>i.value)};
+    status:$("f_status").value,prio:+$("f_prio").value||0,start:s,end:e,notes:$("f_notes").value,checklist:cklist.filter(x=>x.t.trim()),deps:[...document.querySelectorAll("#f_deps input:checked")].map(i=>i.value)};
   $("dlg").close();
   let sp=null;if(t.status==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);t.spawned=sp.id}
   {const r=regDraft;if(r){if(proj&&!r.some(x=>x.p&&x.n===proj))r.push({n:proj,c:nextPColor(),p:1});selTags.forEach(n=>{if(!r.some(x=>!x.p&&x.n===n))r.push({n,c:colorKey(n)})});if(JSON.stringify(r)!==JSON.stringify(reg))saveReg(r)}}

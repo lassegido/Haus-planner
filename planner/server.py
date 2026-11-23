@@ -202,7 +202,7 @@ def clean(t):
         tags = [t.get("area")] if t.get("area") else []
     tags = [n for n in dict.fromkeys(str(x).strip()[:30] for x in tags if isinstance(x, str)) if n][:20]
     return {"id": i, "title": title, "area": (tags[0] if tags else str(t.get("area", ""))[:60]), "tags": tags, "proj": str(t.get("proj", "") or "")[:30], "ms": bool(t.get("ms")), "rec": clean_rec(t.get("rec")), "spawned": str(t.get("spawned", "") or "")[:40], "who": str(t.get("who", ""))[:60],
-            "status": st if st in ("todo", "doing", "done") else "todo", "start": s, "end": e,
+            "status": st if st in ("todo", "doing", "done") else "todo", "prio": (t.get("prio") if t.get("prio") in (1, 2, 3) else 0), "start": s, "end": e,
             "notes": str(t.get("notes", ""))[:4000], "deps": deps, "checklist": ck,
             "arch": bool(t.get("arch")), "del": bool(t.get("del")), "delAt": str(t.get("delAt", "") or "")[:10],
             "log": clean_log(t.get("log")), "files": clean_files(t.get("files")), "v": 0}
