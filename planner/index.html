@@ -679,6 +679,12 @@ td.late{background:none;padding:.4rem .8rem;border-radius:0}
 .glg::after{content:"";position:absolute;left:7px;top:calc(var(--hd,52px)/2 - 14px);width:4px;height:28px;border-radius:2px;background:var(--faint);opacity:.75}
 .glg:hover::after,.glg.on::after{background:var(--acc);opacity:1}
 body.glres{cursor:col-resize;user-select:none}
+/* 1.17.1: Querformat am Handy, Zeitstrahl samt Kopfbereich scrollt mit */
+@media (max-height:600px) and (orientation:landscape){
+  body[data-view=gantt] .stage{overflow-y:auto;overflow-x:hidden;display:block;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  body[data-view=gantt] main.g{display:block;overflow:visible;flex:none;height:auto;padding-bottom:calc(var(--pad) + var(--sab))}
+  body[data-view=gantt] .gwrap{display:flex;overflow-x:auto;overflow-y:hidden;overscroll-behavior-y:auto;min-height:0;flex:none}
+}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"></head>
 <body>

@@ -1,5 +1,8 @@
 # Änderungen
 
+## 1.17.1
+- Zeitstrahl im Querformat (Handy): Der Kopfbereich mit Titel, Kennzahlen und Filtern ist nicht mehr fixiert, sondern scrollt mit weg; das Diagramm bekommt so den ganzen Bildschirm
+
 ## 1.17.0
 - Zeitstrahl: Die Breite der Aufgabenbeschriftung links lässt sich am Griff (kleiner senkrechter Balken im Kopf) ziehen, auch mit dem Finger. Zu lange Titel werden mit „…“ gekürzt, nie umgebrochen und laufen nicht ins Diagramm. Doppeltippen auf den Griff setzt die Breite zurück; die Breite wird auf dem Gerät gemerkt
 
