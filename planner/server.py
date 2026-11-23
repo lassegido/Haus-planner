@@ -258,7 +258,60 @@ def services():
 def ha_info():
     o = options()
     return {"api": bool(TOKEN), "notify": services(), "time": remind_time(),
-            "sensors": bool(o.get("sensors", True))}
+            "sensors": bool(o.get("sensors", True)),
+            "ai": bool(str(o.get("gemini_api_key") or "").strip()), "model": str(o.get("ai_model") or "gemini-flash-lite-latest")}
+
+
+GEMINI = os.environ.get("GEMINI_URL", "https://generativelanguage.googleapis.com/v1beta/models")
+AI_SYSTEM = "Du bist ein sachkundiger Helfer für Heim- und Gartenprojekte. Antworte immer auf Deutsch und genau im verlangten JSON-Format."
+AI_CALLS = []
+
+
+def ai_limit():
+    # höchstens 40 KI-Anfragen pro Stunde (schont das kostenlose Kontingent)
+    now = time.time()
+    AI_CALLS[:] = [x for x in AI_CALLS if now - x < 3600]
+    if len(AI_CALLS) >= 40:
+        raise RuntimeError("Zu viele KI-Anfragen, bitte später erneut versuchen")
+    AI_CALLS.append(now)
+
+
+def ai_call(prompt, raw=False):
+    ai_limit()
+    o = options()
+    key = str(o.get("gemini_api_key") or "").strip()
+    if not key:
+        raise RuntimeError("Kein Gemini-Schlüssel eingetragen")
+    model = str(o.get("ai_model") or "gemini-flash-lite-latest")
+    if not re.fullmatch(r"[A-Za-z0-9._-]+", model):
+        raise RuntimeError("Ungültiges Modell")
+    body = {"system_instruction": {"parts": [{"text": AI_SYSTEM}]},
+            "contents": [{"role": "user", "parts": [{"text": prompt[:4000]}]}],
+            "generationConfig": {"maxOutputTokens": 2000, "responseMimeType": "application/json"}}
+    req = urllib.request.Request("%s/%s:generateContent" % (GEMINI, model), method="POST", data=json.dumps(body).encode(),
+                                 headers={"x-goog-api-key": key, "content-type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            j = json.load(r)
+    except urllib.error.HTTPError as e:
+        try:
+            msg = json.load(e).get("error", {}).get("message", "")
+        except Exception:
+            msg = ""
+        if e.code == 429:
+            raise RuntimeError("Gemini-Tageslimit erreicht, bitte später erneut versuchen")
+        raise RuntimeError("Gemini %s %s" % (e.code, msg[:120]))
+    text = ""
+    for c in (j.get("candidates") or [])[:1]:
+        text = "".join(x.get("text", "") for x in (c.get("content") or {}).get("parts", []) if isinstance(x, dict))
+    a, z = text.find("{"), text.rfind("}")
+    if a < 0 or z < a:
+        raise RuntimeError("Unerwartete Antwort")
+    d = json.loads(text[a:z + 1])
+    if raw:  # freie Zuordnungen (z. B. Tag -> Symbol), nur kurze Texte
+        return {str(k)[:60]: str(v)[:40] for k, v in list(d.items())[:100]}
+    items = [str(x).strip()[:120] for x in d.get("checklist", []) if str(x).strip()] if isinstance(d.get("checklist"), list) else []
+    return {"notes": str(d.get("notes", "")).strip()[:1000], "checklist": items[:10]}
 
 
 def ha_call(method, path, body=None):
@@ -679,6 +732,14 @@ class H(BaseHTTPRequestHandler):
             data = self.body(25_000_000 if path.endswith("/api/import") else 2_000_000)
         except Exception:
             return self.out(400, {"error": "ungültige Anfrage"})
+        if path.endswith("/api/ai"):
+            try:
+                p = data.get("prompt") if isinstance(data, dict) else None
+                if not isinstance(p, str) or not p.strip():
+                    raise RuntimeError("Leere Anfrage")
+                return self.out(200, {"ok": True, "data": ai_call(p, bool(data.get("raw")))})
+            except Exception as e:
+                return self.out(200, {"ok": False, "error": str(e)[:200]})
         if path.endswith("/api/ha-settings"):
             if not isinstance(data, dict):
                 return self.out(400, {"error": "Ungültig"})

@@ -1,5 +1,9 @@
 # Änderungen
 
+## 1.24.0
+- KI-Assistent wieder da, jetzt mit Google Gemini (kostenloser Schlüssel von aistudio.google.com/apikey, Option `gemini_api_key`). Gleiche Funktionen: Notizen und Checkliste vorschlagen, Tag-Symbole zuordnen.
+- Aufgabe gedrückt halten wählt sie aus und startet die Mehrfachauswahl, weitere Aufgaben tippst du einfach an.
+
 ## 1.23.0
 - Homescreen-Widget und KI-Assistent entfernt (inklusive der Optionen `anthropic_api_key` und `ai_model`). Tag-Symbole werden weiter automatisch per Stichwort zugeordnet.
 - Filter-Blatt: auf dem Handy nach unten ziehen schließt es, ohne etwas zu ändern.

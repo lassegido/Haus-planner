@@ -42,6 +42,14 @@ Zugriff von außen nur über Nabu Casa oder ein VPN (z. B. Tailscale).
 
 Der Planner legt in Home Assistant fünf Sensoren an, die jede Minute aktualisiert werden: `sensor.planner_offen`, `sensor.planner_in_arbeit`, `sensor.planner_ueberfaellig`, `sensor.planner_heute_faellig` und `sensor.planner_prio1` (offene Aufgaben mit Prio 1). Das Attribut `aufgaben` enthält die Titel. Abschalten mit `sensors: false` in der Konfiguration.
 
+## KI-Assistent (Google Gemini, kostenlos)
+
+In jeder Aufgabe schlägt „Mit KI ausfüllen" Notizen und Checklistenpunkte vor. Du entscheidest, was übernommen wird. Neue Tags bekommen außerdem ein passendes Symbol.
+
+1. Auf [aistudio.google.com/apikey](https://aistudio.google.com/apikey) mit dem Google-Konto einen API-Schlüssel erstellen (kostenlos, ohne Kreditkarte).
+2. Im Add-on unter **Konfiguration** bei `gemini_api_key` eintragen und neu starten.
+3. Der kostenlose Tarif hat Tageslimits (bei Flash-Lite grob einige hundert Anfragen pro Tag, Google ändert das gelegentlich). Der Planner begrenzt selbst auf 40 Anfragen pro Stunde. Es wird nur der Aufgabentext gesendet. Im kostenlosen Tarif darf Google die Eingaben außerhalb der EU zur Produktverbesserung nutzen, in der EU/dem EWR nicht.
+
 ## Auf den Home-Bildschirm (App-Symbol, Vollbild)
 
 Der Zugriff über Home Assistant (Ingress) braucht dessen Anmeldung und lässt sich nicht als eigene App ablegen. Dafür gibt es einen optionalen direkten Port:

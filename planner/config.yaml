@@ -1,5 +1,5 @@
 name: Planner
-version: "1.23.0"
+version: "1.24.0"
 slug: planner
 description: Aufgaben, Kanban-Board und Gantt-Zeitstrahl für zu Hause
 arch:
@@ -18,8 +18,12 @@ panel_admin: false
 homeassistant_api: true
 options:
   sensors: true
+  gemini_api_key: ""
+  ai_model: "gemini-flash-lite-latest"
 schema:
   sensors: bool?
+  gemini_api_key: password?
+  ai_model: list(gemini-flash-lite-latest|gemini-flash-latest)?
 ports:
   8099/tcp: 8099
 ports_description:

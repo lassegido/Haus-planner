@@ -4,6 +4,14 @@ configuration:
     description: >-
       Legt vier Sensoren an (offen, in Arbeit, überfällig, heute fällig),
       etwa für Dashboards und Automationen.
+  gemini_api_key:
+    name: Gemini-API-Schlüssel
+    description: >-
+      Optional. Schaltet den KI-Assistenten frei. Kostenloser Schlüssel unter
+      aistudio.google.com/apikey. Ohne Schlüssel bleibt die KI aus.
+  ai_model:
+    name: KI-Modell
+    description: Flash-Lite ist am schnellsten und hat das größte kostenlose Kontingent.
 network:
   8099/tcp: >-
     Direkter Zugriff im Heimnetz (ohne Anmeldung), vorbelegt mit 8099. Damit läuft der
