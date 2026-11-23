@@ -20,7 +20,7 @@ fit();addEventListener('resize',fit)}catch(e){d.classList.add('emb')}})();</scri
 :root{
 --bg:#F5F3EB;--surf:#FFFEFA;--card:#FFFEFA;--tx:#14303F;--mut:#587080;--faint:#9FB0B9;--line:#E6E1D2;--line2:#D6D0BC;
 --sky:#6CB6E4;--sun:#FDAF54;--sea:#387CA3;--brick:#D35526;--brick-ink:#B3411A;
---todo:var(--sky);--doing:var(--sun);--done:var(--sea);--bad:var(--brick);
+--p1:#B3411A;--p2:#E3B23C;--p3:#8FB59A;--todo:var(--sky);--doing:var(--sun);--done:var(--sea);--bad:var(--brick);
 --acc:#387CA3;--on-acc:#fff;--acc-soft:#E4EEF3;--tagc:#2D6786;--focus:#387CA3;
 --side:#2D6786;--side-tx:#F5F3EB;--side-mut:#B9D5E5;--side-on:rgba(245,243,235,.16);
 --bt:#14303F;--wk:#EDE9DC;
@@ -688,12 +688,16 @@ body.glres{cursor:col-resize;user-select:none}
 /* 1.18.0: Priorität, Zeitstrahl-Beschriftung */
 .gl{align-self:flex-start;min-height:100%}
 .pr{display:inline-flex;align-items:center;flex:none;font-size:.68rem;font-weight:750;line-height:1;padding:.2rem .36rem;border-radius:.4rem;letter-spacing:.02em;margin-right:.35rem;vertical-align:.08em}
-.pr.p1{background:var(--tx);color:var(--bg)}
-.pr.p2{box-shadow:inset 0 0 0 1.5px var(--tx);color:var(--tx)}
-.pr.p3{background:var(--line);color:var(--mut)}
+.pr.p1{background:var(--p1);color:#fff}
+.pr.p2{background:var(--p2);color:#14303F}
+.pr.p3{background:var(--p3);color:#14303F}
+.card[data-pr="1"],tr.row[data-pr="1"]{--pc:var(--p1)}.card[data-pr="2"],tr.row[data-pr="2"]{--pc:var(--p2)}.card[data-pr="3"],tr.row[data-pr="3"]{--pc:var(--p3)}
+.card[data-pr]{border-left:4px solid var(--pc)}
+tr.row[data-pr] td:first-child{box-shadow:inset 4px 0 0 var(--pc)}
+@media (max-width:699px){tr.row[data-pr] td:first-child{box-shadow:none}tr.row[data-pr]{border-left:4px solid var(--pc)}}
+.tc.prc[data-r="1"]{--tc:var(--p1)}.tc.prc[data-r="2"]{--tc:var(--p2)}.tc.prc[data-r="3"]{--tc:var(--p3)}
 .tg .pr{margin-right:0}
 .gr .pr{flex:none;overflow:visible;text-overflow:clip;margin-right:.1rem}
-.tc.prc{--tc:var(--tx)}
 #srt.tgrp{max-width:10rem}
 .pr4 button{padding:.4rem .15rem}
 .prh{margin:.4rem .2rem 0;font-size:.82rem;color:var(--mut);min-height:1.1em}
@@ -1294,7 +1298,7 @@ function drawTbar(){
   const names=allTags(),pn=allProjs(),n=tasks.length,none=tasks.filter(t=>!tgs(t).length).length,box=$("tchips"),sl=box.scrollLeft;
   ftags=new Set([...ftags].filter(x=>x==="__none"||names.includes(x)));fprojs=new Set([...fprojs].filter(x=>pn.includes(x)));
   const c=(a,k,l,cnt,col,cls)=>`<button class="tc${cls||""}${(a==="p"?fprojs:ftags).has(k)?" on":""}" data-${a}="${esc(k)}"${col?` style="--tc:${col}"`:""}>${col?(a==="t"&&k!=="__none"?tIc(k):"<i></i>"):""}<span>${esc(l)}</span><em>${cnt}</em></button>`;
-  box.innerHTML=`<button class="tc all${ftags.size||fprojs.size||fprios.size?"":" on"}" data-t=""><span>Alle</span><em>${n}</em></button>`+names.map(x=>c("t",x,x,tasks.filter(t=>tgs(t).includes(x)).length,tcol(x))).join("")+(none&&names.length?c("t","__none","Ohne Tag",none):"")+(pn.length?'<span class="tsep"></span>'+pn.map(x=>c("p",x,x,tasks.filter(t=>t.proj===x).length,pcol(x)," pj")).join(""):"")+'<span class="tsep"></span>'+[1,2,3].map(r=>`<button class="tc prc${fprios.has(r)?" on":""}" data-r="${r}"><span>Prio ${r}</span><em>${tasks.filter(t=>t.prio===r).length}</em></button>`).join("");
+  box.innerHTML=`<button class="tc all${ftags.size||fprojs.size||fprios.size?"":" on"}" data-t=""><span>Alle</span><em>${n}</em></button>`+names.map(x=>c("t",x,x,tasks.filter(t=>tgs(t).includes(x)).length,tcol(x))).join("")+(none&&names.length?c("t","__none","Ohne Tag",none):"")+(pn.length?'<span class="tsep"></span>'+pn.map(x=>c("p",x,x,tasks.filter(t=>t.proj===x).length,pcol(x)," pj")).join(""):"")+'<span class="tsep"></span>'+[1,2,3].map(r=>`<button class="tc prc${fprios.has(r)?" on":""}" data-r="${r}"><i></i><span>Prio ${r}</span><em>${tasks.filter(t=>t.prio===r).length}</em></button>`).join("");
   box.scrollLeft=sl;$("grp").value=grp;$("srt").value=sortm;
 }
 $("tchips").onclick=e=>{const b=e.target.closest(".tc");if(!b)return;if("r" in b.dataset){const k=+b.dataset.r;if(fprios.has(k))fprios.delete(k);else fprios.add(k)}else if("p" in b.dataset){const k=b.dataset.p;if(fprojs.has(k))fprojs.delete(k);else fprojs.add(k)}else{const k=b.dataset.t;if(!k){ftags.clear();fprojs.clear();fprios.clear()}else if(ftags.has(k))ftags.delete(k);else ftags.add(k)}render()};
@@ -1447,7 +1451,7 @@ const cl=t=>{const a=t.checklist||[];return a.length?`<span class="ckc">${a.filt
 function card(t,s,i=0){
   const a=t.checklist||[],k=a.filter(x=>x.d).length,late=isLate(t);
   const tg=pb(t)+projChip(t)+tgs(t).map(chip).join("")+(isBlocked(t)?'<span class="blk">blockiert</span>':"");
-  return`<div class="card ${s}${t.id===lastMoved?" pop":""}" draggable="true" data-id="${t.id}" style="--i:${Math.min(i,8)}"><div class="ch"><button class="ring ${s}" data-adv="${t.id}" aria-label="Status: ${ST[s]}. Weiterschalten"></button><div class="t">${esc(t.title)}</div>${wl(t).length?`<span class="avs" title="${esc(wl(t).join(", "))}">${wl(t).slice(0,3).map(n=>`<i class="av ${avc(n)}">${esc(n[0].toUpperCase())}</i>`).join("")}${wl(t).length>3?`<i class="av ao">+${wl(t).length-3}</i>`:""}</span>`:""}</div>${tg?`<div class="tg">${tg}</div>`:""}${a.length?`<div class="cb"><i style="width:${Math.round(k/a.length*100)}%"></i></div>`:""}<div class="cm"><span class="${late?"late":""}">${dr(t)}</span><span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}${cl(t)}</span></div></div>`}
+  return`<div class="card ${s}${t.id===lastMoved?" pop":""}"${t.prio?` data-pr="${t.prio}"`:""} draggable="true" data-id="${t.id}" style="--i:${Math.min(i,8)}"><div class="ch"><button class="ring ${s}" data-adv="${t.id}" aria-label="Status: ${ST[s]}. Weiterschalten"></button><div class="t">${esc(t.title)}</div>${wl(t).length?`<span class="avs" title="${esc(wl(t).join(", "))}">${wl(t).slice(0,3).map(n=>`<i class="av ${avc(n)}">${esc(n[0].toUpperCase())}</i>`).join("")}${wl(t).length>3?`<i class="av ao">+${wl(t).length-3}</i>`:""}</span>`:""}</div>${tg?`<div class="tg">${tg}</div>`:""}${a.length?`<div class="cb"><i style="width:${Math.round(k/a.length*100)}%"></i></div>`:""}<div class="cm"><span class="${late?"late":""}">${dr(t)}</span><span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}${cl(t)}</span></div></div>`}
 let showDone=false;const DONE_MAX=20;
 function board(list){
   return`<div class="board">`+Object.keys(ST).map(s=>{let L=list.filter(t=>t.status===s);const all=L.length;
@@ -1455,7 +1459,7 @@ function board(list){
     return`<div class="colm" data-s="${s}"><h3><i class="dt ${s}"></i><span>${ST[s]}</span><em>${all}</em></h3>`+(L.length?L.map((t,i)=>card(t,s,i)).join(""):'<div class="none">Keine Aufgaben</div>')+(cut?`<button class="btn ghost sm more" onclick="showDone=true;render()">Alle ${all} anzeigen</button>`:"")+`</div>`}).join("")+`</div>`;
 }
 function table(list){
-  const row=t=>`<tr class="row" data-id="${t.id}"><td>${pb(t)}${esc(t.title)} ${isBlocked(t)?'<span class="blk">blockiert</span>':""}<span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}</span></td><td>${projChip(t)}${tgs(t).map(chip).join("")}</td><td>${esc(t.who)}</td><td>${fd(t.start)}</td><td class="${isLate(t)?"late":""}">${fd(t.end)}</td><td><span class="st ${t.status}">${ST[t.status]}</span></td></tr>`;
+  const row=t=>`<tr class="row" data-id="${t.id}"${t.prio?` data-pr="${t.prio}"`:""}><td>${pb(t)}${esc(t.title)} ${isBlocked(t)?'<span class="blk">blockiert</span>':""}<span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}</span></td><td>${projChip(t)}${tgs(t).map(chip).join("")}</td><td>${esc(t.who)}</td><td>${fd(t.start)}</td><td class="${isLate(t)?"late":""}">${fd(t.end)}</td><td><span class="st ${t.status}">${ST[t.status]}</span></td></tr>`;
   return`<div class="wrap"><table><tr><th>Aufgabe</th><th>Tags</th><th>Ressource</th><th>Start</th><th>Ende</th><th>Status</th></tr>`+
   groups(list).map(g=>(g.l!=null?`<tr class="grp"><td colspan="6"><i class="dt" style="background:${g.c}"></i>${esc(g.l)}<em>${g.L.length}</em></td></tr>`:"")+g.L.map(row).join("")).join("")+`</table></div>`;
 }

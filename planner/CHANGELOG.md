@@ -1,5 +1,8 @@
 # Änderungen
 
+## 1.18.1
+- Priorität mit Farbcodierung: Prio 1 dunkles Ziegelrot (kritisch), Prio 2 Ocker, Prio 3 Salbeigrün (nicht kritisch). Farbige Marke, Randstreifen an Karten und Listenzeilen, farbige Filter-Chips
+
 ## 1.18.0
 - Neu: Priorität an Aufgaben (Prio 1, Prio 2, Prio 3, oder keine). Auswahl im Aufgaben-Dialog, kleine Marke P1/P2/P3 auf Karte, in der Liste und im Zeitstrahl, Filter-Chips neben den Tags, Sortierung nach Priorität und Gruppierung „Nach Priorität“. Alte Aufgaben ohne Priorität bleiben unverändert
 - Zeitstrahl: Beschriftungsspalte reicht jetzt bis zur letzten Zeile, die senkrechten Linien laufen nicht mehr über die Titel
