@@ -586,6 +586,36 @@ def ha_tick():
             json.dump({"last": today}, f)
 
 
+def widget_data(who):
+    # eigene Aufgaben für das Homescreen-Widget: überfällig, heute, diese Woche, nächste Woche
+    now = datetime.datetime.now(ha["tz"]) if ha["tz"] else datetime.datetime.now()
+    today = now.date()
+    sun = today + datetime.timedelta(days=6 - today.weekday())
+    nsun = sun + datetime.timedelta(days=7)
+    who = who.strip()[:60]
+    names = [("late", "Überfällig"), ("today", "Heute"), ("week", "Diese Woche"), ("next", "Nächste Woche")]
+    out = {k: [] for k, _ in names}
+    with LOCK:
+        tasks = list(state["tasks"].values())
+    for t in tasks:
+        if t.get("del") or t.get("arch") or t.get("status") == "done":
+            continue
+        if who and who not in [x.strip() for x in str(t.get("who", "")).split(",")]:
+            continue
+        s, e = datetime.date.fromisoformat(t["start"]), datetime.date.fromisoformat(t["end"])
+        d = max(s, today)
+        k = "late" if e < today else "today" if d == today else "week" if d <= sun else "next" if d <= nsun else None
+        if k:
+            out[k].append((t.get("prio") or 9, e, t["title"], t))
+    groups = []
+    for k, label in names:
+        L = sorted(out[k], key=lambda x: (x[0], x[1], x[2]))
+        if L:
+            groups.append({"k": k, "t": label, "tasks": [{"id": x[3]["id"], "title": x[2], "status": x[3]["status"], "end": x[3]["end"], "prio": x[3].get("prio") or 0}
+                                                       for x in L[:30]]})
+    return {"who": who, "today": today.isoformat(), "groups": groups}
+
+
 def ha_loop():
     time.sleep(5)
     init_tz()
@@ -625,6 +655,14 @@ class H(BaseHTTPRequestHandler):
                 return self.out(200, {"ok": True, "services": out})
             except Exception as e:
                 return self.out(200, {"ok": False, "error": str(e)[:200], "services": []})
+        if u.path.endswith("/api/widget"):
+            return self.out(200, widget_data(parse_qs(u.query).get("who", [""])[0]))
+        if u.path.endswith("/api/widget-script"):
+            try:
+                with open(os.path.join(os.path.dirname(INDEX), "widget.js"), "rb") as f:
+                    return self.out(200, f.read(), "text/plain")
+            except Exception:
+                return self.out(404, {"error": "nicht gefunden"})
         if u.path.endswith("/api/tasks"):
             q = parse_qs(u.query).get("rev", [""])[0]
             with LOCK:

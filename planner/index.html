@@ -718,6 +718,15 @@ tr.row[data-pr] td:first-child{position:relative}
 .pjh i{width:.5rem;height:.5rem;border-radius:.15rem;background:var(--tc);flex:none}
 td .pjh{margin-left:0}
 @media (max-width:699px){.tchips{order:10}}
+/* 1.22: Statussymbole (In Arbeit = halb gefüllt) */
+.ring.doing::after{inset:0;transform:scale(1);clip-path:inset(0 0 0 50%)}
+.dt{background:transparent;box-shadow:inset 0 0 0 .14rem var(--sky)}
+.dt.doing{background:linear-gradient(90deg,transparent 50%,var(--sun) 50%);box-shadow:inset 0 0 0 .14rem var(--sun)}
+.dt.done{background:var(--sea);box-shadow:none}
+.wdgt{width:100%;margin-top:.8rem;font:.7rem/1.35 ui-monospace,Menlo,monospace;border:1px solid var(--line2);border-radius:.8rem;background:var(--bg);color:var(--mut);padding:.6rem;resize:none}
+.st::before{width:.7rem;height:.7rem;background:transparent;box-shadow:inset 0 0 0 .14rem var(--c)}
+.st.doing::before{background:linear-gradient(90deg,transparent 50%,var(--c) 50%)}.st.done::before{background:var(--c)}
+.scap+.sgrp{margin-top:.8rem}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"></head>
 <body>
@@ -1073,7 +1082,8 @@ function drawSettings(){
        +(hi.api?srow('data-go="rem"',`Erinnerung`,n?"Täglich "+esc(hi.time)+" Uhr":"Aus"):srow("",`Erinnerung`,"Aus",null,false))
        +srow("",`KI-Assistent`,hi.ai?esc(hi.model):"Aus",null,false)
        +srow("","Sensoren",hi.sensors?"Aktiv":"Aus",null,false)
-       +srow(`data-act="hatest"${hi.api&&n?"":" disabled"}`,"Testnachricht senden",null,null,false))
+       +srow(`data-act="hatest"${hi.api&&n?"":" disabled"}`,"Testnachricht senden",null,null,false)
+       +srow('data-go="wdg"',"Homescreen-Widget","Einrichten"))
        +(hi.ai?"":cap("Den KI-Assistenten schaltest du in Home Assistant unter Add-on → Konfiguration frei (API-Schlüssel eintragen)."))}
     if(matchMedia("(hover:hover)").matches)h+=`<p class="sgt">Hilfe</p>`+grp(srow('data-go="keys"',"Tastaturkürzel"));
   }else if(sPage==="rem"){
@@ -1083,6 +1093,13 @@ function drawSettings(){
       h=(names.length?grp(names.map(x=>sopt(`data-set="ntf:${x}"`,esc(ntfName(x)),sel.has(x))).join("")):cap("Es wurde kein Gerät gefunden. Installiere die Home-Assistant-App auf dem Handy und melde dich an."))
        +cap("Wähle die Geräte, die täglich an fällige und überfällige Aufgaben erinnert werden. Ohne Auswahl ist die Erinnerung aus.")
        +grp(srow('data-go="remt"',"Uhrzeit",esc((haInfo&&haInfo.time)||"08:00")+" Uhr")+srow(`data-act="hatest"${sel.size?"":" disabled"}`,"Testnachricht senden",null,null,false))}
+  }else if(sPage==="wdg"){
+    const base="http://"+location.hostname+":8099";
+    h=cap("Das Widget zeigt deine Aufgaben: überfällig, heute, diese und nächste Woche. Es ist nur eine Anzeige, den Status änderst du im Planner.")
+     +`<p class="sgt">So geht's</p>`+cap("1. App „Scriptable“ aus dem App Store installieren (kostenlos).<br>2. Unten „Skript kopieren“ tippen.<br>3. In Scriptable oben rechts auf + tippen, den Text einfügen und das Skript „Planner“ nennen.<br>4. Auf dem Homescreen lange drücken, Widget „Scriptable“ hinzufügen, bearbeiten und das Skript „Planner“ wählen. Im Feld „Parameter“ kannst du einen anderen Namen eintragen, sonst gilt „Ich bin“.")
+     +grp(srow('data-act="wdgcopy"',"Skript kopieren",wdgSrc===null?"Lade …":null,null,false))
+     +cap("Das Widget ruft "+esc(base)+" ab und funktioniert im Heimnetz. Unterwegs zeigt es den letzten Stand.")
+     +`<textarea id="wdgtxt" class="wdgt" readonly rows="5" aria-label="Skript">${esc(wdgSrc||"")}</textarea>`;
   }else if(sPage==="remt"){
     h=grp(REMT.map(t=>sopt(`data-set="rtime:${t}"`,t+" Uhr",t===(haInfo&&haInfo.time))).join(""));
   }else if(sPage==="theme"){
@@ -1100,12 +1117,14 @@ function drawSettings(){
   }
   $("s_body").innerHTML=h;
 }
+let wdgSrc=null;
+async function loadWdg(){try{const r=await fetch("api/widget-script");wdgSrc=(await r.text()).replace("__BASE__","http://"+location.hostname+":8099").replace("__WHO__",(prefGet("me")||"").replace(/["\\]/g,""))}catch(e){wdgSrc=""}if(sPage==="wdg")drawSettings()}
 function openSettings(){sPage="main";drawSettings();$("dls").showModal();$("dls").scrollTop=0}
 $("cfg").onclick=openSettings;$("s_close").onclick=()=>$("dls").close();
 $("s_back").onclick=()=>{sPage=sPage==="remt"?"rem":"main";drawSettings();$("dls").scrollTop=0};
 $("s_body").onclick=async e=>{
   const b=e.target.closest("button");if(!b||b.disabled)return;const d=b.dataset;
-  if(d.go){sPage=d.go;if(d.go==="rem"&&haAvail===null)loadAvail();drawSettings();$("dls").scrollTop=0;return}
+  if(d.go){sPage=d.go;if(d.go==="rem"&&haAvail===null)loadAvail();if(d.go==="wdg"&&wdgSrc===null)loadWdg();drawSettings();$("dls").scrollTop=0;return}
   if(d.set){const i=d.set.indexOf(":"),k=d.set.slice(0,i),v=d.set.slice(i+1);
     if(k==="theme"){prefSet("theme",v);applyTheme()}else if(k==="des"){prefSet("design",v);prefSet("acc","");applyTheme()}
     else if(k==="ntf"){const cur=new Set((haInfo&&haInfo.notify)||[]);cur.has(v)?cur.delete(v):cur.add(v);await haSave({notify:[...cur]})}
@@ -1114,6 +1133,8 @@ $("s_body").onclick=async e=>{
     drawSettings();return}
   if(d.act==="arch"){const L=tasks.filter(t=>t.status==="done");if(!L.length)return;await saveMany(L.map(t=>({...t,arch:true})));$("dls").close();toast(L.length+" erledigte archiviert",()=>saveMany(L))}
   else if(d.act==="open"){$("dls").close();openArch()}
+  else if(d.act==="wdgcopy"){const ta=$("wdgtxt");if(!wdgSrc){toast("Skript nicht geladen");return}
+    try{await navigator.clipboard.writeText(wdgSrc);toast("Skript kopiert")}catch(_){ta.removeAttribute("readonly");ta.focus();ta.select();toast("Text markiert, bitte kopieren")}}
   else if(d.act==="hatest"){try{const r=await api("api/ha-test",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});$("dls").close();toast(r.ok?"Testnachricht gesendet":"Fehlgeschlagen: "+r.error)}catch(e){toast("Server nicht erreichbar")}}
 };
 

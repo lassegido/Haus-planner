@@ -1,5 +1,9 @@
 # Änderungen
 
+## 1.22.0
+- Neue Statussymbole: „In Arbeit“ ist ein halb gefüllter Kreis, „Offen“ ein leerer Ring, „Erledigt“ ein Haken. Auch die kleinen Statuspunkte (Zeitstrahl, Statusmarken) folgen dem
+- Homescreen-Widget für iPhone (mit der kostenlosen App Scriptable): zeigt deine Aufgaben überfällig, heute, diese und nächste Woche. Einrichtung unter Einstellungen → Home Assistant → Homescreen-Widget (Skript kopieren). Nur Anzeige, nutzt den direkten Zugang auf Port 8099 im Heimnetz
+
 ## 1.21.0
 - Erinnerungen mit Knöpfen: Die tägliche Mitteilung auf dem iPhone zeigt beim langen Drücken bis zu vier Knöpfe „Erledigt: …“ (Prio 1 zuerst). Ein Druck erledigt die Aufgabe, trägt es im Verlauf ein und aktualisiert die Mitteilung (verschwindet, wenn nichts mehr fällig ist). Ein Antippen öffnet den Planner. Wiederkehrende und blockierte Aufgaben haben keinen Knopf
 - Neu: dauerhafte Verbindung des Add-ons zu Home Assistant, um die Knopfdrücke zu empfangen (verbindet sich bei Störungen von selbst neu)
