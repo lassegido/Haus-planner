@@ -264,7 +264,20 @@ def ha_info():
 AI_SYSTEM = "Du bist ein sachkundiger Helfer für Heim- und Gartenprojekte. Antworte immer auf Deutsch und genau im verlangten JSON-Format."
 
 
+AI_CALLS = []
+
+
+def ai_limit():
+    # höchstens 40 KI-Anfragen pro Stunde, schützt vor ungewollten Kosten
+    now = time.time()
+    AI_CALLS[:] = [x for x in AI_CALLS if now - x < 3600]
+    if len(AI_CALLS) >= 40:
+        raise RuntimeError("Zu viele KI-Anfragen, bitte später erneut versuchen")
+    AI_CALLS.append(now)
+
+
 def ai_call(prompt, raw=False):
+    ai_limit()
     o = options()
     key = str(o.get("anthropic_api_key") or "").strip()
     if not key:
@@ -336,7 +349,7 @@ def reminder_text(due, late):
         parts.append("%d heute fällig" % len(due))
     if late:
         parts.append("%d überfällig" % len(late))
-    names = [t["title"] for t in late + due]
+    names = [t["title"] for t in sorted(late + due, key=lambda t: t.get("prio") or 9)]
     txt = ", ".join(parts) + ": " + ", ".join(names[:4]) + (" …" if len(names) > 4 else "")
     return txt
 
@@ -369,6 +382,8 @@ def ha_tick():
                                      ("ueberfaellig", "Planner überfällig", "mdi:alert-circle-outline", late),
                                      ("heute_faellig", "Planner heute fällig", "mdi:calendar-today", due)):
             put_sensor(key, name, len(lst), icon, [t["title"] for t in lst])
+        p1 = [t for t in act if t.get("prio") == 1]
+        put_sensor("prio1", "Planner Prio 1 offen", len(p1), "mdi:flag-outline", [t["title"] for t in p1])
     when = remind_time()
     if services() and now.strftime("%H:%M") >= when and ha["last"] != today:
         if due or late:
@@ -474,7 +489,17 @@ class H(BaseHTTPRequestHandler):
             raise ValueError
         return json.loads(self.rfile.read(n))
 
+    def csrf_ok(self):
+        # Fremde Webseiten können keine eigenen Header ohne Vorabfrage (CORS) senden. So werden
+        # Schreibzugriffe aus einem anderen Browser-Tab (CSRF) abgewiesen.
+        if self.headers.get("X-Planner") == "1":
+            return True
+        self.out(403, {"error": "nicht erlaubt"})
+        return False
+
     def do_POST(self):
+        if not self.csrf_ok():
+            return
         pu = urlparse(self.path)
         path = pu.path
         mf = re.search(r"/api/file/([A-Za-z0-9_-]{1,40})$", path)
@@ -566,6 +591,8 @@ class H(BaseHTTPRequestHandler):
             self.out(200, {"rev": state["rev"], "count": len(items), "v": items[0]["v"]})
 
     def do_DELETE(self):
+        if not self.csrf_ok():
+            return
         mf = re.search(r"/api/file/([A-Za-z0-9_-]{1,40})/([a-f0-9]{12})$", urlparse(self.path).path)
         if mf:
             drop_files(mf.group(1), mf.group(2))

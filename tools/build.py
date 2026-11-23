@@ -20,7 +20,7 @@ storage = '''/* Speicher: Server im Home-Assistant-Add-on (relative Pfade wegen 
 let rev=-1;
 function prefGet(k){try{return localStorage.getItem("haus-"+k)}catch(e){return null}}
 function prefSet(k,v){try{localStorage.setItem("haus-"+k,v)}catch(e){}}
-async function api(path,opt){const r=await fetch(path,opt);if(r.status===409){const e=new Error("409");e.conflict=await r.json().catch(()=>({}));throw e}if(!r.ok)throw new Error(r.status);return r.json()}
+async function api(path,opt){opt=opt||{};if(opt.method&&opt.method!=="GET")opt={...opt,headers:{...(opt.headers||{}),"X-Planner":"1"}};const r=await fetch(path,opt);if(r.status===409){const e=new Error("409");e.conflict=await r.json().catch(()=>({}));throw e}if(!r.ok)throw new Error(r.status);return r.json()}
 async function pull(force){
   try{const j=await api("api/tasks"+(force?"":"?rev="+rev));
     $("note").textContent="";

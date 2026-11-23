@@ -828,7 +828,7 @@ const isBlocked=t=>t.status!=="done"&&(t.deps||[]).some(i=>{const p=byId(i);retu
 let rev=-1;
 function prefGet(k){try{return localStorage.getItem("haus-"+k)}catch(e){return null}}
 function prefSet(k,v){try{localStorage.setItem("haus-"+k,v)}catch(e){}}
-async function api(path,opt){const r=await fetch(path,opt);if(r.status===409){const e=new Error("409");e.conflict=await r.json().catch(()=>({}));throw e}if(!r.ok)throw new Error(r.status);return r.json()}
+async function api(path,opt){opt=opt||{};if(opt.method&&opt.method!=="GET")opt={...opt,headers:{...(opt.headers||{}),"X-Planner":"1"}};const r=await fetch(path,opt);if(r.status===409){const e=new Error("409");e.conflict=await r.json().catch(()=>({}));throw e}if(!r.ok)throw new Error(r.status);return r.json()}
 async function pull(force){
   try{const j=await api("api/tasks"+(force?"":"?rev="+rev));
     $("note").textContent="";
@@ -1230,7 +1230,7 @@ $("main").addEventListener("click",e=>{
   const dy=e.target.closest("[data-day]");if(dy&&!e.target.closest("[data-id]")){calSel=dy.dataset.day;render()}});
 function ics(){
   const esc2=x=>String(x||"").replace(/\\/g,"\\\\").replace(/;/g,"\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n"),c=d=>d.replace(/-/g,""),stp=new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z";
-  const ev=tasks.filter(t=>t.status!=="done").map(t=>["BEGIN:VEVENT","UID:"+t.id+"@planner","DTSTAMP:"+stp,"DTSTART;VALUE=DATE:"+c(t.start),"DTEND;VALUE=DATE:"+c(iso(fromDn(dn(t.end)+1))),"SUMMARY:"+esc2(t.title),...(t.notes?["DESCRIPTION:"+esc2(t.notes)]:[]),...(t.who?["CATEGORIES:"+esc2(t.who)]:[]),"END:VEVENT"].join("\r\n"));
+  const ev=tasks.filter(t=>t.status!=="done").map(t=>["BEGIN:VEVENT","UID:"+t.id+"@planner","DTSTAMP:"+stp,"DTSTART;VALUE=DATE:"+c(t.start),"DTEND;VALUE=DATE:"+c(iso(fromDn(dn(t.end)+1))),"SUMMARY:"+esc2(t.title),...(t.notes?["DESCRIPTION:"+esc2(t.notes)]:[]),...(t.prio?["PRIORITY:"+[0,1,5,9][t.prio]]:[]),...((t.who||t.proj)?["CATEGORIES:"+[t.who,t.proj].filter(Boolean).map(esc2).join(",")]:[]),"END:VEVENT"].join("\r\n"));
   return["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Planner//DE","CALSCALE:GREGORIAN","X-WR-CALNAME:Planner",...ev,"END:VCALENDAR"].join("\r\n")+"\r\n"}
 $("x_ics").onclick=()=>dl("planner-"+stamp()+".ics",new Blob([ics()],{type:"text/calendar"}));
 /* KI-Assistent */
@@ -1679,7 +1679,7 @@ $("x_pdf").onclick=()=>{
   ln(`Stand ${new Date().toLocaleDateString("de-DE")} | ${list.filter(t=>t.status==="done").length} von ${n} erledigt | ${tasks.filter(t=>t.status==="doing").length} in Arbeit | ${tasks.filter(isLate).length} überfällig | ${tasks.filter(isBlocked).length} blockiert`,10,0,0,grey);y+=4;
   list.forEach(t=>{
     ln(t.title,12,1);
-    ln(`${ST[t.status]} | ${fdl(t.start)} - ${fdl(t.end)}${tgs(t).length?" | "+tgs(t).join(", "):""}${t.who?" | "+t.who:""}`,9,0,0,grey);
+    ln(`${ST[t.status]}${t.prio?" | Prio "+t.prio:""} | ${fdl(t.start)} - ${fdl(t.end)}${t.proj?" | Projekt "+t.proj:""}${tgs(t).length?" | "+tgs(t).join(", "):""}${t.who?" | "+t.who:""}`,9,0,0,grey);
     const dp=(t.deps||[]).map(i=>byId(i)?.title).filter(Boolean);if(dp.length)ln("Abhängig von: "+dp.join(", "),9,0,0,grey);
     (t.checklist||[]).forEach(c=>ln((c.d?"[x] ":"[ ] ")+c.t,9,0,4));
     if(t.notes)ln("Notiz: "+t.notes,9,0,0,grey);
@@ -1715,14 +1715,14 @@ async function buildXlsx(){
 
   /* ---------- Blatt 1: Liste (hier werden Aufgaben gepflegt) ---------- */
   const ws=wb.addWorksheet("Liste",{views:[{state:"frozen",xSplit:2,ySplit:4,showGridLines:false}],properties:{tabColor:{argb:C.ink}}});
-  ws.columns=[{width:6},{width:34},{width:14},{width:13},{width:12},{width:12},{width:12},{width:14},{width:34},{width:30},{width:12},{width:30},{width:6,hidden:true},{width:6,hidden:true},{width:6,hidden:true}];
+  ws.columns=[{width:6},{width:34},{width:14},{width:13},{width:12},{width:12},{width:12},{width:14},{width:34},{width:30},{width:12},{width:30},{width:6,hidden:true},{width:6,hidden:true},{width:6,hidden:true},{width:16},{width:10}];
   ws.getCell("A1").value="Planner";ws.getCell("A1").font={bold:true,size:18};
   ws.getCell("H1").value="Neue Aufgabe: einfach in der nächsten freien Zeile eintragen. Board und Zeitstrahl aktualisieren sich automatisch (bis Zeile 304).";
   ws.getCell("H1").font={italic:true,color:{argb:C.grey},size:10};
   const kp=[["B","Aufgaben",`COUNTIF(B${R0}:B${R1},"?*")`,"0"],["C","Erledigt",`IFERROR(COUNTIF(G${R0}:G${R1},"Erledigt")/B3,0)`,"0%"],["D","In Arbeit",`COUNTIF(G${R0}:G${R1},"In Arbeit")`,"0"],["E","Überfällig",`SUMPRODUCT((B${R0}:B${R1}<>"")*(G${R0}:G${R1}<>"Erledigt")*ISNUMBER(F${R0}:F${R1})*(F${R0}:F${R1}<TODAY()))`,"0"],["F","Konflikte",`COUNTIF(L${R0}:L${R1},"?*")`,"0"]];
   kp.forEach(([c,l,f,nf])=>{const a=ws.getCell(c+"2"),b=ws.getCell(c+"3");a.value=l;a.font={size:9,color:{argb:C.grey}};b.value={formula:f};b.numFmt=nf;b.font={bold:true,size:18};a.border={top:edge,left:edge,right:edge};b.border={bottom:edge,left:edge,right:edge};b.alignment={horizontal:"left"}});
   ws.getRow(3).height=28;
-  ["Nr","Aufgabe","Tags","Ressource","Start","Ende","Status","Abhängig von (Nr, z. B. 2,5)","Checkliste (eine Zeile je Punkt, [x] = erledigt)","Notizen","Checkl.-Stand","Hinweis","Offen","In Arbeit","Erledigt"].forEach((h,i)=>hdr(ws.getCell(4,i+1),h));
+  ["Nr","Aufgabe","Tags","Ressource","Start","Ende","Status","Abhängig von (Nr, z. B. 2,5)","Checkliste (eine Zeile je Punkt, [x] = erledigt)","Notizen","Checkl.-Stand","Hinweis","Offen","In Arbeit","Erledigt","Projekt","Priorität"].forEach((h,i)=>hdr(ws.getCell(4,i+1),h));
   ws.getRow(4).height=36;
   for(let r=R0;r<=R1;r++){
     const t=list[r-R0],row=ws.getRow(r);
@@ -1733,19 +1733,22 @@ async function buildXlsx(){
       const dp=(t.deps||[]).map(i=>nr[i]).filter(Boolean).join(",");if(dp)row.getCell(8).value=dp;
       const ck=(t.checklist||[]).map(c=>(c.d?"[x] ":"[ ] ")+c.t).join("\n");if(ck)row.getCell(9).value=ck;
       if(t.notes)row.getCell(10).value=t.notes;
+      if(t.proj)row.getCell(16).value=t.proj;
+      if(t.prio)row.getCell(17).value="Prio "+t.prio;
     }
+    row.getCell(17).dataValidation={type:"list",allowBlank:true,formulae:['"Prio 1,Prio 2,Prio 3"']};
     const dn_=`(LEN(LOWER(I${r}))-LEN(SUBSTITUTE(LOWER(I${r}),"[x]","")))/3`,op_=`(LEN(I${r})-LEN(SUBSTITUTE(I${r},"[ ]","")))/3`;
     row.getCell(11).value={formula:`IF(I${r}="","",${dn_}&"/"&(${dn_}+${op_}))`};
     row.getCell(12).value={formula:`IF(OR(B${r}="",H${r}="",E${r}=""),"",IF(SUMPRODUCT(($A$${R0}:$A$${R1}<>"")*ISNUMBER(SEARCH(","&$A$${R0}:$A$${R1}&",",","&SUBSTITUTE(H${r}," ","")&","))*ISNUMBER($F$${R0}:$F$${R1})*($F$${R0}:$F$${R1}>=E${r}))>0,"Start vor Ende des Vorgängers",""))`};
     row.getCell(13).value={formula:`IF(AND($B${r}<>"",OR($G${r}="Offen",$G${r}="")),MAX(M$4:M${r-1})+1,"")`};
     row.getCell(14).value={formula:`IF(AND($B${r}<>"",$G${r}="In Arbeit"),MAX(N$4:N${r-1})+1,"")`};
     row.getCell(15).value={formula:`IF(AND($B${r}<>"",$G${r}="Erledigt"),MAX(O$4:O${r-1})+1,"")`};
-    for(let c=1;c<=12;c++){const cell=row.getCell(c);cell.border=box;cell.font={size:11,color:{argb:(c===1||c===11)?C.grey:"FF1B201C"}};cell.alignment={vertical:"top",wrapText:(c===2||c===9||c===10||c===12),horizontal:(c===1||c===11)?"center":undefined}}
+    for(const c of [1,2,3,4,5,6,7,8,9,10,11,12,16,17]){const cell=row.getCell(c);cell.border=box;cell.font={size:11,color:{argb:(c===1||c===11)?C.grey:"FF1B201C"}};cell.alignment={vertical:"top",wrapText:(c===2||c===9||c===10||c===12),horizontal:(c===1||c===11)?"center":undefined}}
     row.getCell(5).numFmt="dd.mm.yyyy";row.getCell(6).numFmt="dd.mm.yyyy";row.getCell(8).numFmt="@";
     row.getCell(7).dataValidation={type:"list",allowBlank:true,formulae:['"Offen,In Arbeit,Erledigt"']};
     row.getCell(4).dataValidation={type:"list",allowBlank:true,showErrorMessage:false,formulae:['"Melanie,Lasse"']};
   }
-  ws.autoFilter=`A4:L${R1}`;
+  ws.autoFilter=`A4:Q${R1}`;
   ws.addConditionalFormatting({ref:`G${R0}:G${R1}`,rules:[
     {type:"expression",formulae:[`$G${R0}="Erledigt"`],style:cf(C.done)},
     {type:"expression",formulae:[`$G${R0}="In Arbeit"`],style:cf(C.doing)},

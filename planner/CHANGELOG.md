@@ -1,5 +1,11 @@
 # Änderungen
 
+## 1.19.0
+- Sicherheit: Schreibzugriffe auf den Server (Aufgaben ändern, löschen, importieren, KI, Erinnerungen) funktionieren nur noch aus dem Planner selbst. Fremde Webseiten im Browser können über das Heimnetz keine Aufgaben mehr verändern oder löschen
+- Sicherheit: KI-Anfragen sind auf 40 pro Stunde begrenzt, damit keine unbeabsichtigten Kosten entstehen
+- Exporte und Weitergabe vollständig: Priorität und Projekt stehen jetzt in PDF, Excel (neue Spalten Projekt und Priorität am Ende) und Kalenderdatei (Priorität, Projekt als Kategorie). Das JSON-Backup enthielt sie schon
+- Neuer Home-Assistant-Sensor `sensor.planner_prio1` (offene Aufgaben mit Prio 1). In der Erinnerung stehen Aufgaben mit hoher Priorität zuerst
+
 ## 1.18.2
 - Karten und Liste: Projektmarken ohne überlappenden Rahmen, einheitlich mit Farbpunkt; der Prio-Randstreifen ist jetzt ein kurzer, abgerundeter Strich statt Kantenlinie
 - Mehrfachauswahl („Auswählen“): zusätzlich Priorität setzen und Tag hinzufügen für alle angehakten Aufgaben
