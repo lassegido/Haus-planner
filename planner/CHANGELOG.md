@@ -1,5 +1,8 @@
 # Änderungen
 
+## 1.30.1
+- KI-Seite: Hinweis ergänzt, dass der Gemini-Schlüssel für alle Nutzer des Planners auf diesem Home Assistant gilt (nicht nur für das Gerät, auf dem er eingetragen wurde).
+
 ## 1.30.0
 - Checkliste umsortieren: Punkt am Griff links (sechs Punkte) gedrückt halten und an die neue Stelle ziehen. Die Reihenfolge wird mit der Aufgabe gespeichert.
 - KI-Vorschlag anpassen: Unter dem Vorschlag schreibst du, was anders sein soll (z. B. „Wände sind schon verputzt“), und tippst „Neu vorschlagen“. Die KI berücksichtigt alle Hinweise dieser Runde. Jede Anpassung zählt als eine KI-Anfrage.
