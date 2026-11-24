@@ -1,5 +1,9 @@
 # Änderungen
 
+## 1.30.0
+- Checkliste umsortieren: Punkt am Griff links (sechs Punkte) gedrückt halten und an die neue Stelle ziehen. Die Reihenfolge wird mit der Aufgabe gespeichert.
+- KI-Vorschlag anpassen: Unter dem Vorschlag schreibst du, was anders sein soll (z. B. „Wände sind schon verputzt“), und tippst „Neu vorschlagen“. Die KI berücksichtigt alle Hinweise dieser Runde. Jede Anpassung zählt als eine KI-Anfrage.
+
 ## 1.29.0
 - **Alexa:** Mit der Home-Assistant-Integration „Alexa Devices“ hört der Planner auf Echo-Befehle, die mit „Planner“ beginnen: Aufgaben anlegen, „was steht heute an“ und „Woche“ vorlesen, „… ist erledigt“ abhaken. Die Antwort kommt auf demselben Echo; mit Stimmprofil wird die Aufgabe der sprechenden Person zugewiesen. Schalter unter Einstellungen → Alexa.
 - **Anzeige für Echo Show und Wandbildschirme:** `?anzeige` zeigt Uhrzeit, Heute und Als Nächstes groß und ohne Bedienleisten, optional nur für eine Person und dunkel. Link unter Einstellungen → Anzeige für Echo Show.

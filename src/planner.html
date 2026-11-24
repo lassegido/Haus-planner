@@ -986,6 +986,15 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
 .kfree{display:flex;flex-direction:column;gap:.4rem;padding:1.4rem;border-radius:1rem;background:var(--grp)}.kfree b{font-size:1.4rem}.kfree span{color:var(--mut)}
 .kmore{margin:.3rem .3rem 0;color:var(--mut);font-size:.85rem}
 @media (max-aspect-ratio:1/1){.kio{grid-template-columns:1fr;grid-template-rows:auto 1fr;height:auto;min-height:100dvh}.kclock{font-size:4.5rem}}
+
+/* 1.30: Checkliste ziehen, KI anpassen */
+.ck .grip{flex:none;display:grid;place-items:center;width:1.9rem;height:2.6rem;margin:0 -.3rem 0 -.4rem;padding:0;border:0;background:none;color:var(--faint);cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none}
+.ck .grip svg{width:1.15rem;height:1.15rem;fill:currentColor}
+.ck.drag{position:relative;z-index:3;background:var(--grp);border-radius:.7rem;box-shadow:0 .5rem 1.4rem rgba(10,28,38,.22);transition:box-shadow .15s}
+.ck.drag .grip{cursor:grabbing;color:var(--acc)}
+.airef{display:flex;gap:.45rem;align-items:center;margin-top:.7rem}
+.airef input{flex:1;min-width:0;height:2.6rem;border:1px solid var(--line2);border-radius:.7rem;background:var(--grp);padding:0 .75rem}
+.airef .btn{flex:none;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -1080,7 +1089,7 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
   <select id="f_proj"></select><input id="f_projnew" placeholder="Projektname" maxlength="30" style="display:none;margin-top:.5rem" aria-label="Neues Projekt">
   <div class="dsecs">
   <details class="dsec" id="d_ck"><summary><span>Checkliste</span><em></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><div id="f_ck"></div><button class="btn ghost" id="ck_add" type="button"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Punkt hinzufügen</button><div class="aiw" id="ai_row"><button class="btn ghost sm" id="ai_btn" type="button">Mit KI ausfüllen</button><span class="hint">Notizen und Checkliste vorschlagen</span></div>
-  <div class="aibox" id="ai_box" style="display:none"><div class="aih">Vorschlag</div><div id="ai_notes"></div><div id="ai_items"></div><div class="aia"><button class="btn sm" id="ai_ok" type="button">Übernehmen</button><button class="btn ghost sm" id="ai_no" type="button">Verwerfen</button></div></div></details>
+  <div class="aibox" id="ai_box" style="display:none"><div class="aih">Vorschlag</div><div id="ai_notes"></div><div id="ai_items"></div><div class="airef"><input id="ai_hint" type="text" autocomplete="off" enterkeyhint="send" placeholder="Was soll anders sein?" aria-label="Hinweis für die KI"><button class="btn ghost sm" id="ai_re" type="button">Neu vorschlagen</button></div><div class="aia"><button class="btn sm" id="ai_ok" type="button">Übernehmen</button><button class="btn ghost sm" id="ai_no" type="button">Verwerfen</button></div></div></details>
   <details class="dsec" id="d_pl"><summary><span>Wiederholen und Abhängigkeiten</span><em></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><label for="f_rec">Wiederholen</label>
   <select id="f_rec"><option value="">Nie</option><option value="1d">Täglich</option><option value="1w">Wöchentlich</option><option value="2w">Alle 2 Wochen</option><option value="1m">Monatlich</option><option value="3m">Vierteljährlich</option><option value="1y">Jährlich</option></select>
   <div class="hint" id="f_rechint" style="display:none">Beim Erledigen wird die nächste Aufgabe automatisch angelegt.</div><label>Abhängig von <span class="lh">muss vorher fertig sein</span></label><div class="deps" id="f_deps"></div></div></details>
@@ -1636,20 +1645,26 @@ function aiPrompt(){
   const t=$("f_title").value.trim(),notes=$("f_notes").value.trim(),have=cklist.map(c=>c.t).filter(Boolean),tags=selTags.join(", "),pv=$("f_proj").value,proj=pv&&pv!=="__new"?pv:"";
   return"Du hilfst einem Paar beim Planen von Aufgaben rund ums Haus. Schreibe auf Deutsch, knapp und praktisch.\nAufgabe: "+t+"\n"+(tags?"Tags: "+tags+"\n":"")+(proj?"Projekt: "+proj+"\n":"")+(notes?"Vorhandene Notizen (nicht wiederholen): "+notes+"\n":"")+(have.length?"Vorhandene Checklistenpunkte (nicht wiederholen): "+have.join("; ")+"\n":"")
    +'Antworte ausschließlich mit einem JSON-Objekt, ohne Erklärung und ohne Code-Block: {"notes":"1 bis 3 kurze Sätze: was ist zu tun, worauf achten","checklist":["3 bis 8 kurze Schritte im Imperativ"]}'}
-let aiRes=null;
-async function aiRun(){
+let aiRes=null,aiHints=[];
+async function aiRun(refine){
   if(!$("f_title").value.trim()){toast("Bitte zuerst einen Titel eingeben");$("f_title").focus();return}
-  const b=$("ai_btn");b.disabled=true;b.textContent="KI denkt nach …";
-  try{const r=await aiJson(aiPrompt()),notes=String(r&&r.notes||"").trim().slice(0,1000),items=(Array.isArray(r&&r.checklist)?r.checklist:[]).map(x=>String(x).trim().slice(0,120)).filter(Boolean).slice(0,10);
-    if(!notes&&!items.length)throw new Error("Keine brauchbare Antwort");aiRes={notes,items};drawAi()}
+  const hint=refine?$("ai_hint").value.trim():"";if(refine&&!hint){$("ai_hint").focus();toast("Schreib kurz, was anders sein soll");return}
+  if(!refine)aiHints=[];else aiHints.push(hint.slice(0,300));
+  let prompt=aiPrompt();
+  if(refine&&aiRes)prompt=prompt.replace("Antworte ausschließlich","Bisheriger Vorschlag: "+JSON.stringify({notes:aiRes.notes,checklist:aiRes.items})+"\nHinweise des Nutzers dazu (unbedingt beachten, betreffende Schritte weglassen oder ändern): "+aiHints.join(" | ")+"\nErstelle einen angepassten Vorschlag. Antworte ausschließlich");
+  const b=refine?$("ai_re"):$("ai_btn"),old=b.textContent;b.disabled=true;b.textContent=refine?"Passe an …":"KI denkt nach …";
+  try{const r=await aiJson(prompt),notes=String(r&&r.notes||"").trim().slice(0,1000),items=(Array.isArray(r&&r.checklist)?r.checklist:[]).map(x=>String(x).trim().slice(0,120)).filter(Boolean).slice(0,10);
+    if(!notes&&!items.length)throw new Error("Keine brauchbare Antwort");aiRes={notes,items};if(refine)$("ai_hint").value="";drawAi()}
   catch(e){toast("KI nicht erreichbar: "+((e&&(e.message||e.code))||"unbekannt"))}
-  b.disabled=false;b.textContent="Mit KI ausfüllen"}
+  b.disabled=false;b.textContent=old}
 function drawAi(){
   const box=$("ai_box");if(!aiRes){box.style.display="none";return}box.style.display="";
   $("ai_notes").textContent=aiRes.notes;
   $("ai_items").innerHTML=aiRes.items.map((x,i)=>`<label class="aii"><input type="checkbox" data-ai="${i}" checked><span>${esc(x)}</span></label>`).join("")}
-$("ai_btn").onclick=aiRun;
-$("ai_no").onclick=()=>{aiRes=null;drawAi()};
+$("ai_btn").onclick=()=>aiRun(false);
+$("ai_re").onclick=()=>aiRun(true);
+$("ai_hint").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();aiRun(true)}});
+$("ai_no").onclick=()=>{aiRes=null;aiHints=[];$("ai_hint").value="";drawAi()};
 $("ai_ok").onclick=()=>{
   if(!aiRes)return;const on=[...document.querySelectorAll("#ai_items input:checked")].map(i=>aiRes.items[+i.dataset.ai]);
   if(aiRes.notes){const n=$("f_notes");n.value=(n.value.trim()?n.value.trim()+"\n\n":"")+aiRes.notes}
@@ -2071,10 +2086,25 @@ function sumDlg(){
 $("dlg").addEventListener("input",sumDlg);$("dlg").addEventListener("click",()=>setTimeout(sumDlg,0));
 /* Checkliste */
 let cklist=[];
-function drawCk(){const box=$("f_ck");box.innerHTML=cklist.map((c,i)=>`<div class="ck"><input type="checkbox" data-i="${i}" ${c.d?"checked":""}><input class="ct" data-i="${i}" value="${esc(c.t)}" placeholder="Punkt"><button class="x" type="button" data-r="${i}">✕</button></div>`).join("");
+function drawCk(){const box=$("f_ck");box.innerHTML=cklist.map((c,i)=>`<div class="ck" data-ck="${i}">${cklist.length>1?`<button class="grip" type="button" aria-label="Ziehen zum Verschieben" tabindex="-1"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="1.5"/><circle cx="15" cy="7" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="17" r="1.5"/><circle cx="15" cy="17" r="1.5"/></svg></button>`:""}<input type="checkbox" data-i="${i}" ${c.d?"checked":""}><input class="ct" data-i="${i}" value="${esc(c.t)}" placeholder="Punkt"><button class="x" type="button" data-r="${i}">✕</button></div>`).join("");
   box.querySelectorAll("input[type=checkbox]").forEach(b=>b.onchange=()=>{cklist[b.dataset.i].d=b.checked});
   box.querySelectorAll(".ct").forEach(b=>{b.oninput=()=>{cklist[b.dataset.i].t=b.value};b.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();cklist.splice(+b.dataset.i+1,0,{t:"",d:false});drawCk();box.querySelectorAll(".ct")[+b.dataset.i+1].focus()}}});
-  box.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{cklist.splice(+b.dataset.r,1);drawCk()})}
+  box.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{cklist.splice(+b.dataset.r,1);drawCk()});
+  box.querySelectorAll(".grip").forEach(g=>g.onpointerdown=ckDrag)}
+/* Checkliste umsortieren: Griff gedrückt halten und ziehen */
+function ckDrag(e){
+  if(e.button>0)return;e.preventDefault();
+  const g=e.currentTarget,row=g.closest(".ck"),box=$("f_ck");let y0=e.clientY,moved=false;
+  g.setPointerCapture(e.pointerId);row.classList.add("drag");hap(10);
+  const mv=ev=>{let dy=ev.clientY-y0;
+    const prev=row.previousElementSibling,next=row.nextElementSibling;
+    if(prev&&dy<-prev.offsetHeight/2){box.insertBefore(row,prev);y0-=prev.offsetHeight+parseFloat(getComputedStyle(prev).marginBottom);dy=ev.clientY-y0;moved=true;hap(5)}
+    else if(next&&dy>next.offsetHeight/2){box.insertBefore(next,row);y0+=next.offsetHeight+parseFloat(getComputedStyle(next).marginBottom);dy=ev.clientY-y0;moved=true;hap(5)}
+    row.style.transform=`translateY(${dy}px)`};
+  const up=()=>{g.removeEventListener("pointermove",mv);g.removeEventListener("pointerup",up);g.removeEventListener("pointercancel",up);
+    row.classList.remove("drag");row.style.transform="";
+    if(moved){const order=[...box.querySelectorAll(".ck")].map(r=>+r.dataset.ck);cklist=order.map(i=>cklist[i]);drawCk()}};
+  g.addEventListener("pointermove",mv);g.addEventListener("pointerup",up);g.addEventListener("pointercancel",up)}
 $("ck_add").onclick=()=>{cklist.push({t:"",d:false});drawCk();const a=$("f_ck").querySelectorAll(".ct");a[a.length-1].focus()};
 
 /* Dialog */
