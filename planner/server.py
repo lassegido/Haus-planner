@@ -1,4 +1,4 @@
-import base64, datetime, hashlib, ipaddress, json, os, re, secrets, shutil, socket, struct, threading, time, urllib.error, urllib.request
+import base64, datetime, hashlib, ipaddress, json, os, re, secrets, shutil, socket, struct, threading, time, traceback, urllib.error, urllib.request
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs, unquote
 
@@ -14,6 +14,8 @@ DATA = os.path.join(D, "tasks.json")
 BK = os.path.join(D, "backups")
 FILES = os.path.join(D, "files")
 ICONS = os.environ.get("ICONS_DIR", os.path.join(os.path.dirname(INDEX), "icons"))
+VENDOR = os.environ.get("VENDOR_DIR", os.path.join(os.path.dirname(INDEX), "vendor"))  # Bibliotheken und Schriften (tools/vendor.py)
+STATIC_TYPES = {"png": "image/png", "js": "text/javascript; charset=utf-8", "css": "text/css; charset=utf-8", "woff2": "font/woff2"}
 FID = re.compile(r"[a-f0-9]{12}")
 SAFE = ("image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf")
 LOCK = threading.RLock()  # wiedereintrittsfähig: ha_info() fragt Personen ab, auch wenn ein Handler die Sperre hält
@@ -227,21 +229,35 @@ def clean(t):
 
 
 # ---- Home Assistant: Erinnerungen und Sensoren (nur im Add-on, über die Supervisor-Schnittstelle)
-def options():
+LOGGED = set()
+
+
+def log_once(key, msg):
+    """Meldung nur einmal je Serverlauf ins Add-on-Protokoll (verhindert Flut bei Fehlern, die bei jeder Abfrage auftreten)."""
+    if key not in LOGGED:
+        LOGGED.add(key)
+        print(msg, flush=True)
+
+
+def read_json(path, what):
+    """JSON-Objekt lesen. Fehlt die Datei: {}. Ist sie defekt: {} und eine Meldung im Protokoll statt still zu schweigen."""
     try:
-        with open(OPTS, encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
+        with open(path, encoding="utf-8") as f:
+            d = json.load(f)
+        return d if isinstance(d, dict) else {}
+    except FileNotFoundError:
         return {}
+    except Exception as e:
+        log_once("read:" + path, "%s nicht lesbar (%s): %s" % (what, os.path.basename(path), e))
+        return {}
+
+
+def options():
+    return read_json(OPTS, "Add-on-Konfiguration")
 
 
 def app_settings():
-    try:
-        with open(SETTINGS, encoding="utf-8") as f:
-            d = json.load(f)
-            return d if isinstance(d, dict) else {}
-    except Exception:
-        return {}
+    return read_json(SETTINGS, "Einstellungen aus der App")
 
 
 def save_app_settings(d):
@@ -250,8 +266,8 @@ def save_app_settings(d):
         json.dump(d, f, ensure_ascii=False)
     try:
         os.chmod(tmp, 0o600)  # enthält ggf. den KI-Schlüssel
-    except Exception:
-        pass
+    except OSError:
+        pass  # Dateisystem ohne Rechteverwaltung: Datei liegt trotzdem nur im Add-on-Ordner
     os.replace(tmp, SETTINGS)
 
 
@@ -1084,18 +1100,15 @@ def quick_task(text, who_default=""):
     speech = "„%s“ ist %s %s eingetragen." % (t["title"], "bis" if q["until"] else "für", when)
     return t, speech
 
+BROWSER_LOG = []  # Zeitpunkte der letzten Browser-Fehlermeldungen (Begrenzung)
+LOG_LOCK = threading.Lock()
 PREFS = os.path.join(D, "prefs.json")  # persönliche Einstellungen je Home-Assistant-Benutzer
 PREFS_LOCK = threading.Lock()
 PREF_KEYS = ("theme", "design", "font", "me", "sort", "glw", "hwho", "htile")
 
 
 def prefs_all():
-    try:
-        with open(PREFS, encoding="utf-8") as f:
-            d = json.load(f)
-        return d if isinstance(d, dict) else {}
-    except Exception:
-        return {}
+    return read_json(PREFS, "Persönliche Einstellungen")
 
 
 def prefs_save(d):
@@ -1167,7 +1180,12 @@ class H(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self.guard():
             return
-        u = urlparse(self.path)
+        try:
+            self.get(urlparse(self.path))
+        except Exception:
+            self.fail("GET", urlparse(self.path).path)
+
+    def get(self, u):
         if u.path.endswith("/api/ha-notify"):
             try:
                 if not TOKEN:
@@ -1206,18 +1224,10 @@ class H(BaseHTTPRequestHandler):
                             "application/manifest+json")
         mi = re.search(r"/icons/(icon-192|icon-512|apple-touch-icon)\.png$", u.path)
         if mi:
-            try:
-                with open(os.path.join(ICONS, mi.group(1) + ".png"), "rb") as f:
-                    b = f.read()
-                self.send_response(200)
-                self.send_header("Content-Type", "image/png")
-                self.send_header("Content-Length", str(len(b)))
-                self.send_header("Cache-Control", "public, max-age=86400")
-                self.end_headers()
-                self.wfile.write(b)
-                return
-            except Exception:
-                return self.out(404, {"error": "nicht gefunden"})
+            return self.static(os.path.join(ICONS, mi.group(1) + ".png"))
+        mv = re.search(r"/vendor/([a-z0-9][a-z0-9.-]{0,60}\.(?:js|css|woff2))$", u.path)
+        if mv and ".." not in mv.group(1):
+            return self.static(os.path.join(VENDOR, mv.group(1)), 604800)
         m = re.search(r"/api/file/([A-Za-z0-9_-]{1,40})/([a-f0-9]{12})$", u.path)
         if m:
             with LOCK:
@@ -1242,6 +1252,20 @@ class H(BaseHTTPRequestHandler):
         with open(INDEX, "rb") as f:
             self.out(200, f.read(), "text/html")
 
+    def static(self, path, max_age=86400):
+        """Feste Datei aus dem Add-on ausliefern (Symbole, Bibliotheken, Schriften)."""
+        try:
+            with open(path, "rb") as f:
+                b = f.read()
+        except OSError:
+            return self.out(404, {"error": "nicht gefunden"})
+        self.send_response(200)
+        self.send_header("Content-Type", STATIC_TYPES.get(path.rsplit(".", 1)[-1], "application/octet-stream"))
+        self.send_header("Content-Length", str(len(b)))
+        self.send_header("Cache-Control", "public, max-age=%d" % max_age)
+        self.end_headers()
+        self.wfile.write(b)
+
     def body(self, limit=2_000_000):
         n = int(self.headers.get("Content-Length", "0"))
         if n < 0 or n > limit:
@@ -1256,148 +1280,178 @@ class H(BaseHTTPRequestHandler):
         self.out(403, {"error": "nicht erlaubt"})
         return False
 
+    # POST-Routen: Pfadende → (Methode, größte erlaubte Anfrage in Bytes). Reihenfolge egal, Pfade enden eindeutig.
+    POST_ROUTES = {"/api/ai": ("post_ai", 200_000), "/api/me": ("post_me", 20_000), "/api/voice": ("post_voice", 20_000),
+                   "/api/quick": ("post_quick", 20_000), "/api/ha-settings": ("post_ha_settings", 50_000),
+                   "/api/ha-test": ("post_ha_test", 1_000), "/api/tags": ("post_tags", 200_000), "/api/task": ("post_task", 2_000_000),
+                   "/api/import": ("post_import", 25_000_000), "/api/log": ("post_log", 8_000)}
+
     def do_POST(self):
         if not self.guard() or not self.csrf_ok():
             return
         pu = urlparse(self.path)
-        path = pu.path
-        mf = re.search(r"/api/file/([A-Za-z0-9_-]{1,40})$", path)
-        if mf:
-            tid = mf.group(1)
-            try:
-                n = int(self.headers.get("Content-Length", "0"))
-                if n <= 0 or n > 20_000_000:
-                    raise ValueError
-                raw = self.rfile.read(n)
-            except Exception:
-                return self.out(400, {"error": "Datei zu groß oder leer"})
-            q = parse_qs(pu.query)
-            name = (q.get("name", ["Datei"])[0] or "Datei")[:120]
-            ty = (q.get("type", [""])[0] or "")[:60]
-            with LOCK:
-                if tid not in state["tasks"]:
-                    return self.out(404, {"error": "Aufgabe nicht gefunden"})
-            fid = secrets.token_hex(6)
-            for base in (FILES, os.path.join(SHARE, "files")):
-                try:
-                    os.makedirs(os.path.join(base, tid), exist_ok=True)
-                    with open(os.path.join(base, tid, fid), "wb") as f:
-                        f.write(raw)
-                except Exception as e:
-                    print("Datei speichern:", e, flush=True)
-                    if base == FILES:
-                        return self.out(500, {"error": "Speichern nicht möglich"})
-            return self.out(200, {"file": {"id": fid, "n": name, "s": len(raw), "ty": ty}})
         try:
-            data = self.body(25_000_000 if path.endswith("/api/import") else 2_000_000)
+            mf = re.search(r"/api/file/([A-Za-z0-9_-]{1,40})$", pu.path)
+            if mf:
+                return self.post_file(mf.group(1), parse_qs(pu.query))
+            route = next((r for suffix, r in self.POST_ROUTES.items() if pu.path.endswith(suffix)), None)
+            if not route:
+                return self.out(404, {"error": "nicht gefunden"})
+            try:
+                data = self.body(route[1])
+            except Exception:
+                return self.out(400, {"error": "ungültige Anfrage"})
+            return getattr(self, route[0])(data)
         except Exception:
-            return self.out(400, {"error": "ungültige Anfrage"})
-        if path.endswith("/api/ai"):
+            self.fail("POST", pu.path)
+
+    def fail(self, method, path):
+        """Unerwarteter Fehler: mit Kontext ins Add-on-Protokoll, Browser bekommt 500 statt abgebrochener Verbindung."""
+        print("Fehler bei %s %s:\n%s" % (method, path, traceback.format_exc(limit=6)), flush=True)
+        try:
+            self.out(500, {"error": "Interner Fehler, Details im Add-on-Protokoll"})
+        except Exception:
+            pass  # Verbindung schon zu
+
+    def post_file(self, tid, q):
+        try:
+            n = int(self.headers.get("Content-Length", "0"))
+            if n <= 0 or n > 20_000_000:
+                raise ValueError
+            raw = self.rfile.read(n)
+        except Exception:
+            return self.out(400, {"error": "Datei zu groß oder leer"})
+        name = (q.get("name", ["Datei"])[0] or "Datei")[:120]
+        ty = (q.get("type", [""])[0] or "")[:60]
+        with LOCK:
+            if tid not in state["tasks"]:
+                return self.out(404, {"error": "Aufgabe nicht gefunden"})
+        fid = secrets.token_hex(6)
+        for base in (FILES, os.path.join(SHARE, "files")):
             try:
-                p = data.get("prompt") if isinstance(data, dict) else None
-                if not isinstance(p, str) or not p.strip():
-                    raise RuntimeError("Leere Anfrage")
-                return self.out(200, {"ok": True, "data": ai_call(p, bool(data.get("raw")))})
+                os.makedirs(os.path.join(base, tid), exist_ok=True)
+                with open(os.path.join(base, tid, fid), "wb") as f:
+                    f.write(raw)
             except Exception as e:
-                return self.out(200, {"ok": False, "error": str(e)[:200]})
-        if path.endswith("/api/me"):
-            usr = self.ha_user()
-            if not usr:
-                return self.out(200, {"ok": False})
-            if not isinstance(data, dict):
-                return self.out(400, {"error": "Ungültig"})
-            with PREFS_LOCK:
-                allp = prefs_all()
-                mine = allp.get(usr["id"]) if isinstance(allp.get(usr["id"]), dict) else {}
-                for k, v in data.items():
-                    if k in PREF_KEYS and (v is None or isinstance(v, str)):
-                        if v is None or v == "":
-                            mine.pop(k, None)
-                        else:
-                            mine[k] = v[:60]
-                allp[usr["id"]] = mine
-                prefs_save(allp)
+                print("Datei speichern:", e, flush=True)
+                if base == FILES:
+                    return self.out(500, {"error": "Speichern nicht möglich"})
+        return self.out(200, {"file": {"id": fid, "n": name, "s": len(raw), "ty": ty}})
+
+    def post_ai(self, data):
+        try:
+            p = data.get("prompt") if isinstance(data, dict) else None
+            if not isinstance(p, str) or not p.strip():
+                raise RuntimeError("Leere Anfrage")
+            return self.out(200, {"ok": True, "data": ai_call(p, bool(data.get("raw")))})
+        except Exception as e:
+            return self.out(200, {"ok": False, "error": str(e)[:200]})
+
+    def post_me(self, data):
+        usr = self.ha_user()
+        if not usr:
+            return self.out(200, {"ok": False})
+        if not isinstance(data, dict):
+            return self.out(400, {"error": "Ungültig"})
+        with PREFS_LOCK:
+            allp = prefs_all()
+            mine = allp.get(usr["id"]) if isinstance(allp.get(usr["id"]), dict) else {}
+            for k, v in data.items():
+                if k in PREF_KEYS and (v is None or isinstance(v, str)):
+                    if v is None or v == "":
+                        mine.pop(k, None)
+                    else:
+                        mine[k] = v[:60]
+            allp[usr["id"]] = mine
+            prefs_save(allp)
+        return self.out(200, {"ok": True})
+
+    def post_voice(self, data):
+        # Wie /api/quick, versteht zusätzlich „heute“, „Woche“ und „erledigt …“ (für Siri-Kurzbefehle)
+        try:
+            txt = data.get("text") if isinstance(data, dict) else None
+            if not isinstance(txt, str) or not txt.strip():
+                raise ValueError("Leerer Text")
+            return self.out(200, {"ok": True, "speech": voice_rest(txt[:300], str(data.get("who") or "")[:30], "Siri")})
+        except Exception as e:
+            return self.out(400, {"ok": False, "error": str(e)[:200], "speech": "Das habe ich nicht verstanden."})
+
+    def post_quick(self, data):
+        # Für Siri-Kurzbefehle und Home-Assistant-Sprachsteuerung: {"text": "Zaun streichen Sa #Garten", "who": "Lasse"}
+        try:
+            txt = data.get("text") if isinstance(data, dict) else None
+            if not isinstance(txt, str) or not txt.strip():
+                raise ValueError("Leerer Text")
+            t, speech = quick_task(txt[:300], str(data.get("who") or "")[:30])
+        except Exception as e:
+            return self.out(400, {"ok": False, "error": str(e)[:200], "speech": "Das habe ich nicht verstanden."})
+        with LOCK:
+            t["v"] = 1
+            state["tasks"][t["id"]] = t
+            state["rev"] += 1
+            save()
+        return self.out(200, {"ok": True, "task": t, "speech": speech})
+
+    def post_ha_settings(self, data):
+        if not isinstance(data, dict):
+            return self.out(400, {"error": "Ungültig"})
+        st = app_settings()
+        if isinstance(data.get("notify"), list):
+            st["notify"] = [str(x)[:80] for x in data["notify"][:12] if re.fullmatch(r"[A-Za-z0-9_]+", str(x))]
+        if isinstance(data.get("time"), str) and re.fullmatch(r"([01][0-9]|2[0-3]):[0-5][0-9]", data["time"]):
+            st["time"] = data["time"]
+        if isinstance(data.get("ai_key"), str):
+            k = re.sub(r"\s+", "", data["ai_key"]).strip("\"'„“”")
+            if not k:
+                st.pop("ai_key", None)
+            elif AI_KEY.fullmatch(k):
+                st["ai_key"] = k
+            else:
+                return self.out(400, {"error": "Das sieht nicht wie ein Gemini-Schlüssel aus"})
+        if data.get("ai_model") in AI_MODELS:
+            st["ai_model"] = data["ai_model"]
+        if isinstance(data.get("notify_who"), dict):
+            m = st.get("notify_who") if isinstance(st.get("notify_who"), dict) else {}
+            for k, v in list(data["notify_who"].items())[:20]:
+                if re.fullmatch(r"[A-Za-z0-9_]+", str(k)) and isinstance(v, str):
+                    m[str(k)] = v.strip()[:30]
+            st["notify_who"] = m
+        alexa_changed = isinstance(data.get("alexa"), bool) and data["alexa"] != bool(st.get("alexa"))
+        if isinstance(data.get("alexa"), bool):
+            st["alexa"] = data["alexa"]
+        save_app_settings(st)
+        if alexa_changed:
+            ws_restart()
+        return self.out(200, {"ok": True, "ha": ha_info()})
+
+    def post_ha_test(self, data):
+        try:
+            if not TOKEN:
+                raise RuntimeError("Keine Verbindung zu Home Assistant")
+            notify("Testnachricht vom Planner – die Erinnerungen funktionieren.")
             return self.out(200, {"ok": True})
-        if path.endswith("/api/voice"):
-            # Wie /api/quick, versteht zusätzlich „heute“, „Woche“ und „erledigt …“ (für Siri-Kurzbefehle)
-            try:
-                txt = data.get("text") if isinstance(data, dict) else None
-                if not isinstance(txt, str) or not txt.strip():
-                    raise ValueError("Leerer Text")
-                return self.out(200, {"ok": True, "speech": voice_rest(txt[:300], str(data.get("who") or "")[:30], "Siri")})
-            except Exception as e:
-                return self.out(400, {"ok": False, "error": str(e)[:200], "speech": "Das habe ich nicht verstanden."})
-        if path.endswith("/api/quick"):
-            # Für Siri-Kurzbefehle und Home-Assistant-Sprachsteuerung: {"text": "Zaun streichen Sa #Garten", "who": "Lasse"}
-            try:
-                txt = data.get("text") if isinstance(data, dict) else None
-                if not isinstance(txt, str) or not txt.strip():
-                    raise ValueError("Leerer Text")
-                t, speech = quick_task(txt[:300], str(data.get("who") or "")[:30])
-            except Exception as e:
-                return self.out(400, {"ok": False, "error": str(e)[:200], "speech": "Das habe ich nicht verstanden."})
-            with LOCK:
-                t["v"] = 1
-                state["tasks"][t["id"]] = t
-                state["rev"] += 1
-                save()
-            return self.out(200, {"ok": True, "task": t, "speech": speech})
-        if path.endswith("/api/ha-settings"):
-            if not isinstance(data, dict):
-                return self.out(400, {"error": "Ungültig"})
-            st = app_settings()
-            if isinstance(data.get("notify"), list):
-                st["notify"] = [str(x)[:80] for x in data["notify"][:12] if re.fullmatch(r"[A-Za-z0-9_]+", str(x))]
-            if isinstance(data.get("time"), str) and re.fullmatch(r"([01][0-9]|2[0-3]):[0-5][0-9]", data["time"]):
-                st["time"] = data["time"]
-            if isinstance(data.get("ai_key"), str):
-                k = re.sub(r"\s+", "", data["ai_key"]).strip("\"'„“”")
-                if not k:
-                    st.pop("ai_key", None)
-                elif AI_KEY.fullmatch(k):
-                    st["ai_key"] = k
-                else:
-                    return self.out(400, {"error": "Das sieht nicht wie ein Gemini-Schlüssel aus"})
-            if data.get("ai_model") in AI_MODELS:
-                st["ai_model"] = data["ai_model"]
-            if isinstance(data.get("notify_who"), dict):
-                m = st.get("notify_who") if isinstance(st.get("notify_who"), dict) else {}
-                for k, v in list(data["notify_who"].items())[:20]:
-                    if re.fullmatch(r"[A-Za-z0-9_]+", str(k)) and isinstance(v, str):
-                        m[str(k)] = v.strip()[:30]
-                st["notify_who"] = m
-            alexa_changed = isinstance(data.get("alexa"), bool) and data["alexa"] != bool(st.get("alexa"))
-            if isinstance(data.get("alexa"), bool):
-                st["alexa"] = data["alexa"]
-            save_app_settings(st)
-            if alexa_changed:
-                ws_restart()
-            return self.out(200, {"ok": True, "ha": ha_info()})
-        if path.endswith("/api/ha-test"):
-            try:
-                if not TOKEN:
-                    raise RuntimeError("Keine Verbindung zu Home Assistant")
-                notify("Testnachricht vom Planner – die Erinnerungen funktionieren.")
-                return self.out(200, {"ok": True})
-            except Exception as e:
-                return self.out(200, {"ok": False, "error": str(e)[:200]})
-        if path.endswith("/api/tags"):
-            with LOCK:
-                state["tags"] = clean_tags(data.get("tags", []) if isinstance(data, dict) else [])
-                state["rev"] += 1
-                save()
-                return self.out(200, {"rev": state["rev"], "count": len(state["tags"])})
-        if path.endswith("/api/task"):
-            items = [clean(data)]
-        elif path.endswith("/api/import"):
-            items = [clean(t) for t in (data.get("tasks", []) if isinstance(data, dict) else [])]
-        else:
-            return self.out(404, {"error": "nicht gefunden"})
+        except Exception as e:
+            return self.out(200, {"ok": False, "error": str(e)[:200]})
+
+    def post_tags(self, data):
+        with LOCK:
+            state["tags"] = clean_tags(data.get("tags", []) if isinstance(data, dict) else [])
+            state["rev"] += 1
+            save()
+            return self.out(200, {"rev": state["rev"], "count": len(state["tags"])})
+
+    def post_task(self, data):
+        return self.store([clean(data)], data, check=self.headers.get("X-Check") == "1")
+
+    def post_import(self, data):
+        return self.store([clean(t) for t in (data.get("tasks", []) if isinstance(data, dict) else [])], data)
+
+    def store(self, items, data, check=False):
         items = [t for t in items if t]
         if not items:
             return self.out(400, {"error": "ungültige Aufgabe"})
         with LOCK:
-            if path.endswith("/api/task") and self.headers.get("X-Check") == "1":
+            if check:
                 old = state["tasks"].get(items[0]["id"])
                 try:
                     sent = int(data.get("v", -1))
@@ -1410,11 +1464,32 @@ class H(BaseHTTPRequestHandler):
                 state["tasks"][t["id"]] = t
             state["rev"] += 1
             save()
-            self.out(200, {"rev": state["rev"], "count": len(items), "v": items[0]["v"]})
+            return self.out(200, {"rev": state["rev"], "count": len(items), "v": items[0]["v"]})
+
+    def post_log(self, data):
+        # Skriptfehler aus dem Browser ins Add-on-Protokoll (Home Assistant → Add-on → Protokoll). Höchstens 30 pro Stunde.
+        now = time.time()
+        with LOG_LOCK:
+            BROWSER_LOG[:] = [x for x in BROWSER_LOG if now - x < 3600]
+            if len(BROWSER_LOG) >= 30:
+                return self.out(429, {"ok": False})
+            BROWSER_LOG.append(now)
+        d = data if isinstance(data, dict) else {}
+        one = lambda k, n: re.sub(r"[\x00-\x1f\x7f]+", " ", str(d.get(k) or ""))[:n].strip()
+        usr = self.ha_user()
+        print("Browser-Fehler: %s | %s | Ansicht %s | Version %s | %s%s" % (one("msg", 400), one("where", 160), one("view", 20), one("ver", 20),
+              one("ua", 120), " | " + usr["name"] if usr else ""), flush=True)
+        return self.out(200, {"ok": True})
 
     def do_DELETE(self):
         if not self.guard() or not self.csrf_ok():
             return
+        try:
+            self.delete()
+        except Exception:
+            self.fail("DELETE", urlparse(self.path).path)
+
+    def delete(self):
         mf = re.search(r"/api/file/([A-Za-z0-9_-]{1,40})/([a-f0-9]{12})$", urlparse(self.path).path)
         if mf:
             drop_files(mf.group(1), mf.group(2))

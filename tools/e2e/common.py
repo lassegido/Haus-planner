@@ -133,7 +133,9 @@ class Page:
         self.ctx.route(re.compile(r"^https?://(?!127\.0\.0\.1)"), lambda r: r.abort())
         self.pg = self.ctx.new_page()
         self.errors = []
+        self.external = []  # Anfragen an fremde Server (im Test blockiert)
         self.pg.on("pageerror", lambda e: self.errors.append(str(e)))
+        self.pg.on("request", lambda r: r.url.startswith(("http://127.0.0.1", "file:", "data:", "blob:")) or self.external.append(r.url))
         if onboarded:
             self.pg.add_init_script("try{localStorage.setItem('haus-onb','1')}catch(e){}")
         self.pg.goto(url)

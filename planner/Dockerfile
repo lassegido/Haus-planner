@@ -3,4 +3,5 @@ RUN apk add --no-cache tzdata
 WORKDIR /app
 COPY server.py index.html VERSION /app/
 COPY icons /app/icons
+COPY vendor /app/vendor
 CMD ["python3", "-u", "/app/server.py"]

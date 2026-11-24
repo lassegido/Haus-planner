@@ -6,7 +6,6 @@
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Planner">
 <meta name="theme-color" content="#F5F3EB" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0E1E27" media="(prefers-color-scheme: dark)">
 <title>Planner</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>(function(){var d=document.documentElement;try{if(self===top)return;d.classList.add('emb');
 /* Eingebettet in Home Assistant: HA lässt unten einen Rand (Sicherheitsabstand der Home-Leiste). Wir nehmen ihn selbst auf und füllen die Fläche bis zum Rand. */
 var f=null,msg=0;try{f=window.frameElement}catch(e){}
@@ -1349,13 +1348,15 @@ function applyTheme(){
 applyTheme();
 matchMedia("(prefers-color-scheme:dark)").addEventListener("change",applyTheme);
 
+/* Fremdcode-Adressen. Das Add-on bekommt lokale Dateien aus planner/vendor/ (tools/build.py ersetzt diese Zeile). */
+const LIB={pdf:"https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",xlsx:"https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js",font:f=>"https://fonts.googleapis.com/css2?family="+f+"&display=swap"};
 const SYSF='-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
 const FONTS=[["figtree","Figtree","Figtree:wght@400;500;600;700;800",'"Figtree",'+SYSF,"Freundlich und klar (Standard)"],
  ["sys","Systemschrift","",SYSF,"Sachlich wie iOS (auf dem iPhone San Francisco), lädt sofort"],
  ["fraunces","Fraunces und Figtree","Fraunces:opsz,wght@9..144,600;9..144,700&family=Figtree:wght@400;500;600;700;800",'"Figtree",'+SYSF,"Elegante Überschriften mit Serifen",'"Fraunces",Georgia,"Times New Roman",serif']];
 function applyFont(){
   const k=pg("font")||"figtree",f=FONTS.find(x=>x[0]===k)||FONTS[0],r=document.documentElement;
-  if(f[2]&&!document.getElementById("gf-"+f[0])){const l=document.createElement("link");l.id="gf-"+f[0];l.rel="stylesheet";l.href="https://fonts.googleapis.com/css2?family="+f[2]+"&display=swap";document.head.appendChild(l)}
+  const fh=f[2]&&LIB.font(f[2]);if(fh&&![...document.querySelectorAll("link[data-gf]")].some(l=>l.getAttribute("href")===fh)){const l=document.createElement("link");l.dataset.gf=f[0];l.rel="stylesheet";l.href=fh;document.head.appendChild(l)}
   r.style.setProperty("--fb",f[3]);r.style.setProperty("--disp",f[5]||f[3])}
 applyFont();
 
@@ -2325,7 +2326,7 @@ $("more").onclick=()=>{
   if(v==="board"||v==="list"||v==="gantt")items.push({t:"Sortieren",val:sortm==="prio"?"Priorität":"Datum",sub:[["date","Datum"],["prio","Priorität"]].map(([k,l])=>({t:l,chk:sortm===k,fn:()=>{$("srt").value=k;$("srt").dispatchEvent(new Event("change"))}}))});
   if(v==="list"||v==="gantt")items.push({t:"Gruppieren",val:GRPL[grp],sub:Object.entries(GRPL).map(([k,l])=>({t:l,chk:grp===k,fn:()=>{$("grp").value=k;$("grp").dispatchEvent(new Event("change"))}}))});
   if(items.length)items.push({sep:true});
-  items.push({t:"Tags und Projekte",ic:"tag",fn:openMan},{t:"Archiv und Papierkorb",ic:"arch",fn:openArch},{t:"Export und Backup",ic:"exp",fn:()=>{$("dlx").showModal();$("dlx").scrollTop=0}},{t:"Einstellungen",ic:"cfg",fn:openSettings});
+  items.push({t:"Tags und Projekte",ic:"tag",fn:openMan},{t:"Archiv und Papierkorb",ic:"arch",fn:openArch},{t:"Export und Backup",ic:"exp",fn:()=>{$("dlx").showModal();$("dlx").scrollTop=0;preloadExport()}},{t:"Einstellungen",ic:"cfg",fn:openSettings});
   hap(8);popMenu($("more"),items)};
 matchMedia("(max-width:699px)").addEventListener("change",()=>{renderedView=null;render()});
 $("add").onclick=()=>openDlg();
@@ -2337,13 +2338,14 @@ setTimeout(onboard,1600);
 /* Export */
 async function dl(name,data){try{const d=await window.claude.use("downloads");if(!d){$("note").textContent="Download ist hier nicht verfügbar.";return}await d.save({filename:name,data});$("dlx").close()}catch(e){if(!e||e.code!=="declined")$("note").textContent="Download fehlgeschlagen: "+((e&&(e.message||e.code))||"unbekannt")}}
 const stamp=()=>iso(new Date()),fdl=s=>fromDn(dn(s)).toLocaleDateString("de-DE",{timeZone:"UTC"});
-$("exp").onclick=()=>$("dlx").showModal();
+$("exp").onclick=()=>{$("dlx").showModal();preloadExport()};
 $("x_close").onclick=()=>$("dlx").close();
 $("x_json").onclick=()=>dl("planner-backup-"+stamp()+".json",new Blob([JSON.stringify({version:2,exportiert:new Date().toISOString(),tasks:RAW,tags:reg},null,2)],{type:"application/json"}));
 $("x_imp").onclick=()=>$("imp").click();
 $("imp").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const j=JSON.parse(await f.text()),arr=Array.isArray(j)?j:j.tasks;if(!Array.isArray(arr))throw 0;if(!await confirmSheet(arr.length+" Aufgaben einspielen? Vorhandene mit gleicher ID werden überschrieben.","Einspielen",true))return;await saveMany(arr.filter(t=>t&&t.id&&t.title&&t.start&&t.end));if(Array.isArray(j.tags)&&j.tags.length)await saveReg(mergeReg(j.tags));$("dlx").close()}catch(x){alert("Die Datei konnte nicht gelesen werden.")}e.target.value=""};
-$("x_pdf").onclick=()=>{
-  const J=window.jspdf;if(!J){$("note").textContent="PDF-Bibliothek konnte nicht geladen werden.";return}
+$("x_pdf").onclick=async()=>{
+  if(!window.jspdf){$("note").textContent="PDF wird vorbereitet …";try{await loadJs(LIB.pdf,"jspdf")}catch(e){$("note").textContent="PDF-Bibliothek konnte nicht geladen werden.";return}$("note").textContent=""}
+  const J=window.jspdf;
   const doc=new J.jsPDF({unit:"mm",format:"a4"}),L=14;let y=18;
   const c2=s=>String(s??"").replace(/[^\u0000-\u00ff]/g,"");
   const ln=(txt,sz=10,b=0,ind=0,c=[30,30,30])=>{doc.setFont("helvetica",b?"bold":"normal");doc.setFontSize(sz);doc.setTextColor(...c);for(const l of doc.splitTextToSize(c2(txt),182-ind)){if(y>282){doc.addPage();y=18}doc.text(l,L+ind,y);y+=sz*.45}};
@@ -2372,7 +2374,9 @@ $("x_pdf").onclick=()=>{
   dl("planner-"+stamp()+".pdf",doc.output("arraybuffer"));
 };
 /* Excel-Export (ExcelJS wird erst bei Bedarf geladen) */
-function loadJs(src){return new Promise((ok,no)=>{if(window.ExcelJS)return ok();const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=()=>no(new Error("Excel-Bibliothek konnte nicht geladen werden"));document.head.appendChild(s)})}
+const JSL={};
+function loadJs(src,g){if(window[g])return Promise.resolve();return JSL[src]||(JSL[src]=new Promise((ok,no)=>{const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=()=>{delete JSL[src];s.remove();no(new Error("Bibliothek konnte nicht geladen werden"))};document.head.appendChild(s)}))}
+function preloadExport(){loadJs(LIB.pdf,"jspdf").catch(()=>{});loadJs(LIB.xlsx,"ExcelJS").catch(()=>{})}
 async function buildXlsx(){
   const wb=new ExcelJS.Workbook();wb.creator="Planner";wb.calcProperties={fullCalcOnLoad:true};
   const list=tasks.slice().sort((a,b)=>dn(a.start)-dn(b.start)||dn(a.end)-dn(b.end));
@@ -2490,7 +2494,7 @@ async function buildXlsx(){
   return await wb.xlsx.writeBuffer();
 }
 $("x_xlsx").onclick=async()=>{
-  try{$("note").textContent="Excel-Datei wird erstellt …";await loadJs("https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js");
+  try{$("note").textContent="Excel-Datei wird erstellt …";await loadJs(LIB.xlsx,"ExcelJS");
     const buf=await buildXlsx();$("note").textContent="";
     await dl("planner-"+stamp()+".xlsx",new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}))
   }catch(e){$("note").textContent="Excel-Export fehlgeschlagen: "+((e&&(e.message||e.code))||e)}

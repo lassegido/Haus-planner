@@ -13,12 +13,18 @@ Was passiert:
    definieren (außer ARTIFACT_ONLY). Jede Funktion, die die Server-Version aufruft, muss es in der Datei geben.
    So fällt sofort auf, wenn im Master ein neuer Name in den Speicher-Block gerät, den der Build verlieren würde.
 3. Syntaxprüfung beider Dateien mit node --check (wenn Node installiert ist).
+4. Fremdcode: Liegen Bibliotheken und Schriften geprüft in planner/vendor/ (Prüfsummen aus MANIFEST.txt),
+   lädt die Add-on-Version sie lokal statt aus dem Internet (Zeile „const LIB=“ wird ersetzt).
 """
-import os, re, shutil, subprocess, sys, tempfile
+import hashlib, os, re, shutil, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "src", "planner.html")
 ADDON = os.path.join(ROOT, "planner")
+VENDOR = os.path.join(ADDON, "vendor")
+LIB_LINE = re.compile(r"^const LIB=\{.*\};$", re.M)
+LIB_LOCAL = 'const LIB={pdf:"vendor/jspdf.umd.min.js?v=%(v)s",xlsx:"vendor/exceljs.min.js?v=%(v)s",font:()=>"vendor/fonts.css?v=%(v)s"};'
+VENDOR_NEEDED = ("jspdf.umd.min.js", "exceljs.min.js", "fonts.css")
 START, END = "/* Speicher: gemeinsame Datenbank, sonst lokal */", "/* Anzeige */"
 # Namen, die nur die Claude-Version braucht (lokaler Browser-Speicher, Claude-Datenbank)
 ARTIFACT_ONLY = {"lsGet", "lsSet", "lsGetReg", "lsSetReg", "metaCol"}
@@ -96,6 +102,14 @@ PWA = ('<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-
        '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner">'
        '<meta name="apple-mobile-web-app-status-bar-style" content="default">')
 
+# Skriptfehler und nicht ladbare Dateien an den Server melden (landen im Add-on-Protokoll). Höchstens 8 je Seitenaufruf.
+ERRLOG = ('<script>(function(){var n=0,seen={};function send(m,w){try{m=String(m||"").slice(0,400);w=String(w||"");if(n>=8||seen[m+w])return;seen[m+w]=1;n++;'
+          'var v=(document.body&&document.body.dataset.view)||"";fetch("api/log",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json","X-Planner":"1"},'
+          'body:JSON.stringify({msg:m,where:w,ver:"%s",view:v,ua:navigator.userAgent.slice(0,120)})}).catch(function(){})}catch(_){}}'
+          'addEventListener("error",function(e){var t=e.target;if(t&&t!==window){if(t.tagName==="SCRIPT"||t.tagName==="LINK")send("Datei nicht geladen: "+String(t.src||t.href).split("/").pop().split("?")[0],"");return}'
+          'send(e.message,String(e.filename||"").split("/").pop()+":"+e.lineno+":"+e.colno)},true);'
+          'addEventListener("unhandledrejection",function(e){var r=e.reason||{};send("Unbehandelt: "+(r.message||r),String(r.stack||"").split("\\n")[1]||"")})})();</script>')
+
 
 def fail(msg):
     sys.exit("FEHLER: " + msg)
@@ -141,6 +155,29 @@ def check_syntax(html, label):
                 fail("JavaScript-Syntaxfehler in %s%s: %s" % (label, line, err[0] if err else r.stderr.strip()[-400:]))
 
 
+def vendor_ok():
+    """True, wenn planner/vendor/ vollständig ist und jede Datei zur Prüfsumme in MANIFEST.txt passt."""
+    man = os.path.join(VENDOR, "MANIFEST.txt")
+    if not os.path.exists(man):
+        return False
+    listed = set()
+    for line in open(man, encoding="utf-8"):
+        if not line.strip():
+            continue
+        digest, _size, name = line.split()[:3]
+        listed.add(name)
+        try:
+            data = open(os.path.join(VENDOR, name), "rb").read()
+        except OSError:
+            fail("planner/vendor/%s fehlt (steht in MANIFEST.txt)" % name)
+        if hashlib.sha256(data).hexdigest() != digest:
+            fail("planner/vendor/%s passt nicht zur Prüfsumme in MANIFEST.txt (verändert?). Neu holen: GitHub → Actions → Fremdcode holen" % name)
+    missing = [n for n in VENDOR_NEEDED if n not in listed]
+    if missing:
+        fail("planner/vendor/MANIFEST.txt nennt %s nicht" % ", ".join(missing))
+    return True
+
+
 def build():
     cfg = open(os.path.join(ADDON, "config.yaml"), encoding="utf-8").read()
     ver = re.search(r'^version:\s*"?([^"\n]+)"?\s*$', cfg, re.M).group(1).strip()
@@ -156,7 +193,16 @@ def build():
         fail("Claude-/Browser-spezifischer Code ist noch in der Add-on-Version")
     if s.count("</head>") != 1:
         fail("</head> nicht eindeutig")
-    s = s.replace("</head>", PWA + "</head>")
+    s = s.replace("</head>", PWA + ERRLOG % ver + "</head>")
+    if vendor_ok():
+        s, n = LIB_LINE.subn(lambda m: LIB_LOCAL % {"v": ver}, s)
+        if n != 1:
+            fail("Zeile „const LIB={…};“ in src/planner.html nicht genau einmal gefunden")
+        ext = sorted(set(re.findall(r"https://(?:cdnjs\.cloudflare\.com|fonts\.googleapis\.com|fonts\.gstatic\.com)[^\"' )]*", s)))
+        if ext:
+            fail("Add-on-Version lädt noch aus dem Internet: %s" % ", ".join(ext))
+    else:
+        print("Hinweis: planner/vendor/ fehlt, Add-on lädt Bibliotheken und Schriften aus dem Internet")
     check_contract(src[a:b], s)
     check_syntax(src, "src/planner.html")
     check_syntax(s, "planner/index.html")

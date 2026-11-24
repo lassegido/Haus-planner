@@ -7,7 +7,8 @@ d = tempfile.mkdtemp()
 env = dict(os.environ, DATA_DIR=d + "/d", SHARE_DIR=d + "/s", LEGACY_SHARE_DIR=d + "/l", INDEX=root + "/planner/index.html",
            VERSION_FILE=root + "/planner/VERSION", PORT="8096", GEMINI_URL="http://127.0.0.1:9/v1beta/models", TRUST_USER_HEADERS="1")
 os.makedirs(d + "/d")
-sv = subprocess.Popen([sys.executable, root + "/planner/server.py"], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+svlog = open(d + "/server.log", "w")
+sv = subprocess.Popen([sys.executable, root + "/planner/server.py"], env=env, stdout=svlog, stderr=subprocess.STDOUT)
 time.sleep(1.5)
 
 
@@ -100,6 +101,38 @@ try:
     c, j = call("api/ha-settings", {"notify": ["mobile_app_iphone_von_lasse", "mobile_app_ipad"], "notify_who": {"mobile_app_ipad": "Melanie"}})
     check("Gerät wird Person zugeordnet (automatisch und von Hand)", j["ha"]["nwho"] == {"mobile_app_iphone_von_lasse": "Lasse", "mobile_app_ipad": "Melanie"})
     check("KI-Schlüssel entfernbar", call("api/ha-settings", {"ai_key": ""})[1]["ha"]["ai"] is False)
+    # Lokale Bibliotheken und Schriften (planner/vendor)
+    def raw(path, method="GET", data=None, hdr=None):
+        r = urllib.request.Request("http://127.0.0.1:8096/" + path, data=data, method=method, headers=hdr or {})
+        try:
+            with urllib.request.urlopen(r) as x:
+                return x.status, x.headers, x.read()
+        except urllib.error.HTTPError as e:
+            return e.code, e.headers, e.read()
+    if os.path.isdir(root + "/planner/vendor"):
+        c, h, b = raw("vendor/jspdf.umd.min.js?v=1")
+        check("Bibliothek wird lokal ausgeliefert (JavaScript, nosniff)", c == 200 and h["Content-Type"].startswith("text/javascript") and h["X-Content-Type-Options"] == "nosniff" and b.startswith(b"/**"))
+        c, h, b = raw("vendor/fonts.css")
+        check("Schriften-CSS wird ausgeliefert", c == 200 and h["Content-Type"].startswith("text/css") and b"@font-face" in b)
+        check("Nur erlaubte Dateien aus vendor/ (keine anderen Endungen, kein ../)", b"cdnjs" not in raw("vendor/MANIFEST.txt")[2]
+              and b"ThreadingHTTPServer" not in raw("vendor/..%2F..%2Fserver.py")[2] and b"ThreadingHTTPServer" not in raw("vendor/../server.py")[2]
+              and raw("vendor/nichtda.js")[0] == 404)
+    # Fehler aus dem Browser landen im Protokoll, begrenzt und ohne Zeilenumbrüche
+    check("Fehlerprotokoll ohne Header abgewiesen", call("api/log", {"msg": "x"}, hdr=False)[0] == 403)
+    check("Fehlerprotokoll nimmt Meldung an", call("api/log", {"msg": "TypeError: x is null\nGEFÄLSCHTE ZEILE", "where": "index.html:12:3", "ver": "1.32.0", "view": "list"})[0] == 200)
+    codes = [call("api/log", {"msg": "Flut %d" % i})[0] for i in range(40)]
+    check("Fehlerprotokoll begrenzt (höchstens 30 pro Stunde)", codes.count(200) == 29 and codes[-1] == 429)
+    check("Unbekannte Schnittstelle: 404", call("api/gibtsnicht", {"x": 1})[0] == 404)
+    check("Zu große Anfrage wird abgewiesen", call("api/me", {"x": "y" * 30000})[0] == 400)
+    open(d + "/d/settings.json", "w").write("{kaputt")
+    c, j = call("api/tasks")
+    check("Defekte Einstellungsdatei: Planner läuft weiter", c == 200 and j["ha"]["ai"] is False)
+    time.sleep(0.3)
+    svlog.flush()
+    logtxt = open(d + "/server.log", encoding="utf-8").read()
+    check("Browser-Fehler steht im Protokoll (eine Zeile, mit Ort und Version)", "Browser-Fehler: TypeError: x is null GEFÄLSCHTE ZEILE | index.html:12:3 | Ansicht list | Version 1.32.0" in logtxt
+          and "\nGEFÄLSCHTE" not in logtxt)
+    check("Defekte Datei wird im Protokoll gemeldet (einmal)", logtxt.count("Einstellungen aus der App nicht lesbar") == 1)
 finally:
     sv.kill()
 sys.exit(0 if ok else 1)
