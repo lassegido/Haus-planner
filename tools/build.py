@@ -1,22 +1,31 @@
 #!/usr/bin/env python3
 """Erzeugt die Add-on-Version (planner/index.html + VERSION) aus der Master-Datei src/planner.html.
 
-Aufruf im Repository-Hauptordner:  python3 tools/build.py
+Aufruf im Repository-Hauptordner:
+  python3 tools/build.py           erzeugt planner/index.html und planner/VERSION
+  python3 tools/build.py --check   prüft nur, ob die erzeugten Dateien aktuell sind (für den Prüflauf)
 Die Versionsnummer kommt aus planner/config.yaml (Zeile "version").
+
+Was passiert:
+1. Der Speicher-Block zwischen den Markierungen „Speicher: gemeinsame Datenbank“ und „Anzeige“ wird durch
+   die Server-Version unten (STORAGE) ersetzt. dl() wird durch eine Version mit Teilen-Menü ersetzt.
+2. Vertragsprüfung: Alles, was der Claude-Block oben auf oberster Ebene definiert, muss auch die Server-Version
+   definieren (außer ARTIFACT_ONLY). Jede Funktion, die die Server-Version aufruft, muss es in der Datei geben.
+   So fällt sofort auf, wenn im Master ein neuer Name in den Speicher-Block gerät, den der Build verlieren würde.
+3. Syntaxprüfung beider Dateien mit node --check (wenn Node installiert ist).
 """
-import os, re, sys
+import os, re, shutil, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "src", "planner.html")
 ADDON = os.path.join(ROOT, "planner")
-
-cfg = open(os.path.join(ADDON, "config.yaml"), encoding="utf-8").read()
-ver = re.search(r'^version:\s*"?([^"\n]+)"?\s*$', cfg, re.M).group(1).strip()
-
-s = open(SRC, encoding="utf-8").read()
-a = s.index("/* Speicher: gemeinsame Datenbank, sonst lokal */")
-b = s.index("/* Anzeige */")
-storage = '''/* Speicher: Server im Home-Assistant-Add-on (relative Pfade wegen Ingress) */
+START, END = "/* Speicher: gemeinsame Datenbank, sonst lokal */", "/* Anzeige */"
+# Namen, die nur die Claude-Version braucht (lokaler Browser-Speicher, Claude-Datenbank)
+ARTIFACT_ONLY = {"lsGet", "lsSet", "lsGetReg", "lsSetReg", "metaCol"}
+# Eingebaute Browser-Funktionen und Schlüsselwörter, die im Speicher-Block aufgerufen werden dürfen
+BUILTIN = set("""if for while switch catch return function typeof await async new fetch setInterval setTimeout clearTimeout
+JSON Object Array String Number Boolean Error Blob File URL Promise Math Date matchMedia encodeURIComponent""".split())
+STORAGE = '''/* Speicher: Server im Home-Assistant-Add-on (relative Pfade wegen Ingress) */
 let rev=-1;
 function prefGet(k){try{return localStorage.getItem("haus-"+k)}catch(e){return null}}
 function prefSet(k,v){try{localStorage.setItem("haus-"+k,v)}catch(e){}if(typeof prefSync==="function")prefSync(k,v)}
@@ -74,8 +83,7 @@ function init(){
 }
 
 '''
-s = s[:a] + storage + s[b:]
-dl = '''async function dl(name,data){
+DL = '''async function dl(name,data){
   try{const blob=data instanceof Blob?data:new Blob([data],{type:"application/pdf"}),file=new File([blob],name,{type:blob.type});
     if(matchMedia("(pointer:coarse)").matches&&navigator.canShare&&navigator.canShare({files:[file]})){
       try{await navigator.share({files:[file]});$("dlx").close();return}catch(e){if(e&&e.name==="AbortError")return}}
@@ -83,19 +91,91 @@ dl = '''async function dl(name,data){
     setTimeout(()=>URL.revokeObjectURL(a.href),5000);$("dlx").close()
   }catch(e){$("note").textContent="Download fehlgeschlagen: "+(e.message||e)}}
 '''
-s, n = re.subn(r"async function dl\(name,data\)\{.*\n", lambda m: dl, s, count=1)
-if n != 1:
-    sys.exit("FEHLER: dl()-Funktion in src/planner.html nicht gefunden")
-if "claude.use" in s or "window.claude" in s or "lsGet(" in s:
-    sys.exit("FEHLER: Claude-/Browser-spezifischer Code ist noch in der Add-on-Version")
-
 PWA = ('<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">'
        '<link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes">'
        '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner">'
        '<meta name="apple-mobile-web-app-status-bar-style" content="default">')
-if s.count("</head>") != 1:
-    sys.exit("FEHLER: </head> nicht eindeutig")
-s = s.replace("</head>", PWA + "</head>")
-open(os.path.join(ADDON, "index.html"), "w", encoding="utf-8").write(s)
-open(os.path.join(ADDON, "VERSION"), "w", encoding="utf-8").write(ver + "\n")
-print("OK: planner/index.html und VERSION erzeugt, Version", ver)
+
+
+def fail(msg):
+    sys.exit("FEHLER: " + msg)
+
+
+def top_level_names(code):
+    """Namen, die auf oberster Ebene (Zeilenanfang ohne Einrückung) definiert werden."""
+    return set(m.group(1) or m.group(2) for m in
+               re.finditer(r"^(?:async\s+)?function\s+([A-Za-z_$][\w$]*)|^(?:let|const|var)\s+([A-Za-z_$][\w$]*)", code, re.M))
+
+
+def defined_anywhere(name, html):
+    n = re.escape(name)
+    return re.search(r"function\s+%s\s*\(|(?:let|const|var)\s+(?:[\w$]+\s*=[^;\n]*?,\s*)*%s\s*=" % (n, n), html) is not None
+
+
+def check_contract(src_block, html):
+    missing = sorted(top_level_names(src_block) - top_level_names(STORAGE) - ARTIFACT_ONLY)
+    if missing:
+        fail("Diese Namen stehen in src/planner.html im Speicher-Block, fehlen aber in der Add-on-Version: %s\n"
+             "  → in tools/build.py (STORAGE) ergänzen oder, wenn nur für Claude nötig, in ARTIFACT_ONLY eintragen." % ", ".join(missing))
+    calls = set(re.findall(r"(?<![\w$.])([A-Za-z_$][\w$]*)\s*\(", STORAGE)) - BUILTIN
+    unknown = sorted(c for c in calls if c != "$" and not defined_anywhere(c, html))
+    if unknown:
+        fail("Die Add-on-Version ruft Funktionen auf, die es in der Datei nicht gibt: %s" % ", ".join(unknown))
+
+
+def check_syntax(html, label):
+    node = shutil.which("node")
+    if not node:
+        print("Hinweis: node fehlt, Syntaxprüfung von %s übersprungen" % label)
+        return
+    with tempfile.TemporaryDirectory() as d:
+        for i, m in enumerate(re.finditer(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", html, re.S)):
+            f = os.path.join(d, "s%d.js" % i)
+            open(f, "w", encoding="utf-8").write(m.group(1))
+            r = subprocess.run([node, "--check", f], capture_output=True, text=True)
+            if r.returncode:
+                off = html.count("\n", 0, m.start(1))
+                where = re.search(r":(\d+)", r.stderr)
+                line = " ab Zeile %d" % (int(where.group(1)) + off) if where else ""
+                err = [l for l in r.stderr.splitlines() if "Error" in l][:1]
+                fail("JavaScript-Syntaxfehler in %s%s: %s" % (label, line, err[0] if err else r.stderr.strip()[-400:]))
+
+
+def build():
+    cfg = open(os.path.join(ADDON, "config.yaml"), encoding="utf-8").read()
+    ver = re.search(r'^version:\s*"?([^"\n]+)"?\s*$', cfg, re.M).group(1).strip()
+    src = open(SRC, encoding="utf-8").read()
+    if src.count(START) != 1 or src.count(END) != 1 or src.index(START) > src.index(END):
+        fail("Markierungen für den Speicher-Block in src/planner.html fehlen oder sind doppelt")
+    a, b = src.index(START), src.index(END)
+    s = src[:a] + STORAGE + src[b:]
+    s, n = re.subn(r"async function dl\(name,data\)\{.*\n", lambda m: DL, s, count=1)
+    if n != 1:
+        fail("dl()-Funktion in src/planner.html nicht gefunden")
+    if "claude.use" in s or "window.claude" in s or "lsGet(" in s:
+        fail("Claude-/Browser-spezifischer Code ist noch in der Add-on-Version")
+    if s.count("</head>") != 1:
+        fail("</head> nicht eindeutig")
+    s = s.replace("</head>", PWA + "</head>")
+    check_contract(src[a:b], s)
+    check_syntax(src, "src/planner.html")
+    check_syntax(s, "planner/index.html")
+    return s, ver + "\n"
+
+
+def main():
+    html, ver = build()
+    out = {os.path.join(ADDON, "index.html"): html, os.path.join(ADDON, "VERSION"): ver}
+    if "--check" in sys.argv:
+        old = [p for p, c in out.items() if not os.path.exists(p) or open(p, encoding="utf-8").read() != c]
+        if old:
+            fail("Veraltet: %s. Bitte python3 tools/build.py ausführen und mit einchecken." % ", ".join(os.path.relpath(p, ROOT) for p in old))
+        print("OK: planner/index.html und VERSION passen zu src/planner.html und config.yaml (Version %s)" % ver.strip())
+        return
+    for p, c in out.items():
+        open(p, "w", encoding="utf-8").write(c)
+    print("OK: planner/index.html und VERSION erzeugt, Version", ver.strip())
+
+
+if __name__ == "__main__":
+    main()

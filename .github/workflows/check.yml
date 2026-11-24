@@ -1,0 +1,37 @@
+# Prüflauf bei jedem Push: baut die Add-on-Version nach und führt alle Tests aus (tools/check.py).
+# Ergebnis auf GitHub unter „Actions“. Ein rotes Kreuz heißt: nicht in Home Assistant aktualisieren, erst beheben.
+name: Prüfung
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TZ: Europe/Berlin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Playwright mit Chromium
+        run: |
+          pip install "playwright>=1.49,<2"
+          python -m playwright install --with-deps chromium
+      - name: Alle Prüfungen
+        run: python tools/check.py
+        env:
+          SHOT_DIR: ${{ runner.temp }}/shots
+      - name: Bildschirmfotos aufheben
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bildschirmfotos
+          path: ${{ runner.temp }}/shots
+          if-no-files-found: ignore
+          retention-days: 7

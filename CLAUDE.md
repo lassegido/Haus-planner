@@ -10,13 +10,18 @@ Haus-Aufgaben-Tool von Lasse und Melanie (Kanban, Liste, Gantt). Sprache der Obe
 
 ## Ablauf bei jeder Änderung
 
-1. `src/planner.html` bearbeiten. Serverseitige Änderungen in `planner/server.py`.
-2. `version` in `planner/config.yaml` erhöhen (z. B. 1.1.0 → 1.1.1; neue Funktion: 1.2.0). Ohne neue Version zeigt Home Assistant kein Update an.
-3. Eintrag oben in `planner/CHANGELOG.md`.
-4. `python3 tools/build.py` ausführen. Das Skript bricht mit Fehler ab, wenn Claude-spezifischer Code in die Add-on-Version geraten würde.
-5. Testen: Server lokal starten, z. B. `DATA_DIR=/tmp/d SHARE_DIR=/tmp/s INDEX=planner/index.html VERSION_FILE=planner/VERSION PORT=8097 python3 planner/server.py`, Seite mit Playwright in Handy-, iPad- und Desktop-Größe prüfen, JS-Syntax mit `node --check`.
-6. Committen und pushen (alle geänderten Dateien: `src/`, `planner/`).
+Lageplan, Datenformat und „Wenn du X änderst, prüfe Y“: siehe `ARCHITEKTUR.md`.
+
+1. **Vorher Folgen benennen:** Dem Nutzer kurz sagen, was die Änderung berühren kann (Ansichten, Daten, Erinnerungen, Alexa, Claude-Version) und wie riskant sie ist. Tabelle in `ARCHITEKTUR.md` nutzen.
+2. `src/planner.html` bearbeiten. Serverseitige Änderungen in `planner/server.py`.
+3. **Test dazu schreiben oder anpassen**, bevor die Änderung als fertig gilt: Oberfläche in `tools/e2e/test_*.py`, Server in `tools/test_server.py`, Home Assistant/Alexa in `tools/test_ha.py`. Kein Prüfskript nur im Notizordner.
+4. Eintrag oben in `planner/CHANGELOG.md` (`## <neue Version>`).
+5. `python3 tools/release.py <neue Version>` (z. B. 1.32.0 → 1.32.1; neue Funktion: 1.33.0). Setzt die Nummer in `config.yaml`, baut und führt `tools/check.py` aus. Ohne neue Version zeigt Home Assistant kein Update an.
+6. Committen und pushen (`src/`, `planner/`, `tools/`). Der GitHub-Prüflauf (`.github/workflows/check.yml`) wiederholt alle Prüfungen.
 7. Claude-Artifact mit `src/planner.html` aktualisieren.
+8. Dem Nutzer sagen: was neu ist, Folgen je Änderung, was nur im Test-Browser und was nicht auf echten Geräten geprüft wurde (`PRUEFLISTE.md`).
+
+Zwischendurch: `python3 tools/build.py` (erzeugt Add-on-Version, prüft Vertrag und JS-Syntax), `python3 tools/test_browser.py <Teil des Namens>` für einzelne Browser-Tests, `SHOT_DIR=/tmp/shots` für Bildschirmfotos.
 
 ## Harte Regeln
 
@@ -39,4 +44,11 @@ Grundlage: Apple Human Interface Guidelines (Farbe, Dark Mode), WCAG 2.2 (Kontra
 - **Anpassung nur kuratiert:** Darstellung (Automatisch/Hell/Dunkel), Farbwelt (Portofino, Salbei, Beere, Graphit), Schrift (Figtree, Systemschrift, Fraunces + Figtree). Keine freien Farbwähler. Neue Farbwelten nur mit Hell- und Dunkel-Werten und nach Kontrastprüfung: Text ≥ 4,5 : 1 auf `--bg` und `--grp`, Platzhalter ≥ 3 : 1, Akzent als Textknopf ≥ 4,5 : 1.
 - **Bedienbarkeit:** Tippflächen ≥ 44 pt (2,85 rem), Eingabefelder ≥ 16 px Schrift (sonst zoomt iOS), Tastatur nur bei neuen Aufgaben automatisch öffnen.
 - **Tempo:** Karten und Zeilen mit `content-visibility:auto`; Touch-Handler auf `document` passiv lassen.
-- **Sicherheit:** Server prüft Host-Header (Schutz vor DNS-Rebinding), Schreibzugriffe brauchen `X-Planner: 1`, KI-Schlüssel wird nie an den Browser ausgeliefert. `tools/test_server.py` muss grün sein.
+- **Sicherheit:** Server prüft Host-Header (Schutz vor DNS-Rebinding), Schreibzugriffe brauchen `X-Planner: 1`, KI-Schlüssel wird nie an den Browser ausgeliefert. `tools/check.py` muss grün sein.
+
+## Wartbarkeit (ab 1.32)
+
+- **Tempo bremsen:** Neue Funktionen nur mit Test. Vor großen Umbauten erst auf echten Geräten prüfen lassen (`PRUEFLISTE.md`).
+- **CSS:** Neue Regeln ans Ende mit Versionskommentar; bestehende Klassen nicht an einer dritten Stelle erneut gestalten, sondern die vorhandene Regel ändern. Kein `!important` ohne Kommentar, warum.
+- **Fremdcode:** Bibliotheken und Schriften liegen im Add-on (`planner/vendor/`), nicht im Internet. Die Claude-Version lädt sie weiter vom CDN.
+- **Fehler sichtbar machen:** Skriptfehler im Browser schickt das Add-on an `api/log`; sie stehen im Add-on-Protokoll in Home Assistant.
