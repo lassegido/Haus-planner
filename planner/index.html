@@ -999,6 +999,9 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
 .sgt.sgh{margin-top:1.6rem;font-size:.92rem;font-weight:700;color:var(--tx)}
 .sgt.sgh:first-child{margin-top:.4rem}
 .sgt.sgh+.scap{margin-top:-.2rem;margin-bottom:.2rem}
+
+/* Kein Markieren und keine iOS-Textlupe auf Karten, Zeilen und Menüs */
+#main [data-id],#main [data-id] *,#dsh,#dsh *,#pop,#pop *,.tile,.tile *,.hb,.krow,.krow *,#selbar,.tabs{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"></head>
 <body>
@@ -1532,9 +1535,13 @@ $("main").addEventListener("pointerdown",e=>{
   if(selMode||e.button>0||e.target.closest("button,a,input,select,textarea,svg"))return;
   const el=e.target.closest("#main [data-id]");if(!el)return;
   lpX=e.clientX;lpY=e.clientY;lpStop();
-  lpT=setTimeout(()=>{lpT=0;lpSwallow=true;hap(14);taskMenu(el.dataset.id)},450)});
+  lpT=setTimeout(()=>{lpT=0;lpSwallow=true;noSel();hap(14);taskMenu(el.dataset.id)},450)});
 $("main").addEventListener("pointermove",e=>{if(lpT&&Math.hypot(e.clientX-lpX,e.clientY-lpY)>8)lpStop()});
-["pointerup","pointercancel","scroll","dragstart"].forEach(t=>$("main").addEventListener(t,()=>{lpStop();if(lpSwallow)setTimeout(()=>{lpSwallow=false},350)},true));
+["pointerup","pointercancel","scroll","dragstart"].forEach(t=>$("main").addEventListener(t,()=>{lpStop();if(lpSwallow){noSel();setTimeout(noSel,60);setTimeout(()=>{lpSwallow=false},350)}},true));
+/* Kein Text-Markieren auf Karten, Zeilen und Menüs (iOS markiert sonst beim langen Drücken den Titel) */
+function noSel(){try{const s=getSelection();if(s&&s.rangeCount&&!(document.activeElement&&/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)))s.removeAllRanges()}catch(_){}}
+const NOSEL="#main [data-id],#dsh,#pop,.tile,.hb,.krow,.tabs,#selbar";
+document.addEventListener("selectstart",e=>{const el=e.target&&e.target.nodeType===3?e.target.parentElement:e.target;if(el&&el.closest&&el.closest(NOSEL)&&!el.closest("input,textarea"))e.preventDefault()});
 $("main").addEventListener("contextmenu",e=>{if(e.target.closest("#main [data-id]")&&matchMedia("(pointer:coarse)").matches)e.preventDefault()});
 $("main").addEventListener("click",e=>{
   if(lpSwallow){lpSwallow=false;e.preventDefault();e.stopPropagation();return}

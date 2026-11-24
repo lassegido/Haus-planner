@@ -1,5 +1,8 @@
 # Änderungen
 
+## 1.31.1
+- Gedrückt halten auf einer Karte öffnet nur noch das Menü und markiert keinen Text mehr (auch nicht den Titel im Menü). In Eingabefeldern bleibt Markieren und Einsetzen möglich.
+
 ## 1.31.0
 - **Persönlich je Benutzer:** Der Planner erkennt beim Öffnen über die Home-Assistant-App, wer angemeldet ist. Darstellung, Farbwelt, Schrift, „Ich bin“ und die Auswahl auf der Startseite gelten je Person auf all ihren Geräten. Wählt Melanie eine andere Farbwelt, bleibt Lasses Design unverändert. „Ich bin“ wird beim ersten Öffnen automatisch gesetzt.
 - **Erinnerung je Person:** Unter Einstellungen → Erinnerung gehört jedes gewählte Gerät zu einer Person (automatisch aus dem Gerätenamen, z. B. „iPhone von Lasse“ → Lasse; antippen zum Ändern). Jedes Gerät erinnert nur an die Aufgaben seiner Person und an Aufgaben ohne Zuständigkeit, mit passenden Abhaken-Knöpfen.
