@@ -1002,6 +1002,19 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
 
 /* Kein Markieren und keine iOS-Textlupe auf Karten, Zeilen und Menüs */
 #main [data-id],#main [data-id] *,#dsh,#dsh *,#pop,#pop *,.tile,.tile *,.hb,.krow,.krow *,#selbar,.tabs{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+
+/* 1.32: Suche bei Abhängigkeiten */
+#dlg .dsearch{display:flex;align-items:center;gap:.5rem;margin:0 0 .5rem;padding:0 .8rem;border-radius:.8rem;background:var(--seg-tr)}
+#dlg .dsearch svg{width:1.05rem;height:1.05rem;flex:none;fill:none;stroke:var(--mut);stroke-width:2;stroke-linecap:round}
+#dlg .dsearch input{flex:1;min-width:0;height:2.6rem;border:0;background:none;padding:0;outline:none}
+#dlg .deps{max-height:16rem}
+#dlg .deps label[hidden]{display:none}
+#dlg .deps .dl{display:flex;flex-direction:column;min-width:0}
+#dlg .deps .dl b{font-weight:550;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#dlg .deps .dl small{font-size:.78rem;color:var(--mut);font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#dlg .deps label.cyc{opacity:.55;cursor:default}
+.dcnt{margin:.35rem .3rem 0;font-size:.78rem;color:var(--mut)}.dcnt:empty{display:none}
+.dnone{color:var(--mut);font-size:.85rem;padding:.5rem}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"></head>
 <body>
@@ -1099,7 +1112,7 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
   <div class="aibox" id="ai_box" style="display:none"><div class="aih">Vorschlag</div><div id="ai_notes"></div><div id="ai_items"></div><div class="airef"><input id="ai_hint" type="text" autocomplete="off" enterkeyhint="send" placeholder="Was soll anders sein?" aria-label="Hinweis für die KI"><button class="btn ghost sm" id="ai_re" type="button">Neu vorschlagen</button></div><div class="aia"><button class="btn sm" id="ai_ok" type="button">Übernehmen</button><button class="btn ghost sm" id="ai_no" type="button">Verwerfen</button></div></div></details>
   <details class="dsec" id="d_pl"><summary><span>Wiederholen und Abhängigkeiten</span><em></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><label for="f_rec">Wiederholen</label>
   <select id="f_rec"><option value="">Nie</option><option value="1d">Täglich</option><option value="1w">Wöchentlich</option><option value="2w">Alle 2 Wochen</option><option value="1m">Monatlich</option><option value="3m">Vierteljährlich</option><option value="1y">Jährlich</option></select>
-  <div class="hint" id="f_rechint" style="display:none">Beim Erledigen wird die nächste Aufgabe automatisch angelegt.</div><label>Abhängig von <span class="lh">muss vorher fertig sein</span></label><div class="deps" id="f_deps"></div></div></details>
+  <div class="hint" id="f_rechint" style="display:none">Beim Erledigen wird die nächste Aufgabe automatisch angelegt.</div><label>Abhängig von <span class="lh">muss vorher fertig sein</span></label><div class="dsearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="f_depq" type="search" autocomplete="off" enterkeyhint="search" placeholder="Suchen: Titel, Projekt, Tag, Person" aria-label="Abhängigkeiten durchsuchen"></div><div class="deps" id="f_deps"></div><p class="dcnt" id="f_depc"></p></div></details>
   <details class="dsec" id="f_filesec"><summary><span>Fotos und Dateien</span><em></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><div class="fls" id="f_files"></div><button class="btn ghost" id="fl_btn" type="button" style="margin-top:.6rem">Foto oder Datei hinzufügen</button><input type="file" id="fl_in" multiple hidden accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"></div></details>
   <details class="dsec" id="f_logsec"><summary><span>Verlauf und Kommentare</span><em></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><div class="lgin"><input id="lg_in" placeholder="Kommentar schreiben …" maxlength="500" autocomplete="off"><button class="btn ghost" id="lg_add" type="button">Senden</button></div><div class="lg" id="lg_list"></div></div></details>
   </div>
@@ -2148,11 +2161,26 @@ function openDlg(id){
   $("f_title").value=t.title;$("f_qp").innerHTML="";selTags=[...tgs(t)];regDraft=reg.map(x=>({...x}));colorFor=null;$("f_tagin").value="";drawTags();selWho=wl(t);$("f_who").value="";$("f_who").style.display="none";drawWho();$("f_status").value=t.status;syncSeg();$("f_prio").value=t.prio||0;syncPr();
   $("f_start").value=t.start;$("f_end").value=t.end;initExtra(t);rpOpen(false);drawRange();$("f_notes").value=t.notes||"";
   const others=tasks.filter(x=>!editing||x.id!==editing.id);
-  $("f_deps").innerHTML=others.length?others.map(x=>`<label><input type="checkbox" value="${x.id}" ${(t.deps||[]).includes(x.id)?"checked":""}>${esc(x.title)}</label>`).join(""):'<span style="color:var(--mut);font-size:13px">Noch keine anderen Aufgaben.</span>';
+  drawDeps(others,t.deps||[]);
   cklist=(t.checklist||[]).map(x=>({...x}));drawCk();drawLog();drawFiles();aiRes=null;drawAi();$("ai_row").style.display=aiAvail()?"":"none";
   $("b_del").style.display=editing?"":"none";
   $("dlg").showModal();dlgSnap=dlgState();$("dlg").scrollTop=0;if(!editing)setTimeout(()=>$("f_title").focus(),50);
 }
+/* Abhängigkeiten: gewählte oben, dann offene nach Fälligkeit, erledigte zuletzt; Suche über Titel, Projekt, Tags, Person */
+function drawDeps(others,chosen){
+  const me=editing&&editing.id,rank=x=>chosen.includes(x.id)?0:x.status==="done"?2:1;
+  const L=[...others].sort((a,b)=>rank(a)-rank(b)||dn(a.end)-dn(b.end));
+  $("f_depq").value="";
+  $("f_deps").innerHTML=L.length?L.map(x=>{const cyc=me&&(x.deps||[]).includes(me),meta=[x.proj,...tgs(x),x.who,x.status==="done"?"erledigt":"bis "+fd(x.end)].filter(Boolean);
+    const q=[x.title,x.proj,...tgs(x),x.who].filter(Boolean).join(" ").toLowerCase();
+    return`<label data-q="${esc(q)}"${cyc?' class="cyc"':""}><input type="checkbox" value="${x.id}" ${chosen.includes(x.id)?"checked":""}${cyc?" disabled":""}><span class="dl"><b>${esc(x.title)}</b><small>${cyc?"hängt von dieser Aufgabe ab":meta.map(esc).join(" · ")}</small></span></label>`}).join(""):'<span class="dnone">Noch keine anderen Aufgaben.</span>';
+  filterDeps()}
+function filterDeps(){
+  const w=$("f_depq").value.toLowerCase().trim().split(/\s+/).filter(Boolean),all=[...document.querySelectorAll("#f_deps label")];let shown=0,sel=0;
+  all.forEach(l=>{const c=l.querySelector("input").checked,ok=c||w.every(x=>l.dataset.q.includes(x));l.hidden=!ok;if(ok)shown++;if(c)sel++});
+  $("f_depc").textContent=!all.length?"":w.length?(shown-sel>0||sel?`${shown} von ${all.length}`+(sel?` · ${sel} gewählt`:""):"Nichts gefunden"):(sel?`${sel} gewählt`:"")}
+$("f_depq").addEventListener("input",filterDeps);
+$("f_deps").addEventListener("change",filterDeps);
 function syncMs(){if($("f_ms").checked)$("f_end").value=$("f_start").value;drawRange()}
 function initExtra(t){
   const pn=allProjs();$("f_proj").innerHTML='<option value="">Kein Projekt</option>'+pn.map(n=>`<option>${esc(n)}</option>`).join("")+'<option value="__new">Neues Projekt …</option>';
@@ -2273,7 +2301,7 @@ async function taskMenu(id){
 })();
 /* Dialoge und Blätter: nach unten ziehen schließt (Aufgaben-Dialog fragt bei Änderungen nach) */
 let dlgSnap="";
-const dlgState=()=>{try{return JSON.stringify([...document.querySelectorAll("#dlg input,#dlg select,#dlg textarea")].map(e=>e.type==="checkbox"||e.type==="radio"?e.checked:e.value))+JSON.stringify(cklist)+JSON.stringify(selTags)}catch(_){return""}};
+const dlgState=()=>{try{return JSON.stringify([...document.querySelectorAll("#dlg input:not(#f_depq):not(#ai_hint),#dlg select,#dlg textarea")].map(e=>e.type==="checkbox"||e.type==="radio"?e.checked:e.value))+JSON.stringify(cklist)+JSON.stringify(selTags)}catch(_){return""}};
 function swipeClose(id,guard){
   const d=$(id);let y0=null,dy=0,t0=0,drag=false;
   const sheetOn=()=>matchMedia("(max-width:699px)").matches;
