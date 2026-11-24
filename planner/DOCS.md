@@ -164,3 +164,8 @@ Achtung: Dieser Port hat **keine Anmeldung**. Erlaubt sind nur Aufrufe über ein
 - Bearbeiten zwei Personen dieselbe Aufgabe gleichzeitig, fragt die App beim Speichern nach, statt still zu überschreiben.
 - Richtwert: bis etwa 500 aktive Aufgaben bleibt alles flüssig. Erledigtes lässt sich in den Einstellungen archivieren; Archivierte zählen nicht zu den aktiven.
 - Fotos und Dateien liegen in `/data/files`; es gibt kein Gesamtlimit, Speicherplatz bitte gelegentlich prüfen.
+- Schriften sowie PDF- und Excel-Bibliothek liegen im Add-on. Der Planner lädt nichts aus dem Internet (außer KI-Anfragen an Google, wenn eingerichtet).
+
+## Wenn etwas nicht funktioniert
+
+Skriptfehler aus der App landen im **Add-on-Protokoll** (Einstellungen → Add-ons → Planner → Protokoll) als Zeile „Browser-Fehler: …“ mit Ansicht, Version und Gerät. Diese Zeilen bitte bei einer Fehlermeldung mitschicken. Pro Stunde werden höchstens 30 Meldungen angenommen.

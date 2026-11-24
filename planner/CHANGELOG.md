@@ -1,5 +1,11 @@
 # Änderungen
 
+## 1.32.0
+- **Suche bei Abhängigkeiten:** Im Aufgabenblatt unter „Wiederholen und Abhängigkeiten“ gibt es ein Suchfeld (Titel, Projekt, Tag, Person; mehrere Wörter möglich). Gewählte Aufgaben bleiben beim Suchen sichtbar. Aufgaben, die von der aktuellen abhängen, sind gesperrt (sonst entstünde ein Kreis).
+- **Schneller und unabhängig vom Internet:** Schriften sowie PDF- und Excel-Bibliothek liegen jetzt im Add-on. Die PDF-Bibliothek bremst den Start nicht mehr, sie lädt erst beim Öffnen von „Export und Backup“.
+- **Fehler sichtbar:** Skriptfehler aus der App erscheinen im Add-on-Protokoll („Browser-Fehler: …“).
+- Unter der Haube: Oberfläche in Dateien aufgeteilt, ungenutzte Gestaltungsregeln entfernt (Aussehen nachweislich unverändert), Server-Schnittstellen aufgeräumt, 83 automatische Oberflächen-Tests und ein Prüflauf auf GitHub bei jeder Änderung.
+
 ## 1.31.1
 - Gedrückt halten auf einer Karte öffnet nur noch das Menü und markiert keinen Text mehr (auch nicht den Titel im Menü). In Eingabefeldern bleibt Markieren und Einsetzen möglich.
 
