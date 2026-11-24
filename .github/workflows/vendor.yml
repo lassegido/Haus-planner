@@ -1,0 +1,28 @@
+# Holt Bibliotheken und Schriften (tools/vendor.py) und legt sie als Commit unter planner/vendor/ ab.
+# Läuft automatisch, wenn sich tools/vendor.py ändert, oder von Hand unter „Actions → Fremdcode holen → Run workflow“.
+name: Fremdcode holen
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [tools/vendor.py]
+permissions:
+  contents: write
+jobs:
+  vendor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python tools/vendor.py
+      - name: Einchecken, falls sich etwas geändert hat
+        run: |
+          git add planner/vendor
+          if git diff --cached --quiet; then echo "Keine Änderung"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Fremdcode für das Add-on aktualisiert (tools/vendor.py)"
+          git push
