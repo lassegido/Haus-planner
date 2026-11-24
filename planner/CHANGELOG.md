@@ -1,5 +1,11 @@
 # Änderungen
 
+## 1.29.0
+- **Alexa:** Mit der Home-Assistant-Integration „Alexa Devices“ hört der Planner auf Echo-Befehle, die mit „Planner“ beginnen: Aufgaben anlegen, „was steht heute an“ und „Woche“ vorlesen, „… ist erledigt“ abhaken. Die Antwort kommt auf demselben Echo; mit Stimmprofil wird die Aufgabe der sprechenden Person zugewiesen. Schalter unter Einstellungen → Alexa.
+- **Anzeige für Echo Show und Wandbildschirme:** `?anzeige` zeigt Uhrzeit, Heute und Als Nächstes groß und ohne Bedienleisten, optional nur für eine Person und dunkel. Link unter Einstellungen → Anzeige für Echo Show.
+- **Gesprochene Eingaben:** „am Samstag“, „am zwölften Dezember“, „in drei Tagen“, „kommende Woche“, „Tag Garten“, „Projekt Haus“, „Priorität eins“ werden erkannt, in der Schnelleingabe wie per Sprache.
+- **Siri:** Neuer Endpunkt `api/voice` (anlegen, vorlesen, abhaken) und `api/speech` (nur vorlesen).
+
 ## 1.28.0
 Schneller im Alltag:
 - **Schnelleingabe:** Auf der Startseite oben tippen und mit Enter anlegen, auch im Titel einer neuen Aufgabe. Erkannt werden Datum (heute, morgen, Sa, 12.12., in 3 Tagen, nächste Woche, bis Fr), #Tag, +Projekt, @Person und !1 bis !3. Eine Vorschau zeigt vorher, was erkannt wurde.

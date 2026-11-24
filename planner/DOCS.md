@@ -109,6 +109,29 @@ lists:
 
 Danach Home Assistant neu starten und zu Assist sagen: „Neue Aufgabe Dachrinne reinigen morgen“.
 
+## Alexa
+
+Mit der Home-Assistant-Integration **Alexa Devices** (seit Home Assistant 2025.6, ohne Zusatzkonto bei Amazon-Entwicklern) hört der Planner auf deine Echo-Geräte.
+
+1. Home Assistant: Einstellungen → Geräte & Dienste → Integration hinzufügen → **Alexa Devices**. Mit dem Amazon-Konto anmelden; Amazon verlangt die Zwei-Faktor-Anmeldung per Authenticator-App (SMS reicht nicht).
+2. Planner: ⋯ → Einstellungen → **Alexa** → **An**. Nach ein paar Sekunden steht dort, wie viele Echos gefunden wurden.
+3. Sprechen:
+   - „Alexa, Planner Rasen mähen am Samstag Tag Garten“ legt an
+   - „Alexa, Planner was steht heute an“ bzw. „Alexa, Planner Woche“ liest vor
+   - „Alexa, Planner Fenster putzen ist erledigt“ hakt ab
+
+Alexa selbst kennt den Befehl nicht und sagt das kurz; danach antwortet der Planner auf demselben Echo. Erkennt Alexa deine Stimme (Stimmprofil in der Alexa-App), wird die Aufgabe dir zugewiesen. Gesprochene Tags und Projekte („Tag Garten“) werden nur erkannt, wenn es sie schon gibt.
+
+## Anzeige für Echo Show und Wandbildschirme
+
+`http://<IP-von-Home-Assistant>:8099/?anzeige` zeigt Uhrzeit, heute fällige und überfällige Aufgaben und die nächsten Termine, groß und ohne Bedienleisten. Zusätze: `&wer=Lasse` (nur eine Person), `&dunkel` oder `&hell`. Abhaken per Tippen auf den Kreis. Den fertigen Link gibt es unter Einstellungen → Anzeige für Echo Show.
+
+Am Echo Show: „Alexa, öffne Silk“, Adresse eingeben, als Lesezeichen speichern. Der Echo Show kehrt nach einer Weile zu seinem Startbildschirm zurück; das lässt sich von außen nicht verhindern.
+
+## Siri: vorlesen und abhaken
+
+Neben `api/quick` (nur anlegen) gibt es `api/voice`: gleiche Einrichtung wie beim Kurzbefehl oben, versteht zusätzlich „heute“, „Woche“ und „… ist erledigt“. Mit `GET api/speech?when=heute&who=Lasse` bekommst du nur den Vorlesetext.
+
 ## KI-Assistent (Google Gemini, kostenlos)
 
 In jeder Aufgabe schlägt „Mit KI ausfüllen“ Notizen und Checklistenpunkte vor. Du entscheidest, was übernommen wird. Neue Tags bekommen außerdem ein passendes Symbol.

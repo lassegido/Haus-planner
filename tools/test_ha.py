@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test der Mitteilungs-Knöpfe mit einem nachgebauten Home Assistant. Aufruf: python3 tools/test_ha.py"""
+"""Test der Mitteilungs-Knöpfe und der Alexa-Sprachbefehle mit einem nachgebauten Home Assistant. Aufruf: python3 tools/test_ha.py"""
 import base64, hashlib, importlib.util, json, os, socket, struct, subprocess, sys, tempfile, threading, time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
@@ -27,7 +27,17 @@ class Mock(BaseHTTPRequestHandler):
 
     def do_POST(self):
         n = int(self.headers.get("Content-Length") or 0)
-        posts.append((self.path, json.loads(self.rfile.read(n) or b"{}")))
+        body = json.loads(self.rfile.read(n) or b"{}")
+        posts.append((self.path, body))
+        if self.path.endswith("/template"):
+            tpl = body.get("template", "")
+            out = '["event.echo_kueche"]' if "integration_entities" in tpl else "notify.echo_kueche_speak" if "device_entities" in tpl else ""
+            b = out.encode()
+            self.send_response(200)
+            self.send_header("Content-Length", str(len(b)))
+            self.end_headers()
+            self.wfile.write(b)
+            return
         self.reply({})
 
 
@@ -53,17 +63,31 @@ def ws_mock(listener, done):
     time.sleep(8)  # erst die tägliche Erinnerung abwarten
     c.sendall(frame(json.dumps({"type": "event", "event": {"data": {"action": "PLANNER_DONE_t1"}}})))
     c.sendall(frame(json.dumps({"type": "event", "event": {"data": {"action": "PLANNER_DONE_../etc"}}})))
-    time.sleep(3)
+    sub2 = json.loads(srv.ws_recv(c))
+    assert sub2["type"] == "subscribe_trigger" and sub2["trigger"]["entity_id"] == ["event.echo_kueche"], sub2
+
+    def voice(n, text, person=""):
+        st = {"entity_id": "event.echo_kueche", "state": "2026-11-24T06:%02d:00+00:00" % n,
+              "attributes": {"voice_command": text, "person_first_name": person}}
+        c.sendall(frame(json.dumps({"id": 2, "type": "event", "event": {"variables": {"trigger": {"entity_id": "event.echo_kueche", "to_state": st}}}})))
+        time.sleep(1.2)
+    voice(1, "planner rasen mähen morgen tag garten", "Lasse")
+    voice(2, "planner was steht heute an")
+    voice(3, "wie wird das wetter")
+    voice(4, "planner fenster putzen ist erledigt")
+    voice(4, "planner doppelt gesendet")  # gleicher Zeitstempel: wird ignoriert
+    time.sleep(2)
     done.set()
 
 
 d = tempfile.mkdtemp()
 os.makedirs(d + "/d")
 today = time.strftime("%Y-%m-%d")
-json.dump({"schema": 2, "rev": 1, "tags": [], "tasks": [
+json.dump({"schema": 2, "rev": 1, "tags": [{"n": "Garten", "c": "mint"}], "tasks": [
     {"id": "t1", "title": "Rauchmelder tauschen", "start": "2020-01-01", "end": "2020-01-02", "status": "todo", "prio": 1, "v": 0},
-    {"id": "t2", "title": "Wiederkehrend", "start": "2020-01-01", "end": "2020-01-02", "status": "todo", "rec": {"every": 1, "unit": "w"}, "v": 0}]}, open(d + "/d/tasks.json", "w"))
-json.dump({"notify": ["mobile_app_test"], "time": "00:00"}, open(d + "/d/settings.json", "w"))
+    {"id": "t2", "title": "Wiederkehrend", "start": "2020-01-01", "end": "2020-01-02", "status": "todo", "rec": {"every": 1, "unit": "w"}, "v": 0},
+    {"id": "t3", "title": "Fenster putzen", "start": today, "end": today, "status": "todo", "v": 0}]}, open(d + "/d/tasks.json", "w"))
+json.dump({"notify": ["mobile_app_test"], "time": "00:00", "alexa": True}, open(d + "/d/settings.json", "w"))
 http = HTTPServer(("127.0.0.1", 8095), Mock)
 threading.Thread(target=http.serve_forever, daemon=True).start()
 lst = socket.socket()
@@ -99,6 +123,15 @@ try:
     check("Anderes bleibt unverändert", t["t2"]["status"] == "todo")
     left = [b for p, b in posts if "/services/notify/mobile_app_test" in p][-1]
     check("Mitteilung wird danach aktualisiert", "PLANNER_DONE_t1" not in json.dumps(left))
+    said = [b.get("message") for p, b in posts if p.endswith("/services/notify/send_message") and b.get("entity_id") == "notify.echo_kueche_speak"]
+    t = {x["id"]: x for x in json.load(open(d + "/d/tasks.json"))["tasks"]}
+    new = [x for x in t.values() if x["title"] == "Rasen mähen"]
+    check("Alexa: Aufgabe per Sprache angelegt (Tag, Datum, Person per Stimmerkennung)", len(new) == 1 and new[0]["tags"] == ["Garten"] and new[0]["who"] == "Lasse" and new[0]["start"] > today)
+    check("Alexa: Bestätigung auf demselben Echo gesprochen", len(said) >= 1 and "Rasen mähen" in said[0] and "morgen" in said[0])
+    check("Alexa: „was steht heute an“ wird vorgelesen", len(said) >= 2 and said[1].startswith("Heute") and "Fenster putzen" in said[1])
+    check("Alexa: fremde Befehle werden ignoriert", len(said) == 3)
+    check("Alexa: Abhaken per Sprache", t["t3"]["status"] == "done" and said[-1].endswith("ist erledigt."))
+    check("Alexa: doppelte Ereignisse werden nur einmal verarbeitet", not any(x["title"].lower().startswith("doppelt") for x in t.values()))
 finally:
     sv.kill()
     print(sv.stdout.read().decode()[-600:])

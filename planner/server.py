@@ -281,7 +281,8 @@ def ha_info():
     return {"api": bool(TOKEN), "notify": services(), "time": remind_time(),
             "sensors": bool(o.get("sensors", True)),
             "ai": bool(ai_key()), "model": ai_model(), "aiapp": bool(app_settings().get("ai_key")),
-            "aicfg": bool(str(o.get("gemini_api_key") or "").strip()), "aiuse": ai_usage_info()}
+            "aicfg": bool(str(o.get("gemini_api_key") or "").strip()), "aiuse": ai_usage_info(),
+            "alexa": bool(app_settings().get("alexa")), "echos": ALEXA["n"], "wsok": wsok["ok"]}
 
 
 AI_MODELS = ("gemini-flash-lite-latest", "gemini-flash-latest")
@@ -504,14 +505,14 @@ def reminder_data(due, late, tasks, quiet=False):
     return d
 
 
-def complete_task(tid):
+def complete_task(tid, actor="iPhone"):
     with LOCK:
         t = state["tasks"].get(tid)
         if not t or t.get("del") or t.get("status") == "done" or not can_complete(t, state["tasks"]):
             return None
         n = dict(t)
         n["status"] = "done"
-        n["log"] = (t.get("log") or []) + [{"t": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M"), "a": "iPhone", "k": "h", "x": "Status: Erledigt (Mitteilung)"}]
+        n["log"] = (t.get("log") or []) + [{"t": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M"), "a": actor, "k": "h", "x": "Status: Erledigt (Mitteilung)"}]
         n["log"] = n["log"][-120:]
         n["v"] = t.get("v", 0) + 1
         state["tasks"][tid] = n
@@ -610,6 +611,156 @@ def handle_action(action):
         print("Mitteilung nicht aktualisiert:", e, flush=True)
 
 
+# ---- Vorlesen und Abhaken per Stimme (Siri, Alexa)
+def _today():
+    now = datetime.datetime.now(ha["tz"]) if ha["tz"] else datetime.datetime.now()
+    return now.date()
+
+
+def _mine(t, who):
+    return not who or who.lower() in [p.strip().lower() for p in str(t.get("who", "")).split(",")]
+
+
+def _names(lst):
+    n = ["„%s“" % t["title"] for t in lst[:5]]
+    more = len(lst) - 5
+    if more > 0:
+        n.append("%d weitere" % more)
+    return n[0] if len(n) == 1 else ", ".join(n[:-1]) + " und " + n[-1]
+
+
+def speech_summary(when="heute", who=""):
+    today = _today()
+    ti = today.isoformat()
+    with LOCK:
+        act = [t for t in state["tasks"].values() if not t.get("del") and not t.get("arch") and t["status"] != "done" and _mine(t, who)]
+    late = sorted([t for t in act if t["end"] < ti], key=lambda t: t["end"])
+    if when == "woche":
+        lim = (today + datetime.timedelta(7)).isoformat()
+        lst = late + sorted([t for t in act if t["end"] >= ti and t["start"] <= lim], key=lambda t: t["end"])
+        head = "In den nächsten sieben Tagen"
+    else:
+        lst = late + sorted([t for t in act if t["end"] >= ti and t["start"] <= ti], key=lambda t: t["end"])
+        head = "Heute"
+    who_txt = " für %s" % who if who else ""
+    if not lst:
+        return "%s steht%s nichts an." % (head, who_txt)
+    s = "%s %s%s %d %s an: %s." % (head, "steht" if len(lst) == 1 else "stehen", who_txt, len(lst), "Aufgabe" if len(lst) == 1 else "Aufgaben", _names(lst))
+    if late:
+        s += " %s davon %s überfällig." % ("Eine" if len(late) == 1 else str(len(late)), "ist" if len(late) == 1 else "sind")
+    return s
+
+
+def _norm(x):
+    return re.sub(r"[^a-zäöüß0-9 ]", "", str(x).lower()).strip()
+
+
+def done_by_voice(text, actor="Sprache"):
+    import difflib
+    q = _norm(text)
+    if not q:
+        return "Welche Aufgabe soll ich abhaken?"
+    with LOCK:
+        cand = [t for t in state["tasks"].values() if not t.get("del") and not t.get("arch") and t["status"] != "done"]
+    best, score = None, 0.0
+    for t in cand:
+        ti = _norm(t["title"])
+        sc = 1.0 if ti == q else 0.9 if (q in ti or ti in q) else difflib.SequenceMatcher(None, q, ti).ratio()
+        if sc > score:
+            best, score = t, sc
+    if not best or score < 0.6:
+        return "Ich habe keine passende offene Aufgabe gefunden."
+    if not complete_task(best["id"], actor):
+        return "„%s“ kann ich per Sprache nicht abhaken, sie wiederholt sich oder wartet auf eine andere Aufgabe." % best["title"]
+    return "„%s“ ist erledigt." % best["title"]
+
+
+ALEXA_PREFIX = re.compile(r"^(?:alexa[, ]+)?(?:planner|planer|plana|planna|plan a|neue aufgabe|aufgabe)\b[ ,:]*(.*)$")
+
+
+def alexa_command(text, person=""):
+    """Wertet einen Echo-Sprachbefehl aus. Gibt die Antwort zurück oder None, wenn er nicht dem Planner gilt."""
+    orig = str(text or "").strip()
+    m = ALEXA_PREFIX.match(orig.lower())
+    if not m:
+        return None
+    return voice_rest(orig[m.start(1):], person, "Alexa")
+
+
+def voice_rest(rest, person="", actor="Sprache"):
+    rest = str(rest or "").strip(" .?!")
+    low = rest.lower()
+    with LOCK:
+        people = known_people(list(state["tasks"].values()))
+    who = next((p for p in people if person and p.lower() == person.strip().lower()), "")
+    rest, full = low, rest
+    if rest in ("", "heute", "was steht heute an", "was steht an", "was ist heute dran", "was ist heute zu tun", "was habe ich heute"):
+        return speech_summary("heute", who)
+    if re.fullmatch(r"(?:diese |die )?woche|was steht diese woche an", rest):
+        return speech_summary("woche", who)
+    m2 = re.fullmatch(r"(?:erledigt|fertig|abhaken|hake ab|hak ab)\s+(.+)", rest) or re.fullmatch(r"(.+?)\s+(?:ist\s+)?(?:erledigt|fertig)", rest)
+    if m2:
+        return done_by_voice(m2.group(1), actor)
+    t, speech = quick_task(full, who)
+    with LOCK:
+        t["v"] = 1
+        state["tasks"][t["id"]] = t
+        state["rev"] += 1
+        save()
+    return speech
+
+
+def ha_template(tpl):
+    req = urllib.request.Request(SUP + "/template", method="POST", data=json.dumps({"template": tpl}).encode(),
+                                 headers={"Authorization": "Bearer " + TOKEN, "Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=10) as r:
+        return r.read().decode("utf-8", "replace")
+
+
+ALEXA = {"seen": {}, "speak": {}, "n": 0, "sock": None}
+
+
+def alexa_entities():
+    try:
+        return [e for e in json.loads(ha_template("{{ integration_entities('alexa_devices') | select('match', 'event\\\\.') | list | to_json }}")) if isinstance(e, str)]
+    except Exception as e:
+        print("Alexa-Geräte nicht lesbar:", e, flush=True)
+        return []
+
+
+def alexa_speak(entity, text):
+    try:
+        sp = ALEXA["speak"].get(entity)
+        if sp is None:
+            sp = ha_template("{{ device_entities(device_id('%s')) | select('match', 'notify\\\\..*_speak$') | first | default('') }}" % entity).strip()
+            ALEXA["speak"][entity] = sp
+        if sp:
+            ha_call("POST", "/services/notify/send_message", {"entity_id": sp, "message": text[:600]})
+    except Exception as e:
+        print("Alexa-Antwort fehlgeschlagen:", e, flush=True)
+
+
+def alexa_event(entity, st):
+    if not isinstance(st, dict):
+        return
+    stamp = st.get("state")
+    if not stamp or ALEXA["seen"].get(entity) == stamp:
+        return
+    first = entity not in ALEXA["seen"]
+    ALEXA["seen"][entity] = stamp
+    if first and st.get("_initial"):
+        return
+    a = st.get("attributes") or {}
+    try:
+        answer = alexa_command(a.get("voice_command", ""), a.get("person_first_name") or "")
+    except Exception as e:
+        answer = "Das habe ich nicht verstanden."
+        print("Alexa-Befehl:", e, flush=True)
+    if answer:
+        alexa_speak(entity, answer)
+
+
+
 def ws_session():
     sock = ws_open(WS_URL)
     try:
@@ -622,18 +773,44 @@ def ws_session():
             raise ConnectionError("Anmeldung bei Home Assistant fehlgeschlagen")
         ws_send(sock, json.dumps({"id": 1, "type": "subscribe_events", "event_type": "mobile_app_notification_action"}))
         print("Verbindung zu Home Assistant für Mitteilungs-Knöpfe steht", flush=True)
+        ents = alexa_entities() if app_settings().get("alexa") else []
+        ALEXA["n"] = len(ents)
+        if ents:
+            ws_send(sock, json.dumps({"id": 2, "type": "subscribe_trigger", "trigger": {"platform": "state", "entity_id": ents}}))
+            print("Alexa-Sprachbefehle aktiv für %d Echo-Geräte" % len(ents), flush=True)
+        ALEXA["sock"] = sock
         wsok["ok"] = True
+        started = time.time()
         while True:
             try:
                 msg = json.loads(ws_recv(sock))
             except socket.timeout:
+                if time.time() - started > 1800:
+                    raise ConnectionError("Neuaufbau, um neue Geräte zu erkennen")
                 ws_send(sock, b"", 9)
                 continue
-            if msg.get("type") == "event":
-                handle_action(str(((msg.get("event") or {}).get("data") or {}).get("action", "")))
+            if msg.get("type") != "event":
+                continue
+            if msg.get("id") == 2:
+                tr = ((msg.get("event") or {}).get("variables") or {}).get("trigger") or {}
+                ent, st = tr.get("entity_id"), tr.get("to_state")
+                if ent:
+                    threading.Thread(target=alexa_event, args=(ent, st), daemon=True).start()
+                continue
+            handle_action(str(((msg.get("event") or {}).get("data") or {}).get("action", "")))
     finally:
+        ALEXA["sock"] = None
         try:
             sock.close()
+        except Exception:
+            pass
+
+
+def ws_restart():
+    s_ = ALEXA.get("sock")
+    if s_:
+        try:
+            s_.close()
         except Exception:
             pass
 
@@ -696,9 +873,18 @@ def ha_loop():
 
 
 
-# ---- Schnelleingabe (gleiche Regeln wie im Browser): „Zaun streichen Sa #Garten +Haus !1 @Melanie“
+# ---- Schnelleingabe (gleiche Regeln wie im Browser, siehe parseQuick in planner.html)
+# Getippt: „Zaun streichen Sa #Garten +Haus !1 @Melanie“ · gesprochen: „Zaun streichen am Samstag Tag Garten Priorität eins“
 QWD = (("mo", "montag"), ("di", "dienstag"), ("mi", "mittwoch"), ("do", "donnerstag"), ("fr", "freitag"), ("sa", "samstag"), ("so", "sonntag"))
 WDS = ("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
+MON = ("januar", "februar", "märz", "april", "mai", "juni", "juli", "august", "september", "oktober", "november", "dezember")
+NUMW = {"ein": 1, "eine": 1, "einen": 1, "einem": 1, "eins": 1, "zwei": 2, "drei": 3, "vier": 4, "fünf": 5, "sechs": 6, "sieben": 7,
+        "acht": 8, "neun": 9, "zehn": 10, "elf": 11, "zwölf": 12, "vierzehn": 14}
+_ORD = ["erst", "zweit", "dritt", "viert", "fünft", "sechst", "siebt", "acht", "neunt", "zehnt", "elft", "zwölft", "dreizehnt", "vierzehnt",
+        "fünfzehnt", "sechzehnt", "siebzehnt", "achtzehnt", "neunzehnt", "zwanzigst"]
+_ORD += [p + "undzwanzigst" for p in ("ein", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun")] + ["dreißigst", "einunddreißigst"]
+ORDW = {stem + end: n + 1 for n, stem in enumerate(_ORD) for end in ("e", "en", "er", "es", "em")}
+ORDW["siebente"] = ORDW["siebenten"] = 7
 
 
 def _qn(x):
@@ -717,10 +903,43 @@ def _qname(x, names):
     return x[:1].upper() + x[1:]
 
 
+def _qknown(x, names):
+    # gesprochenes „Tag Garten“ / „Projekt Haus“: nur bekannte Namen (mind. 3 Buchstaben), sonst gehört das Wort zum Titel
+    lo = _qn(x)
+    if len(lo) < 3:
+        return None
+    for n in names:
+        if n.lower() == lo:
+            return n
+    pre = [n for n in names if n.lower().startswith(lo)]
+    return pre[0] if len(pre) == 1 else None
+
+
+def _qnum(x):
+    x = _qn(x)
+    return int(x) if re.fullmatch(r"\d{1,3}", x) else NUMW.get(x)
+
+
+def _qday(d, mo, y, today, explicit):
+    try:
+        r = datetime.date(y, mo, d)
+    except ValueError:
+        return None
+    if not explicit and r < today:
+        try:
+            r = datetime.date(y + 1, mo, d)
+        except ValueError:
+            pass
+    return r
+
+
 def _qdate_at(w, i, today):
     td = datetime.timedelta
     x, raw = _qn(w[i]), re.sub(r"[,;:!?]+$", "", w[i])
-    nxt = _qn(w[i + 1]) if i + 1 < len(w) else ""
+    nx = _qn(w[i + 1]) if i + 1 < len(w) else ""
+    if x in ("am", "zum", "ab") and i + 1 < len(w):
+        r = _qdate_at(w, i + 1, today)
+        return (r[0], r[1] + 1) if r else None
     if x == "heute":
         return today, 1
     if x == "morgen":
@@ -729,10 +948,10 @@ def _qdate_at(w, i, today):
         return today + td(2), 1
     if x == "wochenende":
         return today + td((5 - today.weekday()) % 7), 1
-    if x in ("nächste", "naechste") and nxt == "woche":
+    if x in ("nächste", "naechste", "nächsten", "kommende", "kommenden") and nx == "woche":
         return today + td(7 - today.weekday()), 2
-    if x == "in" and re.fullmatch(r"\d{1,3}", nxt) and i + 2 < len(w):
-        k, u = int(nxt), _qn(w[i + 2])
+    if x == "in" and i + 2 < len(w) and _qnum(w[i + 1]) is not None:
+        k, u = _qnum(w[i + 1]), _qn(w[i + 2])
         if u in ("tag", "tagen"):
             return today + td(k), 3
         if u in ("woche", "wochen"):
@@ -743,18 +962,12 @@ def _qdate_at(w, i, today):
     m = re.fullmatch(r"(\d{1,2})\.(\d{1,2})\.(\d{2}|\d{4})?", raw)
     if m:
         y = int(m.group(3)) if m.group(3) else today.year
-        if y < 100:
-            y += 2000
-        try:
-            d = datetime.date(y, int(m.group(2)), int(m.group(1)))
-        except ValueError:
-            return None
-        if not m.group(3) and d < today:
-            try:
-                d = datetime.date(y + 1, d.month, d.day)
-            except ValueError:
-                pass
-        return d, 1
+        r = _qday(int(m.group(1)), int(m.group(2)), y + 2000 if y < 100 else y, today, bool(m.group(3)))
+        return (r, 1) if r else None
+    d = int(raw[:-1]) if re.fullmatch(r"\d{1,2}\.", raw) else ORDW.get(x)
+    if d and nx in MON:
+        r = _qday(d, MON.index(nx) + 1, today.year, today, False)
+        return (r, 2) if r else None
     return None
 
 
@@ -765,6 +978,8 @@ def parse_quick(text, today, tags, projs, people):
     i = 0
     while i < len(w):
         x = w[i]
+        lo = _qn(x)
+        nx = w[i + 1] if i + 1 < len(w) else ""
         m = re.fullmatch(r"(?:!|[pP])([1-3])", x)
         if x.startswith("#") and len(x) > 1:
             n = _qname(x[1:], tags)
@@ -780,10 +995,24 @@ def parse_quick(text, today, tags, projs, people):
             o["prio"] = int(m.group(1))
         elif re.fullmatch(r"!{1,3}", x):
             o["prio"] = 4 - len(x)
+        elif keep and lo in ("priorität", "prio") and _qnum(nx) in (1, 2, 3):
+            o["prio"] = _qnum(nx)
+            i += 2
+            continue
+        elif keep and lo in ("tag", "hashtag") and nx and _qknown(nx, tags):
+            n = _qknown(nx, tags)
+            if n not in o["tags"]:
+                o["tags"].append(n)
+            i += 2
+            continue
+        elif keep and lo == "projekt" and nx and _qknown(nx, projs):
+            o["proj"] = _qknown(nx, projs)
+            i += 2
+            continue
         else:
             r = None
             if keep:
-                if _qn(x) == "bis" and i + 1 < len(w):
+                if lo == "bis" and i + 1 < len(w):
                     r = _qdate_at(w, i + 1, today)
                     if r:
                         o["date"], o["until"] = r[0], True
@@ -800,6 +1029,10 @@ def parse_quick(text, today, tags, projs, people):
     return o
 
 
+def known_people(tl):
+    return list(dict.fromkeys(["Lasse", "Melanie"] + sorted({p.strip() for t in tl for p in str(t.get("who", "")).split(",") if p.strip()})))
+
+
 def quick_task(text, who_default=""):
     now = datetime.datetime.now(ha["tz"]) if ha["tz"] else datetime.datetime.now()
     today = now.date()
@@ -808,10 +1041,11 @@ def quick_task(text, who_default=""):
         tags = [x["n"] for x in state["tags"] if not x.get("p")] + sorted({n for t in tl for n in t.get("tags", [])})
         projs = [x["n"] for x in state["tags"] if x.get("p")] + sorted({t.get("proj") for t in tl if t.get("proj")})
     tags, projs = list(dict.fromkeys(tags)), list(dict.fromkeys(projs))
-    people = ["Lasse", "Melanie"] + sorted({p.strip() for t in tl for p in str(t.get("who", "")).split(",") if p.strip()})
+    people = known_people(tl)
     q = parse_quick(text, today, tags, projs, list(dict.fromkeys(people)))
     if not q["title"]:
         raise ValueError("Kein Titel erkannt")
+    q["title"] = q["title"][:1].upper() + q["title"][1:]  # Sprachdiktat liefert oft alles klein
     d = q["date"]
     if d is None:
         s = e = today
@@ -892,6 +1126,10 @@ class H(BaseHTTPRequestHandler):
                 return self.out(200, {"ok": True, "services": out})
             except Exception as e:
                 return self.out(200, {"ok": False, "error": str(e)[:200], "services": []})
+        if u.path.endswith("/api/speech"):
+            qs = parse_qs(u.query)
+            when = "woche" if (qs.get("when") or [""])[0] == "woche" else "heute"
+            return self.out(200, {"speech": speech_summary(when, (qs.get("who") or [""])[0][:30])})
         if u.path.endswith("/api/tasks"):
             q = parse_qs(u.query).get("rev", [""])[0]
             with LOCK:
@@ -1000,6 +1238,15 @@ class H(BaseHTTPRequestHandler):
                 return self.out(200, {"ok": True, "data": ai_call(p, bool(data.get("raw")))})
             except Exception as e:
                 return self.out(200, {"ok": False, "error": str(e)[:200]})
+        if path.endswith("/api/voice"):
+            # Wie /api/quick, versteht zusätzlich „heute“, „Woche“ und „erledigt …“ (für Siri-Kurzbefehle)
+            try:
+                txt = data.get("text") if isinstance(data, dict) else None
+                if not isinstance(txt, str) or not txt.strip():
+                    raise ValueError("Leerer Text")
+                return self.out(200, {"ok": True, "speech": voice_rest(txt[:300], str(data.get("who") or "")[:30], "Siri")})
+            except Exception as e:
+                return self.out(400, {"ok": False, "error": str(e)[:200], "speech": "Das habe ich nicht verstanden."})
         if path.endswith("/api/quick"):
             # Für Siri-Kurzbefehle und Home-Assistant-Sprachsteuerung: {"text": "Zaun streichen Sa #Garten", "who": "Lasse"}
             try:
@@ -1033,7 +1280,12 @@ class H(BaseHTTPRequestHandler):
                     return self.out(400, {"error": "Das sieht nicht wie ein Gemini-Schlüssel aus"})
             if data.get("ai_model") in AI_MODELS:
                 st["ai_model"] = data["ai_model"]
+            alexa_changed = isinstance(data.get("alexa"), bool) and data["alexa"] != bool(st.get("alexa"))
+            if isinstance(data.get("alexa"), bool):
+                st["alexa"] = data["alexa"]
             save_app_settings(st)
+            if alexa_changed:
+                ws_restart()
             return self.out(200, {"ok": True, "ha": ha_info()})
         if path.endswith("/api/ha-test"):
             try:

@@ -69,6 +69,12 @@ try:
     check("Neues Schlüsselformat mit Punkt (AQ.…) wird angenommen", call("api/ha-settings", {"ai_key": "AQ.Ab8Testschluessel_neuesFormat-1234567890"})[0] == 200)
     c, j = call("api/quick", {"text": "Rasen mähen morgen #Garten !2 @Melanie"})
     check("Schnelleingabe per Sprache legt Aufgabe an", c == 200 and j["task"]["title"] == "Rasen mähen" and j["task"]["tags"] == ["Garten"] and j["task"]["prio"] == 2 and j["task"]["who"] == "Melanie" and "morgen" in j["speech"])
+    sp = json.loads(urllib.request.urlopen("http://127.0.0.1:8096/api/speech?when=woche&who=Melanie").read())["speech"]
+    check("Vorlesen der Woche für eine Person", "Rasen mähen" in sp and "Aufgabe" in sp)
+    c, j = call("api/voice", {"text": "Rasen mähen ist erledigt"})
+    check("Siri: Abhaken per Sprache", c == 200 and j["speech"].endswith("ist erledigt."))
+    c, j = call("api/voice", {"text": "heute"})
+    check("Siri: „heute“ wird vorgelesen", c == 200 and j["speech"].startswith("Heute"))
     check("Schnelleingabe ohne Header abgewiesen", call("api/quick", {"text": "x"}, hdr=False)[0] == 403)
     check("Leere Schnelleingabe abgewiesen", call("api/quick", {"text": "  "})[0] == 400)
     # KI-Grenzen: Tageslimit und Stundenlimit greifen, Zähler ist sichtbar

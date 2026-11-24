@@ -962,6 +962,30 @@ h1,.pnl h3,.colm h3{font-family:var(--disp)}
 .hlist{grid-column:1/-1}
 
 .home .hero .hst{display:none}
+
+/* 1.29: Anzeige für Echo Show und Wandbildschirme (?anzeige) */
+html.kiosk .side,html.kiosk .bar,html.kiosk #note,html.kiosk .kpis,html.kiosk #tchips,html.kiosk #selbar,html.kiosk .add,html.kiosk #add,html.kiosk .tabs,html.kiosk nav{display:none!important}
+html.kiosk body{overflow:hidden}
+html.kiosk .app,html.kiosk .stage{display:block;padding:0;margin:0;min-height:0}
+html.kiosk #main{padding:0;margin:0;max-width:none}
+.kio{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.6fr);gap:1.4rem;height:100vh;height:100dvh;padding:1.4rem 1.6rem;box-sizing:border-box}
+.kl{display:flex;flex-direction:column;justify-content:center;gap:.4rem}
+.kclock{font:700 clamp(3.4rem,13vw,7.5rem)/1 var(--disp);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.kdate{font-size:clamp(1rem,2.6vw,1.5rem);color:var(--mut);font-weight:550}
+.kst{display:flex;gap:1.4rem;margin-top:1.2rem}
+.kst div{display:flex;flex-direction:column}.kst b{font:700 clamp(1.6rem,4.5vw,2.6rem)/1 var(--fb)}.kst span{font-size:.85rem;color:var(--mut);margin-top:.2rem}
+.kst .hot b{color:var(--brick-ink)}
+.kwho{margin-top:1rem;font-weight:650;color:var(--acc)}
+.kr{overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.kr h3{margin:.4rem 0 .35rem;font:650 .9rem/1 var(--fb);color:var(--mut)}
+.krow{display:flex;align-items:center;gap:.8rem;padding:.55rem .9rem;margin:.25rem 0;background:var(--grp);border-radius:.9rem;box-shadow:0 0 0 1px var(--line)}
+.krow .ring{flex:none;width:1.7rem;height:1.7rem}
+.km{flex:1;min-width:0;display:flex;flex-direction:column}.km b{font-size:clamp(1rem,2.4vw,1.3rem);font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.km span{font-size:.82rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.km span:empty{display:none}
+.krow em{font-style:normal;font-size:.9rem;color:var(--mut);white-space:nowrap}.krow em.late{color:var(--brick-ink);font-weight:650}
+.kfree{display:flex;flex-direction:column;gap:.4rem;padding:1.4rem;border-radius:1rem;background:var(--grp)}.kfree b{font-size:1.4rem}.kfree span{color:var(--mut)}
+.kmore{margin:.3rem .3rem 0;color:var(--mut);font-size:.85rem}
+@media (max-aspect-ratio:1/1){.kio{grid-template-columns:1fr;grid-template-rows:auto 1fr;height:auto;min-height:100dvh}.kclock{font-size:4.5rem}}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"></head>
 <body>
@@ -1132,33 +1156,45 @@ function init(){
 /* Anzeige */
 /* Schnelleingabe: „Zaun streichen Sa #Garten +Haus !1 @Melanie“ */
 const QWD=[["So","sonntag"],["Mo","montag"],["Di","dienstag"],["Mi","mittwoch"],["Do","donnerstag"],["Fr","freitag"],["Sa","samstag"]];
+const QMON=["januar","februar","märz","april","mai","juni","juli","august","september","oktober","november","dezember"];
+const QNUM={ein:1,eine:1,einen:1,einem:1,eins:1,zwei:2,drei:3,vier:4,"fünf":5,sechs:6,sieben:7,acht:8,neun:9,zehn:10,elf:11,"zwölf":12,vierzehn:14};
+const QORD=(()=>{const st=["erst","zweit","dritt","viert","fünft","sechst","siebt","acht","neunt","zehnt","elft","zwölft","dreizehnt","vierzehnt","fünfzehnt","sechzehnt","siebzehnt","achtzehnt","neunzehnt","zwanzigst",...["ein","zwei","drei","vier","fünf","sechs","sieben","acht","neun"].map(p=>p+"undzwanzigst"),"dreißigst","einunddreißigst"],o={};
+  st.forEach((x,n)=>["e","en","er","es","em"].forEach(e=>o[x+e]=n+1));o.siebente=o.siebenten=7;return o})();
 const qn=s=>String(s||"").toLowerCase().replace(/[.,;:!?]+$/,"");
 const qName=(x,list)=>{x=x.replace(/_/g," ").replace(/[.,;:!?]+$/,"").trim();const l=x.toLowerCase();return list.find(n=>n.toLowerCase()===l)||(list.filter(n=>n.toLowerCase().startsWith(l)).length===1?list.find(n=>n.toLowerCase().startsWith(l)):x.charAt(0).toUpperCase()+x.slice(1))};
+const qKnown=(x,list)=>{const l=qn(x);if(l.length<3)return null;const e=list.find(n=>n.toLowerCase()===l);if(e)return e;const p=list.filter(n=>n.toLowerCase().startsWith(l));return p.length===1?p[0]:null};
+const qNum=x=>{x=qn(x);return /^\d{1,3}$/.test(x)?+x:(QNUM[x]??null)};
+function qDay(d,mo,y,T,explicit){const t=Date.UTC(y,mo-1,d)/864e5,x=fromDn(t);if(x.getUTCMonth()!==mo-1||x.getUTCDate()!==d)return null;
+  if(!explicit&&t<T){const t2=Date.UTC(y+1,mo-1,d)/864e5,x2=fromDn(t2);if(x2.getUTCMonth()===mo-1&&x2.getUTCDate()===d)return t2}return t}
 function qDateAt(W,i){
-  const w=qn(W[i]),raw=String(W[i]).replace(/[,;:!?]+$/,""),T=today(),dow=fromDn(T).getUTCDay();
+  const w=qn(W[i]),raw=String(W[i]).replace(/[,;:!?]+$/,""),nx=qn(W[i+1]),T=today(),dow=fromDn(T).getUTCDay();
+  if((w==="am"||w==="zum"||w==="ab")&&i+1<W.length){const r=qDateAt(W,i+1);return r?[r[0],r[1]+1]:null}
   if(w==="heute")return[T,1];if(w==="morgen")return[T+1,1];if(w==="übermorgen"||w==="uebermorgen")return[T+2,1];
   if(w==="wochenende")return[T+(6-dow+7)%7,1];
-  if((w==="nächste"||w==="naechste")&&qn(W[i+1])==="woche")return[T+((1-dow+7)%7||7),2];
-  if(w==="in"&&/^\d{1,3}$/.test(qn(W[i+1]))){const k=+qn(W[i+1]),u=qn(W[i+2]);if(u==="tag"||u==="tagen")return[T+k,3];if(u==="woche"||u==="wochen")return[T+7*k,3]}
+  if(["nächste","naechste","nächsten","kommende","kommenden"].includes(w)&&nx==="woche")return[T+((1-dow+7)%7||7),2];
+  if(w==="in"&&i+2<W.length&&qNum(W[i+1])!==null){const k=qNum(W[i+1]),u=qn(W[i+2]);if(u==="tag"||u==="tagen")return[T+k,3];if(u==="woche"||u==="wochen")return[T+7*k,3]}
   const wi=QWD.findIndex(([a,b])=>w===b||raw.replace(/\.$/,"")===a);if(wi>=0)return[T+(wi-dow+7)%7,1];
-  const m=/^(\d{1,2})\.(\d{1,2})\.(\d{2}|\d{4})?$/.exec(raw);
-  if(m){const d=+m[1],mo=+m[2];let y=m[3]?+m[3]:fromDn(T).getUTCFullYear();if(y<100)y+=2000;
-    const ok=(yy)=>{const t=Date.UTC(yy,mo-1,d)/864e5,x=fromDn(t);return x.getUTCMonth()===mo-1&&x.getUTCDate()===d?t:null};
-    let t=ok(y);if(t===null)return null;if(!m[3]&&t<T){const t2=ok(y+1);if(t2!==null)t=t2}return[t,1]}
+  let m=/^(\d{1,2})\.(\d{1,2})\.(\d{2}|\d{4})?$/.exec(raw);
+  if(m){let y=m[3]?+m[3]:fromDn(T).getUTCFullYear();if(y<100)y+=2000;const t=qDay(+m[1],+m[2],y,T,!!m[3]);return t===null?null:[t,1]}
+  const d=/^\d{1,2}\.$/.test(raw)?parseInt(raw):(QORD[w]||null);
+  if(d&&QMON.includes(nx)){const t=qDay(d,QMON.indexOf(nx)+1,fromDn(T).getUTCFullYear(),T,false);return t===null?null:[t,2]}
   return null}
 function parseQuick(text){
   const W=String(text||"").trim().split(/\s+/).filter(Boolean),o={tags:[],who:[],proj:"",prio:0,date:null,until:false},keep=[];let m;
-  for(let i=0;i<W.length;i++){const w=W[i];
-    if((m=/^#(.+)$/.exec(w))){const n=qName(m[1],allTags());if(n&&!o.tags.includes(n))o.tags.push(n);continue}
+  for(let i=0;i<W.length;i++){const w=W[i],lo=qn(w),nx=W[i+1]||"";
+    if((m=/^#(.+)$/.exec(w))){const n=qName(m[1],allTags());if(n&&!o.tags.includes(n))o.tags.push(n.slice(0,30));continue}
     if((m=/^\+(.+)$/.exec(w))){o.proj=qName(m[1],allProjs()).slice(0,30);continue}
-    if((m=/^@(.+)$/.exec(w))){const n=qName(m[1],allWho());if(n&&!o.who.includes(n))o.who.push(n);continue}
+    if((m=/^@(.+)$/.exec(w))){const n=qName(m[1],allWho());if(n&&!o.who.includes(n))o.who.push(n.slice(0,30));continue}
     if((m=/^(?:!|p)([1-3])$/i.exec(w))){o.prio=+m[1];continue}
     if(/^!{1,3}$/.test(w)){o.prio=4-w.length;continue}
     if(keep.length){
-      if(qn(w)==="bis"&&i+1<W.length){const r=qDateAt(W,i+1);if(r){o.date=r[0];o.until=true;i+=r[1];continue}}
+      if((lo==="priorität"||lo==="prio")&&[1,2,3].includes(qNum(nx))){o.prio=qNum(nx);i++;continue}
+      if((lo==="tag"||lo==="hashtag")&&nx&&qKnown(nx,allTags())){const n=qKnown(nx,allTags());if(!o.tags.includes(n))o.tags.push(n);i++;continue}
+      if(lo==="projekt"&&nx&&qKnown(nx,allProjs())){o.proj=qKnown(nx,allProjs());i++;continue}
+      if(lo==="bis"&&i+1<W.length){const r=qDateAt(W,i+1);if(r){o.date=r[0];o.until=true;i+=r[1];continue}}
       const r=qDateAt(W,i);if(r){o.date=r[0];o.until=false;i+=r[1]-1;continue}}
     keep.push(w)}
-  o.title=keep.join(" ");o.found=!!(o.tags.length||o.who.length||o.proj||o.prio||o.date!==null);return o}
+  o.title=keep.join(" ").slice(0,200);o.found=!!(o.tags.length||o.who.length||o.proj||o.prio||o.date!==null);return o}
 function qDates(q){const T=today();if(q.date===null)return null;return q.until?[iso(fromDn(Math.min(T,q.date))),iso(fromDn(q.date))]:[iso(fromDn(q.date)),iso(fromDn(q.date))]}
 const WDL=["So","Mo","Di","Mi","Do","Fr","Sa"];
 function qChips(q){if(!q.found)return"";const c=[];const d=qDates(q);
@@ -1174,7 +1210,7 @@ async function regEnsure(tags,proj){const r=reg.map(x=>({...x}));let ch=false;
   if(ch)await saveReg(r)}
 let qaddKeep=null;
 async function quickAdd(text){
-  const q=parseQuick(text);if(!q.title){toast("Bitte einen Titel eingeben");return false}
+  const q=parseQuick(text);if(!q.title){toast("Bitte einen Titel eingeben");return false}q.title=q.title.charAt(0).toUpperCase()+q.title.slice(1);
   const d=qDates(q)||[tdy(),tdy()],hw=homeW(),who=q.who.length?q.who:(hw&&hw!=="__all"?[hw]:[]);
   const t={id:newId(),title:q.title.slice(0,200),tags:q.tags,area:q.tags[0]||"",proj:q.proj,who:who.join(", "),status:"todo",prio:q.prio,start:d[0],end:d[1],notes:"",deps:[],checklist:[],ms:false,rec:null};
   await regEnsure(q.tags,q.proj);await saveTask(t);hap(10);
@@ -1323,7 +1359,7 @@ $("a_empty").onclick=async()=>{const T=RAW.filter(t=>t.del);if(T.length&&await c
 /* Einstellungen */
 let sPage="main";
 const CH='<svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',CK='<svg class="ck" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
-const THN={auto:"Automatisch",light:"Hell",dark:"Dunkel"},STT={des:"Farbwelt",font:"Schrift",ki:"KI-Assistent",rem:"Erinnerung",remt:"Uhrzeit",theme:"Darstellung",me:"Ich bin",keys:"Tastaturkürzel"};
+const THN={auto:"Automatisch",light:"Hell",dark:"Dunkel"},STT={alexa:"Alexa",show:"Anzeige für Echo Show",des:"Farbwelt",font:"Schrift",ki:"KI-Assistent",rem:"Erinnerung",remt:"Uhrzeit",theme:"Darstellung",me:"Ich bin",keys:"Tastaturkürzel"};
 const PREV='<div class="prev" aria-label="Vorschau"><div class="pv-side"><i></i><i></i><i></i></div><div class="pv-main"><div class="pv-h">Planner</div><div class="pv-cols"><div><em class="c1"></em><span>Dachrinne reinigen</span></div><div><em class="c2"></em><span>Kinderzimmer streichen</span></div><div><em class="c3"></em><span>Steuer abheften</span></div></div><div class="pv-b"><b>Speichern</b><u>Abbrechen</u></div></div></div>';
 const srow=(a,l,v,x,chev=true)=>`<button class="srow" ${a}>${x||""}<span>${l}</span>${v!=null?`<em>${v}</em>`:""}${chev?CH:""}</button>`;
 const REMT=[];for(let h=5;h<=22;h++){REMT.push(String(h).padStart(2,"0")+":00");if(h<22)REMT.push(String(h).padStart(2,"0")+":30")}
@@ -1351,6 +1387,8 @@ function drawSettings(){
       h+=`<p class="sgt">Home Assistant</p>`+grp(
         srow("",`Verbindung`,hi.api?"Aktiv":"Nicht verfügbar",null,false)
        +(hi.api?srow('data-go="rem"',`Erinnerung`,n?"Täglich "+esc(hi.time)+" Uhr":"Aus"):srow("",`Erinnerung`,"Aus",null,false))
+       +(hi.api?srow('data-go="alexa"',`Alexa`,hi.alexa?(hi.echos?hi.echos+" Echo"+(hi.echos===1?"":"s"):"An"):"Aus"):"")
+       +srow('data-go="show"',`Anzeige für Echo Show`,"Link")
        +srow('data-go="ki"',`KI-Assistent`,hi.ai?"Gemini":"Aus")
        +srow("","Sensoren",hi.sensors?"Aktiv":"Aus",null,false)
        +srow(`data-act="hatest"${hi.api&&n?"":" disabled"}`,"Testnachricht senden",null,null,false))}
@@ -1362,6 +1400,24 @@ function drawSettings(){
       h=(names.length?grp(names.map(x=>sopt(`data-set="ntf:${x}"`,esc(ntfName(x)),sel.has(x))).join("")):cap("Es wurde kein Gerät gefunden. Installiere die Home-Assistant-App auf dem Handy und melde dich an."))
        +cap("Wähle die Geräte, die täglich an fällige und überfällige Aufgaben erinnert werden. Ohne Auswahl ist die Erinnerung aus.")
        +grp(srow('data-go="remt"',"Uhrzeit",esc((haInfo&&haInfo.time)||"08:00")+" Uhr")+srow(`data-act="hatest"${sel.size?"":" disabled"}`,"Testnachricht senden",null,null,false))}
+  }else if(sPage==="alexa"){
+    const hi=haInfo||{},on=!!hi.alexa;
+    h=grp(sopt('data-set="alexa:1"',"An",on)+sopt('data-set="alexa:0"',"Aus",!on))
+     +(on?cap(hi.echos?`${hi.echos} Echo-Gerät${hi.echos===1?"":"e"} gefunden. Der Planner hört auf Befehle, die mit „Planner“ beginnen.`:hi.wsok?"Noch kein Echo gefunden. Ist die Integration „Alexa Devices“ in Home Assistant eingerichtet? Neue Geräte erkennt der Planner spätestens nach 30 Minuten.":"Die Verbindung zu Home Assistant wird gerade aufgebaut …"):"")
+     +`<p class="sgt">So sprichst du mit dem Planner</p>`+grp(
+        srow("","„Alexa, Planner Rasen mähen am Samstag“",null,null,false)
+       +srow("","„Alexa, Planner was steht heute an“",null,null,false)
+       +srow("","„Alexa, Planner Woche“",null,null,false)
+       +srow("","„Alexa, Planner Fenster putzen ist erledigt“",null,null,false))
+     +cap("Auch möglich: „Tag Garten“, „Projekt Haus“, „Priorität eins“, „in drei Tagen“, „am zwölften Dezember“. Alexa sagt zuerst kurz, dass sie das nicht kennt, danach antwortet der Planner auf demselben Echo. Erkennt Alexa deine Stimme (Stimmprofil), wird die Aufgabe dir zugewiesen.")
+     +`<p class="sgt">Einrichtung (einmalig)</p>`+cap("In Home Assistant: Einstellungen → Geräte & Dienste → Integration hinzufügen → „Alexa Devices“. Mit dem Amazon-Konto anmelden. Amazon verlangt dafür die Zwei-Faktor-Anmeldung per Authenticator-App (nicht per SMS). Danach hier „An“ wählen.");
+  }else if(sPage==="show"){
+    const base=location.protocol==="http:"&&location.port==="8099"?location.origin:"http://"+(location.hostname&&!/^\d+\.\d+\.\d+\.\d+$/.test(location.hostname)&&location.hostname!=="localhost"?"IP-von-Home-Assistant":location.hostname)+":8099",me=prefGet("me")||"";
+    const url=base+"/?anzeige"+(me?"&wer="+encodeURIComponent(me):"")+"&dunkel";
+    h=cap("Eine ruhige Übersicht für den Echo Show 5 oder ein Tablet an der Wand: Uhrzeit, heute fällige und überfällige Aufgaben, die nächsten Termine. Sie aktualisiert sich von selbst, abhaken geht per Tippen auf den Kreis.")
+     +`<p class="sgt">Adresse</p><div class="sgrp kin"><input id="show_url" type="text" readonly value="${esc(url)}" aria-label="Adresse der Anzeige"></div>`
+     +grp(srow('data-act="showcopy"',"<b class=\"acc\">Adresse kopieren</b>",null,null,false)+srow('data-act="showopen"',"Hier ansehen",null,null,false))
+     +cap("Am Echo Show: „Alexa, öffne Silk“ (oder „Alexa, öffne Browser“), die Adresse eingeben und als Lesezeichen speichern. Den Teil „&wer=…“ weglassen für alle Personen, „&dunkel“ weglassen für hell. Funktioniert nur im Heimnetz und braucht Port 8099. Hinweis: Der Echo Show kehrt nach einer Weile zu seinem Startbildschirm zurück, das kann der Planner nicht verhindern.");
   }else if(sPage==="ki"){
     const hi=haInfo||{},on=!!hi.ai;
     const au=hi.aiuse||{used:0,limit:100};
@@ -1400,10 +1456,13 @@ $("s_body").onclick=async e=>{
     else if(k==="ntf"){const cur=new Set((haInfo&&haInfo.notify)||[]);cur.has(v)?cur.delete(v):cur.add(v);await haSave({notify:[...cur]})}
     else if(k==="rtime"){await haSave({time:v});sPage="rem"}
     else if(k==="aimodel")await haSave({ai_model:v});
+    else if(k==="alexa"){await haSave({alexa:v==="1"});setTimeout(async()=>{try{if(typeof pull==="function")await pull(true)}catch(_){}if(sPage==="alexa")drawSettings()},6000)}
     else if(k==="acc"){prefSet("acc",v);applyTheme()}else if(k==="font"){prefSet("font",v);applyFont()}else if(k==="me")prefSet("me",v);
     drawSettings();return}
   if(d.act==="arch"){const L=tasks.filter(t=>t.status==="done");if(!L.length)return;await saveMany(L.map(t=>({...t,arch:true})));$("dls").close();toast(L.length+" erledigte archiviert",()=>saveMany(L))}
   else if(d.act==="open"){$("dls").close();openArch()}
+  else if(d.act==="showcopy"){const u=$("show_url").value;try{await navigator.clipboard.writeText(u);toast("Adresse kopiert")}catch(_){$("show_url").focus();$("show_url").select();toast("Adresse markiert, bitte kopieren")}}
+  else if(d.act==="showopen"){window.open(location.pathname+"?anzeige"+(prefGet("me")?"&wer="+encodeURIComponent(prefGet("me")):""),"_blank")}
   else if(d.act==="kipaste"){try{const t=await navigator.clipboard.readText();$("ki_key").value=t.replace(/\s+/g,"");toast(t.trim()?"Eingefügt, jetzt sichern":"Zwischenablage ist leer")}catch(e){$("ki_key").focus();toast("Bitte lange ins Feld tippen und „Einsetzen“ wählen")}}
   else if(d.act==="kisave"){const k=$("ki_key").value.replace(/\s+/g,"").replace(/^["'„“]+|["'„“”]+$/g,"");
     if(!k){kiMsg=["Erst den Schlüssel ins Feld einfügen.",1];drawSettings();return}
@@ -1824,8 +1883,20 @@ function after(o){
   else if(g)gToday(false);
   if(g){g.onscroll=stickyLabels;stickyLabels();ganttDrag();glResize()}
 }
+const KQ=new URLSearchParams(location.search),KIOSK=KQ.has("anzeige");
+if(KIOSK){document.documentElement.classList.add("kiosk");if(KQ.has("dunkel"))try{localStorage.setItem("haus-theme","dark")}catch(_){}else if(KQ.has("hell"))try{localStorage.setItem("haus-theme","light")}catch(_){}applyTheme();
+  try{localStorage.setItem("haus-onb","1")}catch(_){}setInterval(()=>{const c=$("kclock");if(c)c.textContent=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})},15000)}
+function kiosk(){
+  const T=today(),who=KQ.get("wer")||"",mine=t=>!who||wl(t).includes(who),opn=tasks.filter(t=>t.status!=="done"&&mine(t)),be=(a,b)=>dn(a.end)-dn(b.end);
+  const late=opn.filter(isLate).sort(be),now=opn.filter(t=>!isLate(t)&&dn(t.start)<=T).sort(be),next=opn.filter(t=>dn(t.start)>T&&dn(t.start)<=T+7).sort((a,b)=>dn(a.start)-dn(b.start));
+  const L=[...late,...now],row=t=>`<div class="krow"><button class="ring ${t.status}" data-adv="${t.id}" aria-label="Status weiterschalten"></button><div class="km"><b>${esc(t.title)}</b><span>${[t.proj,...tgs(t),who?"":t.who].filter(Boolean).map(esc).join(" · ")}</span></div><em class="${isLate(t)?"late":""}">${rel(t)}</em></div>`;
+  const nx=next.slice(0,Math.max(0,6-L.length));
+  return`<div class="kio"><section class="kl"><div class="kclock" id="kclock">${new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}</div><div class="kdate">${new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})}</div>
+    <div class="kst"><div><b>${L.length}</b><span>heute</span></div><div class="${late.length?"hot":""}"><b>${late.length}</b><span>überfällig</span></div><div><b>${next.length}</b><span>7 Tage</span></div></div>${who?`<div class="kwho">${esc(who)}</div>`:""}</section>
+    <section class="kr">${L.length?`<h3>Heute</h3>${L.slice(0,6).map(row).join("")}`:`<div class="kfree"><b>Für heute ist nichts geplant.</b><span>Genieß den Tag.</span></div>`}${nx.length?`<h3>Als Nächstes</h3>${nx.map(row).join("")}`:""}${L.length>6?`<p class="kmore">und ${L.length-6} weitere</p>`:""}</section></div>`}
 function render(){
   tasks=RAW.filter(t=>!t.arch&&!t.del).map(t=>t.status==="backlog"?{...t,status:"todo"}:t);
+  if(KIOSK){$("main").innerHTML=kiosk();document.querySelectorAll("[data-adv]").forEach(b=>b.onclick=e=>{e.stopPropagation();advance(b.dataset.adv)});return}
   if(!purged&&RAW.length){purged=true;const lim=iso(new Date(Date.now()-30*864e5));RAW.filter(t=>t.del&&t.delAt&&t.delAt<lim).forEach(t=>delTask(t.id))}
   for(const id of [...sel])if(!tasks.some(t=>t.id===id))sel.delete(id);
   const n=tasks.length,d=tasks.filter(t=>t.status==="done").length,pct=n?Math.round(d/n*100):0;
@@ -2187,7 +2258,7 @@ $("more").onclick=()=>{
   hap(8);popMenu($("more"),items)};
 matchMedia("(max-width:699px)").addEventListener("change",()=>{renderedView=null;render()});
 $("add").onclick=()=>openDlg();
-async function onboard(){if(prefGet("onb")||prefGet("me")||document.querySelector("dialog[open]"))return;prefSet("onb","1");
+async function onboard(){if(KIOSK||prefGet("onb")||prefGet("me")||document.querySelector("dialog[open]"))return;prefSet("onb","1");
   const v=await sheet("Willkommen im Planner! Wer nutzt dieses Gerät?",[{items:[{t:"Lasse",v:"Lasse"},{t:"Melanie",v:"Melanie"}]}]);
   if(v){prefSet("me",v);try{localStorage.removeItem("haus-hwho")}catch(_){}render()}
   toast("Tipp: Auf der Startseite oben einfach tippen, z. B. „Rasen mähen Sa #Garten“",null,null,8000)}
