@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Findet totes CSS in src/planner.html (nur Bericht, ändert nichts). Aufruf: python3 tools/css_audit.py [--fix]
+"""Findet totes CSS in src/style.css (nur Bericht, ändert nichts). Aufruf: python3 tools/css_audit.py [--fix]
 
 1. Selektoren mit Klassen/IDs, die im HTML und JavaScript nirgends vorkommen → können nie greifen.
 2. Angaben, die eine spätere Regel mit exakt demselben Selektor im selben @media-Zusammenhang
    immer überschreibt → wirkungslos.
 --fix entfernt beides. Danach immer mit tools/style_diff.py prüfen, dass sich nichts sichtbar ändert.
 """
-import os, re, sys
+import glob, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(ROOT, "src", "planner.html")
+CSS = os.path.join(ROOT, "src", "style.css")
+USES = [os.path.join(ROOT, "src", "seite.html")] + sorted(glob.glob(os.path.join(ROOT, "src", "js", "*.js")))
 # Werte mit neuer Syntax: ältere Browser verwerfen sie, dann greift die frühere Angabe als Rückfall → nicht entfernen
 MODERN = re.compile(r"dvh|svh|lvh|dvw|color-mix|oklch|light-dark|\blch\(|\blab\(|env\(|:has\(|@supports")
 
@@ -114,16 +115,14 @@ def split_selectors(sel):
 
 
 def load():
-    s = open(SRC, encoding="utf-8").read()
-    a = s.index("<style>") + len("<style>")
-    b = s.index("</style>")
-    other = s[:a] + s[b:]
-    return s, a, b, other
+    css = open(CSS, encoding="utf-8").read()
+    other = "".join(open(p, encoding="utf-8").read() for p in USES)
+    return css, other
 
 
 def audit():
-    s, a, b, other = load()
-    rules = parse(s[a:b], a)
+    s, other = load()
+    rules = parse(s)
     words = set(re.findall(r"[A-Za-z_][\w-]*", other))
     # Klassen, die im Code zusammengesetzt werden („p${prio}“, "st-"+x): Präfixe sammeln, solche Treffer nur melden, nicht entfernen
     prefixes = set(re.findall(r"(?<=[\"'`\s])([A-Za-z_][\w-]*)(?:\$\{|[\"']\s*\+)", other))
@@ -160,10 +159,8 @@ def audit():
     return s, rules, dead_sel, dead_decl, unsure
 
 
-def drop_empty(s):
-    """Leere Regeln („.x{}“), leere @media-Blöcke und doppelte Leerzeilen im <style>-Teil entfernen."""
-    a, b = s.index("<style>") + 7, s.index("</style>")
-    css = s[a:b]
+def drop_empty(css):
+    """Leere Regeln („.x{}“), leere @media-Blöcke und doppelte Leerzeilen entfernen."""
     while True:
         new = re.sub(r"(?:(?<=[}{;\n])|^)[ \t]*[^{}@;\n][^{};]*\{\s*\}", "", css)
         new = re.sub(r"@(?:media|supports)[^{}]*\{\s*\}", "", new)
@@ -172,8 +169,7 @@ def drop_empty(s):
         css = new
     css = re.sub(r"\n[ \t]*(?=\n)", "\n", css)
     css = re.sub(r"\n{3,}", "\n\n", css)
-    css = re.sub(r";\}", "}", css)
-    return s[:a] + css + s[b:]
+    return re.sub(r";\}", "}", css)
 
 
 def maybe_dynamic(token, prefixes):
@@ -223,7 +219,7 @@ def main():
         out.append(s[last:])
         new = "".join(out)
         new = drop_empty(new)
-        open(SRC, "w", encoding="utf-8").write(new)
+        open(CSS, "w", encoding="utf-8").write(new)
         print("\nEntfernt: %d Regeln/Selektoren, %d Angaben. Jetzt tools/style_diff.py compare ausführen." % (len(dead_sel), len(dead_decl)))
 
 

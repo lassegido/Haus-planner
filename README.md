@@ -30,13 +30,14 @@ Fehlt etwas: in der App *Export → Backup einspielen* und die JSON-Datei aus Sc
 
 ## Arbeiten mit Claude
 
-Siehe `CLAUDE.md`. Kurz: Claude ändert `src/planner.html` (und bei Bedarf `planner/server.py`), erhöht die Version, führt `python3 tools/build.py` aus und pusht. Der Link in Claude (Artifact) wird aus derselben Datei aktualisiert.
+Siehe `CLAUDE.md` und `ARCHITEKTUR.md`. Kurz: Claude ändert die Quellen in `src/` (und bei Bedarf `planner/server.py`), schreibt einen Test dazu, erhöht mit `python3 tools/release.py <Version>` die Version (baut und prüft alles) und pusht. Der Link in Claude (Artifact) wird aus `artifact/planner.html` aktualisiert. Jeder Push wird auf GitHub unter *Actions* geprüft.
 
 ## Aufbau
 
 | Pfad | Zweck |
 |---|---|
-| `src/planner.html` | Master-Datei (Claude-Version), hier wird gearbeitet |
-| `tools/build.py` | erzeugt daraus `planner/index.html` und `VERSION` |
+| `src/` | Quellen der Oberfläche: `seite.html` (Gerüst), `style.css`, `js/*.js` – hier wird gearbeitet |
+| `tools/build.py` | setzt daraus `artifact/planner.html` (Claude) und `planner/index.html` (Add-on) zusammen |
+| `tools/check.py` | alle Prüfungen (Server, Home Assistant, Browser) |
 | `planner/` | das Home-Assistant-Add-on (Server, Oberfläche, Konfiguration) |
 | `repository.yaml` | macht das Repository für Home Assistant erkennbar |

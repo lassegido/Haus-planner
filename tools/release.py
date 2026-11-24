@@ -37,7 +37,7 @@ def main():
         sys.exit(1)
     if subprocess.run([sys.executable, "tools/check.py"] + sys.argv[2:], cwd=ROOT).returncode:
         sys.exit("Prüfungen fehlgeschlagen. Version bleibt eingetragen; nach dem Beheben: python3 tools/check.py")
-    print("\nBereit. Weiter: git add -A && git commit && git push, danach Claude-Artifact mit src/planner.html aktualisieren.")
+    print("\nBereit. Weiter: git add -A && git commit && git push, danach Claude-Artifact mit artifact/planner.html aktualisieren.")
 
 
 if __name__ == "__main__":

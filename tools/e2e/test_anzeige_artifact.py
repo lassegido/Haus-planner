@@ -1,4 +1,4 @@
-"""Echo-Show-Ansicht (?anzeige) und die Claude-Version (src/planner.html ohne Server, lokaler Speicher)."""
+"""Echo-Show-Ansicht (?anzeige) und die Claude-Version (artifact/planner.html ohne Server, lokaler Speicher)."""
 import datetime
 from common import ROOT, Page, Server, task
 
@@ -26,7 +26,7 @@ def test_echo_show_anzeige(t, browser):
 
 
 def test_claude_version_ohne_server(t, browser):
-    p = Page(browser, "file://" + ROOT + "/src/planner.html", {"viewport": {"width": 390, "height": 844}})
+    p = Page(browser, "file://" + ROOT + "/artifact/planner.html", {"viewport": {"width": 390, "height": 844}})
     for v in ["home", "board", "list", "gantt", "cal"]:
         p.pg.click("[data-v=%s]" % v)
         p.pg.wait_for_timeout(200)

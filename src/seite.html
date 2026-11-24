@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Planner">
+<meta name="theme-color" content="#F5F3EB" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0E1E27" media="(prefers-color-scheme: dark)">
+<title>Planner</title>
+<script>(function(){var d=document.documentElement;try{if(self===top)return;d.classList.add('emb');
+/* Eingebettet in Home Assistant: HA lässt unten einen Rand (Sicherheitsabstand der Home-Leiste). Wir nehmen ihn selbst auf und füllen die Fläche bis zum Rand. */
+var f=null,msg=0;try{f=window.frameElement}catch(e){}
+function px(v){v=parseFloat(v);return isFinite(v)&&v>0?v:0}
+function fit(){var m=0;if(f){try{var o=f.style.getPropertyValue('padding-bottom'),pr=f.style.getPropertyPriority('padding-bottom');f.style.removeProperty('padding-bottom');m=px(getComputedStyle(f).paddingBottom);f.style.setProperty('padding-bottom','0','important')}catch(e){}}
+d.style.setProperty('--sab',Math.max(m,msg)+'px')}
+addEventListener('message',function(e){var x=e.data;if(x&&x.type==='home-assistant/properties'&&x.safeAreaInsets){msg=px(x.safeAreaInsets.bottom);fit()}});
+if(f){try{parent.postMessage({type:'home-assistant/subscribe-properties',handleSafeArea:true},'*')}catch(e){}}
+fit();addEventListener('resize',fit)}catch(e){d.classList.add('emb')}})();</script>
+<style>
+/* @@CSS: src/style.css @@ */
+</style>
+</head>
+<body>
+<svg id="icsp" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-bad" viewBox="0 0 24 24"><path d="M3 12h18v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-2z"/><path d="M6 12V6.5A2.5 2.5 0 0 1 8.5 4 2.5 2.5 0 0 1 11 6.5"/><path d="M7 18l-1 2M17 18l1 2"/></symbol><symbol id="i-kueche" viewBox="0 0 24 24"><path d="M5 10h14v7a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-7z"/><path d="M3 10h2M19 10h2M9 6.5c0-1.2 1-1.2 1-2.5M14 6.5c0-1.2 1-1.2 1-2.5"/></symbol><symbol id="i-sofa" viewBox="0 0 24 24"><path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><path d="M3 13a2 2 0 0 1 4 0v1h10v-1a2 2 0 0 1 4 0v4H3v-4z"/><path d="M6 17v2M18 17v2"/></symbol><symbol id="i-bett" viewBox="0 0 24 24"><path d="M3 19V6M3 14.5h18V19M21 14.5V12a3 3 0 0 0-3-3h-7v5.5"/><circle cx="7" cy="11" r="1.8"/></symbol><symbol id="i-kind" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="6.5"/><circle cx="6.6" cy="6.8" r="2.2"/><circle cx="17.4" cy="6.8" r="2.2"/><circle cx="12" cy="15.2" r="2"/><path d="M9.6 11.6h.01M14.4 11.6h.01"/></symbol><symbol id="i-tuer" viewBox="0 0 24 24"><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M4 21h16"/><circle cx="15" cy="12.5" r=".9" fill="currentColor"/></symbol><symbol id="i-pflanze" viewBox="0 0 24 24"><path d="M12 21v-9"/><path d="M12 12c0-4 3-6.5 7-6.5 0 4-2.5 6.5-7 6.5z"/><path d="M12 15.5c0-3-2.3-5-6-5 0 3.2 2 5 6 5z"/></symbol><symbol id="i-baum" viewBox="0 0 24 24"><path d="M12 21v-6"/><path d="M12 15c-4 0-6.5-2.5-6.5-5.5C5.5 6 8.5 3.5 12 3.5s6.5 2.5 6.5 6c0 3-2.5 5.5-6.5 5.5z"/></symbol><symbol id="i-sonne" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.8"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></symbol><symbol id="i-treppe" viewBox="0 0 24 24"><path d="M3.5 20.5h17M5 20.5v-4h4v-4h4v-4h4v-4"/></symbol><symbol id="i-dach" viewBox="0 0 24 24"><path d="M2.5 13L12 5l9.5 8"/><path d="M17 8.5V5h2v5.2"/><path d="M6 11.5V19h12v-7.5"/></symbol><symbol id="i-fenster" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="17" rx="1.5"/><path d="M12 3.5v17M4.5 12h15"/></symbol><symbol id="i-flamme" viewBox="0 0 24 24"><path d="M12 21c-3.9 0-6-2.5-6-5.7 0-3.6 3.2-5.5 3.7-9.3C12.4 7.4 18 10.2 18 15.3c0 3.2-2.1 5.7-6 5.7z"/><path d="M12 21c-1.6 0-2.6-1-2.6-2.5 0-1.5 1.6-2.2 2.6-3.7 1 1.5 2.6 2.2 2.6 3.7 0 1.5-1 2.5-2.6 2.5z"/></symbol><symbol id="i-blitz" viewBox="0 0 24 24"><path d="M13 3L5.5 13.5H11L10 21l7.5-10.5H12L13 3z"/></symbol><symbol id="i-tropfen" viewBox="0 0 24 24"><path d="M12 3.5c3.2 4 6 7 6 10.2a6 6 0 0 1-12 0C6 10.5 8.8 7.5 12 3.5z"/></symbol><symbol id="i-werkzeug" viewBox="0 0 24 24"><path d="M14 4.5l5.5 5.5-2.8 2.8-5.5-5.5z"/><path d="M12.2 9.7L4.8 17.1a1.9 1.9 0 0 0 2.7 2.7l7.4-7.4"/></symbol><symbol id="i-roller" viewBox="0 0 24 24"><rect x="4" y="3.5" width="14" height="5.5" rx="1.5"/><path d="M18 6h2.5v5.5h-8V14"/><rect x="10.7" y="14" width="3.6" height="6.5" rx="1.2"/></symbol><symbol id="i-boden" viewBox="0 0 24 24"><path d="M12 4l9 5-9 5-9-5z"/><path d="M3 13.5l9 5 9-5"/></symbol><symbol id="i-dokument" viewBox="0 0 24 24"><path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-16z"/><path d="M14 3.5v4h4M9.5 12.5h5M9.5 16h5"/></symbol><symbol id="i-muenze" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M15.2 9.2a4 4 0 1 0 0 5.6M8.3 11h5M8.3 13h5"/></symbol><symbol id="i-schild" viewBox="0 0 24 24"><path d="M12 3.5l7 2.5v5.5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z"/><path d="M9 12l2.2 2.2L15.2 10"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><path d="M4 16v-3.5L6 7.5h12l2 5V16"/><path d="M4 12.5h16M4 16h16"/><circle cx="7.5" cy="16.5" r="1.7"/><circle cx="16.5" cy="16.5" r="1.7"/></symbol><symbol id="i-wagen" viewBox="0 0 24 24"><path d="M3 4.5h2.5l2 10.5h10.5l2-8H7"/><circle cx="9.2" cy="19" r="1.2"/><circle cx="16.8" cy="19" r="1.2"/></symbol><symbol id="i-eimer" viewBox="0 0 24 24"><path d="M5 9h14l-1.6 11H6.6z"/><path d="M5 9c0-2.6 3-4.2 7-4.2s7 1.6 7 4.2"/></symbol><symbol id="i-karton" viewBox="0 0 24 24"><path d="M3.5 8L12 4l8.5 4v8.5L12 20.5l-8.5-4z"/><path d="M3.5 8L12 12l8.5-4M12 12v8.5"/></symbol><symbol id="i-pfote" viewBox="0 0 24 24"><ellipse cx="12" cy="15.5" rx="4" ry="3.2"/><circle cx="6.3" cy="11" r="1.6"/><circle cx="9.7" cy="6.8" r="1.6"/><circle cx="14.3" cy="6.8" r="1.6"/><circle cx="17.7" cy="11" r="1.6"/></symbol><symbol id="i-herz" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.5-7.5-10A4.2 4.2 0 0 1 12 7.6 4.2 4.2 0 0 1 19.5 10C19.5 15.5 12 20 12 20z"/></symbol><symbol id="i-koffer" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v2M4 13.5h16"/></symbol><symbol id="i-geschenk" viewBox="0 0 24 24"><rect x="4" y="9.5" width="16" height="10.5" rx="1.5"/><path d="M3 9.5h18M12 9.5V20"/><path d="M12 9.5C11 6 7.5 6 8 8c.3 1.4 4 1.5 4 1.5zM12 9.5c1-3.5 4.5-3.5 4-1.5-.3 1.4-4 1.5-4 1.5z"/></symbol><symbol id="i-schloss" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><circle cx="12" cy="15.5" r="1"/></symbol><symbol id="i-wlan" viewBox="0 0 24 24"><path d="M3.5 9.5a12 12 0 0 1 17 0M6.5 12.8a7.8 7.8 0 0 1 11 0M9.5 16a3.5 3.5 0 0 1 5 0"/><circle cx="12" cy="19" r=".9" fill="currentColor"/></symbol><symbol id="i-birne" viewBox="0 0 24 24"><path d="M9 17.5h6M10 20.5h4"/><path d="M12 3.5a5.5 5.5 0 0 0-3.2 10c.6.5 1.2 1.3 1.2 2.5h4c0-1.2.6-2 1.2-2.5A5.5 5.5 0 0 0 12 3.5z"/></symbol><symbol id="i-waschmaschine" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="17" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 7h.01M11 7h2"/></symbol><symbol id="i-kalender" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v3.5M15.5 3.5v3.5"/></symbol><symbol id="i-tonne" viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13"/><path d="M10.5 11v5.5M13.5 11v5.5"/></symbol><symbol id="i-stuhl" viewBox="0 0 24 24"><path d="M7 12V5a1.5 1.5 0 0 1 1.5-1.5h7A1.5 1.5 0 0 1 17 5v7"/><path d="M5.5 12h13v3.5h-13zM7.5 15.5V21M16.5 15.5V21"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M3.5 12.5V4.5a1 1 0 0 1 1-1h8L21 12l-8.5 8.5z"/><circle cx="8" cy="8" r="1.2"/></symbol></defs></svg>
+
+<div id="splash" aria-hidden="true"><div class="sp-in"><svg class="sp-mark" viewBox="0 0 24 24"><path pathLength="1" d="M3.5 11 12 4l8.5 7"/><path pathLength="1" d="M5.5 9.8V20h13V9.8"/><path pathLength="1" d="M10 20v-5.5h4V20"/></svg><div class="sp-name">Planner</div><div class="sp-sub" id="sp_sub"></div></div></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="dtip" aria-hidden="true"></div>
+<div class="app">
+<aside class="side">
+  <div class="brand"><svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5.5h4V20"/></svg><span class="bn">Planner</span></div>
+  <button class="add" id="add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span class="l-w">Neue Aufgabe</span><span class="l-n">Neu</span></button>
+  <nav class="tabs" id="tabs">
+    <button data-v="home" class="on"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg><span>Start</span></button>
+    <button data-v="board"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="4.5" height="15" rx="1.2"/><rect x="9.75" y="4.5" width="4.5" height="9" rx="1.2"/><rect x="16" y="4.5" width="4.5" height="12" rx="1.2"/></svg><span>Board</span></button>
+    <button data-v="list"><svg viewBox="0 0 24 24"><path d="M9 6.5h11M9 12h11M9 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01" stroke-width="2.4"/></svg><span>Liste</span></button>
+    <button data-v="gantt"><svg viewBox="0 0 24 24"><path d="M4 6.5h8M8 12h10M12 17.5h8" stroke-width="2.6"/></svg><span>Zeitstrahl</span></button>
+    <button data-v="cal"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg><span>Kalender</span></button>
+  </nav>
+  <div class="chips" id="chips"></div>
+</aside>
+<div class="stage">
+  <header class="bar">
+    <div class="ttl"><h1 id="ttl">Board</h1><div class="sub" id="sub"></div></div>
+    <div class="filters" id="filters"><input id="q" type="search" placeholder="Suchen …" enterkeyhint="search"><select id="fw" aria-label="Person"><option value="">Alle Personen</option></select></div>
+    <div class="hb"><button class="ib" id="ftog" type="button" aria-label="Suchen"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button><button class="ib fb" id="fbtn" type="button" aria-label="Filter"><svg viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></svg><b id="fcnt"></b></button><button class="ib" id="more" type="button" aria-label="Mehr" aria-haspopup="menu"><svg viewBox="0 0 24 24" class="dots3"><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/></svg></button></div>
+  </header>
+  <div id="note"></div>
+  <section class="kpis" id="kpis"></section>
+  <div class="tchips" id="tchips"></div>
+  <div id="legacy" hidden><button class="btn ghost" id="exp"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg><span>Export</span></button><button class="ib cfgb" id="cfg" aria-label="Einstellungen" title="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.3"/><circle cx="8" cy="17" r="2.3"/></svg></button><select class="tgrp" id="grp" aria-label="Gruppieren"><option value="none">Gruppieren</option><option value="tag">Nach Tag</option><option value="proj">Nach Projekt</option><option value="who">Nach Person</option><option value="prio">Nach Priorität</option></select><select class="tgrp" id="srt" aria-label="Sortieren"><option value="date">Sort: Datum</option><option value="prio">Sort: Prio</option></select><button class="tsel" id="selbtn" type="button" aria-label="Mehrere auswählen" title="Mehrere auswählen (S)"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.2l2.5 2.5 4.5-5"/></svg><span>Auswählen</span></button><button class="tgear" id="tman" aria-label="Tags verwalten" title="Tags verwalten"><svg viewBox="0 0 24 24"><path d="M20 13.2 13.2 20a2 2 0 0 1-2.8 0L3.5 13.1V4.5a1 1 0 0 1 1-1h8.6L20 10.4a2 2 0 0 1 0 2.8z"/><circle cx="8.2" cy="8.2" r="1.3"/></svg></button></div>
+  <main id="main"></main>
+</div>
+</div>
+
+<div id="selbar" role="toolbar" aria-label="Auswahl"><span id="selcnt">Aufgaben antippen</span><button data-sa="status">Status</button><button data-sa="who">Person</button><button data-sa="more">Mehr</button><button data-ba="x">Fertig</button><div hidden><select id="selprio" aria-label="Priorität setzen"></select><select id="seltag" aria-label="Tag hinzufügen"></select><select id="selwho" aria-label="Zuständig setzen"></select><select id="selproj" aria-label="Projekt setzen"></select></div></div>
+<dialog id="dls">
+  <div class="shd"><button class="tb l sback" id="s_back" type="button" hidden aria-label="Zurück"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><span>Zurück</span></button><div class="dh" id="s_title">Einstellungen</div><button class="tb r b" id="s_close" type="button">Fertig</button></div>
+  <div id="s_body"></div>
+</dialog>
+<dialog id="dlf">
+  <div class="shd"><button class="tb l" id="f_reset" type="button">Zurücksetzen</button><div class="dh">Filter</div><button class="tb r b" id="f_ok" type="button">Fertig</button></div>
+  <div id="fbody"></div>
+  <p class="fcnt" id="f_cnt"></p>
+</dialog>
+<dialog id="dla">
+  <div class="shd"><div class="dh">Archiv und Papierkorb</div><button class="tb r b" id="a_close" type="button">Fertig</button></div>
+  <div id="a_list"></div>
+  <button class="delrow" id="a_empty" type="button">Papierkorb leeren</button>
+</dialog>
+
+<dialog id="dsh" aria-label="Aktionen"></dialog>
+<div id="popx" hidden></div><div id="pop" role="menu" hidden></div>
+<dialog id="dlx">
+  <div class="shd"><div class="dh">Export und Backup</div><button class="tb r b" id="x_close" type="button">Fertig</button></div>
+  <p class="sgt">Exportieren</p>
+  <div class="sgrp"><button class="xb" id="x_pdf"><span>PDF<small>Liste mit Checklisten und Zeitstrahl</small></span></button><button class="xb" id="x_xlsx"><span>Excel<small>Liste, Board und Zeitstrahl als Tabellenblätter</small></span></button><button class="xb" id="x_ics"><span>Kalender-Datei (.ics)<small>Offene Aufgaben für Apple, Google oder Outlook</small></span></button></div>
+  <p class="sgt">Sichern</p>
+  <div class="sgrp"><button class="xb" id="x_json"><span>Backup-Datei speichern<small>Alle Aufgaben, Tags und Projekte als JSON</small></span></button><button class="xb" id="x_imp"><span>Backup einspielen<small>Aus einer Backup-Datei wiederherstellen</small></span></button></div>
+  <input type="file" id="imp" accept=".json,application/json" hidden>
+  <div class="ver" id="ver"></div>
+</dialog>
+<dialog id="dlt">
+  <div class="shd"><div class="dh">Tags und Projekte</div><button class="tb r b" id="tm_close" type="button">Fertig</button></div>
+  <p class="hint">Farbe antippen zum Ändern. Umbenennen gilt für alle Aufgaben.</p>
+  <label>Tags</label><div id="tm_list"></div>
+  <div class="tmadd"><input id="tm_new" placeholder="Neuer Tag" maxlength="30" autocomplete="off"><button class="btn" id="tm_add" type="button">Anlegen</button></div>
+  <label>Projekte</label><div id="tm_plist"></div>
+  <div class="tmadd"><input id="tm_pnew" placeholder="Neues Projekt" maxlength="30" autocomplete="off"><button class="btn" id="tm_padd" type="button">Anlegen</button></div>
+</dialog>
+<dialog id="dlg">
+  <div class="shd"><button class="tb l" id="b_cancel" type="button">Abbrechen</button><div class="dh" id="dt">Neue Aufgabe</div><button class="tb r b" id="b_save" type="button">Speichern</button></div>
+  <div class="fg fgt"><input id="f_title" class="tin" autocomplete="off" placeholder="Was ist zu tun? z. B. Zaun streichen Sa #Garten" aria-label="Titel"><div class="qprev" id="f_qp"></div><textarea id="f_notes" rows="2" placeholder="Notizen" aria-label="Notizen"></textarea></div>
+  <div class="fg"><button type="button" class="rangebtn" id="f_range" aria-expanded="false"><svg class="ri" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v3.5M15.5 3.5v3.5"/></svg><span id="f_rtxt"></span><em id="f_rlen"></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+  <div class="rp" id="f_rp" hidden></div>
+  <label class="cbl"><span>Meilenstein<small>Nur ein einzelner Tag</small></span><input type="checkbox" id="f_ms" class="sw"></label></div>
+  <input type="hidden" id="f_start"><input type="hidden" id="f_end">
+  <label>Verantwortlich</label>
+  <div class="wchips" id="f_whoseg"></div>
+  <input id="f_who" placeholder="Name eingeben, mit Enter hinzufügen" maxlength="30" style="display:none;margin-top:.5rem" aria-label="Name">
+  <label>Status</label>
+  <div class="seg3 st3" id="f_stseg"><button type="button" data-s="todo">Offen</button><button type="button" data-s="doing">In Arbeit</button><button type="button" data-s="done">Erledigt</button></div>
+  <input type="hidden" id="f_status" value="todo">
+  <label>Priorität</label>
+  <div class="seg3 pr4" id="f_prseg"><button type="button" data-p="0">Keine</button><button type="button" data-p="1">Prio 1</button><button type="button" data-p="2">Prio 2</button><button type="button" data-p="3">Prio 3</button></div>
+  <p class="prh" id="f_prh"></p>
+  <input type="hidden" id="f_prio" value="0">
+  <label for="f_tagin">Tags</label>
+  <div class="tpick" id="f_tpick"><span id="f_tsel" style="display:contents"></span><input id="f_tagin" placeholder="Tag hinzufügen …" enterkeyhint="done" autocomplete="off"></div>
+  <div class="tsug" id="f_tsug"></div><div id="f_sw"></div>
+  <label for="f_proj">Projekt</label>
+  <select id="f_proj"></select><input id="f_projnew" placeholder="Projektname" maxlength="30" style="display:none;margin-top:.5rem" aria-label="Neues Projekt">
+  <div class="dsecs">
+  <details class="dsec" id="d_ck"><summary><span>Checkliste</span><em></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><div id="f_ck"></div><button class="btn ghost" id="ck_add" type="button"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Punkt hinzufügen</button><div class="aiw" id="ai_row"><button class="btn ghost sm" id="ai_btn" type="button">Mit KI ausfüllen</button><span class="hint">Notizen und Checkliste vorschlagen</span></div>
+  <div class="aibox" id="ai_box" style="display:none"><div class="aih">Vorschlag</div><div id="ai_notes"></div><div id="ai_items"></div><div class="airef"><input id="ai_hint" type="text" autocomplete="off" enterkeyhint="send" placeholder="Was soll anders sein?" aria-label="Hinweis für die KI"><button class="btn ghost sm" id="ai_re" type="button">Neu vorschlagen</button></div><div class="aia"><button class="btn sm" id="ai_ok" type="button">Übernehmen</button><button class="btn ghost sm" id="ai_no" type="button">Verwerfen</button></div></div></details>
+  <details class="dsec" id="d_pl"><summary><span>Wiederholen und Abhängigkeiten</span><em></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><label for="f_rec">Wiederholen</label>
+  <select id="f_rec"><option value="">Nie</option><option value="1d">Täglich</option><option value="1w">Wöchentlich</option><option value="2w">Alle 2 Wochen</option><option value="1m">Monatlich</option><option value="3m">Vierteljährlich</option><option value="1y">Jährlich</option></select>
+  <div class="hint" id="f_rechint" style="display:none">Beim Erledigen wird die nächste Aufgabe automatisch angelegt.</div><label>Abhängig von <span class="lh">muss vorher fertig sein</span></label><div class="dsearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="f_depq" type="search" autocomplete="off" enterkeyhint="search" placeholder="Suchen: Titel, Projekt, Tag, Person" aria-label="Abhängigkeiten durchsuchen"></div><div class="deps" id="f_deps"></div><p class="dcnt" id="f_depc"></p></div></details>
+  <details class="dsec" id="f_filesec"><summary><span>Fotos und Dateien</span><em></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><div class="fls" id="f_files"></div><button class="btn ghost" id="fl_btn" type="button" style="margin-top:.6rem">Foto oder Datei hinzufügen</button><input type="file" id="fl_in" multiple hidden accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"></div></details>
+  <details class="dsec" id="f_logsec"><summary><span>Verlauf und Kommentare</span><em></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary><div class="dbody"><div class="lgin"><input id="lg_in" placeholder="Kommentar schreiben …" maxlength="500" autocomplete="off"><button class="btn ghost" id="lg_add" type="button">Senden</button></div><div class="lg" id="lg_list"></div></div></details>
+  </div>
+  <button class="delrow" id="b_del" type="button">Aufgabe löschen</button>
+</dialog>
+
+<script>
+/* @@JS: src/js/*.js @@ */
+</script>
+</body>
+</html>

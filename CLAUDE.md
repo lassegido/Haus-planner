@@ -4,21 +4,21 @@ Haus-Aufgaben-Tool von Lasse und Melanie (Kanban, Liste, Gantt). Sprache der Obe
 
 ## Zwei Versionen, eine Quelle
 
-- **Master:** `src/planner.html`. Das ist die Claude-Version (nutzt `window.claude.use("db")` und `"downloads"`). Änderungen am Aussehen oder Verhalten macht man **nur hier**.
-- **Add-on:** `planner/index.html` und `planner/VERSION` werden von `tools/build.py` erzeugt. **Nie von Hand ändern.**
-- Beide Versionen müssen nach jeder Änderung aktualisiert werden: Add-on über Git, Claude-Link über das Artifact-Tool (Artifact "Planner" per `list` finden und dieselbe Datei auf dessen URL veröffentlichen).
+- **Quellen:** `src/seite.html` (HTML-Gerüst), `src/style.css` (alle Stile), `src/js/*.js` (JavaScript, nach Dateinamen aneinandergehängt, ein gemeinsames Skript). Änderungen am Aussehen oder Verhalten macht man **nur hier**. Dateien mit `.claude.js` gelten nur für die Claude-Version (Claude-Datenbank, Downloads), ihr Gegenstück `.addon.js` nur für das Add-on (Server).
+- **Erzeugt, nie von Hand ändern:** `artifact/planner.html` (Claude-Version) sowie `planner/index.html` und `planner/VERSION` (Add-on), alle von `tools/build.py`.
+- Beide Versionen müssen nach jeder Änderung aktualisiert werden: Add-on über Git, Claude-Link über das Artifact-Tool (Artifact "Planner" per `list` finden und `artifact/planner.html` auf dessen URL veröffentlichen).
 
 ## Ablauf bei jeder Änderung
 
 Lageplan, Datenformat und „Wenn du X änderst, prüfe Y“: siehe `ARCHITEKTUR.md`.
 
 1. **Vorher Folgen benennen:** Dem Nutzer kurz sagen, was die Änderung berühren kann (Ansichten, Daten, Erinnerungen, Alexa, Claude-Version) und wie riskant sie ist. Tabelle in `ARCHITEKTUR.md` nutzen.
-2. `src/planner.html` bearbeiten. Serverseitige Änderungen in `planner/server.py`.
+2. Quellen in `src/` bearbeiten. Serverseitige Änderungen in `planner/server.py`.
 3. **Test dazu schreiben oder anpassen**, bevor die Änderung als fertig gilt: Oberfläche in `tools/e2e/test_*.py`, Server in `tools/test_server.py`, Home Assistant/Alexa in `tools/test_ha.py`. Kein Prüfskript nur im Notizordner.
 4. Eintrag oben in `planner/CHANGELOG.md` (`## <neue Version>`).
 5. `python3 tools/release.py <neue Version>` (z. B. 1.32.0 → 1.32.1; neue Funktion: 1.33.0). Setzt die Nummer in `config.yaml`, baut und führt `tools/check.py` aus. Ohne neue Version zeigt Home Assistant kein Update an.
 6. Committen und pushen (`src/`, `planner/`, `tools/`). Der GitHub-Prüflauf (`.github/workflows/check.yml`) wiederholt alle Prüfungen.
-7. Claude-Artifact mit `src/planner.html` aktualisieren.
+7. Claude-Artifact mit `artifact/planner.html` aktualisieren.
 8. Dem Nutzer sagen: was neu ist, Folgen je Änderung, was nur im Test-Browser und was nicht auf echten Geräten geprüft wurde (`PRUEFLISTE.md`).
 
 Zwischendurch: `python3 tools/build.py` (erzeugt Add-on-Version, prüft Vertrag und JS-Syntax), `python3 tools/test_browser.py <Teil des Namens>` für einzelne Browser-Tests, `SHOT_DIR=/tmp/shots` für Bildschirmfotos.
@@ -49,6 +49,6 @@ Grundlage: Apple Human Interface Guidelines (Farbe, Dark Mode), WCAG 2.2 (Kontra
 ## Wartbarkeit (ab 1.32)
 
 - **Tempo bremsen:** Neue Funktionen nur mit Test. Vor großen Umbauten erst auf echten Geräten prüfen lassen (`PRUEFLISTE.md`).
-- **CSS:** Neue Regeln ans Ende mit Versionskommentar; bestehende Klassen nicht an einer dritten Stelle erneut gestalten, sondern die vorhandene Regel ändern. Kein `!important` ohne Kommentar, warum.
+- **CSS:** Neue Regeln ans Ende von `src/style.css` mit Versionskommentar; bestehende Klassen nicht an einer weiteren Stelle erneut gestalten, sondern die vorhandene Regel ändern. Kein `!important` ohne Kommentar, warum. `python3 tools/css_audit.py` findet tote und überschriebene Regeln; jede CSS-Aufräumung mit `tools/style_diff.py` (vorher `save`, nachher `compare`) absichern.
 - **Fremdcode:** Bibliotheken und Schriften liegen im Add-on (`planner/vendor/`), nicht im Internet. Die Claude-Version lädt sie weiter vom CDN.
 - **Fehler sichtbar machen:** Skriptfehler im Browser schickt das Add-on an `api/log`; sie stehen im Add-on-Protokoll in Home Assistant.

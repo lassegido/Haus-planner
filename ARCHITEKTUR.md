@@ -10,41 +10,70 @@ Echo Show (?anzeige) ─┘                                         │  /data/t
                                                                 │  /share/planner/ (Spiegel + Sicherungen)
                                                                 ├─► Home Assistant: Sensoren, Mitteilungen, Alexa (REST + WebSocket)
                                                                 └─► Google Gemini (nur für KI-Vorschläge, Schlüssel bleibt im Add-on)
-Claude-Artifact (src/planner.html) ─► Claude-Datenbank (window.claude.use)   ← zweite, unabhängige Version
+Claude-Artifact (artifact/planner.html) ─► Claude-Datenbank (window.claude.use)   ← zweite, unabhängige Version
 ```
 
 ## Dateien
 
 | Datei | Rolle | Von Hand ändern? |
 |---|---|---|
-| `src/planner.html` | **Master** der Oberfläche: HTML, CSS, JavaScript in einer Datei. Läuft direkt als Claude-Artifact. | ja |
+| `src/seite.html` | HTML-Gerüst: Kopf, Seitenleiste, Dialoge. Platzhalter für CSS und JavaScript | ja |
+| `src/style.css` | alle Stile | ja |
+| `src/js/*.js` | JavaScript, nach Dateinamen aneinandergehängt (siehe unten) | ja |
+| `artifact/planner.html` | Claude-Version, von `tools/build.py` erzeugt, wird als Artifact veröffentlicht | **nein** |
 | `planner/index.html`, `planner/VERSION` | Add-on-Oberfläche, von `tools/build.py` erzeugt | **nein** |
 | `planner/server.py` | Server (nur Python-Standardbibliothek): Daten, Prüfung, Sicherungen, Home Assistant, Alexa, KI | ja |
+| `planner/vendor/` | PDF-/Excel-Bibliothek und Schriften fürs Add-on, von `tools/vendor.py` (GitHub-Lauf „Fremdcode holen“) | **nein** |
 | `planner/config.yaml` | Add-on-Beschreibung für Home Assistant, **Versionsnummer** | ja |
 | `planner/CHANGELOG.md`, `planner/DOCS.md` | Änderungen und Anleitung, in Home Assistant sichtbar | ja |
-| `tools/build.py` | Erzeugt die Add-on-Version, prüft den Vertrag zwischen beiden Versionen und die JS-Syntax | ja |
-| `tools/check.py` | Alle Prüfungen in einem Lauf (auch im GitHub-Prüflauf) | ja |
-| `tools/release.py` | Neue Version: Nummer setzen, bauen, alles prüfen | ja |
+| `tools/build.py` | Setzt beide Versionen zusammen, prüft Vertrag, JS-Syntax und Fremdcode-Prüfsummen | ja |
+| `tools/check.py`, `tools/release.py` | alle Prüfungen in einem Lauf; neue Version setzen, bauen, prüfen | ja |
 | `tools/test_server.py`, `tools/test_ha.py`, `tools/test_browser.py` + `tools/e2e/` | Tests | ja |
+| `tools/css_audit.py`, `tools/style_diff.py` | totes CSS finden; Aussehen vorher/nachher vergleichen | ja |
 
 ## Die zwei Versionen und der Build
 
-Die Oberfläche existiert nur einmal (`src/planner.html`). Der Unterschied zwischen Claude-Version und Add-on steckt in einem Block zwischen den Kommentaren `/* Speicher: gemeinsame Datenbank, sonst lokal */` und `/* Anzeige */`. `tools/build.py` ersetzt diesen Block durch die Server-Version (`STORAGE` in `build.py`), ersetzt `dl()` (Teilen-Menü auf dem iPhone) und ergänzt die Angaben für „Zum Home-Bildschirm“.
+Die Oberfläche existiert nur einmal (`src/`). `tools/build.py` setzt `src/seite.html`, `src/style.css` und `src/js/*.js` zusammen. Unterschiede zwischen Claude-Version und Add-on stehen in Dateipaaren:
+
+| Paar | Claude (`.claude.js`) | Add-on (`.addon.js`) |
+|---|---|---|
+| `10-speicher` | Claude-Datenbank (`window.claude.use("db")`), sonst Browser-Speicher | Server über `api/…`, Abgleich alle 5 s, persönliche Einstellungen je HA-Benutzer, KI über den Server |
+| `95-download` | Claude-Downloads | Teilen-Menü auf dem iPhone, sonst Download |
+
+Zusätzlich bekommt das Add-on: Angaben für „Zum Home-Bildschirm“, die Fehlermeldung an `api/log` und lokale Bibliotheken/Schriften (Zeile `const LIB=` in `40-darstellung.js`).
 
 **Vertrag** (prüft `build.py` bei jedem Lauf):
-- Jeder Name, den der Claude-Block auf oberster Ebene definiert, muss auch in `STORAGE` stehen. Ausnahmen in `ARTIFACT_ONLY`.
-- Jede Funktion, die `STORAGE` aufruft, muss in der Datei existieren.
-- Beide Dateien müssen `node --check` bestehen.
+- Zu jeder `.claude.js` gibt es eine `.addon.js` und umgekehrt.
+- Was die Claude-Variante auf oberster Ebene definiert, definiert auch die Add-on-Variante (Ausnahmen in `ARTIFACT_ONLY`).
+- Jede Funktion, die eine Add-on-Variante aufruft, existiert in der fertigen Seite.
+- Beide Seiten bestehen `node --check`; das Add-on enthält keinen Claude-Code und lädt nichts aus dem Internet.
 
-Gemeinsame Schnittstelle des Blocks: `prefGet`, `prefSet`, `USER`, `init`, `saveTask`, `delTask`, `saveReg`, `saveMany`, `aiAvail`, `aiJson`. Alles andere in der Oberfläche ist für beide Versionen gleich.
+Gemeinsame Schnittstelle von `10-speicher`: `prefGet`, `prefSet`, `USER`, `init`, `saveTask`, `delTask`, `saveReg`, `saveMany`, `aiAvail`, `aiJson`.
 
-## Aufbau von `src/planner.html`
+## JavaScript in `src/js/`
 
-Eine Datei, gegliedert durch Kommentar-Überschriften (`/* … */` am Zeilenanfang). Reihenfolge:
+Alle Dateien bilden **ein** Skript (keine Module): Namen sind überall sichtbar, Funktionsdeklarationen gelten in der ganzen Seite. Die Nummer bestimmt die Reihenfolge.
 
-1. **CSS** (Zeilen ~19–1020): Grundgerüst, dann Schichten je Version (`/* 1.2: … */` bis `/* 1.32: … */`). Spätere Schichten überschreiben frühere. Neue Regeln kommen ans Ende, mit Versionskommentar. Farben nur über Variablen (`--acc`, `--grp`, Status `--sky`, `--sun`, `--sea`, `--brick`).
-2. **HTML** (bis ~1120): Seitenleiste, Kopfzeile, `#main`, Dialoge (`<dialog id="dlg">` Aufgabe, `dlf` Filter, `dls` Einstellungen, `dsh` Aktionsblatt, …).
-3. **JavaScript** (ab ~1122): Zustand (`RAW`, `tasks`, `reg`), Speicher-Block, Schnelleingabe-Parser, Ansichten (`render()` → Start, Board, Liste, Zeitstrahl, Kalender), Einstellungen, Gesten, Aufgabenblatt.
+| Datei | Inhalt |
+|---|---|
+| `00-grundlagen.js` | Zustand (`RAW`, `tasks`, `reg`, Filter), Datums- und Hilfsfunktionen |
+| `10-speicher.*.js` | Laden und Speichern (siehe oben) |
+| `20-schnelleingabe.js` | Parser `parseQuick` (gleiche Regeln wie `parse_quick` im Server), Datumserkennung |
+| `30-start-zeitstrahl.js` | Startseite-Hilfen, Wiederholung, Balken im Zeitstrahl ziehen |
+| `40-darstellung.js` | Hell/Dunkel, Farbwelten, Schriften, Fremdcode-Adressen `LIB` |
+| `50-einstellungen.js` | Archiv, Papierkorb, Einstellungen (persönlich / für alle) |
+| `60-auswahl-gesten.js` | Mehrfachauswahl, Gedrückt halten, kein Text-Markieren, Tastatur |
+| `70-verlauf-dateien-ki.js` | Verlauf und Kommentare, Fotos/Dateien, Kalender, KI-Assistent |
+| `80-tags.js` | Tags, Tag-Symbole, Tag-Auswahl, Tags verwalten |
+| `85-ansichten.js` | `render()`, Startseite, Board, Liste, Zeitstrahl, Echo-Ansicht |
+| `90-aufgabenblatt.js` | Aufgabenblatt: Personen, Zeitraum, Checkliste, Abhängigkeiten mit Suche |
+| `93-ios.js` | iOS-Verhalten: Aktionsblatt, Kontextmenü, Wischen, Ziehen zum Aktualisieren, ⋯-Menü |
+| `95-download.*.js`, `96-export.js` | Export (PDF, Excel, Backup, Import) |
+| `99-start.js` | Ereignisse verbinden, `init()` |
+
+## CSS in `src/style.css`
+
+Grundgerüst, dann Schichten je Version (`/* 1.2: … */` bis `/* 1.32: … */`). Spätere Schichten überschreiben frühere. Neue Regeln kommen ans Ende, mit Versionskommentar. Farben nur über Variablen (`--acc`, `--grp`, Status `--sky`, `--sun`, `--sea`, `--brick`). Aufräumen nur mit `tools/css_audit.py` und Absicherung durch `tools/style_diff.py`.
 
 ## Server (`planner/server.py`)
 
@@ -66,10 +95,11 @@ Eine Datei, gegliedert durch Kommentar-Überschriften (`/* … */` am Zeilenanfa
 
 | Befehl | Prüft | Dauer |
 |---|---|---|
-| `python3 tools/build.py --check` | erzeugte Dateien aktuell, Vertrag, JS-Syntax | ~7 s |
+| `python3 tools/build.py --check` | erzeugte Dateien aktuell, Vertrag, JS-Syntax, Fremdcode-Prüfsummen | ~7 s |
 | `python3 tools/test_server.py` | Datenprüfung, Schreibschutz, Host-Prüfung, KI-Limits, Schnelleingabe, Benutzer | ~2 s |
 | `python3 tools/test_ha.py` | Erinnerung je Person, Abhaken aus der Mitteilung, Alexa (mit nachgebautem Home Assistant) | ~17 s |
-| `python3 tools/test_browser.py` | Oberfläche in Chromium auf Handy, iPad, Desktop (Gesten, Blätter, Schnelleingabe, KI, Benutzer, Echo-Ansicht, Claude-Version) | ~1 min |
+| `python3 tools/test_browser.py` | Oberfläche in Chromium auf Handy, iPad, Desktop (Gesten, Blätter, Schnelleingabe, KI, Benutzer, Export, Echo-Ansicht, Claude-Version) | ~1 min |
+| `python3 tools/style_diff.py save/compare` | berechnete Stile in 115 Zuständen vorher/nachher (für CSS-Umbauten) | ~4 min |
 | `python3 tools/check.py` | alles oben | ~1,5 min |
 
 Nicht abgedeckt (nur auf echten Geräten prüfbar, siehe `PRUEFLISTE.md`): Safari/WKWebView auf dem iPhone, echte Mitteilungen, echte Alexa-Spracherkennung, echtes Gemini.
@@ -78,10 +108,11 @@ Nicht abgedeckt (nur auf echten Geräten prüfbar, siehe `PRUEFLISTE.md`): Safar
 
 | Änderung | Mögliche Auswirkung | Prüfen |
 |---|---|---|
-| CSS-Regel ändern oder entfernen | Spätere Schichten überschreiben frühere; dieselbe Klasse wird an mehreren Stellen gestaltet | Bildschirmfotos Handy/iPad/Desktop, hell und dunkel (`SHOT_DIR=… tools/test_browser.py`) |
-| Speicher-Block in `src` | Add-on-Version weicht ab | `build.py` meldet fehlende Namen; `STORAGE` nachziehen |
+| CSS-Regel ändern oder entfernen | Spätere Schichten überschreiben frühere; dieselbe Klasse wird an mehreren Stellen gestaltet | `tools/style_diff.py` vorher/nachher; gewollte Änderungen mit Bildschirmfotos prüfen (`SHOT_DIR=… tools/test_browser.py`) |
+| `.claude.js`-Datei | Add-on weicht ab | `build.py` meldet fehlende Namen; `.addon.js` nachziehen |
 | Schnelleingabe (JS `parseQuick`) | Siri/Alexa erkennen anders als die App | `test_browser.py schnell` vergleicht beide Parser |
 | `clean()` oder Datenformat | Bestehende Aufgaben könnten Felder verlieren | Nur ergänzen, nie Felder entfernen; `test_server.py` |
 | Erinnerung, Alexa, WebSocket | Mitteilungen an falsche Person, doppelte Sprachbefehle | `test_ha.py` |
 | Neue Schnittstelle im Server | Schreibschutz vergessen | `X-Planner`-Prüfung gilt für alle POST/DELETE in `guard()`; Test ergänzen |
-| Persönliche Einstellung (neuer Schlüssel) | Wird nicht je Benutzer gespeichert | In `PREF_KEYS` (Server) und `PK` (`build.py`) eintragen |
+| Persönliche Einstellung (neuer Schlüssel) | Wird nicht je Benutzer gespeichert | In `PREF_KEYS` (Server) und `PK` (`src/js/10-speicher.addon.js`) eintragen |
+| Bibliothek oder Schrift | Add-on lädt sie lokal | Adresse in `tools/vendor.py` und `LIB` ändern, GitHub-Lauf „Fremdcode holen“ |

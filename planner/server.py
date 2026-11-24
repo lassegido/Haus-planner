@@ -913,7 +913,7 @@ def ha_loop():
 
 
 
-# ---- Schnelleingabe (gleiche Regeln wie im Browser, siehe parseQuick in planner.html)
+# ---- Schnelleingabe (gleiche Regeln wie im Browser, siehe parseQuick in src/js/20-schnelleingabe.js)
 # Getippt: „Zaun streichen Sa #Garten +Haus !1 @Melanie“ · gesprochen: „Zaun streichen am Samstag Tag Garten Priorität eins“
 QWD = (("mo", "montag"), ("di", "dienstag"), ("mi", "mittwoch"), ("do", "donnerstag"), ("fr", "freitag"), ("sa", "samstag"), ("so", "sonntag"))
 WDS = ("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
