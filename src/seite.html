@@ -89,7 +89,7 @@ fit();addEventListener('resize',fit)}catch(e){d.classList.add('emb')}})();</scri
 </dialog>
 <dialog id="dlg">
   <div class="shd"><button class="tb l" id="b_cancel" type="button">Abbrechen</button><div class="dh" id="dt">Neue Aufgabe</div><button class="tb r b" id="b_save" type="button">Speichern</button></div>
-  <div class="fg fgt"><input id="f_title" class="tin" autocomplete="off" placeholder="Was ist zu tun? z. B. Zaun streichen Sa #Garten" aria-label="Titel"><div class="qprev" id="f_qp"></div><textarea id="f_notes" rows="2" placeholder="Notizen" aria-label="Notizen"></textarea></div>
+  <div class="fg fgt"><input id="f_title" class="tin" autocomplete="off" placeholder="Was ist zu tun? z. B. Zaun streichen Sa #Garten" aria-label="Titel"><div class="qprev" id="f_qp"></div><div class="vsug" id="f_sug" role="list" aria-label="Frühere Aufgaben"></div><textarea id="f_notes" rows="2" placeholder="Notizen" aria-label="Notizen"></textarea></div>
   <div class="fg"><button type="button" class="rangebtn" id="f_range" aria-expanded="false"><svg class="ri" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v3.5M15.5 3.5v3.5"/></svg><span id="f_rtxt"></span><em id="f_rlen"></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
   <div class="rp" id="f_rp" hidden></div>
   <label class="cbl"><span>Meilenstein<small>Nur ein einzelner Tag</small></span><input type="checkbox" id="f_ms" class="sw"></label></div>

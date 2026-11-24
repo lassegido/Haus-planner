@@ -23,12 +23,16 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] Haken setzen, Suche ändern: gewählte Aufgabe bleibt sichtbar. Speichern: Abhängigkeit ist gespeichert.
 - [ ] Beim Tippen ins Suchfeld zoomt das iPhone nicht hinein.
 
+- [ ] Neue Aufgabe, Titel anfangen („Ras…“): frühere Aufgaben erscheinen; Antippen füllt alles aus, „Rückgängig“ unten lässt sich antippen.
+- [ ] Startseite: „Rasen…“ tippen, Vorschlag antippen: Blatt öffnet sich ausgefüllt, Tastatur bleibt zu.
+
 ## 4. Export (iPhone)
 - [ ] PDF: Teilen-Menü erscheint, PDF lässt sich in Dateien sichern oder per Mail senden.
 - [ ] Excel: ebenso; Datei öffnet sich in Numbers oder Excel.
 - [ ] Backup (JSON): ebenso.
 
-## 5. Benutzer und Erinnerungen
+## 5. Benutzer, Startseite und Erinnerungen
+- [ ] Startseite mit „Meine“: Ring zeigt „Heute: x von y erledigt“ nur mit euren heutigen und überfälligen Aufgaben; nach dem Abhaken steigt die Zahl.
 - [ ] Melanie öffnet den Planner auf ihrem iPhone: „Ich bin“ = Melanie, eigene Farbwelt. Lasses Farbwelt bleibt unverändert.
 - [ ] Tägliche Erinnerung: Lasse bekommt nur seine Aufgaben und solche ohne Zuständigkeit, Melanie ebenso.
 - [ ] Knopf „Erledigt: …“ in der Mitteilung hakt die Aufgabe ab.

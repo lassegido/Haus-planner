@@ -997,6 +997,18 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
 #dlg .deps label.cyc{opacity:.55;cursor:default}
 .dcnt{margin:.35rem .3rem 0;font-size:.78rem;color:var(--mut)}.dcnt:empty{display:none}
 .dnone{color:var(--mut);font-size:.85rem;padding:.5rem}
+/* 1.33: Vorschläge aus früheren Aufgaben (Titel im Blatt und Schnelleingabe) */
+.vsug{display:flex;flex-direction:column;margin:.2rem .6rem .5rem;border-radius:.8rem;overflow:hidden;background:var(--bg);box-shadow:0 0 0 1px var(--line)}
+.vsug:empty{display:none}
+.qsug{background:var(--grp);margin:.5rem 0 0}
+.vsg span{flex:1}
+.vsg{display:flex;align-items:center;gap:.7rem;width:100%;min-width:0;min-height:2.85rem;padding:.45rem .85rem;border:0;border-radius:0;background:none;color:var(--tx);text-align:left;font:inherit;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.vsg+.vsg{border-top:1px solid var(--line)}
+.vsg:active,.vsg:focus-visible{background:var(--line);outline:none}
+.vsg svg{width:1.2rem;height:1.2rem;flex:none;fill:none;stroke:var(--acc);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.vsg span{display:flex;flex-direction:column;min-width:0;gap:.05rem}
+.vsg b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vsg small{color:var(--mut);font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -1069,7 +1081,7 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
 </dialog>
 <dialog id="dlg">
   <div class="shd"><button class="tb l" id="b_cancel" type="button">Abbrechen</button><div class="dh" id="dt">Neue Aufgabe</div><button class="tb r b" id="b_save" type="button">Speichern</button></div>
-  <div class="fg fgt"><input id="f_title" class="tin" autocomplete="off" placeholder="Was ist zu tun? z. B. Zaun streichen Sa #Garten" aria-label="Titel"><div class="qprev" id="f_qp"></div><textarea id="f_notes" rows="2" placeholder="Notizen" aria-label="Notizen"></textarea></div>
+  <div class="fg fgt"><input id="f_title" class="tin" autocomplete="off" placeholder="Was ist zu tun? z. B. Zaun streichen Sa #Garten" aria-label="Titel"><div class="qprev" id="f_qp"></div><div class="vsug" id="f_sug" role="list" aria-label="Frühere Aufgaben"></div><textarea id="f_notes" rows="2" placeholder="Notizen" aria-label="Notizen"></textarea></div>
   <div class="fg"><button type="button" class="rangebtn" id="f_range" aria-expanded="false"><svg class="ri" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v3.5M15.5 3.5v3.5"/></svg><span id="f_rtxt"></span><em id="f_rlen"></em><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
   <div class="rp" id="f_rp" hidden></div>
   <label class="cbl"><span>Meilenstein<small>Nur ein einzelner Tag</small></span><input type="checkbox" id="f_ms" class="sw"></label></div>
@@ -1225,7 +1237,13 @@ async function quickAdd(text){
 let lastMoved=null,tt,enterT;
 const greet=()=>{const h=new Date().getHours();return h<5?"Gute Nacht":h<11?"Guten Morgen":h<17?"Guten Tag":"Guten Abend"};
 const reduced=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
-function toast(msg,undo,label,ms){const el=$("toast");el.innerHTML="<span></span>"+(undo?"<button>"+(label||"Rückgängig")+"</button>":"");el.firstChild.textContent=msg;if(undo)el.querySelector("button").onclick=()=>{undo();el.classList.remove("on")};if(el.showPopover){if(!el.hasAttribute("popover"))el.setAttribute("popover","manual");try{el.hidePopover()}catch(_){}try{el.showPopover()}catch(_){}}el.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("on"),ms||4500)}
+/* 1.33: Ist ein Blatt offen, macht es den Rest der Seite unbedienbar (auch den Hinweis). Darum hängt der Hinweis dann im obersten Blatt
+   und wandert beim Schließen zurück; als Popover liegt er trotzdem über allem. */
+function toastHost(el){let ds=[...document.querySelectorAll("dialog[open]")];try{ds=ds.filter(d=>d.matches(":modal"))}catch(_){}
+  const h=ds.length?ds[ds.length-1]:document.body;if(el.parentNode!==h){try{el.hidePopover()}catch(_){}h.appendChild(el)}}
+document.addEventListener("close",e=>{const el=$("toast");if(e.target.tagName!=="DIALOG"||!e.target.contains(el))return;
+  try{el.hidePopover()}catch(_){}document.body.appendChild(el);if(el.classList.contains("on"))try{el.showPopover()}catch(_){}},true);
+function toast(msg,undo,label,ms){const el=$("toast");el.innerHTML="<span></span>"+(undo?"<button>"+(label||"Rückgängig")+"</button>":"");el.firstChild.textContent=msg;if(undo)el.querySelector("button").onclick=()=>{undo();el.classList.remove("on")};toastHost(el);if(el.showPopover){if(!el.hasAttribute("popover"))el.setAttribute("popover","manual");try{el.hidePopover()}catch(_){}try{el.showPopover()}catch(_){}}el.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("on"),ms||4500)}
 async function advance(id){
   const t=byId(id);if(!t)return;const prev=t.status,next=NEXT[prev];hap(8);lastMoved=id;
   const sp=await setStatus(t,next);
@@ -1841,12 +1859,14 @@ function enter(){const m=$("main");m.classList.add("enter");clearTimeout(enterT)
 function animateNums(){if(reduced())return;document.querySelectorAll("[data-n]").forEach(el=>{const n=+el.dataset.n;if(!n)return;const t0=performance.now(),step=t=>{const k=Math.min(1,(t-t0)/800),e=1-Math.pow(1-k,3);el.textContent=Math.round(n*e);if(k<1)requestAnimationFrame(step)};requestAnimationFrame(step)})}
 function rel(t){const d=dn(t.end)-today();return d<0?`${-d} ${-d===1?"Tag":"Tage"} überfällig`:d===0?"heute":d===1?"morgen":d<=14?`in ${d} Tagen`:fd(t.end)}
 function hrow(t,i){return`<div class="hrow" data-id="${t.id}" style="--i:${Math.min(i,8)}"><button class="ring ${t.status}" data-adv="${t.id}" aria-label="Status: ${ST[t.status]}. Weiterschalten"></button><div class="hm"><div class="ht">${esc(t.title)}</div><div class="hs">${[t.proj,...tgs(t),t.who].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}</div></div><span class="hd ${isLate(t)?"late":""}">${rel(t)}</span></div>`}
+/* 1.33: Tag, an dem eine Aufgabe erledigt wurde (aus dem Verlauf, Ortszeit); NaN, wenn unbekannt */
+const DONE_RX=/^Status: (?:[^→]*→ )?Erledigt(?: \(|$)/;
+function doneDay(t){const L=t.log||[];for(let i=L.length-1;i>=0;i--){const x=L[i];if(x.k==="h"&&DONE_RX.test(x.x||"")){const d=new Date(String(x.t)+"Z");return isNaN(d)?NaN:Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5}}return NaN}
 function homeBody(tasks,allT){
-  const T=today(),n=tasks.length,d=tasks.filter(t=>t.status==="done").length,pct=n?Math.round(d/n*100):0;
+  const T=today(),n=tasks.length,d=tasks.filter(t=>t.status==="done").length;
   const doing=tasks.filter(t=>t.status==="doing").length,over=tasks.filter(isLate).sort((a,b)=>dn(a.end)-dn(b.end)),blk=tasks.filter(isBlocked).length;
   const week=tasks.filter(t=>t.status!=="done"&&!isLate(t)&&dn(t.start)<=T+7&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end)||dn(a.start)-dn(b.start));
-  const nx=tasks.filter(t=>t.status!=="done"&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end))[0],C=326.7,off=(C*(1-pct/100)).toFixed(1),open=n-d;
-  const sub=over.length?`${over.length} ${over.length===1?"Aufgabe ist":"Aufgaben sind"} überfällig.`:week.length?`${week.length} ${week.length===1?"Aufgabe":"Aufgaben"} in den nächsten 7 Tagen.`:open?"Nichts Dringendes.":"Alles erledigt.";
+  const nx=tasks.filter(t=>t.status!=="done"&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end))[0],C=326.7,open=n-d;
   const areas=allTags().filter(a=>tasks.some(t=>tgs(t).includes(a)));
   const bars=areas.map(a=>{const L=tasks.filter(t=>tgs(t).includes(a)),x=L.filter(t=>t.status==="done").length;return`<div class="prg" style="--tc:${tcol(a)}"><span class="pn">${tIc(a)}${esc(a)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
   const names=allWho(),cnt=w=>allT.filter(t=>t.status!=="done"&&wl(t).includes(w)).length,mx=Math.max(1,...names.map(cnt));
@@ -1856,16 +1876,20 @@ function homeBody(tasks,allT){
   const byEnd=(a,b)=>dn(a.end)-dn(b.end)||dn(a.start)-dn(b.start),opn=tasks.filter(t=>t.status!=="done");
   const nowL=opn.filter(t=>!isLate(t)&&dn(t.start)<=T&&dn(t.end)>=T).sort(byEnd),todayL=[...over,...nowL];
   const doingL=opn.filter(t=>t.status==="doing").sort(byEnd);
+  /* Ring: nur heute (überfällig, heute anstehend, heute erledigt) der oben gewählten Person */
+  const doneT=tasks.filter(t=>{if(t.status!=="done")return false;const dd=doneDay(t);return isNaN(dd)?dn(t.start)<=T&&dn(t.end)>=T:dd===T});
+  const rd=doneT.length,rn=todayL.length+rd,rpct=rn?Math.round(rd/rn*100):0,off=(C*(1-rpct/100)).toFixed(1);
+  const sub=!rn?"Für heute ist nichts geplant.":!todayL.length?"Alles für heute erledigt.":`Noch ${todayL.length} offen`+(over.length?`, davon ${over.length} überfällig.`:".");
   const TL={heute:["Heute",todayL,"var(--acc)",'<rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/><circle cx="12" cy="15" r="1.6" fill="currentColor" stroke="none"/>',"Für heute ist nichts geplant."],
     woche:["7 Tage",week,"#6F8796",'<rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4M8 14.5h8"/>',"In den nächsten 7 Tagen ist nichts fällig."],
     doing:["In Arbeit",doingL,"var(--sun)",'<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/>',"Gerade ist nichts in Arbeit."],
     late:["Überfällig",over,"var(--brick)",'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.3v.2"/>',"Nichts überfällig."]};
   let ht="heute";try{ht=localStorage.getItem("haus-htile")||"heute"}catch(_){}if(!TL[ht])ht="heute";
   const tiles=`<div class="tiles">`+Object.entries(TL).map(([k,[l,L,c,ic]])=>`<button type="button" class="tile${k===ht?" on":""}" data-ht="${k}" style="--tc:${c}"><span class="ti2"><svg viewBox="0 0 24 24">${ic}</svg></span><b>${L.length}</b><span class="tl">${l}</span></button>`).join("")+`</div>`;
-  const qa=`<section class="qadd"><div class="qbox"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><input id="qadd" placeholder="Neue Aufgabe, z. B. Rasen mähen Sa" enterkeyhint="done" autocomplete="off" autocorrect="on" aria-label="Schnelleingabe"></div><div class="qprev" id="qprev"></div><p class="qhint">Erkannt werden: heute · morgen · Sa · 12.12. · in 3 Tagen · bis Fr · #Tag · +Projekt · @Person · !1</p></section>`;
+  const qa=`<section class="qadd"><div class="qbox"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><input id="qadd" placeholder="Neue Aufgabe, z. B. Rasen mähen Sa" enterkeyhint="done" autocomplete="off" autocorrect="on" aria-label="Schnelleingabe"></div><div class="qprev" id="qprev"></div><div class="vsug qsug" id="qsug" role="list" aria-label="Frühere Aufgaben"></div><p class="qhint">Erkannt werden: heute · morgen · Sa · 12.12. · in 3 Tagen · bis Fr · #Tag · +Projekt · @Person · !1</p></section>`;
   const cur=TL[ht],LL=cur[1];
   const list=`<section class="pnl hlist" style="--i:${k++}"><h3><span>${cur[0]}</span><em>${LL.length}</em></h3>${LL.length?LL.slice(0,40).map(hrow).join(""):`<div class="none">${cur[4]}</div>`}</section>`;
-  return`<div class="home">${tiles}${qa}${list}<section class="hero" style="--i:0"><div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn"><span data-n="${pct}">${pct}</span><i>%</i></div></div><div class="hbody"><div class="hh">${d} von ${n} erledigt</div><div class="hsub">${sub}</div><div class="hst"><div><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="${over.length?"hot":""}"><b data-n="${over.length}">${over.length}</b><span>überfällig</span></div><div><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div></div>${nx?`<div class="hnext"><small>Nächste Frist</small><strong>${esc(nx.title)}</strong><span>${[nx.area,rel(nx)].filter(Boolean).map(esc).join(" · ")}</span></div>`:""}</section>`+
+  return`<div class="home">${tiles}${qa}${list}<section class="hero" style="--i:0"><div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div><div class="hbody"><div class="hh">Heute: ${rd} von ${rn} erledigt</div><div class="hsub">${sub}</div><div class="hst"><div><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="${over.length?"hot":""}"><b data-n="${over.length}">${over.length}</b><span>überfällig</span></div><div><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div></div>${nx?`<div class="hnext"><small>Nächste Frist</small><strong>${esc(nx.title)}</strong><span>${[nx.area,rel(nx)].filter(Boolean).map(esc).join(" · ")}</span></div>`:""}</section>`+
     (pjs.length?P("","Projekte",pjs.length,pbars):"")+
     P("","Tags",areas.length,bars||'<div class="none">Noch keine Tags.</div>')+
     P("","Offen pro Person",open,who)+`</div>`}
@@ -1942,7 +1966,7 @@ function render(){
   const qa0=$("qadd"),qv0=qa0?qa0.value:"",qf0=!!qa0&&document.activeElement===qa0;
   $("main").innerHTML=view==="home"?home():view==="board"?board(list):view==="list"?table(list):view==="cal"?cal(list):gantt(list);
   bind();after(old);applySel();
-  const qa1=$("qadd");if(qa1){qa1.value=qv0;if(qv0)$("qprev").innerHTML=qChips(parseQuick(qv0));if(qf0||qaddKeep){qa1.focus({preventScroll:true});qaddKeep=null}}
+  const qa1=$("qadd");if(qa1){qa1.value=qv0;if(qv0)$("qprev").innerHTML=qChips(parseQuick(qv0));if(qv0&&qf0)$("qsug").innerHTML=sugHtml(sugFind(qv0));if(qf0||qaddKeep){qa1.focus({preventScroll:true});qaddKeep=null}}
 }
 const avc=w=>/^melanie/i.test(w)?"am":/^lasse/i.test(w)?"al":"ao";
 const pjh=t=>t.proj?`<div class="pjh" style="--tc:${pcol(t.proj)}"><i></i>${esc(t.proj)}</div>`:"";
@@ -2124,17 +2148,56 @@ function ckDrag(e){
 $("ck_add").onclick=()=>{cklist.push({t:"",d:false});drawCk();const a=$("f_ck").querySelectorAll(".ct");a[a.length-1].focus()};
 
 /* Dialog */
-function openDlg(id){
-  editing=id?byId(id):null;const t=editing||{title:"",tags:ftags.size===1&&!ftags.has("__none")?[...ftags]:[],who:"",proj:fprojs.size===1&&!fprojs.has("__none")?[...fprojs][0]:"",status:"todo",start:tdy(),end:iso(fromDn(dn(tdy())+6)),deps:[],notes:""};
+const blankTask=()=>({title:"",tags:ftags.size===1&&!ftags.has("__none")?[...ftags]:[],who:"",proj:fprojs.size===1&&!fprojs.has("__none")?[...fprojs][0]:"",status:"todo",start:tdy(),end:iso(fromDn(dn(tdy())+6)),deps:[],notes:""});
+/* Öffnet das Aufgabenblatt: id = bearbeiten, sonst neu; tpl = neue Aufgabe mit diesen Werten (Vorschlag aus der Schnelleingabe) */
+function openDlg(id,tpl){
+  editing=id?byId(id):null;const t=editing||tpl||blankTask();
   $("dt").textContent=editing?"Aufgabe bearbeiten":"Neue Aufgabe";
-  $("f_title").value=t.title;$("f_qp").innerHTML="";selTags=[...tgs(t)];regDraft=reg.map(x=>({...x}));colorFor=null;$("f_tagin").value="";drawTags();selWho=wl(t);$("f_who").value="";$("f_who").style.display="none";drawWho();$("f_status").value=t.status;syncSeg();$("f_prio").value=t.prio||0;syncPr();
+  fillDlg(t);
+  $("b_del").style.display=editing?"":"none";
+  $("dlg").showModal();dlgSnap=dlgState();$("dlg").scrollTop=0;if(!editing&&!tpl)setTimeout(()=>$("f_title").focus(),50);
+}
+function fillDlg(t){
+  $("f_title").value=t.title;$("f_qp").innerHTML="";$("f_sug").innerHTML="";selTags=[...tgs(t)];regDraft=reg.map(x=>({...x}));colorFor=null;$("f_tagin").value="";drawTags();selWho=wl(t);$("f_who").value="";$("f_who").style.display="none";drawWho();$("f_status").value=t.status;syncSeg();$("f_prio").value=t.prio||0;syncPr();
   $("f_start").value=t.start;$("f_end").value=t.end;initExtra(t);rpOpen(false);drawRange();$("f_notes").value=t.notes||"";
   const others=tasks.filter(x=>!editing||x.id!==editing.id);
   drawDeps(others,t.deps||[]);
   cklist=(t.checklist||[]).map(x=>({...x}));drawCk();drawLog();drawFiles();aiRes=null;drawAi();$("ai_row").style.display=aiAvail()?"":"none";
-  $("b_del").style.display=editing?"":"none";
-  $("dlg").showModal();dlgSnap=dlgState();$("dlg").scrollTop=0;if(!editing)setTimeout(()=>$("f_title").focus(),50);
 }
+/* 1.33: Vorschläge aus früheren Aufgaben (wie Apple Kalender). Treffer: Titel beginnt mit dem Getippten, ab 3 Zeichen auch ein Wort darin.
+   Gleiche Titel nur einmal (die jüngste Aufgabe). Auswahl übernimmt alle Einstellungen außer Datum, Abhängigkeiten, Verlauf und Dateien. */
+const SUGI='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5M3.5 3.5v5h5M12 7.5V12l3 2"/></svg>';
+function sugFind(text){
+  const q=parseQuick(text),base=String(q.found&&q.title?q.title:text).trim().toLowerCase();if(base.length<2)return[];
+  const best=new Map();
+  for(const t of RAW){if(t.del||!t.title)continue;const k=t.title.trim().toLowerCase();
+    const r=k.startsWith(base)?0:base.length>=3&&k.split(/[\s\-\/]+/).some(w=>w.startsWith(base))?1:-1;if(r<0)continue;
+    const o=best.get(k);if(!o||dn(t.start)>dn(o.t.start))best.set(k,{t,r})}
+  return[...best.values()].sort((a,b)=>a.r-b.r||dn(b.t.start)-dn(a.t.start)).slice(0,4).map(x=>x.t)}
+function sugMeta(t){const d=dn(t.end)-dn(t.start)+1,ck=(t.checklist||[]).length;
+  return[t.proj,...tgs(t),t.who,t.ms?"Meilenstein":d>1?d+" Tage":"",ck?ck+(ck===1?" Punkt":" Punkte"):"",t.rec?"wiederholt sich":"","zuletzt "+fd(t.start)].filter(Boolean).join(" · ")}
+const sugHtml=L=>L.map(t=>`<button type="button" class="vsg" data-sid="${t.id}">${SUGI}<span><b>${esc(t.title)}</b><small>${esc(sugMeta(t))}</small></span></button>`).join("");
+/* Neue Aufgabe aus einer alten: Getipptes (Datum, #Tag, @Person, +Projekt, !Prio) hat Vorrang, Dauer bleibt gleich */
+function fromTemplate(src,text,fb){
+  const q=text?parseQuick(text):null,qd=q&&qDates(q),len=Math.max(0,dn(src.end)-dn(src.start)),start=qd?qd[0]:fb||tdy();
+  const end=src.ms?start:qd&&qd[0]!==qd[1]?qd[1]:iso(fromDn(dn(start)+len));
+  return{title:src.title,tags:[...new Set([...tgs(src),...(q?q.tags:[])])],proj:(q&&q.proj)||src.proj||"",who:q&&q.who.length?q.who.join(", "):src.who||"",
+    prio:(q&&q.prio)||src.prio||0,status:"todo",ms:!!src.ms,rec:src.rec?{...src.rec}:null,start,end,notes:src.notes||"",deps:[],checklist:(src.checklist||[]).map(c=>({...c,d:false}))}}
+function sugApply(id){
+  const src=byId(id);if(!src||editing)return;const prev={title:$("f_title").value,start:$("f_start").value,end:$("f_end").value};
+  fillDlg(fromTemplate(src,prev.title,prev.start));$("f_title").blur();hap(8);
+  toast("„"+src.title+"“ übernommen",()=>{fillDlg({...blankTask(),...prev});$("f_title").focus()},"Rückgängig",6000)}
+function sugOpen(id){
+  const src=byId(id),qa=$("qadd");if(!src)return;const text=qa?qa.value:"";
+  if(qa){qa.value="";qa.blur()}$("qprev").innerHTML="";$("qsug").innerHTML="";hap(8);openDlg(null,fromTemplate(src,text))}
+$("f_title").addEventListener("input",()=>{$("f_sug").innerHTML=editing?"":sugHtml(sugFind($("f_title").value))});
+$("f_sug").addEventListener("click",e=>{const b=e.target.closest("[data-sid]");if(b)sugApply(b.dataset.sid)});
+const sugDown=(e,box)=>{if(e.key==="ArrowDown"){const b=box&&box.querySelector("button");if(b){e.preventDefault();b.focus()}}};
+$("f_title").addEventListener("keydown",e=>sugDown(e,$("f_sug")));
+/* Tippen außerhalb von Titel und Vorschlägen blendet die Vorschläge aus (wie beim Verlassen des Feldes) */
+document.addEventListener("pointerdown",e=>{const t=e.target;if(!t.closest)return;
+  if(!t.closest("#f_title,#f_sug"))$("f_sug").innerHTML="";
+  const qs=$("qsug");if(qs&&!t.closest(".qadd"))qs.innerHTML=""},{passive:true});
 /* Abhängigkeiten: gewählte oben, dann offene nach Fälligkeit, erledigte zuletzt; Suche über Titel, Projekt, Tags, Person */
 function drawDeps(others,chosen){
   const me=editing&&editing.id,rank=x=>chosen.includes(x.id)?0:x.status==="done"?2:1;
@@ -2485,9 +2548,10 @@ $("x_xlsx").onclick=async()=>{
 
 $("ftog").onclick=()=>{const f=$("filters");f.classList.toggle("open");if(f.classList.contains("open"))$("q").focus()};
 $("main").addEventListener("click",e=>{const t=e.target.closest("[data-ht]");if(!t)return;hap(6);prefSet("htile",t.dataset.ht);render()});
-$("main").addEventListener("input",e=>{if(e.target.id==="qadd"){const v=e.target.value;$("qprev").innerHTML=v.trim()?qChips(parseQuick(v)):""}});
-$("main").addEventListener("keydown",async e=>{if(e.target.id!=="qadd"||e.key!=="Enter")return;e.preventDefault();const v=e.target.value;if(!v.trim())return;
-  qaddKeep=true;e.target.value="";$("qprev").innerHTML="";if(!await quickAdd(v)){e.target.value=v}});
+$("main").addEventListener("input",e=>{if(e.target.id==="qadd"){const v=e.target.value;$("qprev").innerHTML=v.trim()?qChips(parseQuick(v)):"";$("qsug").innerHTML=v.trim()?sugHtml(sugFind(v)):""}});
+$("main").addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("#qsug [data-sid]");if(b)sugOpen(b.dataset.sid)});
+$("main").addEventListener("keydown",async e=>{if(e.target.id!=="qadd")return;if(e.key==="ArrowDown")return sugDown(e,$("qsug"));if(e.key!=="Enter")return;e.preventDefault();const v=e.target.value;if(!v.trim())return;
+  qaddKeep=true;e.target.value="";$("qprev").innerHTML="";$("qsug").innerHTML="";if(!await quickAdd(v)){e.target.value=v}});
 $("main").addEventListener("click",e=>{const b=e.target.closest("[data-hw]");if(!b)return;prefSet("hwho",b.dataset.hw);render()});
 $("q").oninput=render;$("fw").onchange=render;
 $("chips").onclick=e=>{const b=e.target.closest("button");if(!b)return;if("cw" in b.dataset)$("fw").value=b.dataset.cw;render()};

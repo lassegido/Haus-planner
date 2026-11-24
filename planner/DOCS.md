@@ -63,6 +63,10 @@ Auf der Startseite oben einfach tippen und mit Enter anlegen, oder im Titel eine
 
 Beispiel: `Zaun streichen Sa #Garten !1 @Melanie`. Unter dem Feld siehst du vor dem Anlegen, was erkannt wurde.
 
+**Frühere Aufgaben als Vorlage** (wie im Apple Kalender): Beim Tippen erscheinen bis zu vier frühere Aufgaben, deren Titel so beginnt (ab drei Zeichen auch ein Wort mitten im Titel), auch erledigte und archivierte. Gibt es einen Titel mehrfach, zählt die jüngste Aufgabe. Antippen übernimmt Tags, Projekt, Person, Priorität, Dauer, Wiederholung, Notizen und die Checkliste (alle Punkte wieder offen); Datum ab heute oder ab dem getippten Tag. Was du selbst tippst (`Sa`, `@Melanie`, `#Tag`), hat Vorrang. Nicht übernommen: Abhängigkeiten, Verlauf, Kommentare und Dateien. Auf der Startseite öffnet sich danach das Aufgabenblatt zum Prüfen, im Blatt gibt es „Rückgängig“. Enter legt wie gewohnt ohne Vorlage an.
+
+**Ring auf der Startseite:** zeigt nur den heutigen Tag der oben gewählten Person („Meine“, eine andere Person oder „Alle“): überfällige, heute anstehende und heute erledigte Aufgaben.
+
 ## Per Sprache: Siri-Kurzbefehl
 
 Braucht den direkten Port 8099 (siehe unten) und funktioniert im Heimnetz.

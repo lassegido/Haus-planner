@@ -543,7 +543,8 @@ def complete_task(tid, actor="iPhone"):
             return None
         n = dict(t)
         n["status"] = "done"
-        n["log"] = (t.get("log") or []) + [{"t": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M"), "a": actor, "k": "h", "x": "Status: Erledigt (Mitteilung)"}]
+        # Verlaufszeiten in UTC wie in der App (die App rechnet beim Anzeigen in Ortszeit um)
+        n["log"] = (t.get("log") or []) + [{"t": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M"), "a": actor, "k": "h", "x": "Status: Erledigt (Mitteilung)"}]
         n["log"] = n["log"][-120:]
         n["v"] = t.get("v", 0) + 1
         state["tasks"][tid] = n

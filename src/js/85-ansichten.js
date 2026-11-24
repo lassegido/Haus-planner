@@ -2,12 +2,14 @@ function enter(){const m=$("main");m.classList.add("enter");clearTimeout(enterT)
 function animateNums(){if(reduced())return;document.querySelectorAll("[data-n]").forEach(el=>{const n=+el.dataset.n;if(!n)return;const t0=performance.now(),step=t=>{const k=Math.min(1,(t-t0)/800),e=1-Math.pow(1-k,3);el.textContent=Math.round(n*e);if(k<1)requestAnimationFrame(step)};requestAnimationFrame(step)})}
 function rel(t){const d=dn(t.end)-today();return d<0?`${-d} ${-d===1?"Tag":"Tage"} überfällig`:d===0?"heute":d===1?"morgen":d<=14?`in ${d} Tagen`:fd(t.end)}
 function hrow(t,i){return`<div class="hrow" data-id="${t.id}" style="--i:${Math.min(i,8)}"><button class="ring ${t.status}" data-adv="${t.id}" aria-label="Status: ${ST[t.status]}. Weiterschalten"></button><div class="hm"><div class="ht">${esc(t.title)}</div><div class="hs">${[t.proj,...tgs(t),t.who].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}</div></div><span class="hd ${isLate(t)?"late":""}">${rel(t)}</span></div>`}
+/* 1.33: Tag, an dem eine Aufgabe erledigt wurde (aus dem Verlauf, Ortszeit); NaN, wenn unbekannt */
+const DONE_RX=/^Status: (?:[^→]*→ )?Erledigt(?: \(|$)/;
+function doneDay(t){const L=t.log||[];for(let i=L.length-1;i>=0;i--){const x=L[i];if(x.k==="h"&&DONE_RX.test(x.x||"")){const d=new Date(String(x.t)+"Z");return isNaN(d)?NaN:Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5}}return NaN}
 function homeBody(tasks,allT){
-  const T=today(),n=tasks.length,d=tasks.filter(t=>t.status==="done").length,pct=n?Math.round(d/n*100):0;
+  const T=today(),n=tasks.length,d=tasks.filter(t=>t.status==="done").length;
   const doing=tasks.filter(t=>t.status==="doing").length,over=tasks.filter(isLate).sort((a,b)=>dn(a.end)-dn(b.end)),blk=tasks.filter(isBlocked).length;
   const week=tasks.filter(t=>t.status!=="done"&&!isLate(t)&&dn(t.start)<=T+7&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end)||dn(a.start)-dn(b.start));
-  const nx=tasks.filter(t=>t.status!=="done"&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end))[0],C=326.7,off=(C*(1-pct/100)).toFixed(1),open=n-d;
-  const sub=over.length?`${over.length} ${over.length===1?"Aufgabe ist":"Aufgaben sind"} überfällig.`:week.length?`${week.length} ${week.length===1?"Aufgabe":"Aufgaben"} in den nächsten 7 Tagen.`:open?"Nichts Dringendes.":"Alles erledigt.";
+  const nx=tasks.filter(t=>t.status!=="done"&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end))[0],C=326.7,open=n-d;
   const areas=allTags().filter(a=>tasks.some(t=>tgs(t).includes(a)));
   const bars=areas.map(a=>{const L=tasks.filter(t=>tgs(t).includes(a)),x=L.filter(t=>t.status==="done").length;return`<div class="prg" style="--tc:${tcol(a)}"><span class="pn">${tIc(a)}${esc(a)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
   const names=allWho(),cnt=w=>allT.filter(t=>t.status!=="done"&&wl(t).includes(w)).length,mx=Math.max(1,...names.map(cnt));
@@ -17,16 +19,20 @@ function homeBody(tasks,allT){
   const byEnd=(a,b)=>dn(a.end)-dn(b.end)||dn(a.start)-dn(b.start),opn=tasks.filter(t=>t.status!=="done");
   const nowL=opn.filter(t=>!isLate(t)&&dn(t.start)<=T&&dn(t.end)>=T).sort(byEnd),todayL=[...over,...nowL];
   const doingL=opn.filter(t=>t.status==="doing").sort(byEnd);
+  /* Ring: nur heute (überfällig, heute anstehend, heute erledigt) der oben gewählten Person */
+  const doneT=tasks.filter(t=>{if(t.status!=="done")return false;const dd=doneDay(t);return isNaN(dd)?dn(t.start)<=T&&dn(t.end)>=T:dd===T});
+  const rd=doneT.length,rn=todayL.length+rd,rpct=rn?Math.round(rd/rn*100):0,off=(C*(1-rpct/100)).toFixed(1);
+  const sub=!rn?"Für heute ist nichts geplant.":!todayL.length?"Alles für heute erledigt.":`Noch ${todayL.length} offen`+(over.length?`, davon ${over.length} überfällig.`:".");
   const TL={heute:["Heute",todayL,"var(--acc)",'<rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/><circle cx="12" cy="15" r="1.6" fill="currentColor" stroke="none"/>',"Für heute ist nichts geplant."],
     woche:["7 Tage",week,"#6F8796",'<rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4M8 14.5h8"/>',"In den nächsten 7 Tagen ist nichts fällig."],
     doing:["In Arbeit",doingL,"var(--sun)",'<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/>',"Gerade ist nichts in Arbeit."],
     late:["Überfällig",over,"var(--brick)",'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.3v.2"/>',"Nichts überfällig."]};
   let ht="heute";try{ht=localStorage.getItem("haus-htile")||"heute"}catch(_){}if(!TL[ht])ht="heute";
   const tiles=`<div class="tiles">`+Object.entries(TL).map(([k,[l,L,c,ic]])=>`<button type="button" class="tile${k===ht?" on":""}" data-ht="${k}" style="--tc:${c}"><span class="ti2"><svg viewBox="0 0 24 24">${ic}</svg></span><b>${L.length}</b><span class="tl">${l}</span></button>`).join("")+`</div>`;
-  const qa=`<section class="qadd"><div class="qbox"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><input id="qadd" placeholder="Neue Aufgabe, z. B. Rasen mähen Sa" enterkeyhint="done" autocomplete="off" autocorrect="on" aria-label="Schnelleingabe"></div><div class="qprev" id="qprev"></div><p class="qhint">Erkannt werden: heute · morgen · Sa · 12.12. · in 3 Tagen · bis Fr · #Tag · +Projekt · @Person · !1</p></section>`;
+  const qa=`<section class="qadd"><div class="qbox"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><input id="qadd" placeholder="Neue Aufgabe, z. B. Rasen mähen Sa" enterkeyhint="done" autocomplete="off" autocorrect="on" aria-label="Schnelleingabe"></div><div class="qprev" id="qprev"></div><div class="vsug qsug" id="qsug" role="list" aria-label="Frühere Aufgaben"></div><p class="qhint">Erkannt werden: heute · morgen · Sa · 12.12. · in 3 Tagen · bis Fr · #Tag · +Projekt · @Person · !1</p></section>`;
   const cur=TL[ht],LL=cur[1];
   const list=`<section class="pnl hlist" style="--i:${k++}"><h3><span>${cur[0]}</span><em>${LL.length}</em></h3>${LL.length?LL.slice(0,40).map(hrow).join(""):`<div class="none">${cur[4]}</div>`}</section>`;
-  return`<div class="home">${tiles}${qa}${list}<section class="hero" style="--i:0"><div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn"><span data-n="${pct}">${pct}</span><i>%</i></div></div><div class="hbody"><div class="hh">${d} von ${n} erledigt</div><div class="hsub">${sub}</div><div class="hst"><div><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="${over.length?"hot":""}"><b data-n="${over.length}">${over.length}</b><span>überfällig</span></div><div><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div></div>${nx?`<div class="hnext"><small>Nächste Frist</small><strong>${esc(nx.title)}</strong><span>${[nx.area,rel(nx)].filter(Boolean).map(esc).join(" · ")}</span></div>`:""}</section>`+
+  return`<div class="home">${tiles}${qa}${list}<section class="hero" style="--i:0"><div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div><div class="hbody"><div class="hh">Heute: ${rd} von ${rn} erledigt</div><div class="hsub">${sub}</div><div class="hst"><div><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="${over.length?"hot":""}"><b data-n="${over.length}">${over.length}</b><span>überfällig</span></div><div><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div></div>${nx?`<div class="hnext"><small>Nächste Frist</small><strong>${esc(nx.title)}</strong><span>${[nx.area,rel(nx)].filter(Boolean).map(esc).join(" · ")}</span></div>`:""}</section>`+
     (pjs.length?P("","Projekte",pjs.length,pbars):"")+
     P("","Tags",areas.length,bars||'<div class="none">Noch keine Tags.</div>')+
     P("","Offen pro Person",open,who)+`</div>`}
@@ -103,7 +109,7 @@ function render(){
   const qa0=$("qadd"),qv0=qa0?qa0.value:"",qf0=!!qa0&&document.activeElement===qa0;
   $("main").innerHTML=view==="home"?home():view==="board"?board(list):view==="list"?table(list):view==="cal"?cal(list):gantt(list);
   bind();after(old);applySel();
-  const qa1=$("qadd");if(qa1){qa1.value=qv0;if(qv0)$("qprev").innerHTML=qChips(parseQuick(qv0));if(qf0||qaddKeep){qa1.focus({preventScroll:true});qaddKeep=null}}
+  const qa1=$("qadd");if(qa1){qa1.value=qv0;if(qv0)$("qprev").innerHTML=qChips(parseQuick(qv0));if(qv0&&qf0)$("qsug").innerHTML=sugHtml(sugFind(qv0));if(qf0||qaddKeep){qa1.focus({preventScroll:true});qaddKeep=null}}
 }
 const avc=w=>/^melanie/i.test(w)?"am":/^lasse/i.test(w)?"al":"ao";
 const pjh=t=>t.proj?`<div class="pjh" style="--tc:${pcol(t.proj)}"><i></i>${esc(t.proj)}</div>`:"";

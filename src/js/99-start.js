@@ -1,8 +1,9 @@
 $("ftog").onclick=()=>{const f=$("filters");f.classList.toggle("open");if(f.classList.contains("open"))$("q").focus()};
 $("main").addEventListener("click",e=>{const t=e.target.closest("[data-ht]");if(!t)return;hap(6);prefSet("htile",t.dataset.ht);render()});
-$("main").addEventListener("input",e=>{if(e.target.id==="qadd"){const v=e.target.value;$("qprev").innerHTML=v.trim()?qChips(parseQuick(v)):""}});
-$("main").addEventListener("keydown",async e=>{if(e.target.id!=="qadd"||e.key!=="Enter")return;e.preventDefault();const v=e.target.value;if(!v.trim())return;
-  qaddKeep=true;e.target.value="";$("qprev").innerHTML="";if(!await quickAdd(v)){e.target.value=v}});
+$("main").addEventListener("input",e=>{if(e.target.id==="qadd"){const v=e.target.value;$("qprev").innerHTML=v.trim()?qChips(parseQuick(v)):"";$("qsug").innerHTML=v.trim()?sugHtml(sugFind(v)):""}});
+$("main").addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("#qsug [data-sid]");if(b)sugOpen(b.dataset.sid)});
+$("main").addEventListener("keydown",async e=>{if(e.target.id!=="qadd")return;if(e.key==="ArrowDown")return sugDown(e,$("qsug"));if(e.key!=="Enter")return;e.preventDefault();const v=e.target.value;if(!v.trim())return;
+  qaddKeep=true;e.target.value="";$("qprev").innerHTML="";$("qsug").innerHTML="";if(!await quickAdd(v)){e.target.value=v}});
 $("main").addEventListener("click",e=>{const b=e.target.closest("[data-hw]");if(!b)return;prefSet("hwho",b.dataset.hw);render()});
 $("q").oninput=render;$("fw").onchange=render;
 $("chips").onclick=e=>{const b=e.target.closest("button");if(!b)return;if("cw" in b.dataset)$("fw").value=b.dataset.cw;render()};

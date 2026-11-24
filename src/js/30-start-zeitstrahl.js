@@ -2,7 +2,13 @@
 let lastMoved=null,tt,enterT;
 const greet=()=>{const h=new Date().getHours();return h<5?"Gute Nacht":h<11?"Guten Morgen":h<17?"Guten Tag":"Guten Abend"};
 const reduced=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
-function toast(msg,undo,label,ms){const el=$("toast");el.innerHTML="<span></span>"+(undo?"<button>"+(label||"Rückgängig")+"</button>":"");el.firstChild.textContent=msg;if(undo)el.querySelector("button").onclick=()=>{undo();el.classList.remove("on")};if(el.showPopover){if(!el.hasAttribute("popover"))el.setAttribute("popover","manual");try{el.hidePopover()}catch(_){}try{el.showPopover()}catch(_){}}el.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("on"),ms||4500)}
+/* 1.33: Ist ein Blatt offen, macht es den Rest der Seite unbedienbar (auch den Hinweis). Darum hängt der Hinweis dann im obersten Blatt
+   und wandert beim Schließen zurück; als Popover liegt er trotzdem über allem. */
+function toastHost(el){let ds=[...document.querySelectorAll("dialog[open]")];try{ds=ds.filter(d=>d.matches(":modal"))}catch(_){}
+  const h=ds.length?ds[ds.length-1]:document.body;if(el.parentNode!==h){try{el.hidePopover()}catch(_){}h.appendChild(el)}}
+document.addEventListener("close",e=>{const el=$("toast");if(e.target.tagName!=="DIALOG"||!e.target.contains(el))return;
+  try{el.hidePopover()}catch(_){}document.body.appendChild(el);if(el.classList.contains("on"))try{el.showPopover()}catch(_){}},true);
+function toast(msg,undo,label,ms){const el=$("toast");el.innerHTML="<span></span>"+(undo?"<button>"+(label||"Rückgängig")+"</button>":"");el.firstChild.textContent=msg;if(undo)el.querySelector("button").onclick=()=>{undo();el.classList.remove("on")};toastHost(el);if(el.showPopover){if(!el.hasAttribute("popover"))el.setAttribute("popover","manual");try{el.hidePopover()}catch(_){}try{el.showPopover()}catch(_){}}el.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("on"),ms||4500)}
 async function advance(id){
   const t=byId(id);if(!t)return;const prev=t.status,next=NEXT[prev];hap(8);lastMoved=id;
   const sp=await setStatus(t,next);

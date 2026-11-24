@@ -1,5 +1,11 @@
 # Änderungen
 
+## 1.33.0
+- **Frühere Aufgaben als Vorlage** (wie im Apple Kalender): Beim Eintippen eines Titels, im Aufgabenblatt und in der Schnelleingabe auf der Startseite, erscheinen frühere Aufgaben mit gleichem Anfang. Antippen übernimmt Tags, Projekt, Person, Priorität, Dauer, Wiederholung, Notizen und die Checkliste (Punkte wieder offen). Datum ab heute oder ab dem getippten Tag; Getipptes wie `@Melanie` hat Vorrang. Abhängigkeiten, Verlauf und Dateien bleiben bei der alten Aufgabe.
+- **Ring auf der Startseite zeigt nur heute:** überfällige, heute anstehende und heute erledigte Aufgaben der oben gewählten Person (standardmäßig „Meine“), z. B. „Heute: 2 von 5 erledigt“. Die Übersichten darunter zählen weiter alles.
+- „Rückgängig“ im Hinweis unten funktioniert jetzt auch, während ein Blatt offen ist (vorher nicht antippbar).
+- Verlaufseinträge aus Mitteilungen und von Alexa stehen mit der richtigen Uhrzeit im Verlauf (vorher eine Stunde zu spät angezeigt).
+
 ## 1.32.0
 - **Suche bei Abhängigkeiten:** Im Aufgabenblatt unter „Wiederholen und Abhängigkeiten“ gibt es ein Suchfeld (Titel, Projekt, Tag, Person; mehrere Wörter möglich). Gewählte Aufgaben bleiben beim Suchen sichtbar. Aufgaben, die von der aktuellen abhängen, sind gesperrt (sonst entstünde ein Kreis).
 - **Schneller und unabhängig vom Internet:** Schriften sowie PDF- und Excel-Bibliothek liegen jetzt im Add-on. Die PDF-Bibliothek bremst den Start nicht mehr, sie lädt erst beim Öffnen von „Export und Backup“.

@@ -80,17 +80,56 @@ function ckDrag(e){
 $("ck_add").onclick=()=>{cklist.push({t:"",d:false});drawCk();const a=$("f_ck").querySelectorAll(".ct");a[a.length-1].focus()};
 
 /* Dialog */
-function openDlg(id){
-  editing=id?byId(id):null;const t=editing||{title:"",tags:ftags.size===1&&!ftags.has("__none")?[...ftags]:[],who:"",proj:fprojs.size===1&&!fprojs.has("__none")?[...fprojs][0]:"",status:"todo",start:tdy(),end:iso(fromDn(dn(tdy())+6)),deps:[],notes:""};
+const blankTask=()=>({title:"",tags:ftags.size===1&&!ftags.has("__none")?[...ftags]:[],who:"",proj:fprojs.size===1&&!fprojs.has("__none")?[...fprojs][0]:"",status:"todo",start:tdy(),end:iso(fromDn(dn(tdy())+6)),deps:[],notes:""});
+/* Öffnet das Aufgabenblatt: id = bearbeiten, sonst neu; tpl = neue Aufgabe mit diesen Werten (Vorschlag aus der Schnelleingabe) */
+function openDlg(id,tpl){
+  editing=id?byId(id):null;const t=editing||tpl||blankTask();
   $("dt").textContent=editing?"Aufgabe bearbeiten":"Neue Aufgabe";
-  $("f_title").value=t.title;$("f_qp").innerHTML="";selTags=[...tgs(t)];regDraft=reg.map(x=>({...x}));colorFor=null;$("f_tagin").value="";drawTags();selWho=wl(t);$("f_who").value="";$("f_who").style.display="none";drawWho();$("f_status").value=t.status;syncSeg();$("f_prio").value=t.prio||0;syncPr();
+  fillDlg(t);
+  $("b_del").style.display=editing?"":"none";
+  $("dlg").showModal();dlgSnap=dlgState();$("dlg").scrollTop=0;if(!editing&&!tpl)setTimeout(()=>$("f_title").focus(),50);
+}
+function fillDlg(t){
+  $("f_title").value=t.title;$("f_qp").innerHTML="";$("f_sug").innerHTML="";selTags=[...tgs(t)];regDraft=reg.map(x=>({...x}));colorFor=null;$("f_tagin").value="";drawTags();selWho=wl(t);$("f_who").value="";$("f_who").style.display="none";drawWho();$("f_status").value=t.status;syncSeg();$("f_prio").value=t.prio||0;syncPr();
   $("f_start").value=t.start;$("f_end").value=t.end;initExtra(t);rpOpen(false);drawRange();$("f_notes").value=t.notes||"";
   const others=tasks.filter(x=>!editing||x.id!==editing.id);
   drawDeps(others,t.deps||[]);
   cklist=(t.checklist||[]).map(x=>({...x}));drawCk();drawLog();drawFiles();aiRes=null;drawAi();$("ai_row").style.display=aiAvail()?"":"none";
-  $("b_del").style.display=editing?"":"none";
-  $("dlg").showModal();dlgSnap=dlgState();$("dlg").scrollTop=0;if(!editing)setTimeout(()=>$("f_title").focus(),50);
 }
+/* 1.33: Vorschläge aus früheren Aufgaben (wie Apple Kalender). Treffer: Titel beginnt mit dem Getippten, ab 3 Zeichen auch ein Wort darin.
+   Gleiche Titel nur einmal (die jüngste Aufgabe). Auswahl übernimmt alle Einstellungen außer Datum, Abhängigkeiten, Verlauf und Dateien. */
+const SUGI='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5M3.5 3.5v5h5M12 7.5V12l3 2"/></svg>';
+function sugFind(text){
+  const q=parseQuick(text),base=String(q.found&&q.title?q.title:text).trim().toLowerCase();if(base.length<2)return[];
+  const best=new Map();
+  for(const t of RAW){if(t.del||!t.title)continue;const k=t.title.trim().toLowerCase();
+    const r=k.startsWith(base)?0:base.length>=3&&k.split(/[\s\-\/]+/).some(w=>w.startsWith(base))?1:-1;if(r<0)continue;
+    const o=best.get(k);if(!o||dn(t.start)>dn(o.t.start))best.set(k,{t,r})}
+  return[...best.values()].sort((a,b)=>a.r-b.r||dn(b.t.start)-dn(a.t.start)).slice(0,4).map(x=>x.t)}
+function sugMeta(t){const d=dn(t.end)-dn(t.start)+1,ck=(t.checklist||[]).length;
+  return[t.proj,...tgs(t),t.who,t.ms?"Meilenstein":d>1?d+" Tage":"",ck?ck+(ck===1?" Punkt":" Punkte"):"",t.rec?"wiederholt sich":"","zuletzt "+fd(t.start)].filter(Boolean).join(" · ")}
+const sugHtml=L=>L.map(t=>`<button type="button" class="vsg" data-sid="${t.id}">${SUGI}<span><b>${esc(t.title)}</b><small>${esc(sugMeta(t))}</small></span></button>`).join("");
+/* Neue Aufgabe aus einer alten: Getipptes (Datum, #Tag, @Person, +Projekt, !Prio) hat Vorrang, Dauer bleibt gleich */
+function fromTemplate(src,text,fb){
+  const q=text?parseQuick(text):null,qd=q&&qDates(q),len=Math.max(0,dn(src.end)-dn(src.start)),start=qd?qd[0]:fb||tdy();
+  const end=src.ms?start:qd&&qd[0]!==qd[1]?qd[1]:iso(fromDn(dn(start)+len));
+  return{title:src.title,tags:[...new Set([...tgs(src),...(q?q.tags:[])])],proj:(q&&q.proj)||src.proj||"",who:q&&q.who.length?q.who.join(", "):src.who||"",
+    prio:(q&&q.prio)||src.prio||0,status:"todo",ms:!!src.ms,rec:src.rec?{...src.rec}:null,start,end,notes:src.notes||"",deps:[],checklist:(src.checklist||[]).map(c=>({...c,d:false}))}}
+function sugApply(id){
+  const src=byId(id);if(!src||editing)return;const prev={title:$("f_title").value,start:$("f_start").value,end:$("f_end").value};
+  fillDlg(fromTemplate(src,prev.title,prev.start));$("f_title").blur();hap(8);
+  toast("„"+src.title+"“ übernommen",()=>{fillDlg({...blankTask(),...prev});$("f_title").focus()},"Rückgängig",6000)}
+function sugOpen(id){
+  const src=byId(id),qa=$("qadd");if(!src)return;const text=qa?qa.value:"";
+  if(qa){qa.value="";qa.blur()}$("qprev").innerHTML="";$("qsug").innerHTML="";hap(8);openDlg(null,fromTemplate(src,text))}
+$("f_title").addEventListener("input",()=>{$("f_sug").innerHTML=editing?"":sugHtml(sugFind($("f_title").value))});
+$("f_sug").addEventListener("click",e=>{const b=e.target.closest("[data-sid]");if(b)sugApply(b.dataset.sid)});
+const sugDown=(e,box)=>{if(e.key==="ArrowDown"){const b=box&&box.querySelector("button");if(b){e.preventDefault();b.focus()}}};
+$("f_title").addEventListener("keydown",e=>sugDown(e,$("f_sug")));
+/* Tippen außerhalb von Titel und Vorschlägen blendet die Vorschläge aus (wie beim Verlassen des Feldes) */
+document.addEventListener("pointerdown",e=>{const t=e.target;if(!t.closest)return;
+  if(!t.closest("#f_title,#f_sug"))$("f_sug").innerHTML="";
+  const qs=$("qsug");if(qs&&!t.closest(".qadd"))qs.innerHTML=""},{passive:true});
 /* Abhängigkeiten: gewählte oben, dann offene nach Fälligkeit, erledigte zuletzt; Suche über Titel, Projekt, Tags, Person */
 function drawDeps(others,chosen){
   const me=editing&&editing.id,rank=x=>chosen.includes(x.id)?0:x.status==="done"?2:1;
