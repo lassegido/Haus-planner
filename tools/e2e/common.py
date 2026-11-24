@@ -125,7 +125,7 @@ class FakeGemini:
 class Page:
     """Eine Browser-Seite mit Fehlersammlung. Wartet, bis die Aufgaben geladen sind."""
 
-    def __init__(self, browser, url, device=PHONE, onboarded=True, headers=None, wait=True):
+    def __init__(self, browser, url, device=PHONE, onboarded=True, headers=None, wait=True, setup=None):
         opts = dict(device)
         if headers:
             opts["extra_http_headers"] = headers
@@ -138,6 +138,8 @@ class Page:
         self.pg.on("request", lambda r: r.url.startswith(("http://127.0.0.1", "file:", "data:", "blob:")) or self.external.append(r.url))
         if onboarded:
             self.pg.add_init_script("try{localStorage.setItem('haus-onb','1')}catch(e){}")
+        if setup:
+            setup(self.pg)
         self.pg.goto(url)
         if wait:
             self.ready()
