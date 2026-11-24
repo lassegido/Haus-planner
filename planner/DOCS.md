@@ -42,6 +42,12 @@ Zugriff von außen nur über Nabu Casa oder ein VPN (z. B. Tailscale).
 
 Der Planner legt in Home Assistant fünf Sensoren an, die jede Minute aktualisiert werden: `sensor.planner_offen`, `sensor.planner_in_arbeit`, `sensor.planner_ueberfaellig`, `sensor.planner_heute_faellig` und `sensor.planner_prio1` (offene Aufgaben mit Prio 1). Das Attribut `aufgaben` enthält die Titel. Abschalten mit `sensors: false` in der Konfiguration.
 
+## Persönlich oder für alle
+
+Öffnest du den Planner über die Home-Assistant-App, weiß er, wer angemeldet ist. **Nur für dich** gelten Darstellung, Farbwelt, Schrift, „Ich bin“ und die Startseiten-Auswahl (gespeichert je Home-Assistant-Benutzer in `/data/prefs.json`, also auf all deinen Geräten gleich). **Für alle** gelten Aufgaben, Erinnerungs-Geräte, Alexa, Sensoren und der KI-Schlüssel. Über Port 8099 (ohne Anmeldung) gelten persönliche Einstellungen nur für das jeweilige Gerät.
+
+Erinnerung: Unter Einstellungen → Erinnerung die Geräte wählen. Jedes Gerät gehört zu einer Person (aus dem Gerätenamen erraten, antippen zum Ändern) und erinnert an deren Aufgaben und an Aufgaben ohne Zuständigkeit.
+
 ## Schnelleingabe
 
 Auf der Startseite oben einfach tippen und mit Enter anlegen, oder im Titel einer neuen Aufgabe. Erkannt wird:

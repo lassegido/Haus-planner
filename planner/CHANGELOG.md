@@ -1,5 +1,11 @@
 # Änderungen
 
+## 1.31.0
+- **Persönlich je Benutzer:** Der Planner erkennt beim Öffnen über die Home-Assistant-App, wer angemeldet ist. Darstellung, Farbwelt, Schrift, „Ich bin“ und die Auswahl auf der Startseite gelten je Person auf all ihren Geräten. Wählt Melanie eine andere Farbwelt, bleibt Lasses Design unverändert. „Ich bin“ wird beim ersten Öffnen automatisch gesetzt.
+- **Erinnerung je Person:** Unter Einstellungen → Erinnerung gehört jedes gewählte Gerät zu einer Person (automatisch aus dem Gerätenamen, z. B. „iPhone von Lasse“ → Lasse; antippen zum Ändern). Jedes Gerät erinnert nur an die Aufgaben seiner Person und an Aufgaben ohne Zuständigkeit, mit passenden Abhaken-Knöpfen.
+- **Einstellungen getrennt:** „Nur für dich“ und „Für alle im Haushalt“ (Aufgaben, Home Assistant, Erinnerung, Alexa, KI-Schlüssel).
+- Fehler behoben: interne Sperre konnte sich beim Speichern von Einstellungen selbst blockieren.
+
 ## 1.30.1
 - KI-Seite: Hinweis ergänzt, dass der Gemini-Schlüssel für alle Nutzer des Planners auf diesem Home Assistant gilt (nicht nur für das Gerät, auf dem er eingetragen wurde).
 

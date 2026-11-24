@@ -995,6 +995,10 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
 .airef{display:flex;gap:.45rem;align-items:center;margin-top:.7rem}
 .airef input{flex:1;min-width:0;height:2.6rem;border:1px solid var(--line2);border-radius:.7rem;background:var(--grp);padding:0 .75rem}
 .airef .btn{flex:none;white-space:nowrap}
+
+.sgt.sgh{margin-top:1.6rem;font-size:.92rem;font-weight:700;color:var(--tx)}
+.sgt.sgh:first-child{margin-top:.4rem}
+.sgt.sgh+.scap{margin-top:-.2rem;margin-bottom:.2rem}
 </style>
 </head>
 <body>
@@ -1119,7 +1123,8 @@ const isBlocked=t=>t.status!=="done"&&(t.deps||[]).some(i=>{const p=byId(i);retu
 function lsGet(){try{return JSON.parse(localStorage.getItem("haus-tasks")||"[]")}catch(e){return[]}}
 function lsSet(){try{localStorage.setItem("haus-tasks",JSON.stringify(RAW))}catch(e){}}
 function prefGet(k){try{return localStorage.getItem("haus-"+k)}catch(e){return null}}
-function prefSet(k,v){try{localStorage.setItem("haus-"+k,v)}catch(e){}}
+function prefSet(k,v){try{localStorage.setItem("haus-"+k,v)}catch(e){}if(typeof prefSync==="function")prefSync(k,v)}
+let USER=null;
 function lsGetReg(){try{return JSON.parse(localStorage.getItem("haus-tags")||"[]")}catch(e){return[]}}
 function lsSetReg(){try{localStorage.setItem("haus-tags",JSON.stringify(reg))}catch(e){}}
 let metaCol=null;
@@ -1382,14 +1387,15 @@ function drawSettings(){
   if(sPage==="main"){
     const dn=tasks.filter(t=>t.status==="done").length,A=RAW.filter(t=>t.arch&&!t.del).length,T=RAW.filter(t=>t.del).length;
     const dsx=DES.find(x=>x[0]===ds)||DES[0];
-    h=`<p class="sgt">Erscheinungsbild</p>`+grp(srow('data-go="theme"',"Darstellung",THN[th])+srow('data-go="des"',"Farbwelt",`<i class="sdot sm" style="background:var(--acc)"></i> `+dsx[1])+srow('data-go="font"',"Schrift",(FONTS.find(x=>x[0]===fk)||FONTS[0])[1]))
-     +`<p class="sgt">Persönlich</p>`+grp(srow('data-go="me"',"Ich bin",me||"Keine Angabe"))
+    h=`<p class="sgt sgh">Nur für dich${USER?" · "+esc(USER):""}</p>`+cap(USER?"Gilt für dich auf all deinen Geräten, die anderen behalten ihre eigene Auswahl.":"Gilt nur für dieses Gerät.")
+     +grp(srow('data-go="theme"',"Darstellung",THN[th])+srow('data-go="des"',"Farbwelt",`<i class="sdot sm" style="background:var(--acc)"></i> `+dsx[1])+srow('data-go="font"',"Schrift",(FONTS.find(x=>x[0]===fk)||FONTS[0])[1])+srow('data-go="me"',"Ich bin",me||"Keine Angabe"))
+     +`<p class="sgt sgh">Für alle im Haushalt</p>`+cap("Änderungen hier gelten für alle, die den Planner nutzen.")
      +`<p class="sgt">Aufgaben</p>`+grp(srow(`data-act="arch"${dn?"":" disabled"}`,"Erledigte archivieren",dn?String(dn):"Keine",null,false)+srow('data-act="open"',"Archiv und Papierkorb",A+T?(A+T)+(A+T===1?" Eintrag":" Einträge"):"Leer"));
     const hi=haInfo;
     if(hi){const n=(hi.notify||[]).length;
       h+=`<p class="sgt">Home Assistant</p>`+grp(
         srow("",`Verbindung`,hi.api?"Aktiv":"Nicht verfügbar",null,false)
-       +(hi.api?srow('data-go="rem"',`Erinnerung`,n?"Täglich "+esc(hi.time)+" Uhr":"Aus"):srow("",`Erinnerung`,"Aus",null,false))
+       +(hi.api?srow('data-go="rem"',`Erinnerung`,n?n+" Gerät"+(n===1?"":"e")+" · "+esc(hi.time)+" Uhr":"Aus"):srow("",`Erinnerung`,"Aus",null,false))
        +(hi.api?srow('data-go="alexa"',`Alexa`,hi.alexa?(hi.echos?hi.echos+" Echo"+(hi.echos===1?"":"s"):"An"):"Aus"):"")
        +srow('data-go="show"',`Anzeige für Echo Show`,"Link")
        +srow('data-go="ki"',`KI-Assistent`,hi.ai?"Gemini":"Aus")
@@ -1400,8 +1406,11 @@ function drawSettings(){
     const sel=new Set((haInfo&&haInfo.notify)||[]),av=haAvail;
     if(av===null)h=cap("Lade Geräte …");
     else{const names=[...new Set([...av,...sel])];
-      h=(names.length?grp(names.map(x=>sopt(`data-set="ntf:${x}"`,esc(ntfName(x)),sel.has(x))).join("")):cap("Es wurde kein Gerät gefunden. Installiere die Home-Assistant-App auf dem Handy und melde dich an."))
-       +cap("Wähle die Geräte, die täglich an fällige und überfällige Aufgaben erinnert werden. Ohne Auswahl ist die Erinnerung aus.")
+      const nw=(haInfo&&haInfo.nwho)||{};
+      h=`<p class="sgt">Geräte</p>`+(names.length?grp(names.map(x=>sopt(`data-set="ntf:${x}"`,esc(ntfName(x)),sel.has(x))).join("")):cap("Es wurde kein Gerät gefunden. Installiere die Home-Assistant-App auf dem Handy oder iPad und melde dich an."))
+       +cap("Gewählte Geräte bekommen jeden Tag eine Erinnerung an fällige und überfällige Aufgaben, mit Knöpfen zum Abhaken. Ohne Auswahl ist die Erinnerung aus.")
+       +(sel.size?`<p class="sgt">Erinnert wird an Aufgaben von</p>`+grp([...sel].map(x=>srow(`data-nw="${esc(x)}"`,esc(ntfName(x)),nw[x]?esc(nw[x]):"Allen")).join(""))
+         +cap("Jedes Gerät bekommt nur die Aufgaben seiner Person, dazu Aufgaben ohne Zuständigkeit. Der Planner ordnet Geräte mit Namen im Gerätenamen automatisch zu (z. B. „iPhone von Lasse“ → Lasse). Antippen zum Ändern."):"")
        +grp(srow('data-go="remt"',"Uhrzeit",esc((haInfo&&haInfo.time)||"08:00")+" Uhr")+srow(`data-act="hatest"${sel.size?"":" disabled"}`,"Testnachricht senden",null,null,false))}
   }else if(sPage==="alexa"){
     const hi=haInfo||{},on=!!hi.alexa;
@@ -1453,6 +1462,9 @@ $("s_body").addEventListener("keydown",e=>{if(e.target.id==="ki_key"&&e.key==="E
 $("s_back").onclick=()=>{sPage=sPage==="remt"?"rem":"main";drawSettings();$("dls").scrollTop=0};
 $("s_body").onclick=async e=>{
   const b=e.target.closest("button");if(!b||b.disabled)return;const d=b.dataset;
+  if(d.nw){const sv=d.nw,cur=((haInfo&&haInfo.nwho)||{})[sv]||"";
+    const v=await sheet("Erinnerung auf „"+ntfName(sv)+"“ für",[{items:[...allWho().map(w=>({t:w,v:w,cur:w===cur})),{t:"Alle Aufgaben",v:"__all",cur:!cur}]}]);
+    if(v){await haSave({notify_who:{[sv]:v==="__all"?"":v}});drawSettings()}return}
   if(d.go){sPage=d.go;if(d.go==="ki")kiMsg=null;if(d.go==="rem"&&haAvail===null)loadAvail();drawSettings();$("dls").scrollTop=0;return}
   if(d.set){const i=d.set.indexOf(":"),k=d.set.slice(0,i),v=d.set.slice(i+1);
     if(k==="theme"){prefSet("theme",v);applyTheme()}else if(k==="des"){prefSet("design",v);prefSet("acc","");applyTheme()}
@@ -2284,7 +2296,7 @@ matchMedia("(max-width:699px)").addEventListener("change",()=>{renderedView=null
 $("add").onclick=()=>openDlg();
 async function onboard(){if(KIOSK||prefGet("onb")||prefGet("me")||document.querySelector("dialog[open]"))return;prefSet("onb","1");
   const v=await sheet("Willkommen im Planner! Wer nutzt dieses Gerät?",[{items:[{t:"Lasse",v:"Lasse"},{t:"Melanie",v:"Melanie"}]}]);
-  if(v){prefSet("me",v);try{localStorage.removeItem("haus-hwho")}catch(_){}render()}
+  if(v){prefSet("me",v);prefSet("hwho","");render()}
   toast("Tipp: Auf der Startseite oben einfach tippen, z. B. „Rasen mähen Sa #Garten“",null,null,8000)}
 setTimeout(onboard,1600);
 /* Export */
@@ -2450,11 +2462,11 @@ $("x_xlsx").onclick=async()=>{
 };
 
 $("ftog").onclick=()=>{const f=$("filters");f.classList.toggle("open");if(f.classList.contains("open"))$("q").focus()};
-$("main").addEventListener("click",e=>{const t=e.target.closest("[data-ht]");if(!t)return;hap(6);try{localStorage.setItem("haus-htile",t.dataset.ht)}catch(_){}render()});
+$("main").addEventListener("click",e=>{const t=e.target.closest("[data-ht]");if(!t)return;hap(6);prefSet("htile",t.dataset.ht);render()});
 $("main").addEventListener("input",e=>{if(e.target.id==="qadd"){const v=e.target.value;$("qprev").innerHTML=v.trim()?qChips(parseQuick(v)):""}});
 $("main").addEventListener("keydown",async e=>{if(e.target.id!=="qadd"||e.key!=="Enter")return;e.preventDefault();const v=e.target.value;if(!v.trim())return;
   qaddKeep=true;e.target.value="";$("qprev").innerHTML="";if(!await quickAdd(v)){e.target.value=v}});
-$("main").addEventListener("click",e=>{const b=e.target.closest("[data-hw]");if(!b)return;try{localStorage.setItem("haus-hwho",b.dataset.hw)}catch(_){}render()});
+$("main").addEventListener("click",e=>{const b=e.target.closest("[data-hw]");if(!b)return;prefSet("hwho",b.dataset.hw);render()});
 $("q").oninput=render;$("fw").onchange=render;
 $("chips").onclick=e=>{const b=e.target.closest("button");if(!b)return;if("cw" in b.dataset)$("fw").value=b.dataset.cw;render()};
 $("tabs").onclick=e=>{const bt=e.target.closest("button"),v=bt&&bt.dataset.v;if(!v)return;view=v;[...$("tabs").children].forEach(b=>b.classList.toggle("on",b.dataset.v===v));render()};

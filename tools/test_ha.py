@@ -86,8 +86,10 @@ today = time.strftime("%Y-%m-%d")
 json.dump({"schema": 2, "rev": 1, "tags": [{"n": "Garten", "c": "mint"}], "tasks": [
     {"id": "t1", "title": "Rauchmelder tauschen", "start": "2020-01-01", "end": "2020-01-02", "status": "todo", "prio": 1, "v": 0},
     {"id": "t2", "title": "Wiederkehrend", "start": "2020-01-01", "end": "2020-01-02", "status": "todo", "rec": {"every": 1, "unit": "w"}, "v": 0},
-    {"id": "t3", "title": "Fenster putzen", "start": today, "end": today, "status": "todo", "v": 0}]}, open(d + "/d/tasks.json", "w"))
-json.dump({"notify": ["mobile_app_test"], "time": "00:00", "alexa": True}, open(d + "/d/settings.json", "w"))
+    {"id": "t3", "title": "Fenster putzen", "start": today, "end": today, "status": "todo", "v": 0},
+    {"id": "t4", "title": "Lasses Aufgabe", "start": "2020-01-01", "end": "2020-01-02", "status": "todo", "who": "Lasse", "v": 0},
+    {"id": "t5", "title": "Melanies Aufgabe", "start": "2020-01-01", "end": "2020-01-02", "status": "todo", "who": "Melanie", "v": 0}]}, open(d + "/d/tasks.json", "w"))
+json.dump({"notify": ["mobile_app_test", "mobile_app_iphone_von_lasse", "mobile_app_iphone_von_melanie"], "time": "00:00", "alexa": True}, open(d + "/d/settings.json", "w"))
 http = HTTPServer(("127.0.0.1", 8095), Mock)
 threading.Thread(target=http.serve_forever, daemon=True).start()
 lst = socket.socket()
@@ -126,6 +128,13 @@ try:
     said = [b.get("message") for p, b in posts if p.endswith("/services/notify/send_message") and b.get("entity_id") == "notify.echo_kueche_speak"]
     t = {x["id"]: x for x in json.load(open(d + "/d/tasks.json"))["tasks"]}
     new = [x for x in t.values() if x["title"] == "Rasen mähen"]
+    def first_for(sv):
+        r = [b for p, b in posts if p.endswith("/services/notify/" + sv) and "data" in b and b.get("message") != "clear_notification"]
+        return json.dumps(r[0], ensure_ascii=False) if r else ""
+    la, me = first_for("mobile_app_iphone_von_lasse"), first_for("mobile_app_iphone_von_melanie")
+    check("Erinnerung je Person: Lasse bekommt seine Aufgabe, nicht Melanies", "PLANNER_DONE_t4" in la and "PLANNER_DONE_t5" not in la)
+    check("Erinnerung je Person: Melanie bekommt ihre Aufgabe, nicht Lasses", "PLANNER_DONE_t5" in me and "PLANNER_DONE_t4" not in me)
+    check("Erinnerung je Person: Aufgaben ohne Zuständigkeit bekommen beide", "PLANNER_DONE_t1" in la and "PLANNER_DONE_t1" in me)
     check("Alexa: Aufgabe per Sprache angelegt (Tag, Datum, Person per Stimmerkennung)", len(new) == 1 and new[0]["tags"] == ["Garten"] and new[0]["who"] == "Lasse" and new[0]["start"] > today)
     check("Alexa: Bestätigung auf demselben Echo gesprochen", len(said) >= 1 and "Rasen mähen" in said[0] and "morgen" in said[0])
     check("Alexa: „was steht heute an“ wird vorgelesen", len(said) >= 2 and said[1].startswith("Heute") and "Fenster putzen" in said[1])

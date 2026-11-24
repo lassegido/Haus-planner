@@ -16,7 +16,7 @@ FILES = os.path.join(D, "files")
 ICONS = os.environ.get("ICONS_DIR", os.path.join(os.path.dirname(INDEX), "icons"))
 FID = re.compile(r"[a-f0-9]{12}")
 SAFE = ("image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf")
-LOCK = threading.Lock()
+LOCK = threading.RLock()  # wiedereintrittsfähig: ha_info() fragt Personen ab, auch wenn ein Handler die Sperre hält
 state = {"rev": 0, "tasks": {}, "tags": []}
 COLORS = ("sky", "sun", "sea", "brick", "mint", "rose", "lilac", "sand", "slate", "lemon")
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
@@ -276,9 +276,24 @@ def services():
     return out
 
 
+def notify_who():
+    """Welche Person zu welchem Gerät gehört. Ohne Angabe: aus dem Gerätenamen erraten (z. B. iphone_von_lasse → Lasse)."""
+    st = app_settings()
+    m = st.get("notify_who") if isinstance(st.get("notify_who"), dict) else {}
+    with LOCK:
+        people = known_people(list(state["tasks"].values()))
+    out = {}
+    for sv in services():
+        v = m.get(sv)
+        if v is None:
+            v = next((p for p in people if p.lower() in sv.lower()), "")
+        out[sv] = str(v)[:30]
+    return out
+
+
 def ha_info():
     o = options()
-    return {"api": bool(TOKEN), "notify": services(), "time": remind_time(),
+    return {"api": bool(TOKEN), "notify": services(), "nwho": notify_who(), "time": remind_time(),
             "sensors": bool(o.get("sensors", True)),
             "ai": bool(ai_key()), "model": ai_model(), "aiapp": bool(app_settings().get("ai_key")),
             "aicfg": bool(str(o.get("gemini_api_key") or "").strip()), "aiuse": ai_usage_info(),
@@ -455,8 +470,8 @@ def reminder_text(due, late):
     return txt
 
 
-def notify(message, data=None):
-    sv = services()
+def notify(message, data=None, only=None):
+    sv = [only] if only else services()
     if not sv:
         raise RuntimeError("Kein Benachrichtigungsdienst eingetragen")
     for s in sv:
@@ -521,16 +536,26 @@ def complete_task(tid, actor="iPhone"):
         return n["title"]
 
 
-def refresh_notification():
+def _for_person(lst, who):
+    # Erinnerung je Person: eigene Aufgaben und solche ohne Zuständigkeit
+    return [t for t in lst if not who or not str(t.get("who", "")).strip() or _mine(t, who)]
+
+
+def remind_all(quiet=False, clear=False):
     now = datetime.datetime.now(ha["tz"]) if ha["tz"] else datetime.datetime.now()
     with LOCK:
         tasks = dict(state["tasks"])
     act, due, late, doing = stats(list(tasks.values()), now.strftime("%Y-%m-%d"))
-    if due or late:
-        notify(reminder_text(due, late), reminder_data(due, late, tasks, quiet=True))
-    else:
-        for s in services():
-            ha_call("POST", "/services/notify/" + s, {"message": "clear_notification", "data": {"tag": NTAG}})
+    for sv, who in notify_who().items():
+        d, l = _for_person(due, who), _for_person(late, who)
+        if d or l:
+            notify(reminder_text(d, l), reminder_data(d, l, tasks, quiet=quiet), only=sv)
+        elif clear:
+            ha_call("POST", "/services/notify/" + sv, {"message": "clear_notification", "data": {"tag": NTAG}})
+
+
+def refresh_notification():
+    remind_all(quiet=True, clear=True)
 
 
 # ---- Verbindung zu Home Assistant (WebSocket), um Knopfdrücke in Mitteilungen zu empfangen
@@ -854,8 +879,7 @@ def ha_tick():
         put_sensor("prio1", "Planner Prio 1 offen", len(p1), "mdi:flag-outline", [t["title"] for t in p1])
     when = remind_time()
     if services() and now.strftime("%H:%M") >= when and ha["last"] != today:
-        if due or late:
-            notify(reminder_text(due, late), reminder_data(due, late, {t["id"]: t for t in tasks}))
+        remind_all()
         ha["last"] = today
         with open(HASTATE, "w", encoding="utf-8") as f:
             json.dump({"last": today}, f)
@@ -1060,6 +1084,27 @@ def quick_task(text, who_default=""):
     speech = "„%s“ ist %s %s eingetragen." % (t["title"], "bis" if q["until"] else "für", when)
     return t, speech
 
+PREFS = os.path.join(D, "prefs.json")  # persönliche Einstellungen je Home-Assistant-Benutzer
+PREFS_LOCK = threading.Lock()
+PREF_KEYS = ("theme", "design", "font", "me", "sort", "glw", "hwho", "htile")
+
+
+def prefs_all():
+    try:
+        with open(PREFS, encoding="utf-8") as f:
+            d = json.load(f)
+        return d if isinstance(d, dict) else {}
+    except Exception:
+        return {}
+
+
+def prefs_save(d):
+    tmp = PREFS + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(d, f, ensure_ascii=False)
+    os.replace(tmp, PREFS)
+
+
 INGRESS_IP = "172.30.32.2"  # Home-Assistant-Ingress (Supervisor)
 LOCAL_SUFFIX = (".local", ".lan", ".home", ".home.arpa", ".internal", ".localdomain", ".fritz.box", ".box", ".intranet", ".localhost")
 TRUSTED_HOSTS = set()  # Adressen aus der Home-Assistant-Konfiguration (interne/externe URL)
@@ -1088,6 +1133,16 @@ def host_ok(client_ip, host_header):
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
+
+    def ha_user(self):
+        # Angemeldeter Home-Assistant-Benutzer. Nur über Ingress vertrauenswürdig (Port 8099 könnte die Kopfzeilen fälschen).
+        if self.client_address[0] != INGRESS_IP and not os.environ.get("TRUST_USER_HEADERS"):
+            return None
+        uid = (self.headers.get("X-Remote-User-Id") or "").strip()
+        if not re.fullmatch(r"[A-Za-z0-9_-]{4,64}", uid):
+            return None
+        name = (self.headers.get("X-Remote-User-Display-Name") or self.headers.get("X-Remote-User-Name") or "").strip()[:40]
+        return {"id": uid, "name": name}
 
     def guard(self):
         if host_ok(self.client_address[0], self.headers.get("Host")):
@@ -1126,6 +1181,13 @@ class H(BaseHTTPRequestHandler):
                 return self.out(200, {"ok": True, "services": out})
             except Exception as e:
                 return self.out(200, {"ok": False, "error": str(e)[:200], "services": []})
+        if u.path.endswith("/api/me"):
+            usr = self.ha_user()
+            if not usr:
+                return self.out(200, {"user": None})
+            with PREFS_LOCK:
+                pr = prefs_all().get(usr["id"]) or {}
+            return self.out(200, {"user": usr["name"], "prefs": pr})
         if u.path.endswith("/api/speech"):
             qs = parse_qs(u.query)
             when = "woche" if (qs.get("when") or [""])[0] == "woche" else "heute"
@@ -1238,6 +1300,24 @@ class H(BaseHTTPRequestHandler):
                 return self.out(200, {"ok": True, "data": ai_call(p, bool(data.get("raw")))})
             except Exception as e:
                 return self.out(200, {"ok": False, "error": str(e)[:200]})
+        if path.endswith("/api/me"):
+            usr = self.ha_user()
+            if not usr:
+                return self.out(200, {"ok": False})
+            if not isinstance(data, dict):
+                return self.out(400, {"error": "Ungültig"})
+            with PREFS_LOCK:
+                allp = prefs_all()
+                mine = allp.get(usr["id"]) if isinstance(allp.get(usr["id"]), dict) else {}
+                for k, v in data.items():
+                    if k in PREF_KEYS and (v is None or isinstance(v, str)):
+                        if v is None or v == "":
+                            mine.pop(k, None)
+                        else:
+                            mine[k] = v[:60]
+                allp[usr["id"]] = mine
+                prefs_save(allp)
+            return self.out(200, {"ok": True})
         if path.endswith("/api/voice"):
             # Wie /api/quick, versteht zusätzlich „heute“, „Woche“ und „erledigt …“ (für Siri-Kurzbefehle)
             try:
@@ -1280,6 +1360,12 @@ class H(BaseHTTPRequestHandler):
                     return self.out(400, {"error": "Das sieht nicht wie ein Gemini-Schlüssel aus"})
             if data.get("ai_model") in AI_MODELS:
                 st["ai_model"] = data["ai_model"]
+            if isinstance(data.get("notify_who"), dict):
+                m = st.get("notify_who") if isinstance(st.get("notify_who"), dict) else {}
+                for k, v in list(data["notify_who"].items())[:20]:
+                    if re.fullmatch(r"[A-Za-z0-9_]+", str(k)) and isinstance(v, str):
+                        m[str(k)] = v.strip()[:30]
+                st["notify_who"] = m
             alexa_changed = isinstance(data.get("alexa"), bool) and data["alexa"] != bool(st.get("alexa"))
             if isinstance(data.get("alexa"), bool):
                 st["alexa"] = data["alexa"]
