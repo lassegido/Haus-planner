@@ -15,10 +15,10 @@ def test_design_je_benutzer(t, browser):
         t.check("Kein Willkommensblatt, wenn der Benutzer bekannt ist", not p.js("document.getElementById('dsh').open"))
         default = p.js(ACC)
         p.settings("des")
-        p.pg.click("#s_body [data-set='des:salbei']")
+        p.pg.click("#s_body [data-set='des:wald']")
         p.pg.wait_for_timeout(500)
         lasse = p.js(ACC)
-        t.check("Lasse wählt Salbei", lasse != default, (default, lasse))
+        t.check("Lasse wählt Wald", lasse != default, (default, lasse))
         p.close()
 
         p = Page(browser, s.url, PHONE, onboarded=False, headers=USERS["Melanie"])
@@ -30,7 +30,7 @@ def test_design_je_benutzer(t, browser):
         p = Page(browser, s.url, PHONE, onboarded=False, headers=USERS["Lasse"])
         p.pg.wait_for_function("USER!==null", timeout=5000)
         p.pg.wait_for_timeout(300)
-        t.check("Lasse bekommt Salbei auch auf einem neuen Gerät", p.js(ACC) == lasse)
+        t.check("Lasse bekommt Wald auch auf einem neuen Gerät", p.js(ACC) == lasse)
         t.check("keine Skriptfehler", not p.errors, p.errors)
         p.close()
 

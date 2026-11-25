@@ -1,23 +1,30 @@
 /* Darstellung: Hell/Dunkel, Akzentfarbe */
 const hostTheme=document.documentElement.dataset.theme||"";
 const pg=prefGet;
-const DK=["--bg","--surf","--card","--tx","--mut","--faint","--line","--line2","--wk","--side","--side-mut","--acc","--on-acc","--acc-soft","--tagc","--focus","--acc2"];
-/* Farbwelten: kuratiert und auf Kontrast geprüft (Text ≥ 4,5 : 1, Bedienelemente ≥ 3 : 1, Hell und Dunkel).
-   Je Farbwelt genau eine Akzentfarbe; Statusfarben (Offen, In Arbeit, Erledigt, Überfällig) bleiben überall gleich. */
+const DK=["--bg","--surf","--card","--tx","--mut","--faint","--line","--line2","--wk","--side","--side-mut","--acc","--on-acc","--acc-soft","--tagc","--focus","--acc2","--acc3"];
+/* Farbwelten (ab 1.40.1 im Stil „Polarlicht“): getönte Flächen, kräftige Seitenleiste, Akzent mit Verlauf (--acc → --acc2, Ring endet in --acc3).
+   Kuratiert und auf Kontrast geprüft (tools/e2e/test_farbwelten.py). Je Farbwelt genau eine Akzentfarbe für Bedienelemente;
+   keine rote, orange oder gelbe Akzentfarbe, damit nichts wie ein Status aussieht. Statusfarben bleiben überall gleich. */
 const DES=[
  ["porto","Portofino","Creme, Meerblau, Sonnenorange",null,null],
- ["salbei","Salbei","Ruhiges Grün, natürlich",["#ECEFE4","#FFFFFF","#FFFFFF","#1E2D26","#5C6F65","#7F8A83","#E1E6D8","#CFD7C6","#E4E8DA","#22403A","#AFC7BC","#3C755F","#FFFFFF","#E1EDE6","#2F5F4C","#3C755F","#4A7340"],
-  ["#101A16","#17241F","#1C2B25","#EAF0EB","#9DB3A8","#62756B","#26382F","#324A3F","#14201B","#0B1411","#8FB5A2","#7CC4A2","#0E1A15","#223C31","#A6D9C0","#7CC4A2","#A3CC7C"]],
- ["beere","Beere","Sanftes Pastell-Violett",["#F4EFF4","#FFFCFE","#FFFCFE","#2B1F33","#6C5A78","#92879A","#E8DEEC","#D7C8DE","#ECE3EF","#5B3A6B","#D4BEE0","#7A4A92","#FFFFFF","#EEE3F3","#603878","#7A4A92","#9A3F74"],
-  ["#1A1220","#221829","#2A1E32","#F4EFF4","#AE9BBA","#75677D","#3A2A44","#4A3857","#1E1526","#120B17","#B79BC8","#C79BE0","#22112B","#3A2548","#DDBFF0","#C79BE0","#E59AC2"]],
- ["graphit","Graphit","Neutrales Grau, sachlich",["#F0F1F2","#FFFFFF","#FFFFFF","#1B2126","#5C666E","#868C91","#E0E3E5","#CDD2D6","#E7E9EB","#2A3238","#B6C0C8","#3E5C74","#FFFFFF","#E2E9EE","#34505F","#3E5C74","#4B5A80"],
-  ["#121518","#1A1E22","#20252A","#EEF0F2","#9AA5AD","#677076","#2A3036","#38414A","#161A1E","#0C0E10","#9AA9B4","#8FB4D0","#101820","#26333E","#B5D0E3","#8FB4D0","#A3A9DD"]],
- /* 1.40: zum Ausprobieren. Indigo bis Petrol als Verlauf; Violett ist klar von allen Statusfarben unterscheidbar */
- ["polar","Polarlicht","Indigo und Petrol, mit Verlauf",["#F1F2F8","#FFFFFF","#FFFFFF","#1B1E3A","#5A5F80","#868AA6","#E3E4F0","#D0D2E4","#E8E9F4","#23264A","#B9BCD9","#5B4FC9","#FFFFFF","#ECEAFB","#4A3FB0","#5B4FC9","#23808F"],
-  ["#10122A","#171A36","#1C2040","#EEF0FA","#A3A7C9","#6F7396","#272B4F","#343963","#141733","#0B0C1F","#A9ADD6","#A99CFF","#15122E","#2A2856","#C9C0FF","#A99CFF","#6FD5E3"]]];
+ ["polar","Polarlicht","Indigo bis Petrol, wie Nordlicht",["#F1F2F8","#FFFFFF","#FFFFFF","#1B1E3A","#5A5F80","#868AA6","#E3E4F0","#D0D2E4","#E8E9F4","#23264A","#B9BCD9","#5B4FC9","#FFFFFF","#ECEAFB","#4A3FB0","#5B4FC9","#23808F","#6CB6E4"],
+  ["#10122A","#171A36","#1C2040","#EEF0FA","#A3A7C9","#6F7396","#272B4F","#343963","#141733","#0B0C1F","#A9ADD6","#A99CFF","#15122E","#2A2856","#C9C0FF","#A99CFF","#6FD5E3","#6CB6E4"]],
+ ["wald","Wald","Smaragd bis Moos, natürlich",["#F2F8F5","#FFFFFF","#FFFFFF","#1A3326","#557766","#7D968A","#E3EDE8","#D0DFD7","#EAF2EE","#234333","#C1D7CC","#1E7A4E","#FFFFFF","#EEFCF5","#196440","#1E7A4E","#4F7A12","#B5D65A"],
+  ["#0E2017","#162A20","#1B3226","#EEF7F2","#A8C8B8","#749585","#284336","#365947","#12241B","#09130E","#B4D0C2","#6CD39E","#0F291C","#2B4A3B","#AEE7CA","#6CD39E","#B9DC6E","#E3F09A"]],
+ ["lagune","Lagune","Türkis bis Kobalt, frisch wie Wasser",["#F2F7F8","#FFFFFF","#FFFFFF","#192E34","#547178","#7D9297","#E3EBEE","#CFDCE0","#E9F0F2","#223D44","#C1D3D7","#0B6E7B","#FFFFFF","#EEFAFC","#095A65","#0B6E7B","#2F55C4","#7FD6E6"],
+  ["#0E1C20","#15262B","#1A2E32","#EDF5F7","#A6C2C9","#738F96","#273E44","#35525A","#112125","#081214","#B3CBD0","#5ED0DD","#0F2429","#2A464C","#A6E5EC","#5ED0DD","#93AEFF","#B8F0E8"]],
+ ["orchidee","Orchidee","Violett bis Magenta, kräftig",["#F5F2F8","#FFFFFF","#FFFFFF","#261A33","#665577","#8A7D96","#E8E3ED","#D7D0DF","#EEEAF2","#332343","#CCC1D7","#6A3FC6","#FFFFFF","#F4EEFC","#5734A2","#6A3FC6","#A42E7C","#F2A2D2"],
+  ["#170E20","#20162A","#261B32","#F2EEF7","#B8A8C8","#857495","#362843","#473659","#1B1224","#0E0913","#C2B4D0","#B89DFF","#1B0F29","#3A2B4A","#D8C9FF","#B89DFF","#F08DC6","#FFC9E6"]],
+ ["feige","Feige","Aubergine bis Altrosa, warm wie Sand",["#F7F3F1","#FFFFFF","#FFFFFF","#31241B","#756457","#94887F","#EDE7E4","#DED6D1","#F1EDEA","#413125","#D5CAC3","#7A3A76","#FFFFFF","#FCEEFB","#643061","#7A3A76","#A3446F","#F0B8CF"],
+  ["#1E160F","#291E17","#30251C","#F6F2EE","#C6B5AA","#938276","#41342A","#564539","#231913","#130D09","#CEC0B6","#D9A2E0","#290F27","#482D46","#EACCEE","#D9A2E0","#EE97BE","#FFD3E4"]],
+ ["schiefer","Schiefer","Kühles Grau, Tinte bis Petrol, sachlich",["#F4F5F6","#FFFFFF","#FFFFFF","#22252B","#60656C","#85898E","#E6E8EA","#D5D7DA","#ECEDEF","#2D3239","#C8CBD0","#34557F","#FFFFFF","#EEF4FC","#2B4668","#34557F","#22737A","#8CC4D6"],
+  ["#14161A","#1C1F24","#22262A","#F1F2F4","#B2B7BD","#7F848B","#31353B","#41464E","#171A1E","#0C0E10","#BDC1C7","#93B5E6","#0F1A29","#353A40","#C4D6F1","#93B5E6","#7FD0D4","#C6E6F0"]]];
+/* Frühere Farbwelten (bis 1.40.0) → Nachfolger; gespeicherte Wahl wird beim nächsten Öffnen umgestellt */
+const DES_OLD={salbei:"wald",beere:"orchidee",graphit:"schiefer"};
 function isDark(){const th=pg("theme")||"auto";return th==="dark"||(th==="auto"&&(hostTheme?hostTheme==="dark":matchMedia("(prefers-color-scheme:dark)").matches))}
 function applyTheme(){
-  const th=pg("theme")||"auto",ac=pg("acc")||"",ds=pg("design")||"porto",r=document.documentElement;
+  const th=pg("theme")||"auto",ac=pg("acc")||"",r=document.documentElement;let ds=pg("design")||"porto";
+  if(DES_OLD[ds]){ds=DES_OLD[ds];prefSet("design",ds)}
   if(th==="auto"){hostTheme?r.dataset.theme=hostTheme:r.removeAttribute("data-theme")}else r.dataset.theme=th;
   const dark=isDark();
   DK.forEach(k=>r.style.removeProperty(k));

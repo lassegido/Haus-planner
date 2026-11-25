@@ -31,7 +31,7 @@ def test_claude_version_ohne_server(t, browser):
         p.pg.click("[data-v=%s]" % v)
         p.pg.wait_for_timeout(200)
     p.settings("des")
-    p.pg.click("#s_body [data-set='des:salbei']")
+    p.pg.click("#s_body [data-set='des:wald']")
     p.pg.wait_for_timeout(200)
     t.check("Claude-Version: Farbwelt wechselt", p.js("getComputedStyle(document.documentElement).getPropertyValue('--acc').trim()") != "")
     p.js("document.getElementById('dls').close()")

@@ -202,3 +202,18 @@ def test_keine_negativen_memes(t, browser):
         bad = p.js("Object.values(GIF_BASE).flat().filter(x=>GIF_BAD.test(x[0]+' '+x[1])).length")
         t.check("Eingebaute Auswahl enthält keine Scheitern-Memes", bad == 0, bad)
         p.close()
+
+
+def test_ohne_spass_kein_konfetti(t, browser):
+    with Server() as s:
+        s.seed([task("h1", "Heute 1", D(0), D(0), who="Lasse")])
+        p = Page(browser, s.url, PHONE, setup=lambda pg: (ALS_LASSE(pg), pg.add_init_script("try{localStorage.setItem('haus-fun','0')}catch(e){}")))
+        p.pg.click("[data-v=home]")
+        p.pg.wait_for_timeout(300)
+        p.js("void setStatus(byId('h1'),'done')")
+        p.pg.wait_for_timeout(600)
+        msg = p.pg.text_content("#toast") or ""
+        t.check("Sprüche, GIFs und Konfetti aus: kein Konfetti, kein GIF", not p.js("!!document.querySelector('.confetti,.gifpop')"))
+        t.check("Der kurze Glückwunsch kommt trotzdem", "Alles für heute erledigt" in msg, msg)
+        t.check("keine Skriptfehler", not p.errors, p.errors)
+        p.close()

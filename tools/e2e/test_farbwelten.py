@@ -10,7 +10,7 @@ COLORS = """(names)=>{const r={},el=document.createElement('i');document.body.ap
   for(const n of names){el.style.color='var('+n+')';const s=getComputedStyle(el).color,m=s.match(/[\\d.]+/g).map(Number).slice(0,3);
     r[n]=s.startsWith('color(srgb')?m.map(v=>v*255):m}  /* color-mix liefert color(srgb 0..1) */
   el.remove();return r}"""
-NAMES = ["--bg", "--grp", "--seg-tr", "--seg-tx", "--card", "--tx", "--mut", "--faint", "--acc", "--on-acc", "--acc2"]
+NAMES = ["--acc3", "--bg", "--grp", "--seg-tr", "--seg-tx", "--card", "--tx", "--mut", "--faint", "--acc", "--on-acc", "--acc2"]
 
 
 def lum(c):
@@ -28,9 +28,14 @@ def test_kontrast_aller_farbwelten(t, browser):
     with Server() as s:
         p = Page(browser, s.url, PHONE)
         worlds = p.js("DES.map(d=>[d[0],d[3]&&d[3].length,d[4]&&d[4].length])")
-        t.check("Polarlicht ist neu dabei", [w[0] for w in worlds] == ["porto", "salbei", "beere", "graphit", "polar"], worlds)
-        t.check("Jede Farbwelt hat alle Werte (Hell und Dunkel, mit zweitem Akzent)",
-                all(w[1] in (None, 17) and w[2] in (None, 17) for w in worlds) and p.js("DK.length") == 17, worlds)
+        t.check("Sieben Farbwelten: Portofino, Polarlicht und fünf neue", [w[0] for w in worlds] == ["porto", "polar", "wald", "lagune", "orchidee", "feige", "schiefer"], worlds)
+        t.check("Jede Farbwelt hat alle Werte (Hell und Dunkel, Verlauf mit drei Farben)",
+                all(w[1] in (None, 18) and w[2] in (None, 18) for w in worlds) and p.js("DK.length") == 18, worlds)
+        t.check("Namen und Beschreibungen ohne Doppelungen", len(set(p.js("DES.map(d=>d[1])"))) == len(worlds) and len(set(p.js("DES.map(d=>d[2])"))) == len(worlds))
+        # Keine Akzentfarbe, die wie ein Status aussieht: Farbton von --acc nicht rot, orange oder gelb (0–60° und ab 345°)
+        hues = p.js("""DES.filter(d=>d[3]).flatMap(d=>[[d[0],d[3][11]],[d[0],d[4][11]]]).map(([k,c])=>{const n=parseInt(c.slice(1),16),r=(n>>16)/255,g=(n>>8&255)/255,b=(n&255)/255,
+          mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let h=0;if(d){h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h=(h*60+360)%360}return[k,Math.round(h)]})""")
+        t.check("Keine rote, orange oder gelbe Akzentfarbe", all(60 < h < 345 for _, h in hues), hues)
         bad = []
         for k, *_ in worlds:
             for th in ("light", "dark"):
@@ -89,4 +94,18 @@ def test_tiefe_und_verlaeufe(t, browser):
             stops = p.js("[...document.querySelectorAll('#rgG stop')].map(s=>s.getAttribute('style'))")
             t.check(th + ": Ring mit Verlauf über drei Farben", len(stops) == 3 and "--acc2" in stops[1], stops)
             t.check(th + ": keine Skriptfehler", not p.errors, p.errors)
+            p.close()
+
+
+def test_alte_farbwelt_wird_umgestellt(t, browser):
+    with Server() as s:
+        for old, new in (("salbei", "wald"), ("beere", "orchidee"), ("graphit", "schiefer")):
+            p = Page(browser, s.url, PHONE, setup=lambda pg, o=old: pg.add_init_script("try{localStorage.setItem('haus-design','%s')}catch(e){}" % o))
+            acc = p.js("getComputedStyle(document.documentElement).getPropertyValue('--acc').trim()").upper()
+            want = p.js("k=>DES.find(d=>d[0]===k)[isDark()?4:3][11]", new).upper()
+            t.check("%s wird zu %s (gespeichert und angewendet)" % (old, new), p.js("prefGet('design')") == new and acc == want, (p.js("prefGet('design')"), acc, want))
+            p.settings("des")
+            t.check("%s: in den Einstellungen ist %s gewählt" % (old, new),
+                    p.js("k=>[...document.querySelectorAll('#s_body .opt.on')].map(b=>b.dataset.set)", new) == ["des:" + new])
+            t.check("keine Skriptfehler", not p.errors, p.errors)
             p.close()

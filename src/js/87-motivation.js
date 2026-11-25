@@ -66,7 +66,7 @@ document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest
 /* Sprüche und GIFs je Person abschaltbar */
 const funOn=()=>prefGet("fun")!=="0";
 /* Feiern: nach dem Abhaken. Letzte Aufgabe des Tages → Konfetti; neues Abzeichen → Hinweis */
-function confetti(){if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;const box=document.createElement("div");box.className="confetti";box.setAttribute("aria-hidden","true");
+function confetti(){if(!funOn()||matchMedia("(prefers-reduced-motion:reduce)").matches)return;const box=document.createElement("div");box.className="confetti";box.setAttribute("aria-hidden","true");
   const C=["var(--acc)","var(--sky)","var(--sun)","var(--sea)","var(--brick)"];
   box.innerHTML=Array.from({length:48},(_,k)=>`<i style="left:${Math.random()*100}%;background:${C[k%5]};--d:${(Math.random()*.5).toFixed(2)}s;--r:${Math.round(Math.random()*720-360)}deg;--x:${Math.round(Math.random()*120-60)}px"></i>`).join("");
   document.body.appendChild(box);setTimeout(()=>box.remove(),2600)}

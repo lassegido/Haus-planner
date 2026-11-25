@@ -70,7 +70,7 @@ def states():
     ph = "Handy"
     for pg in ("des", "font", "theme", "me", "rem", "remt", "keys", "ki", "alexa", "show"):
         out.append(("Handy Einstellungen " + pg, ph, lambda p, pg=pg: p.js(HA_ON + "openSettings();sPage='%s';drawSettings()" % pg)))
-    for d in ("salbei", "beere", "graphit"):
+    for d in ("polar", "wald", "lagune", "orchidee", "feige", "schiefer"):
         for th in ("light", "dark"):
             for v in ("home", "list"):
                 out.append(("Handy %s %s %s" % (d, th, v), ph, lambda p, d=d, th=th, v=v: (p.js("prefSet('design','%s');prefSet('theme','%s');applyTheme()" % (d, th)), C(p, "[data-v=%s]" % v))))

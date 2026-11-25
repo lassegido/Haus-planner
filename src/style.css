@@ -1111,7 +1111,7 @@ main.enter .hero.game .rg{animation:ringin 1.2s .15s cubic-bezier(.2,.8,.2,1) bo
 /* 1.40: Tiefe und Farbverläufe für alle Farbwelten. Ruhig gehalten: weiche Schatten in zwei Ebenen (--sh1 liegt auf, --sh2 schwebt),
    feine Lichtkante oben (--hi), Flächen mit hauchdünnem Verlauf (--surf-grad), Akzentflächen von --acc nach --acc2.
    Die Werte stehen hier; angewendet werden sie in den jeweiligen Regeln weiter oben. Statusfarben bleiben unverändert. */
-:root{--acc2:#2E7C86;--sh1:0 1px 2px rgba(20,48,63,.05),0 6px 18px -6px rgba(20,48,63,.14);--sh2:0 2px 6px rgba(20,48,63,.07),0 18px 40px -12px rgba(20,48,63,.24);
+:root{--acc2:#2E7C86;--acc3:var(--sky);--sh1:0 1px 2px rgba(20,48,63,.05),0 6px 18px -6px rgba(20,48,63,.14);--sh2:0 2px 6px rgba(20,48,63,.07),0 18px 40px -12px rgba(20,48,63,.24);
   --hi:inset 0 1px 0 rgba(255,255,255,.8);--surf-grad:linear-gradient(180deg,color-mix(in srgb,#fff 70%,var(--card)) 0%,var(--card) 55%);--acc-grad:linear-gradient(135deg,var(--acc) 0%,var(--acc2) 100%)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--acc2:#78CFC8;--sh1:0 1px 2px rgba(0,0,0,.35),0 8px 22px -8px rgba(0,0,0,.55);--sh2:0 2px 6px rgba(0,0,0,.4),0 20px 44px -12px rgba(0,0,0,.65);--hi:inset 0 1px 0 rgba(255,255,255,.07);--surf-grad:linear-gradient(180deg,color-mix(in srgb,#fff 6%,var(--card)) 0%,var(--card) 55%)}}
 :root[data-theme="dark"]{--acc2:#78CFC8;--sh1:0 1px 2px rgba(0,0,0,.35),0 8px 22px -8px rgba(0,0,0,.55);--sh2:0 2px 6px rgba(0,0,0,.4),0 20px 44px -12px rgba(0,0,0,.65);--hi:inset 0 1px 0 rgba(255,255,255,.07);--surf-grad:linear-gradient(180deg,color-mix(in srgb,#fff 6%,var(--card)) 0%,var(--card) 55%)}

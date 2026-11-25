@@ -1,5 +1,16 @@
 # Änderungen
 
+## 1.41.0
+- **Fünf neue Farbwelten im Stil von Polarlicht:** getönte Flächen, kräftige Leiste, Akzent mit Verlauf und eigener Ring-Farbe, jeweils für Hell und Dunkel.
+  - **Wald:** Smaragd bis Moos
+  - **Lagune:** Türkis bis Kobalt
+  - **Orchidee:** Violett bis Magenta
+  - **Feige:** Aubergine bis Altrosa auf warmem Sand
+  - **Schiefer:** kühles Grau mit Tinte bis Petrol, für alle, die es sachlich mögen
+- **Salbei, Beere und Graphit entfallen**, weil sie flach wirkten und kaum Verlauf hatten. Wer eine davon gewählt hatte, bekommt beim nächsten Öffnen automatisch den Nachfolger (Salbei → Wald, Beere → Orchidee, Graphit → Schiefer).
+- Jetzt 7 Farbwelten: Portofino (Standard), Polarlicht, Wald, Lagune, Orchidee, Feige, Schiefer. Alle bestehen die Kontrastprüfung in Hell und Dunkel; keine hat eine rote, orange oder gelbe Akzentfarbe, damit nichts wie ein Status aussieht.
+- **Korrektur:** Ist „Sprüche, GIFs und Konfetti“ ausgeschaltet, kommt jetzt auch kein Konfetti mehr. Der kurze Glückwunsch bleibt.
+
 ## 1.40.0
 - **Statt „Warum dieses GIF?“ ein Satz, der motiviert** und den Grund nur andeutet, z. B. „Eine Sache ist liegen geblieben. Die holst du dir jetzt zurück.“, „2 geschafft, nur noch eine. Du bist richtig drin.“ oder „Alle 3 erledigt. Das hast du dir verdient.“
 - **Mehr Tiefe in allen Ansichten, ohne Spielerei:** Karten, Kästen und Listen liegen mit weichem Schatten und feiner Lichtkante auf, die Seite hat einen kaum sichtbaren Farbschimmer. Verläufe nur auf Akzentflächen: Ring (jetzt über drei Farben), Hauptknöpfe, Neu-Knopf, Leiste unten bzw. Seitenleiste. Tafel-Spalten oben leicht in ihrer Statusfarbe getönt, Balken im Zeitstrahl und Fortschrittsbalken mit leichtem Glanz, Kalender-Einträge mit Lichtkante. Karten heben sich am Computer beim Darüberfahren leicht an.

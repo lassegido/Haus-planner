@@ -33,7 +33,9 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] Startseite: Beim Öffnen nichts zum Wegklicken. Tageskarte mit Meme, darunter Eingabe, Umschalter und Liste ohne Scrollen erreichbar. Letzte Aufgabe abhaken: Meme groß und Konfetti.
 - [ ] Über dem GIF steht ein kurzer Satz (z. B. „2 geschafft, nur noch eine. Du bist richtig drin.“), keine Frage „Warum dieses GIF?“.
 - [ ] Hell und Dunkel: Karten, Liste und Tafel wirken leicht plastisch (Schatten, Lichtkante), nichts sieht verwaschen oder grell aus; Ring-Verlauf gut sichtbar.
-- [ ] Einstellungen → Farbwelt → Polarlicht: alle Ansichten gut lesbar, auch im Dunkelmodus; zurück auf Portofino geht.
+- [ ] Einstellungen → Farbwelt: alle 7 durchtippen (Portofino, Polarlicht, Wald, Lagune, Orchidee, Feige, Schiefer), jeweils Hell und Dunkel gut lesbar.
+- [ ] Wer vorher Salbei, Beere oder Graphit hatte: nach dem Update Wald, Orchidee bzw. Schiefer, auch auf dem zweiten Gerät.
+- [ ] „Sprüche, GIFs und Konfetti“ aus, letzte Aufgabe abhaken: kein Konfetti, nur der kurze Hinweis.
 - [ ] Zeitstrahl: Balken ziehen und an den Enden verlängern funktioniert wie vorher (Glanz liegt nur darüber).
 - [ ] Am Tag nach dem Update: Spruch auf der Startseite kommt von Gemini (neu formuliert), KI-Verbrauch in den Einstellungen nur +1.
 
