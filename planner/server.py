@@ -454,63 +454,66 @@ def ai_request(prompt, system=AI_SYSTEM):
     return d
 
 
-# 1.34: Sprüche für die Startseite. Höchstens eine Gemini-Anfrage pro Tag, nur wenn weniger als die Hälfte des
-# Tageslimits verbraucht ist. Ohne Schlüssel oder bei Fehlern nutzt die App ihre eingebauten Sprüche.
+# 1.35: Memes für die Startseite. Es werden keine Memes erfunden: Gemini wählt höchstens einmal am Tag zu jeder Lage
+# bekannte, bestehende Memes aus und liefert GIPHY-Suchbegriffe dafür; die App sucht damit bei GIPHY und zeigt das GIF.
+# Nur wenn weniger als die Hälfte des Tageslimits verbraucht ist. Ohne Schlüssel nutzt die App ihre eingebaute Auswahl.
 MEMES = os.path.join(D, "sprueche.json")
 GIF_FILE = os.path.join(D, "gif.json")
 MEME_KINDS = ("done", "streak", "late", "start", "good")
 MEME_TRY = {"day": ""}
-MEME_SYSTEM = "Du schreibst kurze, witzige deutsche Sprüche für eine Haushalts-App. Antworte nur im verlangten JSON-Format."
-# Themen, aus denen die Sprüche schöpfen (übergeordnet; Beispiele nur zur Orientierung). Hier ergänzen, wenn sich der Geschmack ändert.
+MEME_SYSTEM = "Du kennst Memes, GIFs und Popkultur sehr gut. Antworte nur im verlangten JSON-Format."
+# Themen (übergeordnet; Beispiele nur zur Orientierung). Hier ergänzen, wenn sich der Geschmack ändert.
 MEME_THEMES = [
     "Büro- und Arbeitsplatz-Comedy (z. B. Stromberg, The Office)",
     "US-Zeichentrick-Sitcoms (z. B. Die Simpsons, Family Guy)",
-    "Videospiele und Gaming-Sprüche (z. B. GTA: Mission bestanden, Wanted-Level)",
-    "Fußball-Memes und Fußball-Sprüche",
-    "Tier-Memes, vor allem Hunde (z. B. Doge, „This is fine“, Good Boy), aber auch Katzen und andere Tiere",
-    "aktuelle amerikanische und deutsche Internet-Memes",
-    "Polit-Satire im Stil deutscher Satire-Shows über bekannte Polit-Momente aus Deutschland und der Welt, quer durch alle Parteien",
+    "Videospiele (z. B. GTA: Mission Passed, Wasted)",
+    "Fußball-Memes",
+    "Tier-Memes, vor allem Hunde (z. B. „This is fine“, Doge), auch Katzen und andere Tiere",
+    "bekannte amerikanische und deutsche Internet-Memes",
+    "bekannte Polit-Meme-Momente aus Deutschland und der Welt, quer durch alle Parteien",
 ]
-MEME_PROMPT = """Schreibe kurze Motivationssprüche (Deutsch, je höchstens 90 Zeichen) für die Startseite einer Aufgaben-App,
-die ein Paar um die 30 für Haushalt, Haus und Garten nutzt. Stil: augenzwinkernde Anspielungen auf Popkultur und Memes aus diesen Bereichen:
-%s.
-Bevorzuge, was gerade aktuell oder angesagt ist, und wechsle die Bereiche ab. Wortwahl locker und jugendsprachlich, aber gut verständlich.
-Nur kurze Anspielungen oder sehr kurze bekannte Sprüche, keine langen Zitate, höchstens ein Emoji pro Spruch.
-Grenzen: nichts Beleidigendes oder Anzügliches, niemanden beschämen; bei Politik ausgewogen und ohne eigene Meinung zu Parteien,
-keine Herabwürdigung, keine erfundenen Zitate echter Personen.
-Heute ist der %s. Wiederhole diese Sprüche von gestern nicht: %s
-Kategorien: done = alles für heute erledigt; streak = mehrere Tage in Folge geschafft; late = Aufgaben überfällig (anspornen, nicht schimpfen);
-start = heute noch nichts erledigt; good = schon etwas geschafft, aber noch offen.
-Antworte als JSON: {"done": [8 Sprüche], "streak": [8], "late": [8], "start": [8], "good": [8]}"""
+MEME_PROMPT = """Ein Paar um die 30 nutzt eine Aufgaben-App für Haushalt, Haus und Garten. Auf der Startseite soll je nach Lage ein
+BESTEHENDES, bekanntes Meme als GIF erscheinen (nichts erfinden). Wähle aus diesen Bereichen: %s.
+Lagen: done = alles für heute erledigt (feiern); streak = mehrere Tage in Folge geschafft (stolz); late = Aufgaben überfällig
+(augenzwinkernd: Chaos, „This is fine“, Ausreden); start = heute noch nichts erledigt (Motivation, Anpfiff); good = schon etwas geschafft, aber noch offen (weiter so).
+Gib je Lage 4 verschiedene bekannte Memes an, jeweils mit einem kurzen GIPHY-Suchbegriff (englisch oder deutsch, 2 bis 4 Wörter,
+so dass genau dieses Meme gefunden wird) und dem üblichen Namen des Memes (höchstens 40 Zeichen).
+Bevorzuge, was gerade aktuell und bekannt ist, und wechsle die Bereiche ab. Nichts Anzügliches oder Herabwürdigendes, bei Politik ausgewogen.
+Heute ist der %s. Nimm nicht wieder diese von gestern: %s
+Antworte als JSON: {"done": [{"q": "...", "n": "..."}, ...], "streak": [...], "late": [...], "start": [...], "good": [...]}"""
 
 
 def memes():
-    d = read_json(MEMES, "Sprüche")
+    d = read_json(MEMES, "Meme-Auswahl")
     today = ai_today()
     if d.get("day") != today and MEME_TRY["day"] != today and ai_key():
         u = ai_usage_info()
         if not u["blocked"] and u["used"] < u["limit"] // 2:
             MEME_TRY["day"] = today
             threading.Thread(target=memes_fetch, args=(today,), daemon=True).start()
-    lines = d.get("lines") if isinstance(d.get("lines"), dict) else None
-    return {"day": d.get("day", ""), "lines": lines}
+    gifs = d.get("gifs") if isinstance(d.get("gifs"), dict) else None
+    return {"day": d.get("day", ""), "gifs": gifs}
 
 
 def memes_fetch(today):
     try:
-        old = read_json(MEMES, "Sprüche").get("lines") or {}
-        prev = " | ".join(x for v in old.values() if isinstance(v, list) for x in v[:3])[:800] or "keine"
+        old = read_json(MEMES, "Meme-Auswahl").get("gifs") or {}
+        prev = ", ".join(x.get("n", "") for v in old.values() if isinstance(v, list) for x in v if isinstance(x, dict))[:600] or "keine"
         r = ai_request(MEME_PROMPT % ("; ".join(MEME_THEMES), today, prev), MEME_SYSTEM)
-        lines = {k: [re.sub(r"\s+", " ", x).strip()[:120] for x in r.get(k, []) if isinstance(x, str) and x.strip()][:10]
-                 for k in MEME_KINDS if isinstance(r.get(k), list)}
-        if sum(len(v) for v in lines.values()) < 10:
-            raise RuntimeError("zu wenige Sprüche")
+        gifs = {}
+        for k in MEME_KINDS:
+            items = [{"q": re.sub(r"\s+", " ", str(x.get("q", ""))).strip()[:50], "n": re.sub(r"\s+", " ", str(x.get("n", ""))).strip()[:40]}
+                     for x in (r.get(k) or []) if isinstance(x, dict) and str(x.get("q", "")).strip()]
+            if items:
+                gifs[k] = items[:6]
+        if len(gifs) < 3:
+            raise RuntimeError("zu wenige Vorschläge")
         tmp = MEMES + ".tmp"
         with open(tmp, "w", encoding="utf-8") as f:
-            json.dump({"day": today, "lines": lines}, f, ensure_ascii=False)
+            json.dump({"day": today, "gifs": gifs}, f, ensure_ascii=False)
         os.replace(tmp, MEMES)
     except Exception as e:
-        print("Sprüche nicht erneuert (eingebaute bleiben):", e, flush=True)
+        print("Meme-Auswahl nicht erneuert (eingebaute bleibt):", e, flush=True)
 
 
 def ha_call(method, path, body=None):
@@ -1564,7 +1567,7 @@ class H(BaseHTTPRequestHandler):
             return self.out(200, {"rev": state["rev"], "count": len(items), "v": items[0]["v"]})
 
     def post_gif(self, data):
-        # GIF des Tages (einer für alle, ausgesucht im Browser über GIPHY). Nur Adressen von GIPHY. {"reset": true} löscht es.
+        # GIF je Lage und Tag (für alle gleich), ausgesucht im Browser über GIPHY. Nur Adressen von GIPHY. {"reset": true} löscht.
         d = data if isinstance(data, dict) else {}
         if d.get("reset"):
             try:
@@ -1572,20 +1575,22 @@ class H(BaseHTTPRequestHandler):
             except OSError:
                 pass
             return self.out(200, {"ok": True})
-        url = str(d.get("url") or "")
-        if not re.fullmatch(r"https://media[0-9]?\.giphy\.com/[A-Za-z0-9/_.\-?=&]{5,400}", url):
+        kind, url = str(d.get("kind") or ""), str(d.get("url") or "")
+        if kind not in MEME_KINDS or not re.fullmatch(r"https://media[0-9]?\.giphy\.com/[A-Za-z0-9/_.\-?=&]{5,400}", url):
             return self.out(400, {"error": "Nur GIFs von GIPHY"})
-        g = {"day": ai_today(), "url": url, "title": str(d.get("title") or "")[:120], "term": str(d.get("term") or "")[:40],
+        g = {"url": url, "title": str(d.get("title") or "")[:120], "name": str(d.get("name") or "")[:40], "term": str(d.get("term") or "")[:50],
              "link": str(d.get("link") or "")[:200] if str(d.get("link") or "").startswith("https://giphy.com/") else ""}
         with LOCK:
-            old = read_json(GIF_FILE, "GIF des Tages")
-            if old.get("day") == g["day"]:
-                return self.out(200, old)  # anderes Gerät war schneller: alle sehen dasselbe GIF
-            tmp = GIF_FILE + ".tmp"
-            with open(tmp, "w", encoding="utf-8") as f:
-                json.dump(g, f, ensure_ascii=False)
-            os.replace(tmp, GIF_FILE)
-        return self.out(200, g)
+            cur = read_json(GIF_FILE, "GIF des Tages")
+            if cur.get("day") != ai_today() or not isinstance(cur.get("by"), dict):
+                cur = {"day": ai_today(), "by": {}}
+            if kind not in cur["by"]:  # anderes Gerät war schneller: alle sehen dasselbe GIF
+                cur["by"][kind] = g
+                tmp = GIF_FILE + ".tmp"
+                with open(tmp, "w", encoding="utf-8") as f:
+                    json.dump(cur, f, ensure_ascii=False)
+                os.replace(tmp, GIF_FILE)
+        return self.out(200, cur)
 
     def post_log(self, data):
         # Skriptfehler aus dem Browser ins Add-on-Protokoll (Home Assistant → Add-on → Protokoll). Höchstens 30 pro Stunde.

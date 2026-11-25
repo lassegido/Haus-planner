@@ -34,7 +34,6 @@ function homeBody(tasks,allT){
   const cur=TL[ht],LL=cur[1];
   const list=`<section class="pnl hlist" style="--i:${k++}"><h3><span>${cur[0]}</span><em>${LL.length}</em></h3>${LL.length?LL.slice(0,40).map(hrow).join(""):`<div class="none">${cur[4]}</div>`}</section>`;
   const kind=rn&&!todayL.length?"done":over.length?"late":ms.streak>=3?"streak":rd?"good":todayL.length?"start":"done";
-  if(!gifAsked&&haInfo){gifAsked=true;setTimeout(gifToday,0)}
   /* Kopf: persönliche Spiel-Karte ganz oben (Ring, Serie, Woche, Spruch + GIF, Abzeichen), danach Kacheln, Eingabe, Liste */
   const hero=`<section class="hero game" style="--i:0"><div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div><div class="hbody"><div class="hh">Heute: ${rd} von ${rn} erledigt</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>${nx?`<div class="hnext"><small>Nächste Frist</small><strong>${esc(nx.title)}</strong><span>${[nx.area,rel(nx)].filter(Boolean).map(esc).join(" · ")}</span></div>`:""}${funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length})}${badgeStrip(ms)}</section>`;
   return`<div class="home">${hero}${tiles}${qa}${list}`+

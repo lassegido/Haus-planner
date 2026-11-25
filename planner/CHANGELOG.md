@@ -2,7 +2,9 @@
 
 ## 1.35.0
 - **Startseite neu sortiert:** Ganz oben steht jetzt deine persönliche Spiel-Karte: Tagesring, Serie, „x diese Woche“, Spruch mit GIF und Abzeichen. Danach folgen Kacheln, Eingabe und Liste. „Gemeinsam diese Woche“ ist ganz nach unten gewandert.
-- **GIF des Tages (GIPHY):** ein GIF pro Tag für alle, beim ersten Öffnen des Tages kurz groß und dann klein neben dem Spruch. Antippen zeigt es noch einmal, beim Feiern kommt es zurück. Es braucht einen kostenlosen GIPHY-Schlüssel (Einstellungen → Sprüche und GIFs), dort lassen sich auch eigene Suchbegriffe eintragen.
+- **Echte Memes als GIF je Lage (GIPHY):** Es werden nur bestehende, bekannte Memes gezeigt, nichts erfunden. Zu jeder Lage (alles erledigt, Serie, überfällig, noch nichts, halb geschafft) gibt es höchstens ein GIF am Tag, für alle gleich. Es erscheint einmal kurz groß und bleibt dann klein mit dem Namen des Memes in der Karte. Ändert sich die Lage (z. B. letzte Aufgabe erledigt), kommt das passende GIF.
+- **Auswahl durch Gemini:** Einmal am Tag schlägt Gemini zu jeder Lage bekannte Memes aus euren Themen vor (eine Anfrage, nur wenn weniger als die Hälfte des Tageslimits verbraucht ist); sonst gilt eine eingebaute Auswahl. Eigene Suchbegriffe lassen sich ergänzen. Die selbst geschriebenen Sprüche gibt es nur noch, solange kein GIPHY-Schlüssel eingetragen ist.
+- Für GIFs braucht es einen kostenlosen GIPHY-Schlüssel (Einstellungen → Sprüche und GIFs).
 - **Abzeichen mit Fortschritt:** Die Karte zeigt die freigeschalteten Abzeichen und das nächste mit Balken (z. B. „Erste 10 · 8/10“). Antippen klappt alle Abzeichen mit ihrem Stand auf.
 - Sprüche und GIFs lassen sich je Person abschalten (Einstellungen → Nur für dich → Sprüche und GIFs).
 

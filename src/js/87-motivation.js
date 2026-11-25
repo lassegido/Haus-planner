@@ -73,7 +73,7 @@ function newBadges(){const s=motStats(motScope()),got=BADGES.filter(b=>bOn(b,s))
 function cheer(){
   const L=motScope(),T=today(),doneToday=L.some(t=>t.status==="done"&&doneOn(t)===T),fresh=newBadges();
   const all=!todayOpenOf(L).length&&doneToday,nb=fresh.length?"Neues Abzeichen: "+fresh.map(b=>b[1]).join(", "):"";
-  if(all||nb){confetti();hap(30);toast(all?"Alles für heute erledigt – stark! 🎉"+(nb?" "+nb:""):"🏅 "+nb,null,null,5000);if(all)gifPop(true)}}
+  if(all||nb){confetti();hap(30);toast(all?"Alles für heute erledigt – stark! 🎉"+(nb?" "+nb:""):"🏅 "+nb,null,null,5000);if(all)gifPop("done",true)}}
 /* 1.34: Sprüche auf der Startseite (nur dort). Eingebaut; im Add-on erneuert Gemini sie höchstens einmal am Tag (api/sprueche).
    Platzhalter: {n} Serie, {late} überfällig, {open} offen. */
 const MEME_BASE={
@@ -88,31 +88,41 @@ const MEME_BASE={
   good:["Halbzeitführung. Jetzt bloß nicht nachlassen.","Noch {open} offen – das macht ihr mit links.","Läuft bei euch. Fast so gut wie Ernie beim Kaffeeholen.",
     "Mission läuft. Noch {open} Ziele auf der Karte.","Excellent. – Mr. Burns wäre zufrieden. Noch {open}.","Ihr cookt gerade. Noch {open}.","Lass mal so weitermachen, noch {open} – ezpz.","Wauzi-Wackel-Modus: noch {open} 🐕","Tremendous progress. The best. Noch {open}."]};
 let MEMES=null;
-(function loadMemes(){if(typeof api!=="function")return;api("api/sprueche").then(j=>{if(j&&j.lines){MEMES=j.lines;if(typeof regLoaded!=="undefined"&&regLoaded&&view==="home")render()}}).catch(()=>{})})();
-function memeText(kind,v){const L=(MEMES&&MEMES[kind]&&MEMES[kind].length?MEMES[kind]:MEME_BASE[kind])||[];if(!L.length)return"";
+(function loadMemes(){if(typeof api!=="function")return;api("api/sprueche").then(j=>{if(j&&j.gifs){MEMES=j.gifs;if(typeof regLoaded!=="undefined"&&regLoaded&&view==="home")render()}}).catch(()=>{})})();
+function memeText(kind,v){const L=MEME_BASE[kind]||[];if(!L.length)return"";
   return L[(today()+kind.length*7)%L.length].replace(/\{(\w+)\}/g,(m,k)=>v[k]!==undefined?v[k]:m)}
-/* 1.35: GIF des Tages über GIPHY (ein GIF pro Tag für alle). GIPHY verlangt die Suche im Browser; das erste Gerät des Tages sucht,
-   der Server merkt es sich (api/gif), alle anderen bekommen dasselbe. Suchbegriffe: eingebaute plus eigene aus den Einstellungen. */
-const GIF_TERMS=["stromberg","the office celebration","simpsons woohoo","family guy","gta mission passed","this is fine dog","happy dog","doge",
-  "football celebration","capybara","cat knocking","dwight schrute","good boy","success kid"];
-let GIF=null,gifAsked=false;
-async function gifToday(){
+/* 1.35: GIF je Lage (done, streak, late, start, good) aus BESTEHENDEN Memes. Auswahl: Gemini schlägt einmal am Tag passende bekannte
+   Memes mit GIPHY-Suchbegriff vor (api/sprueche), sonst die eingebaute Liste unten; eigene Suchbegriffe aus den Einstellungen kommen dazu.
+   Je Lage und Tag sucht das erste Gerät einmal bei GIPHY (GIPHY verlangt die Suche im Browser), der Server merkt sich das GIF für alle. */
+const GIF_BASE={
+  done:[["stromberg applaus","Stromberg: Applaus"],["gta mission passed","GTA: Mission Passed"],["homer woohoo","Homer: Woo-hoo!"],["michael scott yes","Michael Scott: Yes!"],["happy dog zoomies","Hund mit Zoomies"],["success kid","Success Kid"]],
+  streak:[["leonardo dicaprio cheers","DiCaprio: Cheers"],["dwight schrute perfect","Dwight: Perfekt"],["proud dog","Stolzer Hund"],["football goal celebration","Torjubel"],["nba jam on fire","He's on fire!"]],
+  late:[["this is fine dog","This is fine"],["homer backs into bush","Homer verschwindet in der Hecke"],["gta wasted","GTA: Wasted"],["cat knocking things off table","Katze räumt den Tisch ab"],["stromberg","Stromberg"],["peter griffin","Peter Griffin"]],
+  start:[["lets do this","Let's do this"],["dog waiting","Hund wartet"],["capybara","Capybara"],["kick off football","Anpfiff"],["michael scott","Michael Scott"]],
+  good:[["mr burns excellent","Mr. Burns: Excellent"],["keep going","Keep going"],["excited dog","Aufgeregter Hund"],["nice","Nice"],["thumbs up dog","Daumen hoch"]]};
+let GIFS={},gifAsked=false;const gifBusy=new Set();
+function gifPick(kind){const own=((haInfo&&haInfo.gifterms)||[]).map(q=>({q,n:q}));
+  const L=[...((MEMES&&MEMES[kind])||GIF_BASE[kind].map(([q,n])=>({q,n}))),...own];return L[(today()*7+kind.length)%L.length]}
+async function gifToday(kind){
   if(typeof api!=="function"||!funOn())return;
-  try{const j=await api("api/gif");if(j&&j.url){GIF=j;return gifReady()}
-    const k=haInfo&&haInfo.giphy;if(!k)return;const terms=[...GIF_TERMS,...((haInfo&&haInfo.gifterms)||[])],q=terms[(today()*7+3)%terms.length];
-    const r=await fetch("https://api.giphy.com/v1/gifs/search?api_key="+encodeURIComponent(k)+"&q="+encodeURIComponent(q)+"&limit=25&rating=pg-13&lang=de").then(x=>x.json());
+  try{if(!gifAsked){gifAsked=true;const j=await api("api/gif");GIFS=(j&&j.by)||{};if(GIFS[kind])return gifReady(kind)}
+    if(GIFS[kind]||gifBusy.has(kind))return;const k=haInfo&&haInfo.giphy;if(!k)return;gifBusy.add(kind);const m=gifPick(kind);
+    const r=await fetch("https://api.giphy.com/v1/gifs/search?api_key="+encodeURIComponent(k)+"&q="+encodeURIComponent(m.q)+"&limit=12&rating=pg-13&lang=de").then(x=>x.json());
     const L=(r.data||[]).filter(x=>x.images&&x.images.fixed_height&&(x.images.fixed_height.webp||x.images.fixed_height.url));if(!L.length)return;
-    const g=L[Math.floor(Math.random()*Math.min(L.length,15))],im=g.images.fixed_height;
-    GIF=await api("api/gif",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url:im.webp||im.url,title:g.title||q,term:q,link:g.url||""})});gifReady()}
+    const g=L[Math.floor(Math.random()*Math.min(L.length,6))],im=g.images.fixed_height;
+    const j=await api("api/gif",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind,url:im.webp||im.url,title:g.title||"",name:m.n,term:m.q,link:g.url||""})});
+    GIFS=(j&&j.by)||GIFS;gifReady(kind)}
   catch(_){}}
-function gifReady(){if(view==="home")render();gifPop(false)}
-/* Einmal am Tag je Gerät groß zeigen (und beim Feiern), danach klein auf der Startseite */
-function gifPop(force){if(!GIF||!GIF.url||!funOn()||document.querySelector("dialog[open]"))return;let seen="";try{seen=localStorage.getItem("haus-gifday")||""}catch(_){}
-  if(!force&&seen===GIF.day)return;try{localStorage.setItem("haus-gifday",GIF.day)}catch(_){}
-  const o=document.createElement("div");o.className="gifpop";o.innerHTML=`<figure><img src="${esc(GIF.url)}" alt="${esc(GIF.title||"GIF")}"><figcaption>GIF des Tages · via GIPHY</figcaption></figure>`;
-  const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),250)};o.onclick=close;document.body.appendChild(o);setTimeout(close,4500)}
-document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-gif]"))gifPop(true)});
-/* Kopf der Startseite: Spiel-Karte (Ring, Serie, Woche, Spruch mit GIF, Abzeichen) */
-function funHtml(kind,v){if(!funOn())return"";const t=memeText(kind,v);
-  return`<div class="hfun">${GIF&&GIF.url?`<button type="button" class="gifth" data-gif aria-label="GIF des Tages ansehen"><img src="${esc(GIF.url)}" alt="" loading="lazy"><small>GIPHY</small></button>`:""}<p class="meme">${esc(t)}</p></div>`}
-function memeHtml(kind,v){const s=memeText(kind,v);return s?`<p class="meme">${esc(s)}</p>`:""}
+function gifReady(kind){if(view==="home")render();gifPop(kind,false)}
+/* Je Gerät, Tag und Lage einmal groß zeigen (und beim Feiern), sonst klein in der Spiel-Karte */
+function gifPop(kind,force){const g=GIFS[kind];if(!g||!g.url||!funOn()||document.querySelector("dialog[open],.gifpop"))return;
+  const key=tdy()+":"+kind;let seen="";try{seen=localStorage.getItem("haus-gifseen")||""}catch(_){}
+  if(!force&&seen.split(",").includes(key))return;try{localStorage.setItem("haus-gifseen",[...seen.split(",").filter(x=>x.startsWith(tdy())),key].join(","))}catch(_){}
+  const o=document.createElement("div");o.className="gifpop";o.innerHTML=`<figure><img src="${esc(g.url)}" alt="${esc(g.name||g.title||"GIF")}"><figcaption><b>${esc(g.name||"")}</b> · via GIPHY</figcaption></figure>`;
+  const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),250)};o.onclick=close;document.body.appendChild(o);setTimeout(close,5000)}
+let gifKind="start";
+document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-gif]"))gifPop(gifKind,true)});
+/* In der Spiel-Karte: GIF der aktuellen Lage mit dem Namen des Memes; ohne GIPHY-Schlüssel ein kurzer Spruch */
+function funHtml(kind,v){if(!funOn())return"";gifKind=kind;if(haInfo&&haInfo.giphy&&!GIFS[kind])setTimeout(()=>gifToday(kind),0);const g=GIFS[kind];
+  if(g&&g.url)return`<div class="hfun"><button type="button" class="gifth" data-gif aria-label="GIF ansehen"><img src="${esc(g.url)}" alt="" loading="lazy"><small>GIPHY</small></button><p class="meme mname">${esc(g.name||g.title||"")}</p></div>`;
+  return`<div class="hfun"><p class="meme">${esc(memeText(kind,v))}</p></div>`}

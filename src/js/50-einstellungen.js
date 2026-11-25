@@ -89,13 +89,13 @@ function drawSettings(){
     const hi=haInfo||{},on=funOn();
     h=`<p class="sgt">Nur für dich</p>`+grp(sopt('data-set="fun:1"',"An",on)+sopt('data-set="fun:0"',"Aus",!on))
      +cap("Sprüche, GIF des Tages und Konfetti auf der Startseite. Liste, Board, Zeitstrahl und Kalender bleiben immer sachlich.");
-    if(haInfo){h+=`<p class="sgt">GIF des Tages · für alle</p>`+(GIF&&GIF.url?`<div class="gifprev"><img src="${esc(GIF.url)}" alt=""><small>Heute: „${esc(GIF.term||"")}“ · via GIPHY</small></div>`:"")
+    if(haInfo){h+=`<p class="sgt">GIF des Tages · für alle</p>`+(GIFS[gifKind]&&GIFS[gifKind].url?`<div class="gifprev"><img src="${esc(GIFS[gifKind].url)}" alt=""><small>Gerade: ${esc(GIFS[gifKind].name||"")} · via GIPHY</small></div>`:"")
        +`<div class="sgrp kin"><input id="gif_key" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="${hi.giphy?"GIPHY-Schlüssel ist eingetragen":"GIPHY-Schlüssel einfügen"}" aria-label="GIPHY-Schlüssel"></div>`
-       +grp(srow('data-act="gifsave"',"<b class=\"acc\">Schlüssel sichern</b>",null,null,false)+(hi.giphy?srow('data-act="gifnew"',"Heute ein anderes GIF",null,null,false)+srow('data-act="gifdel"',"<span class=\"bad\">Schlüssel entfernen</span>",null,null,false):""))
-       +cap("Ein GIF pro Tag für alle, eine einzige Suche bei GIPHY. Kostenloser Schlüssel: developers.giphy.com → Create an App → API. Der Schlüssel ist für den Browser gedacht und wird darum an die App ausgeliefert (anders als der Gemini-Schlüssel).")
+       +grp(srow('data-act="gifsave"',"<b class=\"acc\">Schlüssel sichern</b>",null,null,false)+(hi.giphy?srow('data-act="gifnew"',"Heute andere GIFs",null,null,false)+srow('data-act="gifdel"',"<span class=\"bad\">Schlüssel entfernen</span>",null,null,false):""))
+       +cap("Je Lage (alles erledigt, Serie, überfällig, noch nichts, halb geschafft) höchstens ein GIF am Tag, für alle gleich. Es werden nur bestehende Memes von GIPHY gezeigt. Kostenloser Schlüssel: developers.giphy.com → Create an App → API. Der Schlüssel ist für den Browser gedacht und wird darum an die App ausgeliefert (anders als der Gemini-Schlüssel).")
        +`<p class="sgt">Eigene Suchbegriffe</p><div class="sgrp kin"><input id="gif_terms" type="text" autocomplete="off" value="${esc(((hi.gifterms)||[]).join(", "))}" placeholder="z. B. stromberg finger, dog zoomies" aria-label="Eigene GIF-Suchbegriffe"></div>`
        +grp(srow('data-act="giftermsave"',"<b class=\"acc\">Suchbegriffe sichern</b>",null,null,false))
-       +cap("Mit Komma trennen. Der Planner wechselt täglich zwischen eingebauten Themen (Büro-Comedy, Zeichentrick, Gaming, Fußball, Tiere) und euren Begriffen. Die Sprüche schreibt Gemini einmal am Tag neu, wenn ein Gemini-Schlüssel eingetragen ist.")}
+       +cap("Mit Komma trennen. Der Planner wechselt täglich zwischen eingebauten Themen (Büro-Comedy, Zeichentrick, Gaming, Fußball, Tiere) und euren Begriffen. Mit Gemini-Schlüssel wählt die KI einmal am Tag passende bekannte Memes für jede Lage aus (eine Anfrage).")}
   }else if(sPage==="ki"){
     const hi=haInfo||{},on=!!hi.ai;
     const au=hi.aiuse||{used:0,limit:100};
@@ -144,9 +144,9 @@ $("s_body").onclick=async e=>{
   if(d.act==="arch"){const L=tasks.filter(t=>t.status==="done");if(!L.length)return;await saveMany(L.map(t=>({...t,arch:true})));$("dls").close();toast(L.length+" erledigte archiviert",()=>saveMany(L))}
   else if(d.act==="open"){$("dls").close();openArch()}
   else if(d.act==="gifsave"||d.act==="gifdel"){const k=d.act==="gifdel"?"":$("gif_key").value.trim();if(d.act==="gifsave"&&!k){toast("Erst den Schlüssel einfügen");return}
-    try{await haSave({giphy_key:k});toast(k?"GIPHY-Schlüssel gesichert":"GIPHY-Schlüssel entfernt");if(k){GIF=null;gifAsked=false;await gifToday()}}catch(e){toast("Speichern fehlgeschlagen")}drawSettings()}
+    try{await haSave({giphy_key:k});toast(k?"GIPHY-Schlüssel gesichert":"GIPHY-Schlüssel entfernt");if(k){GIFS={};gifAsked=false;render()}}catch(e){toast("Speichern fehlgeschlagen")}drawSettings()}
   else if(d.act==="giftermsave"){await haSave({gif_terms:$("gif_terms").value.split(",").map(x=>x.trim()).filter(Boolean)});toast("Suchbegriffe gesichert");drawSettings()}
-  else if(d.act==="gifnew"){try{await api("api/gif",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({reset:true})});GIF=null;try{localStorage.removeItem("haus-gifday")}catch(_){}$("dls").close();await gifToday()}catch(_){toast("Kein neues GIF gefunden")}}
+  else if(d.act==="gifnew"){try{await api("api/gif",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({reset:true})});GIFS={};gifAsked=false;try{localStorage.removeItem("haus-gifseen")}catch(_){}$("dls").close();render()}catch(_){toast("Kein neues GIF gefunden")}}
   else if(d.act==="showcopy"){const u=$("show_url").value;try{await navigator.clipboard.writeText(u);toast("Adresse kopiert")}catch(_){$("show_url").focus();$("show_url").select();toast("Adresse markiert, bitte kopieren")}}
   else if(d.act==="showopen"){window.open(location.pathname+"?anzeige"+(prefGet("me")?"&wer="+encodeURIComponent(prefGet("me")):""),"_blank")}
   else if(d.act==="kipaste"){try{const t=await navigator.clipboard.readText();$("ki_key").value=t.replace(/\s+/g,"");toast(t.trim()?"Eingefügt, jetzt sichern":"Zwischenablage ist leer")}catch(e){$("ki_key").focus();toast("Bitte lange ins Feld tippen und „Einsetzen“ wählen")}}

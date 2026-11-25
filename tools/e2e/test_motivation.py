@@ -86,28 +86,33 @@ def test_ohne_geschichte_kein_alarm(t, browser):
         p.close()
 
 
-def test_sprueche_einmal_am_tag(t, browser):
+def test_meme_auswahl_einmal_am_tag(t, browser):
     from common import FakeGemini
     import json, time
     kinds = ["done", "streak", "late", "start", "good"]
-    g = FakeGemini(lambda prompt: {k: ["Gemini-%s-%d" % (k, i) for i in range(8)] for k in kinds})
-    with Server(settings={"ai_key": "AQ.TestSchluessel_1234567890abcdef"}, GEMINI_URL=g.url) as s:
+    g = FakeGemini(lambda prompt: {k: [{"q": "gemini %s %d" % (k, i), "n": "Meme %s %d" % (k, i)} for i in range(4)] for k in kinds})
+    with Server(settings={"ai_key": "AQ.TestSchluessel_1234567890abcdef", "giphy_key": "TestGiphyKey1234567890abcd"}, GEMINI_URL=g.url) as s:
         s.seed([task("h", "Heute", D(0), D(0), who="Lasse")])
         first = s.api("api/sprueche")
         time.sleep(1)
         second = s.api("api/sprueche")
         s.api("api/sprueche")
         time.sleep(0.5)
-        t.check("Sprüche: eine Gemini-Anfrage im Hintergrund, danach aus dem Speicher", first["lines"] is None and second["lines"] and len(g.prompts) == 1, (first, len(g.prompts)))
-        t.check("Anfrage nennt die gewünschten Themen", all(x in g.prompts[0] for x in ("Stromberg", "Simpsons", "GTA", "Tier", "Satire")))
+        t.check("Meme-Auswahl: eine Gemini-Anfrage im Hintergrund, danach aus dem Speicher", first["gifs"] is None and second["gifs"] and len(g.prompts) == 1, (first, len(g.prompts)))
+        t.check("Anfrage verlangt bestehende Memes aus den gewünschten Bereichen", "BESTEHENDES" in g.prompts[0] and all(x in g.prompts[0] for x in ("Stromberg", "Simpsons", "GTA", "Tier", "Polit")))
         t.check("Zählt fürs Tageslimit (1 Anfrage)", s.api("api/tasks")["ha"]["aiuse"]["used"] == 1)
-        p = Page(browser, s.url, PHONE, setup=ALS_LASSE)
-        p.pg.click("[data-v=home]")
-        p.pg.wait_for_timeout(500)
-        m = p.js("(document.querySelector('.hero .meme')||{}).textContent||''")
-        t.check("Startseite zeigt einen Gemini-Spruch passend zur Lage (heute noch nichts erledigt)", m.startswith("Gemini-start-"), m)
+        calls = []
+        p = Page(browser, s.url, PHONE, setup=lambda pg: (ALS_LASSE(pg), giphy_mock(pg, calls)))
+        p.pg.wait_for_timeout(800)
+        t.check("GIPHY-Suche mit dem von Gemini gewählten Meme der Lage „start“", len(calls) == 1 and "q=gemini%20start" in calls[0], calls)
+        t.check("Karte zeigt GIF mit Meme-Namen", p.js("(document.querySelector('.hero .mname')||{}).textContent") .startswith("Meme start"))
+        p.js("document.querySelectorAll('.gifpop').forEach(x=>x.remove())")
+        p.js("void setStatus(byId('h'),'done')")
+        p.pg.wait_for_timeout(900)
+        t.check("Lage wechselt (alles erledigt): neues passendes GIF, groß eingeblendet", len(calls) == 2 and "q=gemini%20done" in calls[1] and p.js("!!document.querySelector('.gifpop')"), calls)
+        t.check("Server merkt sich je Lage ein GIF", sorted(s.api("api/gif").get("by", {})) == ["done", "start"])
         p.pg.click("[data-v=list]")
-        t.check("Andere Ansichten bleiben ohne Sprüche", not p.js("!!document.querySelector('.meme')"))
+        t.check("Andere Ansichten bleiben ohne Memes", not p.js("!!document.querySelector('#main .meme,#main .gifth')"))
         p.close()
     with Server(settings={"ai_key": "AQ.TestSchluessel_1234567890abcdef"}, GEMINI_URL=g.url) as s:
         json.dump({"day": time.strftime("%Y-%m-%d"), "n": 60, "blocked": False}, open(s.dir + "/d/ai_usage.json", "w"))
@@ -115,8 +120,7 @@ def test_sprueche_einmal_am_tag(t, browser):
         time.sleep(0.5)
         t.check("Ist mehr als die Hälfte des Tageslimits verbraucht, wird nicht nachgefragt", len(g.prompts) == 1)
         p = Page(browser, s.url, PHONE, setup=ALS_LASSE)
-        p.pg.click("[data-v=home]")
-        t.check("Dann eingebaute Sprüche", p.js("!!document.querySelector('.hero .meme')") and "Gemini" not in p.js("document.querySelector('.hero .meme').textContent"))
+        t.check("Ohne GIPHY-Schlüssel: kurzer Spruch statt GIF", p.js("!!document.querySelector('.hero .meme')") and not p.js("!!document.querySelector('.hero .gifth')"))
         p.close()
     g.close()
 
@@ -139,21 +143,19 @@ def test_gif_des_tages(t, browser):
         s.seed([task("h", "Heute", D(0), D(0), who="Lasse")])
         calls = []
         p = Page(browser, s.url, PHONE, setup=lambda pg: (ALS_LASSE(pg), giphy_mock(pg, calls)))
-        p.pg.wait_for_timeout(500)  # Start ist die erste Ansicht
-        t.check("Erstes Öffnen am Tag: eine GIPHY-Suche, GIF groß eingeblendet", len(calls) == 1 and p.js("!!document.querySelector('.gifpop img')"), calls)
+        p.pg.wait_for_timeout(600)  # Start ist die erste Ansicht
+        t.check("Erstes Öffnen: eine GIPHY-Suche aus der eingebauten Auswahl, GIF groß eingeblendet", len(calls) == 1 and p.js("!!document.querySelector('.gifpop img')"), calls)
         t.check("Suche mit Schlüssel und Jugendschutz pg-13", "api_key=TestGiphyKey" in calls[0] and "rating=pg-13" in calls[0])
         p.pg.click(".gifpop")
         p.pg.wait_for_timeout(400)
         t.check("Antippen schließt, GIF bleibt klein in der Karte", not p.js("!!document.querySelector('.gifpop')") and p.js("!!document.querySelector('.hero .gifth img')"))
-        t.check("Server merkt sich das GIF des Tages", s.api("api/gif").get("url", "").startswith("https://media.giphy.com/"))
         p.close()
         calls2 = []
         p = Page(browser, s.url, PHONE, setup=lambda pg: (ALS_LASSE(pg), giphy_mock(pg, calls2)))
-        p.pg.click("[data-v=home]")
-        p.pg.wait_for_timeout(800)
+        p.pg.wait_for_timeout(600)
         t.check("Zweites Gerät: keine neue Suche, gleiches GIF", calls2 == [] and p.js("!!document.querySelector('.hero .gifth img')"), calls2)
         p.js("prefSet('fun','0');render()")
         t.check("Abschaltbar je Person: dann weder Spruch noch GIF", not p.js("!!document.querySelector('.hero .meme,.hero .gifth')"))
-        t.check("Fremde GIF-Adressen lehnt der Server ab", s.api("api/gif", {"url": "https://evil.example/x.gif"}).get("_status") == 400)
+        t.check("Fremde GIF-Adressen lehnt der Server ab", s.api("api/gif", {"kind": "done", "url": "https://evil.example/x.gif"}).get("_status") == 400)
         t.check("keine Skriptfehler", not p.errors, p.errors)
         p.close()
