@@ -474,12 +474,12 @@ MEME_THEMES = [
 ]
 MEME_PROMPT = """Ein Paar um die 30 nutzt eine Aufgaben-App für Haushalt, Haus und Garten. Auf der Startseite soll je nach Lage ein
 BESTEHENDES, bekanntes Meme als GIF erscheinen (nichts erfinden). Wähle aus diesen Bereichen: %s.
-Lagen: done = alles für heute erledigt (feiern); streak = mehrere Tage in Folge geschafft (stolz); late = Aufgaben überfällig
-(augenzwinkernd: Chaos, „This is fine“, Ausreden); start = heute noch nichts erledigt (Motivation, Anpfiff); good = schon etwas geschafft, aber noch offen (weiter so).
+Lagen: done = alles für heute erledigt (feiern); streak = mehrere Tage in Folge geschafft (stolz); late = etwas ist liegen geblieben
+(anspornen: aufholen, Comeback, „packen wir’s an“; KEIN Scheitern, keine Niederlage, kein Tod, kein „Wasted“, kein „This is fine“); start = heute noch nichts erledigt (Motivation, Anpfiff); good = schon etwas geschafft, aber noch offen (weiter so).
 Gib je Lage 4 verschiedene bekannte Memes an, jeweils mit einem kurzen GIPHY-Suchbegriff (englisch oder deutsch, 2 bis 4 Wörter,
 so dass genau dieses Meme gefunden wird) und einer kurzen DEUTSCHEN Beschreibung, was im GIF passiert (höchstens 40 Zeichen,
 z. B. „DiCaprio prostet euch zu“, „Hund im brennenden Zimmer“; keine englischen Titel).
-Bevorzuge, was gerade aktuell und bekannt ist, und wechsle die Bereiche ab. Nichts Anzügliches oder Herabwürdigendes, bei Politik ausgewogen.
+Jede Lage ist eine positive, anspornende Botschaft (die App soll motivieren, nie herunterziehen). Bevorzuge, was gerade aktuell und bekannt ist, und wechsle die Bereiche ab. Nichts Anzügliches oder Herabwürdigendes, bei Politik ausgewogen.
 Heute ist der %s. Nimm nicht wieder diese von gestern: %s
 Antworte als JSON: {"done": [{"q": "...", "n": "..."}, ...], "streak": [...], "late": [...], "start": [...], "good": [...]}"""
 
@@ -1585,7 +1585,7 @@ class H(BaseHTTPRequestHandler):
             cur = read_json(GIF_FILE, "GIF des Tages")
             if cur.get("day") != ai_today() or not isinstance(cur.get("by"), dict):
                 cur = {"day": ai_today(), "by": {}}
-            if kind not in cur["by"]:  # anderes Gerät war schneller: alle sehen dasselbe GIF
+            if kind not in cur["by"] or d.get("replace"):  # sonst: anderes Gerät war schneller, alle sehen dasselbe GIF
                 cur["by"][kind] = g
                 tmp = GIF_FILE + ".tmp"
                 with open(tmp, "w", encoding="utf-8") as f:

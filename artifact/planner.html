@@ -1126,6 +1126,10 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
 .hseg button b{min-width:0;padding:0;background:none;font-size:1.05rem;font-weight:700}
 .hseg button.hot b{background:none}
 .hlist{padding-top:.4rem}
+/* 1.38: Begründung über dem GIF */
+.mwhy{margin:0 0 .55rem;font-size:.86rem;line-height:1.35;color:var(--tx)}
+.mwhy .eyebrow{margin-bottom:.15rem}
+.hmeme .mname{align-items:center}
 </style>
 </head>
 <body>
@@ -2048,7 +2052,15 @@ function homeBody(tasks,allT){
   const qa=`<section class="qadd"><div class="qbox"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><input id="qadd" placeholder="Neue Aufgabe, z. B. Rasen mähen Sa" enterkeyhint="done" autocomplete="off" autocorrect="on" aria-label="Schnelleingabe"></div><div class="qprev" id="qprev"></div><div class="vsug qsug" id="qsug" role="list" aria-label="Frühere Aufgaben"></div><p class="qhint">Erkannt werden: heute · morgen · Sa · 12.12. · in 3 Tagen · bis Fr · #Tag · +Projekt · @Person · !1</p></section>`;
   const cur=TL[ht],LL=cur[1];
   const list=`<section class="pnl hlist" style="--i:${k++}" aria-label="${cur[0]}">${LL.length?LL.slice(0,40).map(hrow).join(""):`<div class="none">${cur[4]}</div>`}</section>`;
-  const kind=rn&&!todayL.length?"done":over.length?"late":ms.streak>=3?"streak":rd?"good":todayL.length?"start":"done";
+  /* Lage für das Meme, in dieser Reihenfolge: alles erledigt → etwas überfällig → schon etwas geschafft → Serie läuft → noch nichts.
+     Ist eine Lage gelöst (z. B. Überfälliges erledigt), greift die nächste und damit ein anderes GIF. */
+  const kind=rn&&!todayL.length?"done":over.length?"late":rd?"good":ms.streak>=3?"streak":todayL.length?"start":"done";
+  const A=n=>n===1?"Aufgabe":"Aufgaben",nOpen=todayL.length;
+  const why={done:rn?`Für heute ist alles erledigt (${rd} von ${rn}).`:"Für heute ist nichts fällig.",
+    late:`${over.length===1?"Eine Aufgabe ist":over.length+" Aufgaben sind"} liegen geblieben. Hol sie auf, dann wechselt das GIF.`,
+    good:`Du hast heute schon ${rd} ${A(rd)} erledigt, ${nOpen} ${nOpen===1?"ist":"sind"} noch offen.`,
+    streak:`Du hast ${ms.streak} Tage am Stück alles geschafft. Heute warten noch ${nOpen} ${A(nOpen)}.`,
+    start:`Heute ist noch nichts erledigt, ${nOpen} ${A(nOpen)} ${nOpen===1?"wartet":"warten"}.`}[kind];
   /* Startseite (1.37), ein Weg von oben nach unten:
      1. Ankommen: Begrüßung, Tagesstand, Serie, Meme zur Lage (eine Karte)
      2. Handeln: Eingabe, dann die Liste mit Umschalter Heute / 7 Tage / In Arbeit / Überfällig
@@ -2056,7 +2068,7 @@ function homeBody(tasks,allT){
      4. Überblick: Projekte, Tags, Personen, Gemeinsam (zugeklappt) */
   const ring=`<div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div>`;
   const me=prefGet("me")||"",hw=homeW(),who1=hw==="__all"?"":hw===me?"":hw;
-  const hero=`<section class="hero game" style="--i:0">${ring}<div class="hbody"><small class="eyebrow">${who1?"Tag von "+esc(who1):greet()+(me?", "+esc(me):"")}</small><div class="hh">${rn?`${rd} von ${rn} erledigt`:"Heute ist nichts fällig"}</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>${funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length})}</section>`;
+  const hero=`<section class="hero game" style="--i:0">${ring}<div class="hbody"><small class="eyebrow">${who1?"Tag von "+esc(who1):greet()+(me?", "+esc(me):"")}</small><div class="hh">${rn?`${rd} von ${rn} erledigt`:"Heute ist nichts fällig"}</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>${funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length,why})}</section>`;
   const seg=`<div class="hseg" role="tablist">`+Object.entries(TL).map(([k,[l,L]])=>`<button type="button" role="tab" class="${k===ht?"on":""}${k==="late"&&L.length?" hot":""}" data-ht="${k}" aria-selected="${k===ht}">${l}<b>${L.length}</b></button>`).join("")+`</div>`;
   const ovw=`<details class="pnl ovw" style="--i:${k++}"${ovwOpen?" open":""}><summary><span>Überblick</span><em>Projekte, Tags, Personen, gemeinsame Woche</em></summary>`
     +(pjs.length?P("","Projekte",pjs.length,pbars):"")+P("","Tags",areas.length,bars||'<div class="none">Noch keine Tags.</div>')+P("","Offen je Person",open,who)+motPanel(k++)+`</details>`;
@@ -2338,20 +2350,22 @@ function memeText(kind,v){const L=MEME_BASE[kind]||[];if(!L.length)return"";
 const GIF_BASE={
   done:[["stromberg applaus","Stromberg klatscht Beifall"],["gta mission passed","GTA: Mission bestanden"],["homer woohoo","Homer jubelt"],["michael scott yes","Michael Scott freut sich"],["happy dog zoomies","Hund dreht vor Freude durch"],["success kid","Der Erfolgs-Junge mit Faust"]],
   streak:[["leonardo dicaprio cheers","DiCaprio prostet euch zu"],["dwight schrute perfect","Dwight findet es perfekt"],["proud dog","Stolzer Hund"],["football goal celebration","Torjubel"],["nba jam on fire","Er brennt!"]],
-  late:[["this is fine dog","Hund im brennenden Zimmer: „Alles gut“"],["homer backs into bush","Homer verschwindet in der Hecke"],["gta wasted","GTA: Hinüber"],["cat knocking things off table","Katze räumt den Tisch ab"],["stromberg","Stromberg zieht eine Grimasse"],["peter griffin","Peter Griffin"]],
+  late:[["challenge accepted","Herausforderung angenommen"],["lets do this","Packen wir’s an"],["rocky training","Rocky trainiert fürs Comeback"],["dog running fast","Hund gibt Vollgas"],["michael scott lets go","Michael Scott: Los geht’s"],["cleaning montage","Aufräumen im Zeitraffer"]],
   start:[["lets do this","Auf geht’s"],["dog waiting","Hund wartet ungeduldig"],["capybara","Ganz entspanntes Capybara"],["kick off football","Anpfiff"],["michael scott","Michael Scott motiviert"]],
   good:[["mr burns excellent","Mr. Burns: „Ausgezeichnet“"],["keep going","Weiter so"],["excited dog","Aufgeregter Hund"],["nice","Sauber"],["thumbs up dog","Hund mit Daumen hoch"]]};
 let GIFS={},gifAsked=false;const gifBusy=new Set();
+/* Die Karte hat eine Botschaft: motivieren. Memes über Scheitern passen nie, auch nicht, wenn Gemini sie vorschlägt */
+const GIF_BAD=/wasted|fail|death|dead|dying|crying|sad|disaster|this is fine|game over|loser/i;
 function gifPick(kind){const own=((haInfo&&haInfo.gifterms)||[]).map(q=>({q,n:q}));
-  const L=[...((MEMES&&MEMES[kind])||GIF_BASE[kind].map(([q,n])=>({q,n}))),...own];return L[(today()*7+kind.length)%L.length]}
+  let L=[...((MEMES&&MEMES[kind])||[]),...GIF_BASE[kind].map(([q,n])=>({q,n})),...own].filter(m=>!GIF_BAD.test(m.q+" "+m.n));if(MEMES&&MEMES[kind]){const g=L.filter(m=>MEMES[kind].includes(m));if(g.length)L=g}return L[(today()*7+kind.length)%L.length]}
 async function gifToday(kind){
   if(typeof api!=="function"||!funOn())return;
-  try{if(!gifAsked){gifAsked=true;const j=await api("api/gif");GIFS=(j&&j.by)||{};if(GIFS[kind])return gifReady(kind)}
-    if(GIFS[kind]||gifBusy.has(kind))return;const k=haInfo&&haInfo.giphy;if(!k)return;gifBusy.add(kind);const m=gifPick(kind);
+  try{if(!gifAsked){gifAsked=true;const j=await api("api/gif");GIFS=(j&&j.by)||{};for(const k in GIFS)if(GIF_BAD.test((GIFS[k].term||"")+" "+(GIFS[k].name||"")+" "+(GIFS[k].title||""))){GIFS[k].bad=1}if(GIFS[kind]&&!GIFS[kind].bad)return gifReady(kind)}
+    if((GIFS[kind]&&!GIFS[kind].bad)||gifBusy.has(kind))return;const k=haInfo&&haInfo.giphy;if(!k)return;gifBusy.add(kind);const m=gifPick(kind);
     const r=await fetch("https://api.giphy.com/v1/gifs/search?api_key="+encodeURIComponent(k)+"&q="+encodeURIComponent(m.q)+"&limit=12&rating=pg-13&lang=de").then(x=>x.json());
     const L=(r.data||[]).filter(x=>x.images&&x.images.fixed_height&&(x.images.fixed_height.webp||x.images.fixed_height.url));if(!L.length)return;
     const g=L[Math.floor(Math.random()*Math.min(L.length,6))],im=g.images.fixed_height;
-    const j=await api("api/gif",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind,url:im.webp||im.url,title:g.title||"",name:m.n,term:m.q,link:g.url||""})});
+    const j=await api("api/gif",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind,replace:!!(GIFS[kind]&&GIFS[kind].bad),url:im.webp||im.url,title:g.title||"",name:m.n,term:m.q,link:g.url||""})});
     GIFS=(j&&j.by)||GIFS;gifReady(kind)}
   catch(_){}}
 /* Groß nur beim Feiern (letzte Aufgabe des Tages) oder auf Antippen, nie einfach beim Öffnen */
@@ -2367,9 +2381,10 @@ let gifKind="start";
 document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-gif]"))gifPop(gifKind,true)});
 /* Meme-Karte: GIF der aktuellen Lage vollständig sichtbar, darunter der Name des Memes; ohne GIPHY-Schlüssel ein kurzer Spruch */
 const LAGE={done:"Alles geschafft",streak:"Läuft bei dir",late:"Da ist was liegen geblieben",start:"Noch nichts geschafft",good:"Gut dabei"};
-function funHtml(kind,v){if(!funOn())return"";gifKind=kind;if(haInfo&&haInfo.giphy&&!GIFS[kind])setTimeout(()=>gifToday(kind),0);const g=GIFS[kind];
-  if(g&&g.url)return`<div class="hmeme"><button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button><p class="mname"><span><small>${LAGE[kind]}</small><b>${esc(g.name||g.title||"")}</b></span><small>über GIPHY</small></p></div>`;
-  return`<div class="hmeme"><p class="meme">${esc(memeText(kind,v))}</p></div>`}
+function funHtml(kind,v){if(!funOn())return"";gifKind=kind;if(haInfo&&haInfo.giphy&&(!GIFS[kind]||GIFS[kind].bad))setTimeout(()=>gifToday(kind),0);const g=GIFS[kind]&&!GIFS[kind].bad?GIFS[kind]:null;
+  const why=v.why?`<p class="mwhy"><small class="eyebrow">Warum dieses GIF?</small>${esc(v.why)}</p>`:"";
+  if(g&&g.url)return`<div class="hmeme">${why}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button><p class="mname"><b>${esc(g.name||g.title||"")}</b><small>über GIPHY</small></p></div>`;
+  return`<div class="hmeme">${why}<p class="meme">${esc(memeText(kind,v))}</p></div>`}
 /* Ressource: Auswahl oder Freitext */
 /* Verantwortlich: Mehrfachauswahl */
 let selWho=[];

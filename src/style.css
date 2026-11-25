@@ -1108,3 +1108,7 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
 .hseg button b{min-width:0;padding:0;background:none;font-size:1.05rem;font-weight:700}
 .hseg button.hot b{background:none}
 .hlist{padding-top:.4rem}
+/* 1.38: Begründung über dem GIF */
+.mwhy{margin:0 0 .55rem;font-size:.86rem;line-height:1.35;color:var(--tx)}
+.mwhy .eyebrow{margin-bottom:.15rem}
+.hmeme .mname{align-items:center}

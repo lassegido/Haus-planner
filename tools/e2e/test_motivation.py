@@ -164,3 +164,40 @@ def test_gif_des_tages(t, browser):
         t.check("Fremde GIF-Adressen lehnt der Server ab", s.api("api/gif", {"kind": "done", "url": "https://evil.example/x.gif"}).get("_status") == 400)
         t.check("keine Skriptfehler", not p.errors, p.errors)
         p.close()
+
+
+def test_gif_wechselt_mit_der_lage_und_erklaert_sich(t, browser):
+    with Server(settings={"giphy_key": "TestGiphyKey1234567890abcd"}) as s:
+        s.seed([task("o", "Überfällig", D(-2), D(-1), who="Lasse"), task("h1", "Heute 1", D(0), D(0), who="Lasse"), task("h2", "Heute 2", D(0), D(0), who="Lasse")])
+        calls = []
+        p = Page(browser, s.url, PHONE, setup=lambda pg: (ALS_LASSE(pg), giphy_mock(pg, calls)))
+        p.pg.wait_for_timeout(600)
+        why = lambda: p.js("(document.querySelector('.hero .mwhy')||{}).textContent||''")
+        t.check("Begründung sichtbar: überfällig", "Warum dieses GIF?" in why() and "Eine Aufgabe ist liegen geblieben" in why(), why())
+        p.js("void setStatus(byId('o'),'done')")
+        p.pg.wait_for_timeout(800)
+        t.check("Überfälliges gelöst: neue Lage, neue Suche, neue Begründung", len(calls) == 2 and calls[0] != calls[1] and "schon 1 Aufgabe erledigt, 2 sind noch offen" in why(), (calls, why()))
+        p.js("void setStatus(byId('h1'),'done')")
+        p.pg.wait_for_timeout(600)
+        t.check("Gleiche Lage: kein neues GIF", len(calls) == 2 and "schon 2 Aufgaben erledigt" in why(), why())
+        p.js("void setStatus(byId('h2'),'done')")
+        p.pg.wait_for_timeout(900)
+        t.check("Alles erledigt: drittes GIF, groß eingeblendet", len(calls) == 3 and "alles erledigt (3 von 3)" in why() and p.js("!!document.querySelector('.gifpop')"), (calls, why()))
+        t.check("keine Skriptfehler", not p.errors, p.errors)
+        p.close()
+
+
+def test_keine_negativen_memes(t, browser):
+    import json, time
+    with Server(settings={"giphy_key": "TestGiphyKey1234567890abcd"}) as s:
+        s.seed([task("o", "Überfällig", D(-2), D(-1), who="Lasse"), task("h1", "Heute 1", D(0), D(0), who="Lasse")])
+        json.dump({"day": time.strftime("%Y-%m-%d"), "by": {"late": {"kind": "late", "url": "https://media.giphy.com/media/alt/200.webp", "term": "gta wasted", "name": "GTA: Hinüber"}}},
+                  open(s.dir + "/d/gif.json", "w"))
+        calls = []
+        p = Page(browser, s.url, PHONE, setup=lambda pg: (ALS_LASSE(pg), giphy_mock(pg, calls)))
+        p.pg.wait_for_timeout(800)
+        t.check("Gespeichertes „Wasted“-GIF wird ersetzt", len(calls) == 1 and "wasted" not in calls[0].lower() and s.api("api/gif")["by"]["late"]["term"] != "gta wasted", calls)
+        t.check("Karte zeigt nie das negative GIF", "Hinüber" not in p.js("document.querySelector('.hero').textContent"))
+        bad = p.js("Object.values(GIF_BASE).flat().filter(x=>GIF_BAD.test(x[0]+' '+x[1])).length")
+        t.check("Eingebaute Auswahl enthält keine Scheitern-Memes", bad == 0, bad)
+        p.close()

@@ -1,5 +1,10 @@
 # Änderungen
 
+## 1.38.0
+- **„Warum dieses GIF?“** steht jetzt über dem GIF, z. B. „Eine Aufgabe ist liegen geblieben. Hol sie auf, dann wechselt das GIF.“ oder „Du hast heute schon 2 Aufgaben erledigt, 3 sind noch offen.“
+- **GIF wechselt mit dem Stand:** Ist eine Lage gelöst (z. B. Überfälliges erledigt), kommt sofort ein neues, passendes GIF. Reihenfolge: alles erledigt → etwas liegen geblieben → schon etwas geschafft → Serie läuft → noch nichts.
+- **Eine Botschaft pro Karte:** Die Startseite motiviert immer. Memes über Scheitern („Wasted“, „This is fine“, Game over …) werden nicht mehr gezeigt, auch nicht, wenn Gemini sie vorschlägt; ein bereits gespeichertes wird ersetzt. Bei Liegengebliebenem kommen jetzt Comeback-Memes.
+
 ## 1.37.0
 - **Kein GIF mehr zum Wegklicken:** Beim Öffnen erscheint nichts mehr vor der Seite. Das Meme steht in der Tageskarte; groß kommt es nur beim Antippen oder wenn die letzte Aufgabe des Tages erledigt ist.
 - **Startseite als ein Weg von oben nach unten:**

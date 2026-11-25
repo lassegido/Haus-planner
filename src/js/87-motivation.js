@@ -100,20 +100,22 @@ function memeText(kind,v){const L=MEME_BASE[kind]||[];if(!L.length)return"";
 const GIF_BASE={
   done:[["stromberg applaus","Stromberg klatscht Beifall"],["gta mission passed","GTA: Mission bestanden"],["homer woohoo","Homer jubelt"],["michael scott yes","Michael Scott freut sich"],["happy dog zoomies","Hund dreht vor Freude durch"],["success kid","Der Erfolgs-Junge mit Faust"]],
   streak:[["leonardo dicaprio cheers","DiCaprio prostet euch zu"],["dwight schrute perfect","Dwight findet es perfekt"],["proud dog","Stolzer Hund"],["football goal celebration","Torjubel"],["nba jam on fire","Er brennt!"]],
-  late:[["this is fine dog","Hund im brennenden Zimmer: „Alles gut“"],["homer backs into bush","Homer verschwindet in der Hecke"],["gta wasted","GTA: Hinüber"],["cat knocking things off table","Katze räumt den Tisch ab"],["stromberg","Stromberg zieht eine Grimasse"],["peter griffin","Peter Griffin"]],
+  late:[["challenge accepted","Herausforderung angenommen"],["lets do this","Packen wir’s an"],["rocky training","Rocky trainiert fürs Comeback"],["dog running fast","Hund gibt Vollgas"],["michael scott lets go","Michael Scott: Los geht’s"],["cleaning montage","Aufräumen im Zeitraffer"]],
   start:[["lets do this","Auf geht’s"],["dog waiting","Hund wartet ungeduldig"],["capybara","Ganz entspanntes Capybara"],["kick off football","Anpfiff"],["michael scott","Michael Scott motiviert"]],
   good:[["mr burns excellent","Mr. Burns: „Ausgezeichnet“"],["keep going","Weiter so"],["excited dog","Aufgeregter Hund"],["nice","Sauber"],["thumbs up dog","Hund mit Daumen hoch"]]};
 let GIFS={},gifAsked=false;const gifBusy=new Set();
+/* Die Karte hat eine Botschaft: motivieren. Memes über Scheitern passen nie, auch nicht, wenn Gemini sie vorschlägt */
+const GIF_BAD=/wasted|fail|death|dead|dying|crying|sad|disaster|this is fine|game over|loser/i;
 function gifPick(kind){const own=((haInfo&&haInfo.gifterms)||[]).map(q=>({q,n:q}));
-  const L=[...((MEMES&&MEMES[kind])||GIF_BASE[kind].map(([q,n])=>({q,n}))),...own];return L[(today()*7+kind.length)%L.length]}
+  let L=[...((MEMES&&MEMES[kind])||[]),...GIF_BASE[kind].map(([q,n])=>({q,n})),...own].filter(m=>!GIF_BAD.test(m.q+" "+m.n));if(MEMES&&MEMES[kind]){const g=L.filter(m=>MEMES[kind].includes(m));if(g.length)L=g}return L[(today()*7+kind.length)%L.length]}
 async function gifToday(kind){
   if(typeof api!=="function"||!funOn())return;
-  try{if(!gifAsked){gifAsked=true;const j=await api("api/gif");GIFS=(j&&j.by)||{};if(GIFS[kind])return gifReady(kind)}
-    if(GIFS[kind]||gifBusy.has(kind))return;const k=haInfo&&haInfo.giphy;if(!k)return;gifBusy.add(kind);const m=gifPick(kind);
+  try{if(!gifAsked){gifAsked=true;const j=await api("api/gif");GIFS=(j&&j.by)||{};for(const k in GIFS)if(GIF_BAD.test((GIFS[k].term||"")+" "+(GIFS[k].name||"")+" "+(GIFS[k].title||""))){GIFS[k].bad=1}if(GIFS[kind]&&!GIFS[kind].bad)return gifReady(kind)}
+    if((GIFS[kind]&&!GIFS[kind].bad)||gifBusy.has(kind))return;const k=haInfo&&haInfo.giphy;if(!k)return;gifBusy.add(kind);const m=gifPick(kind);
     const r=await fetch("https://api.giphy.com/v1/gifs/search?api_key="+encodeURIComponent(k)+"&q="+encodeURIComponent(m.q)+"&limit=12&rating=pg-13&lang=de").then(x=>x.json());
     const L=(r.data||[]).filter(x=>x.images&&x.images.fixed_height&&(x.images.fixed_height.webp||x.images.fixed_height.url));if(!L.length)return;
     const g=L[Math.floor(Math.random()*Math.min(L.length,6))],im=g.images.fixed_height;
-    const j=await api("api/gif",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind,url:im.webp||im.url,title:g.title||"",name:m.n,term:m.q,link:g.url||""})});
+    const j=await api("api/gif",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind,replace:!!(GIFS[kind]&&GIFS[kind].bad),url:im.webp||im.url,title:g.title||"",name:m.n,term:m.q,link:g.url||""})});
     GIFS=(j&&j.by)||GIFS;gifReady(kind)}
   catch(_){}}
 /* Groß nur beim Feiern (letzte Aufgabe des Tages) oder auf Antippen, nie einfach beim Öffnen */
@@ -129,6 +131,7 @@ let gifKind="start";
 document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-gif]"))gifPop(gifKind,true)});
 /* Meme-Karte: GIF der aktuellen Lage vollständig sichtbar, darunter der Name des Memes; ohne GIPHY-Schlüssel ein kurzer Spruch */
 const LAGE={done:"Alles geschafft",streak:"Läuft bei dir",late:"Da ist was liegen geblieben",start:"Noch nichts geschafft",good:"Gut dabei"};
-function funHtml(kind,v){if(!funOn())return"";gifKind=kind;if(haInfo&&haInfo.giphy&&!GIFS[kind])setTimeout(()=>gifToday(kind),0);const g=GIFS[kind];
-  if(g&&g.url)return`<div class="hmeme"><button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button><p class="mname"><span><small>${LAGE[kind]}</small><b>${esc(g.name||g.title||"")}</b></span><small>über GIPHY</small></p></div>`;
-  return`<div class="hmeme"><p class="meme">${esc(memeText(kind,v))}</p></div>`}
+function funHtml(kind,v){if(!funOn())return"";gifKind=kind;if(haInfo&&haInfo.giphy&&(!GIFS[kind]||GIFS[kind].bad))setTimeout(()=>gifToday(kind),0);const g=GIFS[kind]&&!GIFS[kind].bad?GIFS[kind]:null;
+  const why=v.why?`<p class="mwhy"><small class="eyebrow">Warum dieses GIF?</small>${esc(v.why)}</p>`:"";
+  if(g&&g.url)return`<div class="hmeme">${why}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button><p class="mname"><b>${esc(g.name||g.title||"")}</b><small>über GIPHY</small></p></div>`;
+  return`<div class="hmeme">${why}<p class="meme">${esc(memeText(kind,v))}</p></div>`}

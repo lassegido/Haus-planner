@@ -33,7 +33,15 @@ function homeBody(tasks,allT){
   const qa=`<section class="qadd"><div class="qbox"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><input id="qadd" placeholder="Neue Aufgabe, z. B. Rasen mähen Sa" enterkeyhint="done" autocomplete="off" autocorrect="on" aria-label="Schnelleingabe"></div><div class="qprev" id="qprev"></div><div class="vsug qsug" id="qsug" role="list" aria-label="Frühere Aufgaben"></div><p class="qhint">Erkannt werden: heute · morgen · Sa · 12.12. · in 3 Tagen · bis Fr · #Tag · +Projekt · @Person · !1</p></section>`;
   const cur=TL[ht],LL=cur[1];
   const list=`<section class="pnl hlist" style="--i:${k++}" aria-label="${cur[0]}">${LL.length?LL.slice(0,40).map(hrow).join(""):`<div class="none">${cur[4]}</div>`}</section>`;
-  const kind=rn&&!todayL.length?"done":over.length?"late":ms.streak>=3?"streak":rd?"good":todayL.length?"start":"done";
+  /* Lage für das Meme, in dieser Reihenfolge: alles erledigt → etwas überfällig → schon etwas geschafft → Serie läuft → noch nichts.
+     Ist eine Lage gelöst (z. B. Überfälliges erledigt), greift die nächste und damit ein anderes GIF. */
+  const kind=rn&&!todayL.length?"done":over.length?"late":rd?"good":ms.streak>=3?"streak":todayL.length?"start":"done";
+  const A=n=>n===1?"Aufgabe":"Aufgaben",nOpen=todayL.length;
+  const why={done:rn?`Für heute ist alles erledigt (${rd} von ${rn}).`:"Für heute ist nichts fällig.",
+    late:`${over.length===1?"Eine Aufgabe ist":over.length+" Aufgaben sind"} liegen geblieben. Hol sie auf, dann wechselt das GIF.`,
+    good:`Du hast heute schon ${rd} ${A(rd)} erledigt, ${nOpen} ${nOpen===1?"ist":"sind"} noch offen.`,
+    streak:`Du hast ${ms.streak} Tage am Stück alles geschafft. Heute warten noch ${nOpen} ${A(nOpen)}.`,
+    start:`Heute ist noch nichts erledigt, ${nOpen} ${A(nOpen)} ${nOpen===1?"wartet":"warten"}.`}[kind];
   /* Startseite (1.37), ein Weg von oben nach unten:
      1. Ankommen: Begrüßung, Tagesstand, Serie, Meme zur Lage (eine Karte)
      2. Handeln: Eingabe, dann die Liste mit Umschalter Heute / 7 Tage / In Arbeit / Überfällig
@@ -41,7 +49,7 @@ function homeBody(tasks,allT){
      4. Überblick: Projekte, Tags, Personen, Gemeinsam (zugeklappt) */
   const ring=`<div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div>`;
   const me=prefGet("me")||"",hw=homeW(),who1=hw==="__all"?"":hw===me?"":hw;
-  const hero=`<section class="hero game" style="--i:0">${ring}<div class="hbody"><small class="eyebrow">${who1?"Tag von "+esc(who1):greet()+(me?", "+esc(me):"")}</small><div class="hh">${rn?`${rd} von ${rn} erledigt`:"Heute ist nichts fällig"}</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>${funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length})}</section>`;
+  const hero=`<section class="hero game" style="--i:0">${ring}<div class="hbody"><small class="eyebrow">${who1?"Tag von "+esc(who1):greet()+(me?", "+esc(me):"")}</small><div class="hh">${rn?`${rd} von ${rn} erledigt`:"Heute ist nichts fällig"}</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>${funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length,why})}</section>`;
   const seg=`<div class="hseg" role="tablist">`+Object.entries(TL).map(([k,[l,L]])=>`<button type="button" role="tab" class="${k===ht?"on":""}${k==="late"&&L.length?" hot":""}" data-ht="${k}" aria-selected="${k===ht}">${l}<b>${L.length}</b></button>`).join("")+`</div>`;
   const ovw=`<details class="pnl ovw" style="--i:${k++}"${ovwOpen?" open":""}><summary><span>Überblick</span><em>Projekte, Tags, Personen, gemeinsame Woche</em></summary>`
     +(pjs.length?P("","Projekte",pjs.length,pbars):"")+P("","Tags",areas.length,bars||'<div class="none">Noch keine Tags.</div>')+P("","Offen je Person",open,who)+motPanel(k++)+`</details>`;
