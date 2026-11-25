@@ -30,7 +30,7 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] Startseite: Serie mit Flamme, „Gemeinsam diese Woche“ mit beiden Namen, Abzeichen antippen. Letzte Aufgabe des Tages abhaken: Konfetti und Vibration.
 - [ ] Leiste unten: Start, Liste, Board, Zeitstrahl, Kalender.
 - [ ] GIPHY-Schlüssel eintragen: GIF erscheint kurz groß, danach klein in der Karte; auf dem zweiten iPhone dasselbe GIF. Antippen zeigt es wieder.
-- [ ] Startseite oben: Dein Tag mit „Als Nächstes“ (Ring antippen schaltet weiter), darunter das Meme vollständig sichtbar und „Nächstes Abzeichen“.
+- [ ] Startseite: Beim Öffnen nichts zum Wegklicken. Tageskarte mit Meme, darunter Eingabe, Umschalter und Liste ohne Scrollen erreichbar. Letzte Aufgabe abhaken: Meme groß und Konfetti.
 - [ ] Am Tag nach dem Update: Spruch auf der Startseite kommt von Gemini (neu formuliert), KI-Verbrauch in den Einstellungen nur +1.
 
 ## 4. Export (iPhone)

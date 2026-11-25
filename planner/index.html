@@ -1103,8 +1103,31 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
 .bdx .bnext .pb{grid-column:1/-1}
 .bdx .bgot{flex-direction:column;align-items:flex-end;gap:.15rem}
 .bdx .bgot i{display:none}.bdx .bgot i:nth-last-of-type(-n+3){display:inline-flex}
+/* 1.37: Startseite: Meme in der Tageskarte, Umschalter statt Kacheln, Überblick zugeklappt */
+.hmeme{flex:1 1 100%;border-top:1px solid var(--line);padding-top:.7rem}
+.hmeme .gifbox img{max-height:11rem}
+.hmeme .mname{margin-top:.45rem}
+.hmeme .mname span{display:flex;flex-direction:column;min-width:0}
+.hmeme .mname span small{font-size:.72rem;color:var(--mut)}
+.hmeme .meme{margin:0}
+.hseg{display:flex;gap:.25rem;padding:.25rem;border-radius:.95rem;background:var(--grp);overflow-x:auto;scrollbar-width:none}
+.hseg::-webkit-scrollbar{display:none}
+.hseg button{flex:1 0 auto;display:flex;align-items:center;justify-content:center;gap:.35rem;min-height:2.6rem;padding:.3rem .65rem;border:0;border-radius:.7rem;background:none;color:var(--mut);font:inherit;font-size:.86rem;font-weight:600;white-space:nowrap;cursor:pointer}
+.hseg button b{min-width:1.4rem;padding:.05rem .4rem;border-radius:.7rem;background:var(--line);color:var(--tx);font-size:.78rem;font-variant-numeric:tabular-nums}
+.hseg button.on{background:var(--card);color:var(--tx);box-shadow:0 1px 3px rgba(20,48,63,.14)}
+.hseg button.hot b{background:color-mix(in srgb,var(--brick) 22%,transparent);color:var(--brick)}
+.ovw{padding:.2rem 1rem .6rem}
+.ovw>summary{display:flex;align-items:baseline;justify-content:space-between;gap:.8rem;min-height:2.85rem;padding-top:.55rem;list-style:none;cursor:pointer;font-weight:650}
+.ovw>summary::-webkit-details-marker{display:none}
+.ovw>summary em{font-style:normal;font-weight:400;font-size:.78rem;color:var(--mut);text-align:right}
+.ovw>.pnl{box-shadow:none;border:0;padding-left:0;padding-right:0;background:none}
+.hseg{overflow:visible}
+.hseg button{flex:1 1 0;min-width:0;flex-direction:column-reverse;gap:.05rem;padding:.35rem .2rem;font-size:.74rem;font-weight:600}
+.hseg button b{min-width:0;padding:0;background:none;font-size:1.05rem;font-weight:700}
+.hseg button.hot b{background:none}
+.hlist{padding-top:.4rem}
 </style>
-<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"><script>(function(){var n=0,seen={};function send(m,w){try{m=String(m||"").slice(0,400);w=String(w||"");if(n>=8||seen[m+w])return;seen[m+w]=1;n++;var v=(document.body&&document.body.dataset.view)||"";fetch("api/log",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json","X-Planner":"1"},body:JSON.stringify({msg:m,where:w,ver:"1.36.0",view:v,ua:navigator.userAgent.slice(0,120)})}).catch(function(){})}catch(_){}}addEventListener("error",function(e){var t=e.target;if(t&&t!==window){if(t.tagName==="SCRIPT"||t.tagName==="LINK")send("Datei nicht geladen: "+String(t.src||t.href).split("/").pop().split("?")[0],"");return}send(e.message,String(e.filename||"").split("/").pop()+":"+e.lineno+":"+e.colno)},true);addEventListener("unhandledrejection",function(e){var r=e.reason||{};send("Unbehandelt: "+(r.message||r),String(r.stack||"").split("\n")[1]||"")})})();</script></head>
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"><script>(function(){var n=0,seen={};function send(m,w){try{m=String(m||"").slice(0,400);w=String(w||"");if(n>=8||seen[m+w])return;seen[m+w]=1;n++;var v=(document.body&&document.body.dataset.view)||"";fetch("api/log",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json","X-Planner":"1"},body:JSON.stringify({msg:m,where:w,ver:"1.37.0",view:v,ua:navigator.userAgent.slice(0,120)})}).catch(function(){})}catch(_){}}addEventListener("error",function(e){var t=e.target;if(t&&t!==window){if(t.tagName==="SCRIPT"||t.tagName==="LINK")send("Datei nicht geladen: "+String(t.src||t.href).split("/").pop().split("?")[0],"");return}send(e.message,String(e.filename||"").split("/").pop()+":"+e.lineno+":"+e.colno)},true);addEventListener("unhandledrejection",function(e){var r=e.reason||{};send("Unbehandelt: "+(r.message||r),String(r.stack||"").split("\n")[1]||"")})})();</script></head>
 <body>
 <svg id="icsp" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-bad" viewBox="0 0 24 24"><path d="M3 12h18v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-2z"/><path d="M6 12V6.5A2.5 2.5 0 0 1 8.5 4 2.5 2.5 0 0 1 11 6.5"/><path d="M7 18l-1 2M17 18l1 2"/></symbol><symbol id="i-kueche" viewBox="0 0 24 24"><path d="M5 10h14v7a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-7z"/><path d="M3 10h2M19 10h2M9 6.5c0-1.2 1-1.2 1-2.5M14 6.5c0-1.2 1-1.2 1-2.5"/></symbol><symbol id="i-sofa" viewBox="0 0 24 24"><path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><path d="M3 13a2 2 0 0 1 4 0v1h10v-1a2 2 0 0 1 4 0v4H3v-4z"/><path d="M6 17v2M18 17v2"/></symbol><symbol id="i-bett" viewBox="0 0 24 24"><path d="M3 19V6M3 14.5h18V19M21 14.5V12a3 3 0 0 0-3-3h-7v5.5"/><circle cx="7" cy="11" r="1.8"/></symbol><symbol id="i-kind" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="6.5"/><circle cx="6.6" cy="6.8" r="2.2"/><circle cx="17.4" cy="6.8" r="2.2"/><circle cx="12" cy="15.2" r="2"/><path d="M9.6 11.6h.01M14.4 11.6h.01"/></symbol><symbol id="i-tuer" viewBox="0 0 24 24"><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M4 21h16"/><circle cx="15" cy="12.5" r=".9" fill="currentColor"/></symbol><symbol id="i-pflanze" viewBox="0 0 24 24"><path d="M12 21v-9"/><path d="M12 12c0-4 3-6.5 7-6.5 0 4-2.5 6.5-7 6.5z"/><path d="M12 15.5c0-3-2.3-5-6-5 0 3.2 2 5 6 5z"/></symbol><symbol id="i-baum" viewBox="0 0 24 24"><path d="M12 21v-6"/><path d="M12 15c-4 0-6.5-2.5-6.5-5.5C5.5 6 8.5 3.5 12 3.5s6.5 2.5 6.5 6c0 3-2.5 5.5-6.5 5.5z"/></symbol><symbol id="i-sonne" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.8"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></symbol><symbol id="i-treppe" viewBox="0 0 24 24"><path d="M3.5 20.5h17M5 20.5v-4h4v-4h4v-4h4v-4"/></symbol><symbol id="i-dach" viewBox="0 0 24 24"><path d="M2.5 13L12 5l9.5 8"/><path d="M17 8.5V5h2v5.2"/><path d="M6 11.5V19h12v-7.5"/></symbol><symbol id="i-fenster" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="17" rx="1.5"/><path d="M12 3.5v17M4.5 12h15"/></symbol><symbol id="i-flamme" viewBox="0 0 24 24"><path d="M12 21c-3.9 0-6-2.5-6-5.7 0-3.6 3.2-5.5 3.7-9.3C12.4 7.4 18 10.2 18 15.3c0 3.2-2.1 5.7-6 5.7z"/><path d="M12 21c-1.6 0-2.6-1-2.6-2.5 0-1.5 1.6-2.2 2.6-3.7 1 1.5 2.6 2.2 2.6 3.7 0 1.5-1 2.5-2.6 2.5z"/></symbol><symbol id="i-blitz" viewBox="0 0 24 24"><path d="M13 3L5.5 13.5H11L10 21l7.5-10.5H12L13 3z"/></symbol><symbol id="i-tropfen" viewBox="0 0 24 24"><path d="M12 3.5c3.2 4 6 7 6 10.2a6 6 0 0 1-12 0C6 10.5 8.8 7.5 12 3.5z"/></symbol><symbol id="i-werkzeug" viewBox="0 0 24 24"><path d="M14 4.5l5.5 5.5-2.8 2.8-5.5-5.5z"/><path d="M12.2 9.7L4.8 17.1a1.9 1.9 0 0 0 2.7 2.7l7.4-7.4"/></symbol><symbol id="i-roller" viewBox="0 0 24 24"><rect x="4" y="3.5" width="14" height="5.5" rx="1.5"/><path d="M18 6h2.5v5.5h-8V14"/><rect x="10.7" y="14" width="3.6" height="6.5" rx="1.2"/></symbol><symbol id="i-boden" viewBox="0 0 24 24"><path d="M12 4l9 5-9 5-9-5z"/><path d="M3 13.5l9 5 9-5"/></symbol><symbol id="i-dokument" viewBox="0 0 24 24"><path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-16z"/><path d="M14 3.5v4h4M9.5 12.5h5M9.5 16h5"/></symbol><symbol id="i-muenze" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M15.2 9.2a4 4 0 1 0 0 5.6M8.3 11h5M8.3 13h5"/></symbol><symbol id="i-schild" viewBox="0 0 24 24"><path d="M12 3.5l7 2.5v5.5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z"/><path d="M9 12l2.2 2.2L15.2 10"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><path d="M4 16v-3.5L6 7.5h12l2 5V16"/><path d="M4 12.5h16M4 16h16"/><circle cx="7.5" cy="16.5" r="1.7"/><circle cx="16.5" cy="16.5" r="1.7"/></symbol><symbol id="i-wagen" viewBox="0 0 24 24"><path d="M3 4.5h2.5l2 10.5h10.5l2-8H7"/><circle cx="9.2" cy="19" r="1.2"/><circle cx="16.8" cy="19" r="1.2"/></symbol><symbol id="i-eimer" viewBox="0 0 24 24"><path d="M5 9h14l-1.6 11H6.6z"/><path d="M5 9c0-2.6 3-4.2 7-4.2s7 1.6 7 4.2"/></symbol><symbol id="i-karton" viewBox="0 0 24 24"><path d="M3.5 8L12 4l8.5 4v8.5L12 20.5l-8.5-4z"/><path d="M3.5 8L12 12l8.5-4M12 12v8.5"/></symbol><symbol id="i-pfote" viewBox="0 0 24 24"><ellipse cx="12" cy="15.5" rx="4" ry="3.2"/><circle cx="6.3" cy="11" r="1.6"/><circle cx="9.7" cy="6.8" r="1.6"/><circle cx="14.3" cy="6.8" r="1.6"/><circle cx="17.7" cy="11" r="1.6"/></symbol><symbol id="i-herz" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.5-7.5-10A4.2 4.2 0 0 1 12 7.6 4.2 4.2 0 0 1 19.5 10C19.5 15.5 12 20 12 20z"/></symbol><symbol id="i-koffer" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v2M4 13.5h16"/></symbol><symbol id="i-geschenk" viewBox="0 0 24 24"><rect x="4" y="9.5" width="16" height="10.5" rx="1.5"/><path d="M3 9.5h18M12 9.5V20"/><path d="M12 9.5C11 6 7.5 6 8 8c.3 1.4 4 1.5 4 1.5zM12 9.5c1-3.5 4.5-3.5 4-1.5-.3 1.4-4 1.5-4 1.5z"/></symbol><symbol id="i-schloss" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><circle cx="12" cy="15.5" r="1"/></symbol><symbol id="i-wlan" viewBox="0 0 24 24"><path d="M3.5 9.5a12 12 0 0 1 17 0M6.5 12.8a7.8 7.8 0 0 1 11 0M9.5 16a3.5 3.5 0 0 1 5 0"/><circle cx="12" cy="19" r=".9" fill="currentColor"/></symbol><symbol id="i-birne" viewBox="0 0 24 24"><path d="M9 17.5h6M10 20.5h4"/><path d="M12 3.5a5.5 5.5 0 0 0-3.2 10c.6.5 1.2 1.3 1.2 2.5h4c0-1.2.6-2 1.2-2.5A5.5 5.5 0 0 0 12 3.5z"/></symbol><symbol id="i-waschmaschine" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="17" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 7h.01M11 7h2"/></symbol><symbol id="i-kalender" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v3.5M15.5 3.5v3.5"/></symbol><symbol id="i-tonne" viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13"/><path d="M10.5 11v5.5M13.5 11v5.5"/></symbol><symbol id="i-stuhl" viewBox="0 0 24 24"><path d="M7 12V5a1.5 1.5 0 0 1 1.5-1.5h7A1.5 1.5 0 0 1 17 5v7"/><path d="M5.5 12h13v3.5h-13zM7.5 15.5V21M16.5 15.5V21"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M3.5 12.5V4.5a1 1 0 0 1 1-1h8L21 12l-8.5 8.5z"/><circle cx="8" cy="8" r="1.2"/></symbol></defs></svg>
 
@@ -1484,7 +1507,7 @@ applyTheme();
 matchMedia("(prefers-color-scheme:dark)").addEventListener("change",applyTheme);
 
 /* Fremdcode-Adressen. Das Add-on bekommt lokale Dateien aus planner/vendor/ (tools/build.py ersetzt diese Zeile). */
-const LIB={pdf:"vendor/jspdf.umd.min.js?v=1.36.0",xlsx:"vendor/exceljs.min.js?v=1.36.0",font:()=>"vendor/fonts.css?v=1.36.0"};
+const LIB={pdf:"vendor/jspdf.umd.min.js?v=1.37.0",xlsx:"vendor/exceljs.min.js?v=1.37.0",font:()=>"vendor/fonts.css?v=1.37.0"};
 const SYSF='-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
 const FONTS=[["figtree","Figtree","Figtree:wght@400;500;600;700;800",'"Figtree",'+SYSF,"Freundlich und klar (Standard)"],
  ["sys","Systemschrift","",SYSF,"Sachlich wie iOS (auf dem iPhone San Francisco), lädt sofort"],
@@ -2039,17 +2062,22 @@ function homeBody(tasks,allT){
   const tiles=`<div class="tiles">`+Object.entries(TL).map(([k,[l,L,c,ic]])=>`<button type="button" class="tile${k===ht?" on":""}" data-ht="${k}" style="--tc:${c}"><span class="ti2"><svg viewBox="0 0 24 24">${ic}</svg></span><b>${L.length}</b><span class="tl">${l}</span></button>`).join("")+`</div>`;
   const qa=`<section class="qadd"><div class="qbox"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><input id="qadd" placeholder="Neue Aufgabe, z. B. Rasen mähen Sa" enterkeyhint="done" autocomplete="off" autocorrect="on" aria-label="Schnelleingabe"></div><div class="qprev" id="qprev"></div><div class="vsug qsug" id="qsug" role="list" aria-label="Frühere Aufgaben"></div><p class="qhint">Erkannt werden: heute · morgen · Sa · 12.12. · in 3 Tagen · bis Fr · #Tag · +Projekt · @Person · !1</p></section>`;
   const cur=TL[ht],LL=cur[1];
-  const list=`<section class="pnl hlist" style="--i:${k++}"><h3><span>${cur[0]}</span><em>${LL.length}</em></h3>${LL.length?LL.slice(0,40).map(hrow).join(""):`<div class="none">${cur[4]}</div>`}</section>`;
+  const list=`<section class="pnl hlist" style="--i:${k++}" aria-label="${cur[0]}">${LL.length?LL.slice(0,40).map(hrow).join(""):`<div class="none">${cur[4]}</div>`}</section>`;
   const kind=rn&&!todayL.length?"done":over.length?"late":ms.streak>=3?"streak":rd?"good":todayL.length?"start":"done";
-  /* Startseite als Geschichte (1.36): 1. Dein Tag (Stand + das Nächste zum Abhaken) → 2. Meme zur Lage (Belohnung/Anstoß)
-     → 3. Nächstes Abzeichen (langfristiges Ziel) → Kacheln, Eingabe, Liste (Arbeit) → Übersichten → Gemeinsam (ganz unten) */
-  const nextT=todayL[0],ring=`<div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div>`;
-  const hero=`<section class="hero game" style="--i:0">${ring}<div class="hbody"><small class="eyebrow">Dein Tag</small><div class="hh">${rn?`${rd} von ${rn} geschafft`:"Heute ist nichts fällig"}</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>`
-    +(nextT?`<div class="hnow"><small class="eyebrow">Als Nächstes</small>${hrow(nextT,0)}</div>`:"")+`</section>`+funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length})+badgeCard(ms);
-  return`<div class="home">${hero}${tiles}${qa}${list}`+
-    (pjs.length?P("","Projekte",pjs.length,pbars):"")+
-    P("","Tags",areas.length,bars||'<div class="none">Noch keine Tags.</div>')+
-    P("","Offen pro Person",open,who)+motPanel(k++)+`</div>`}
+  /* Startseite (1.37), ein Weg von oben nach unten:
+     1. Ankommen: Begrüßung, Tagesstand, Serie, Meme zur Lage (eine Karte)
+     2. Handeln: Eingabe, dann die Liste mit Umschalter Heute / 7 Tage / In Arbeit / Überfällig
+     3. Dranbleiben: nächstes Abzeichen in einer Zeile
+     4. Überblick: Projekte, Tags, Personen, Gemeinsam (zugeklappt) */
+  const ring=`<div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div>`;
+  const me=prefGet("me")||"",hw=homeW(),who1=hw==="__all"?"":hw===me?"":hw;
+  const hero=`<section class="hero game" style="--i:0">${ring}<div class="hbody"><small class="eyebrow">${who1?"Tag von "+esc(who1):greet()+(me?", "+esc(me):"")}</small><div class="hh">${rn?`${rd} von ${rn} erledigt`:"Heute ist nichts fällig"}</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>${funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length})}</section>`;
+  const seg=`<div class="hseg" role="tablist">`+Object.entries(TL).map(([k,[l,L]])=>`<button type="button" role="tab" class="${k===ht?"on":""}${k==="late"&&L.length?" hot":""}" data-ht="${k}" aria-selected="${k===ht}">${l}<b>${L.length}</b></button>`).join("")+`</div>`;
+  const ovw=`<details class="pnl ovw" style="--i:${k++}"${ovwOpen?" open":""}><summary><span>Überblick</span><em>Projekte, Tags, Personen, gemeinsame Woche</em></summary>`
+    +(pjs.length?P("","Projekte",pjs.length,pbars):"")+P("","Tags",areas.length,bars||'<div class="none">Noch keine Tags.</div>')+P("","Offen je Person",open,who)+motPanel(k++)+`</details>`;
+  return`<div class="home">${hero}${qa}${seg}${list}${badgeCard(ms)}${ovw}</div>`}
+let ovwOpen=false;
+document.addEventListener("toggle",e=>{if(e.target.classList&&e.target.classList.contains("ovw"))ovwOpen=e.target.open},true);
 
 const homeW=()=>{let v=null;try{v=localStorage.getItem("haus-hwho")}catch(_){}const me=prefGet("me")||"";return v||me||"__all"};
 function home(){
@@ -2273,7 +2301,7 @@ function badgeCard(s){
   const got=BADGES.filter(b=>bOn(b,s)),open=BADGES.filter(b=>!bOn(b,s)).map(b=>[b,b[3](s)]).sort((a,b)=>b[1][0]/b[1][1]-a[1][0]/a[1][1]),nx=open[0];
   const all=BADGES.map(b=>{const[c,g]=b[3](s),on=c>=g;return`<button type="button" class="bdg${on?" on":""}" data-bdg="${b[0]}">${MEDAL}<span>${esc(b[1])}</span><small>${on?"geschafft":Math.min(c,g)+" von "+g}</small></button>`}).join("");
   const left=nx?(BLEFT[nx[0][0]]||(()=>nx[0][2]))(nx[1][1]-nx[1][0]):"";
-  return`<details class="pnl bdx" style="--i:2"><summary><span class="bmed">${MEDAL}</span><span class="bnext">${nx?`<small>Nächstes Abzeichen</small><b>${esc(nx[0][1])}</b><span class="bleft">${esc(left)}</span><span class="pb"><i style="width:${Math.round(Math.min(1,nx[1][0]/nx[1][1])*100)}%"></i></span>`:`<b>Alle Abzeichen geschafft 🏆</b>`}</span>`
+  return`<details class="pnl bdx" style="--i:3"><summary><span class="bmed">${MEDAL}</span><span class="bnext">${nx?`<small>Nächstes Abzeichen</small><b>${esc(nx[0][1])}</b><span class="bleft">${esc(left)}</span><span class="pb"><i style="width:${Math.round(Math.min(1,nx[1][0]/nx[1][1])*100)}%"></i></span>`:`<b>Alle Abzeichen geschafft 🏆</b>`}</span>`
     +`<span class="bgot" aria-label="${got.length} von ${BADGES.length} freigeschaltet">${got.map(b=>`<i title="${esc(b[1])}">${MEDAL}</i>`).join("")}<em>${got.length} von ${BADGES.length}</em></span></summary><div class="bdgs">${all}</div></details>`}
 function motPanel(i){
   const T=today(),mon=T-mo(fromDn(T).getUTCDay()),all=RAW.filter(t=>!t.del&&t.status==="done");
@@ -2301,7 +2329,7 @@ function newBadges(){const s=motStats(motScope()),got=BADGES.filter(b=>bOn(b,s))
 function cheer(){
   const L=motScope(),T=today(),doneToday=L.some(t=>t.status==="done"&&doneOn(t)===T),fresh=newBadges();
   const all=!todayOpenOf(L).length&&doneToday,nb=fresh.length?"Neues Abzeichen: "+fresh.map(b=>b[1]).join(", "):"";
-  if(all||nb){confetti();hap(30);toast(all?"Alles für heute erledigt – stark! 🎉"+(nb?" "+nb:""):"🏅 "+nb,null,null,5000);if(all)gifPop("done",true)}}
+  if(all||nb){confetti();hap(30);toast(all?"Alles für heute erledigt – stark! 🎉"+(nb?" "+nb:""):"🏅 "+nb,null,null,5000);if(all){if(GIFS.done)gifPop("done",true);else gifCheer="done"}}}
 /* 1.34: Sprüche auf der Startseite (nur dort). Eingebaut; im Add-on erneuert Gemini sie höchstens einmal am Tag (api/sprueche).
    Platzhalter: {n} Serie, {late} überfällig, {open} offen. */
 const MEME_BASE={
@@ -2341,7 +2369,9 @@ async function gifToday(kind){
     const j=await api("api/gif",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind,url:im.webp||im.url,title:g.title||"",name:m.n,term:m.q,link:g.url||""})});
     GIFS=(j&&j.by)||GIFS;gifReady(kind)}
   catch(_){}}
-function gifReady(kind){if(view==="home")render();gifPop(kind,false)}
+/* Groß nur beim Feiern (letzte Aufgabe des Tages) oder auf Antippen, nie einfach beim Öffnen */
+let gifCheer=null;
+function gifReady(kind){if(view==="home")render();if(gifCheer===kind){gifCheer=null;gifPop(kind,true)}}
 /* Je Gerät, Tag und Lage einmal groß zeigen (und beim Feiern), sonst klein in der Spiel-Karte */
 function gifPop(kind,force){const g=GIFS[kind];if(!g||!g.url||!funOn()||document.querySelector("dialog[open],.gifpop"))return;
   const key=tdy()+":"+kind;let seen="";try{seen=localStorage.getItem("haus-gifseen")||""}catch(_){}
@@ -2353,9 +2383,8 @@ document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[da
 /* Meme-Karte: GIF der aktuellen Lage vollständig sichtbar, darunter der Name des Memes; ohne GIPHY-Schlüssel ein kurzer Spruch */
 const LAGE={done:"Alles geschafft",streak:"Läuft bei dir",late:"Da ist was liegen geblieben",start:"Noch nichts geschafft",good:"Gut dabei"};
 function funHtml(kind,v){if(!funOn())return"";gifKind=kind;if(haInfo&&haInfo.giphy&&!GIFS[kind])setTimeout(()=>gifToday(kind),0);const g=GIFS[kind];
-  const head=`<div class="mhead"><small class="eyebrow">Passend zu deinem Tag</small><span>${LAGE[kind]}</span></div>`;
-  if(g&&g.url)return`<section class="pnl memec" style="--i:1">${head}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button><p class="mname"><b>${esc(g.name||g.title||"")}</b><small>über GIPHY</small></p></section>`;
-  return`<section class="pnl memec" style="--i:1">${head}<p class="meme">${esc(memeText(kind,v))}</p></section>`}
+  if(g&&g.url)return`<div class="hmeme"><button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button><p class="mname"><span><small>${LAGE[kind]}</small><b>${esc(g.name||g.title||"")}</b></span><small>über GIPHY</small></p></div>`;
+  return`<div class="hmeme"><p class="meme">${esc(memeText(kind,v))}</p></div>`}
 /* Ressource: Auswahl oder Freitext */
 /* Verantwortlich: Mehrfachauswahl */
 let selWho=[];

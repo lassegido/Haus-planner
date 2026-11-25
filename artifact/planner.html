@@ -1103,6 +1103,29 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
 .bdx .bnext .pb{grid-column:1/-1}
 .bdx .bgot{flex-direction:column;align-items:flex-end;gap:.15rem}
 .bdx .bgot i{display:none}.bdx .bgot i:nth-last-of-type(-n+3){display:inline-flex}
+/* 1.37: Startseite: Meme in der Tageskarte, Umschalter statt Kacheln, Überblick zugeklappt */
+.hmeme{flex:1 1 100%;border-top:1px solid var(--line);padding-top:.7rem}
+.hmeme .gifbox img{max-height:11rem}
+.hmeme .mname{margin-top:.45rem}
+.hmeme .mname span{display:flex;flex-direction:column;min-width:0}
+.hmeme .mname span small{font-size:.72rem;color:var(--mut)}
+.hmeme .meme{margin:0}
+.hseg{display:flex;gap:.25rem;padding:.25rem;border-radius:.95rem;background:var(--grp);overflow-x:auto;scrollbar-width:none}
+.hseg::-webkit-scrollbar{display:none}
+.hseg button{flex:1 0 auto;display:flex;align-items:center;justify-content:center;gap:.35rem;min-height:2.6rem;padding:.3rem .65rem;border:0;border-radius:.7rem;background:none;color:var(--mut);font:inherit;font-size:.86rem;font-weight:600;white-space:nowrap;cursor:pointer}
+.hseg button b{min-width:1.4rem;padding:.05rem .4rem;border-radius:.7rem;background:var(--line);color:var(--tx);font-size:.78rem;font-variant-numeric:tabular-nums}
+.hseg button.on{background:var(--card);color:var(--tx);box-shadow:0 1px 3px rgba(20,48,63,.14)}
+.hseg button.hot b{background:color-mix(in srgb,var(--brick) 22%,transparent);color:var(--brick)}
+.ovw{padding:.2rem 1rem .6rem}
+.ovw>summary{display:flex;align-items:baseline;justify-content:space-between;gap:.8rem;min-height:2.85rem;padding-top:.55rem;list-style:none;cursor:pointer;font-weight:650}
+.ovw>summary::-webkit-details-marker{display:none}
+.ovw>summary em{font-style:normal;font-weight:400;font-size:.78rem;color:var(--mut);text-align:right}
+.ovw>.pnl{box-shadow:none;border:0;padding-left:0;padding-right:0;background:none}
+.hseg{overflow:visible}
+.hseg button{flex:1 1 0;min-width:0;flex-direction:column-reverse;gap:.05rem;padding:.35rem .2rem;font-size:.74rem;font-weight:600}
+.hseg button b{min-width:0;padding:0;background:none;font-size:1.05rem;font-weight:700}
+.hseg button.hot b{background:none}
+.hlist{padding-top:.4rem}
 </style>
 </head>
 <body>
@@ -2024,17 +2047,22 @@ function homeBody(tasks,allT){
   const tiles=`<div class="tiles">`+Object.entries(TL).map(([k,[l,L,c,ic]])=>`<button type="button" class="tile${k===ht?" on":""}" data-ht="${k}" style="--tc:${c}"><span class="ti2"><svg viewBox="0 0 24 24">${ic}</svg></span><b>${L.length}</b><span class="tl">${l}</span></button>`).join("")+`</div>`;
   const qa=`<section class="qadd"><div class="qbox"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><input id="qadd" placeholder="Neue Aufgabe, z. B. Rasen mähen Sa" enterkeyhint="done" autocomplete="off" autocorrect="on" aria-label="Schnelleingabe"></div><div class="qprev" id="qprev"></div><div class="vsug qsug" id="qsug" role="list" aria-label="Frühere Aufgaben"></div><p class="qhint">Erkannt werden: heute · morgen · Sa · 12.12. · in 3 Tagen · bis Fr · #Tag · +Projekt · @Person · !1</p></section>`;
   const cur=TL[ht],LL=cur[1];
-  const list=`<section class="pnl hlist" style="--i:${k++}"><h3><span>${cur[0]}</span><em>${LL.length}</em></h3>${LL.length?LL.slice(0,40).map(hrow).join(""):`<div class="none">${cur[4]}</div>`}</section>`;
+  const list=`<section class="pnl hlist" style="--i:${k++}" aria-label="${cur[0]}">${LL.length?LL.slice(0,40).map(hrow).join(""):`<div class="none">${cur[4]}</div>`}</section>`;
   const kind=rn&&!todayL.length?"done":over.length?"late":ms.streak>=3?"streak":rd?"good":todayL.length?"start":"done";
-  /* Startseite als Geschichte (1.36): 1. Dein Tag (Stand + das Nächste zum Abhaken) → 2. Meme zur Lage (Belohnung/Anstoß)
-     → 3. Nächstes Abzeichen (langfristiges Ziel) → Kacheln, Eingabe, Liste (Arbeit) → Übersichten → Gemeinsam (ganz unten) */
-  const nextT=todayL[0],ring=`<div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div>`;
-  const hero=`<section class="hero game" style="--i:0">${ring}<div class="hbody"><small class="eyebrow">Dein Tag</small><div class="hh">${rn?`${rd} von ${rn} geschafft`:"Heute ist nichts fällig"}</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>`
-    +(nextT?`<div class="hnow"><small class="eyebrow">Als Nächstes</small>${hrow(nextT,0)}</div>`:"")+`</section>`+funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length})+badgeCard(ms);
-  return`<div class="home">${hero}${tiles}${qa}${list}`+
-    (pjs.length?P("","Projekte",pjs.length,pbars):"")+
-    P("","Tags",areas.length,bars||'<div class="none">Noch keine Tags.</div>')+
-    P("","Offen pro Person",open,who)+motPanel(k++)+`</div>`}
+  /* Startseite (1.37), ein Weg von oben nach unten:
+     1. Ankommen: Begrüßung, Tagesstand, Serie, Meme zur Lage (eine Karte)
+     2. Handeln: Eingabe, dann die Liste mit Umschalter Heute / 7 Tage / In Arbeit / Überfällig
+     3. Dranbleiben: nächstes Abzeichen in einer Zeile
+     4. Überblick: Projekte, Tags, Personen, Gemeinsam (zugeklappt) */
+  const ring=`<div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div>`;
+  const me=prefGet("me")||"",hw=homeW(),who1=hw==="__all"?"":hw===me?"":hw;
+  const hero=`<section class="hero game" style="--i:0">${ring}<div class="hbody"><small class="eyebrow">${who1?"Tag von "+esc(who1):greet()+(me?", "+esc(me):"")}</small><div class="hh">${rn?`${rd} von ${rn} erledigt`:"Heute ist nichts fällig"}</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>${funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length})}</section>`;
+  const seg=`<div class="hseg" role="tablist">`+Object.entries(TL).map(([k,[l,L]])=>`<button type="button" role="tab" class="${k===ht?"on":""}${k==="late"&&L.length?" hot":""}" data-ht="${k}" aria-selected="${k===ht}">${l}<b>${L.length}</b></button>`).join("")+`</div>`;
+  const ovw=`<details class="pnl ovw" style="--i:${k++}"${ovwOpen?" open":""}><summary><span>Überblick</span><em>Projekte, Tags, Personen, gemeinsame Woche</em></summary>`
+    +(pjs.length?P("","Projekte",pjs.length,pbars):"")+P("","Tags",areas.length,bars||'<div class="none">Noch keine Tags.</div>')+P("","Offen je Person",open,who)+motPanel(k++)+`</details>`;
+  return`<div class="home">${hero}${qa}${seg}${list}${badgeCard(ms)}${ovw}</div>`}
+let ovwOpen=false;
+document.addEventListener("toggle",e=>{if(e.target.classList&&e.target.classList.contains("ovw"))ovwOpen=e.target.open},true);
 
 const homeW=()=>{let v=null;try{v=localStorage.getItem("haus-hwho")}catch(_){}const me=prefGet("me")||"";return v||me||"__all"};
 function home(){
@@ -2258,7 +2286,7 @@ function badgeCard(s){
   const got=BADGES.filter(b=>bOn(b,s)),open=BADGES.filter(b=>!bOn(b,s)).map(b=>[b,b[3](s)]).sort((a,b)=>b[1][0]/b[1][1]-a[1][0]/a[1][1]),nx=open[0];
   const all=BADGES.map(b=>{const[c,g]=b[3](s),on=c>=g;return`<button type="button" class="bdg${on?" on":""}" data-bdg="${b[0]}">${MEDAL}<span>${esc(b[1])}</span><small>${on?"geschafft":Math.min(c,g)+" von "+g}</small></button>`}).join("");
   const left=nx?(BLEFT[nx[0][0]]||(()=>nx[0][2]))(nx[1][1]-nx[1][0]):"";
-  return`<details class="pnl bdx" style="--i:2"><summary><span class="bmed">${MEDAL}</span><span class="bnext">${nx?`<small>Nächstes Abzeichen</small><b>${esc(nx[0][1])}</b><span class="bleft">${esc(left)}</span><span class="pb"><i style="width:${Math.round(Math.min(1,nx[1][0]/nx[1][1])*100)}%"></i></span>`:`<b>Alle Abzeichen geschafft 🏆</b>`}</span>`
+  return`<details class="pnl bdx" style="--i:3"><summary><span class="bmed">${MEDAL}</span><span class="bnext">${nx?`<small>Nächstes Abzeichen</small><b>${esc(nx[0][1])}</b><span class="bleft">${esc(left)}</span><span class="pb"><i style="width:${Math.round(Math.min(1,nx[1][0]/nx[1][1])*100)}%"></i></span>`:`<b>Alle Abzeichen geschafft 🏆</b>`}</span>`
     +`<span class="bgot" aria-label="${got.length} von ${BADGES.length} freigeschaltet">${got.map(b=>`<i title="${esc(b[1])}">${MEDAL}</i>`).join("")}<em>${got.length} von ${BADGES.length}</em></span></summary><div class="bdgs">${all}</div></details>`}
 function motPanel(i){
   const T=today(),mon=T-mo(fromDn(T).getUTCDay()),all=RAW.filter(t=>!t.del&&t.status==="done");
@@ -2286,7 +2314,7 @@ function newBadges(){const s=motStats(motScope()),got=BADGES.filter(b=>bOn(b,s))
 function cheer(){
   const L=motScope(),T=today(),doneToday=L.some(t=>t.status==="done"&&doneOn(t)===T),fresh=newBadges();
   const all=!todayOpenOf(L).length&&doneToday,nb=fresh.length?"Neues Abzeichen: "+fresh.map(b=>b[1]).join(", "):"";
-  if(all||nb){confetti();hap(30);toast(all?"Alles für heute erledigt – stark! 🎉"+(nb?" "+nb:""):"🏅 "+nb,null,null,5000);if(all)gifPop("done",true)}}
+  if(all||nb){confetti();hap(30);toast(all?"Alles für heute erledigt – stark! 🎉"+(nb?" "+nb:""):"🏅 "+nb,null,null,5000);if(all){if(GIFS.done)gifPop("done",true);else gifCheer="done"}}}
 /* 1.34: Sprüche auf der Startseite (nur dort). Eingebaut; im Add-on erneuert Gemini sie höchstens einmal am Tag (api/sprueche).
    Platzhalter: {n} Serie, {late} überfällig, {open} offen. */
 const MEME_BASE={
@@ -2326,7 +2354,9 @@ async function gifToday(kind){
     const j=await api("api/gif",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind,url:im.webp||im.url,title:g.title||"",name:m.n,term:m.q,link:g.url||""})});
     GIFS=(j&&j.by)||GIFS;gifReady(kind)}
   catch(_){}}
-function gifReady(kind){if(view==="home")render();gifPop(kind,false)}
+/* Groß nur beim Feiern (letzte Aufgabe des Tages) oder auf Antippen, nie einfach beim Öffnen */
+let gifCheer=null;
+function gifReady(kind){if(view==="home")render();if(gifCheer===kind){gifCheer=null;gifPop(kind,true)}}
 /* Je Gerät, Tag und Lage einmal groß zeigen (und beim Feiern), sonst klein in der Spiel-Karte */
 function gifPop(kind,force){const g=GIFS[kind];if(!g||!g.url||!funOn()||document.querySelector("dialog[open],.gifpop"))return;
   const key=tdy()+":"+kind;let seen="";try{seen=localStorage.getItem("haus-gifseen")||""}catch(_){}
@@ -2338,9 +2368,8 @@ document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[da
 /* Meme-Karte: GIF der aktuellen Lage vollständig sichtbar, darunter der Name des Memes; ohne GIPHY-Schlüssel ein kurzer Spruch */
 const LAGE={done:"Alles geschafft",streak:"Läuft bei dir",late:"Da ist was liegen geblieben",start:"Noch nichts geschafft",good:"Gut dabei"};
 function funHtml(kind,v){if(!funOn())return"";gifKind=kind;if(haInfo&&haInfo.giphy&&!GIFS[kind])setTimeout(()=>gifToday(kind),0);const g=GIFS[kind];
-  const head=`<div class="mhead"><small class="eyebrow">Passend zu deinem Tag</small><span>${LAGE[kind]}</span></div>`;
-  if(g&&g.url)return`<section class="pnl memec" style="--i:1">${head}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button><p class="mname"><b>${esc(g.name||g.title||"")}</b><small>über GIPHY</small></p></section>`;
-  return`<section class="pnl memec" style="--i:1">${head}<p class="meme">${esc(memeText(kind,v))}</p></section>`}
+  if(g&&g.url)return`<div class="hmeme"><button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button><p class="mname"><span><small>${LAGE[kind]}</small><b>${esc(g.name||g.title||"")}</b></span><small>über GIPHY</small></p></div>`;
+  return`<div class="hmeme"><p class="meme">${esc(memeText(kind,v))}</p></div>`}
 /* Ressource: Auswahl oder Freitext */
 /* Verantwortlich: Mehrfachauswahl */
 let selWho=[];

@@ -1,5 +1,14 @@
 # Änderungen
 
+## 1.37.0
+- **Kein GIF mehr zum Wegklicken:** Beim Öffnen erscheint nichts mehr vor der Seite. Das Meme steht in der Tageskarte; groß kommt es nur beim Antippen oder wenn die letzte Aufgabe des Tages erledigt ist.
+- **Startseite als ein Weg von oben nach unten:**
+  1. **Ankommen:** eine Karte mit Begrüßung, Tagesstand, Serie, Woche und dem Meme passend zum Tag.
+  2. **Handeln:** direkt darunter die Eingabe, dann ein schmaler Umschalter Heute · 7 Tage · In Arbeit · Überfällig (ersetzt die vier großen Kacheln) und die Liste.
+  3. **Dranbleiben:** das nächste Abzeichen in einer Zeile.
+  4. **Überblick:** Projekte, Tags, Personen und die gemeinsame Woche, zugeklappt ganz unten.
+- „Als Nächstes“ entfällt, weil die erste Zeile der Liste genau das ist.
+
 ## 1.36.0
 - **Startseite folgt jetzt einer klaren Reihenfolge:**
   1. **Dein Tag:** Stand mit Ring, „4 Tage am Stück“, „3 diese Woche · 2 mehr als letzte“ und darunter **Als Nächstes**: die eine Aufgabe, die jetzt dran ist, direkt zum Abhaken.

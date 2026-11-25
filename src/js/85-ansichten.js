@@ -32,17 +32,22 @@ function homeBody(tasks,allT){
   const tiles=`<div class="tiles">`+Object.entries(TL).map(([k,[l,L,c,ic]])=>`<button type="button" class="tile${k===ht?" on":""}" data-ht="${k}" style="--tc:${c}"><span class="ti2"><svg viewBox="0 0 24 24">${ic}</svg></span><b>${L.length}</b><span class="tl">${l}</span></button>`).join("")+`</div>`;
   const qa=`<section class="qadd"><div class="qbox"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><input id="qadd" placeholder="Neue Aufgabe, z. B. Rasen mähen Sa" enterkeyhint="done" autocomplete="off" autocorrect="on" aria-label="Schnelleingabe"></div><div class="qprev" id="qprev"></div><div class="vsug qsug" id="qsug" role="list" aria-label="Frühere Aufgaben"></div><p class="qhint">Erkannt werden: heute · morgen · Sa · 12.12. · in 3 Tagen · bis Fr · #Tag · +Projekt · @Person · !1</p></section>`;
   const cur=TL[ht],LL=cur[1];
-  const list=`<section class="pnl hlist" style="--i:${k++}"><h3><span>${cur[0]}</span><em>${LL.length}</em></h3>${LL.length?LL.slice(0,40).map(hrow).join(""):`<div class="none">${cur[4]}</div>`}</section>`;
+  const list=`<section class="pnl hlist" style="--i:${k++}" aria-label="${cur[0]}">${LL.length?LL.slice(0,40).map(hrow).join(""):`<div class="none">${cur[4]}</div>`}</section>`;
   const kind=rn&&!todayL.length?"done":over.length?"late":ms.streak>=3?"streak":rd?"good":todayL.length?"start":"done";
-  /* Startseite als Geschichte (1.36): 1. Dein Tag (Stand + das Nächste zum Abhaken) → 2. Meme zur Lage (Belohnung/Anstoß)
-     → 3. Nächstes Abzeichen (langfristiges Ziel) → Kacheln, Eingabe, Liste (Arbeit) → Übersichten → Gemeinsam (ganz unten) */
-  const nextT=todayL[0],ring=`<div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div>`;
-  const hero=`<section class="hero game" style="--i:0">${ring}<div class="hbody"><small class="eyebrow">Dein Tag</small><div class="hh">${rn?`${rd} von ${rn} geschafft`:"Heute ist nichts fällig"}</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>`
-    +(nextT?`<div class="hnow"><small class="eyebrow">Als Nächstes</small>${hrow(nextT,0)}</div>`:"")+`</section>`+funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length})+badgeCard(ms);
-  return`<div class="home">${hero}${tiles}${qa}${list}`+
-    (pjs.length?P("","Projekte",pjs.length,pbars):"")+
-    P("","Tags",areas.length,bars||'<div class="none">Noch keine Tags.</div>')+
-    P("","Offen pro Person",open,who)+motPanel(k++)+`</div>`}
+  /* Startseite (1.37), ein Weg von oben nach unten:
+     1. Ankommen: Begrüßung, Tagesstand, Serie, Meme zur Lage (eine Karte)
+     2. Handeln: Eingabe, dann die Liste mit Umschalter Heute / 7 Tage / In Arbeit / Überfällig
+     3. Dranbleiben: nächstes Abzeichen in einer Zeile
+     4. Überblick: Projekte, Tags, Personen, Gemeinsam (zugeklappt) */
+  const ring=`<div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div>`;
+  const me=prefGet("me")||"",hw=homeW(),who1=hw==="__all"?"":hw===me?"":hw;
+  const hero=`<section class="hero game" style="--i:0">${ring}<div class="hbody"><small class="eyebrow">${who1?"Tag von "+esc(who1):greet()+(me?", "+esc(me):"")}</small><div class="hh">${rn?`${rd} von ${rn} erledigt`:"Heute ist nichts fällig"}</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>${funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length})}</section>`;
+  const seg=`<div class="hseg" role="tablist">`+Object.entries(TL).map(([k,[l,L]])=>`<button type="button" role="tab" class="${k===ht?"on":""}${k==="late"&&L.length?" hot":""}" data-ht="${k}" aria-selected="${k===ht}">${l}<b>${L.length}</b></button>`).join("")+`</div>`;
+  const ovw=`<details class="pnl ovw" style="--i:${k++}"${ovwOpen?" open":""}><summary><span>Überblick</span><em>Projekte, Tags, Personen, gemeinsame Woche</em></summary>`
+    +(pjs.length?P("","Projekte",pjs.length,pbars):"")+P("","Tags",areas.length,bars||'<div class="none">Noch keine Tags.</div>')+P("","Offen je Person",open,who)+motPanel(k++)+`</details>`;
+  return`<div class="home">${hero}${qa}${seg}${list}${badgeCard(ms)}${ovw}</div>`}
+let ovwOpen=false;
+document.addEventListener("toggle",e=>{if(e.target.classList&&e.target.classList.contains("ovw"))ovwOpen=e.target.open},true);
 
 const homeW=()=>{let v=null;try{v=localStorage.getItem("haus-hwho")}catch(_){}const me=prefGet("me")||"";return v||me||"__all"};
 function home(){

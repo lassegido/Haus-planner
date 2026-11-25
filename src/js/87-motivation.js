@@ -48,7 +48,7 @@ function badgeCard(s){
   const got=BADGES.filter(b=>bOn(b,s)),open=BADGES.filter(b=>!bOn(b,s)).map(b=>[b,b[3](s)]).sort((a,b)=>b[1][0]/b[1][1]-a[1][0]/a[1][1]),nx=open[0];
   const all=BADGES.map(b=>{const[c,g]=b[3](s),on=c>=g;return`<button type="button" class="bdg${on?" on":""}" data-bdg="${b[0]}">${MEDAL}<span>${esc(b[1])}</span><small>${on?"geschafft":Math.min(c,g)+" von "+g}</small></button>`}).join("");
   const left=nx?(BLEFT[nx[0][0]]||(()=>nx[0][2]))(nx[1][1]-nx[1][0]):"";
-  return`<details class="pnl bdx" style="--i:2"><summary><span class="bmed">${MEDAL}</span><span class="bnext">${nx?`<small>Nächstes Abzeichen</small><b>${esc(nx[0][1])}</b><span class="bleft">${esc(left)}</span><span class="pb"><i style="width:${Math.round(Math.min(1,nx[1][0]/nx[1][1])*100)}%"></i></span>`:`<b>Alle Abzeichen geschafft 🏆</b>`}</span>`
+  return`<details class="pnl bdx" style="--i:3"><summary><span class="bmed">${MEDAL}</span><span class="bnext">${nx?`<small>Nächstes Abzeichen</small><b>${esc(nx[0][1])}</b><span class="bleft">${esc(left)}</span><span class="pb"><i style="width:${Math.round(Math.min(1,nx[1][0]/nx[1][1])*100)}%"></i></span>`:`<b>Alle Abzeichen geschafft 🏆</b>`}</span>`
     +`<span class="bgot" aria-label="${got.length} von ${BADGES.length} freigeschaltet">${got.map(b=>`<i title="${esc(b[1])}">${MEDAL}</i>`).join("")}<em>${got.length} von ${BADGES.length}</em></span></summary><div class="bdgs">${all}</div></details>`}
 function motPanel(i){
   const T=today(),mon=T-mo(fromDn(T).getUTCDay()),all=RAW.filter(t=>!t.del&&t.status==="done");
@@ -76,7 +76,7 @@ function newBadges(){const s=motStats(motScope()),got=BADGES.filter(b=>bOn(b,s))
 function cheer(){
   const L=motScope(),T=today(),doneToday=L.some(t=>t.status==="done"&&doneOn(t)===T),fresh=newBadges();
   const all=!todayOpenOf(L).length&&doneToday,nb=fresh.length?"Neues Abzeichen: "+fresh.map(b=>b[1]).join(", "):"";
-  if(all||nb){confetti();hap(30);toast(all?"Alles für heute erledigt – stark! 🎉"+(nb?" "+nb:""):"🏅 "+nb,null,null,5000);if(all)gifPop("done",true)}}
+  if(all||nb){confetti();hap(30);toast(all?"Alles für heute erledigt – stark! 🎉"+(nb?" "+nb:""):"🏅 "+nb,null,null,5000);if(all){if(GIFS.done)gifPop("done",true);else gifCheer="done"}}}
 /* 1.34: Sprüche auf der Startseite (nur dort). Eingebaut; im Add-on erneuert Gemini sie höchstens einmal am Tag (api/sprueche).
    Platzhalter: {n} Serie, {late} überfällig, {open} offen. */
 const MEME_BASE={
@@ -116,7 +116,9 @@ async function gifToday(kind){
     const j=await api("api/gif",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind,url:im.webp||im.url,title:g.title||"",name:m.n,term:m.q,link:g.url||""})});
     GIFS=(j&&j.by)||GIFS;gifReady(kind)}
   catch(_){}}
-function gifReady(kind){if(view==="home")render();gifPop(kind,false)}
+/* Groß nur beim Feiern (letzte Aufgabe des Tages) oder auf Antippen, nie einfach beim Öffnen */
+let gifCheer=null;
+function gifReady(kind){if(view==="home")render();if(gifCheer===kind){gifCheer=null;gifPop(kind,true)}}
 /* Je Gerät, Tag und Lage einmal groß zeigen (und beim Feiern), sonst klein in der Spiel-Karte */
 function gifPop(kind,force){const g=GIFS[kind];if(!g||!g.url||!funOn()||document.querySelector("dialog[open],.gifpop"))return;
   const key=tdy()+":"+kind;let seen="";try{seen=localStorage.getItem("haus-gifseen")||""}catch(_){}
@@ -128,6 +130,5 @@ document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[da
 /* Meme-Karte: GIF der aktuellen Lage vollständig sichtbar, darunter der Name des Memes; ohne GIPHY-Schlüssel ein kurzer Spruch */
 const LAGE={done:"Alles geschafft",streak:"Läuft bei dir",late:"Da ist was liegen geblieben",start:"Noch nichts geschafft",good:"Gut dabei"};
 function funHtml(kind,v){if(!funOn())return"";gifKind=kind;if(haInfo&&haInfo.giphy&&!GIFS[kind])setTimeout(()=>gifToday(kind),0);const g=GIFS[kind];
-  const head=`<div class="mhead"><small class="eyebrow">Passend zu deinem Tag</small><span>${LAGE[kind]}</span></div>`;
-  if(g&&g.url)return`<section class="pnl memec" style="--i:1">${head}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button><p class="mname"><b>${esc(g.name||g.title||"")}</b><small>über GIPHY</small></p></section>`;
-  return`<section class="pnl memec" style="--i:1">${head}<p class="meme">${esc(memeText(kind,v))}</p></section>`}
+  if(g&&g.url)return`<div class="hmeme"><button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button><p class="mname"><span><small>${LAGE[kind]}</small><b>${esc(g.name||g.title||"")}</b></span><small>über GIPHY</small></p></div>`;
+  return`<div class="hmeme"><p class="meme">${esc(memeText(kind,v))}</p></div>`}
