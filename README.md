@@ -1,6 +1,6 @@
 # Planner
 
-Aufgaben, Kanban-Board, Liste und Zeitstrahl (Gantt) für zu Hause. Läuft als Home-Assistant-Add-on auf dem eigenen Gerät. Dieses Repository enthält nur den **Code**. Die Aufgaben selbst liegen nie hier, sondern auf deinem Home Assistant.
+Aufgaben als Liste, Tafel und Zeitstrahl für zu Hause. Läuft als Home-Assistant-Add-on auf dem eigenen Gerät. Dieses Repository enthält nur den **Code**. Die Aufgaben selbst liegen nie hier, sondern auf deinem Home Assistant.
 
 ## Einrichtung (einmalig)
 

@@ -1080,6 +1080,29 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
 .gifprev img{width:5rem;height:5rem;object-fit:cover;border-radius:.7rem}
 .gifprev small{color:var(--mut)}
 @media (min-width:700px){.hero.game .hring{width:7rem;height:7rem}}
+/* 1.36: Startseite als Geschichte: Dein Tag → Meme zur Lage → Nächstes Abzeichen */
+.eyebrow{display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.hero.game .hh{margin-top:.1rem}
+.hnow{flex:1 1 100%;border-top:1px solid var(--line);padding-top:.55rem}
+.hnow .hrow{padding-left:0;padding-right:0;border:0;background:none}
+.memec{padding:.9rem 1rem 1rem}
+.mhead{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin-bottom:.6rem}
+.mhead span{font-weight:650;font-size:.92rem}
+.gifbox{display:block;width:100%;padding:0;border:0;border-radius:.9rem;overflow:hidden;background:#0d1418;cursor:pointer}
+.gifbox img{display:block;width:100%;height:auto;max-height:12rem;object-fit:contain;margin:0 auto}
+.mname{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin:.55rem 0 0;font-size:.92rem}
+.mname small{flex:none;font-size:.7rem;color:var(--mut)}
+.memec .meme{margin:0;font-size:1rem}
+.bdx.pnl{border-top:0;padding:.75rem 1rem}
+.bdx.pnl summary{gap:.75rem}
+.bmed svg{width:2.1rem;height:2.1rem;fill:color-mix(in srgb,var(--sun) 22%,transparent);stroke:var(--sun);stroke-width:1.6;stroke-linecap:round}
+.bdx .bnext{display:grid;grid-template-columns:auto 1fr;align-items:baseline;column-gap:.5rem;row-gap:.25rem}
+.bdx .bnext small{grid-column:1/-1;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.bdx .bnext b{font-size:.95rem}
+.bdx .bleft{font-size:.82rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bdx .bnext .pb{grid-column:1/-1}
+.bdx .bgot{flex-direction:column;align-items:flex-end;gap:.15rem}
+.bdx .bgot i{display:none}.bdx .bgot i:nth-last-of-type(-n+3){display:inline-flex}
 </style>
 </head>
 <body>
@@ -1095,7 +1118,7 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
   <nav class="tabs" id="tabs">
     <button data-v="home" class="on"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg><span>Start</span></button>
     <button data-v="list"><svg viewBox="0 0 24 24"><path d="M9 6.5h11M9 12h11M9 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01" stroke-width="2.4"/></svg><span>Liste</span></button>
-    <button data-v="board"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="4.5" height="15" rx="1.2"/><rect x="9.75" y="4.5" width="4.5" height="9" rx="1.2"/><rect x="16" y="4.5" width="4.5" height="12" rx="1.2"/></svg><span>Board</span></button>
+    <button data-v="board"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="4.5" height="15" rx="1.2"/><rect x="9.75" y="4.5" width="4.5" height="9" rx="1.2"/><rect x="16" y="4.5" width="4.5" height="12" rx="1.2"/></svg><span>Tafel</span></button>
     <button data-v="gantt"><svg viewBox="0 0 24 24"><path d="M4 6.5h8M8 12h10M12 17.5h8" stroke-width="2.6"/></svg><span>Zeitstrahl</span></button>
     <button data-v="cal"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg><span>Kalender</span></button>
   </nav>
@@ -1103,7 +1126,7 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
 </aside>
 <div class="stage">
   <header class="bar">
-    <div class="ttl"><h1 id="ttl">Board</h1><div class="sub" id="sub"></div></div>
+    <div class="ttl"><h1 id="ttl">Tafel</h1><div class="sub" id="sub"></div></div>
     <div class="filters" id="filters"><input id="q" type="search" placeholder="Suchen …" enterkeyhint="search"><select id="fw" aria-label="Person"><option value="">Alle Personen</option></select></div>
     <div class="hb"><button class="ib" id="ftog" type="button" aria-label="Suchen"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button><button class="ib fb" id="fbtn" type="button" aria-label="Filter"><svg viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></svg><b id="fcnt"></b></button><button class="ib" id="more" type="button" aria-label="Mehr" aria-haspopup="menu"><svg viewBox="0 0 24 24" class="dots3"><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/></svg></button></div>
   </header>
@@ -1134,11 +1157,11 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
 <dialog id="dsh" aria-label="Aktionen"></dialog>
 <div id="popx" hidden></div><div id="pop" role="menu" hidden></div>
 <dialog id="dlx">
-  <div class="shd"><div class="dh">Export und Backup</div><button class="tb r b" id="x_close" type="button">Fertig</button></div>
+  <div class="shd"><div class="dh">Export und Sicherung</div><button class="tb r b" id="x_close" type="button">Fertig</button></div>
   <p class="sgt">Exportieren</p>
-  <div class="sgrp"><button class="xb" id="x_pdf"><span>PDF<small>Liste mit Checklisten und Zeitstrahl</small></span></button><button class="xb" id="x_xlsx"><span>Excel<small>Liste, Board und Zeitstrahl als Tabellenblätter</small></span></button><button class="xb" id="x_ics"><span>Kalender-Datei (.ics)<small>Offene Aufgaben für Apple, Google oder Outlook</small></span></button></div>
+  <div class="sgrp"><button class="xb" id="x_pdf"><span>PDF<small>Liste mit Checklisten und Zeitstrahl</small></span></button><button class="xb" id="x_xlsx"><span>Excel<small>Liste, Tafel und Zeitstrahl als Tabellenblätter</small></span></button><button class="xb" id="x_ics"><span>Kalender-Datei (.ics)<small>Offene Aufgaben für Apple, Google oder Outlook</small></span></button></div>
   <p class="sgt">Sichern</p>
-  <div class="sgrp"><button class="xb" id="x_json"><span>Backup-Datei speichern<small>Alle Aufgaben, Tags und Projekte als JSON</small></span></button><button class="xb" id="x_imp"><span>Backup einspielen<small>Aus einer Backup-Datei wiederherstellen</small></span></button></div>
+  <div class="sgrp"><button class="xb" id="x_json"><span>Sicherung speichern<small>Alle Aufgaben, Tags und Projekte als JSON</small></span></button><button class="xb" id="x_imp"><span>Sicherung einspielen<small>Aus einer Sicherungsdatei wiederherstellen</small></span></button></div>
   <input type="file" id="imp" accept=".json,application/json" hidden>
   <div class="ver" id="ver"></div>
 </dialog>
@@ -1518,7 +1541,7 @@ function drawSettings(){
     if(matchMedia("(hover:hover)").matches)h+=`<p class="sgt">Hilfe</p>`+grp(srow('data-go="keys"',"Tastaturkürzel"));
   }else if(sPage==="rem"){
     const sel=new Set((haInfo&&haInfo.notify)||[]),av=haAvail;
-    if(av===null)h=cap("Lade Geräte …");
+    if(av===null)h=cap("Geräte werden geladen …");
     else{const names=[...new Set([...av,...sel])];
       const nw=(haInfo&&haInfo.nwho)||{};
       h=`<p class="sgt">Geräte</p>`+(names.length?grp(names.map(x=>sopt(`data-set="ntf:${x}"`,esc(ntfName(x)),sel.has(x))).join("")):cap("Es wurde kein Gerät gefunden. Installiere die Home-Assistant-App auf dem Handy oder iPad und melde dich an."))
@@ -1547,11 +1570,11 @@ function drawSettings(){
   }else if(sPage==="fun"){
     const hi=haInfo||{},on=funOn();
     h=`<p class="sgt">Nur für dich</p>`+grp(sopt('data-set="fun:1"',"An",on)+sopt('data-set="fun:0"',"Aus",!on))
-     +cap("Sprüche, GIF des Tages und Konfetti auf der Startseite. Liste, Board, Zeitstrahl und Kalender bleiben immer sachlich.");
-    if(haInfo){h+=`<p class="sgt">GIF des Tages · für alle</p>`+(GIFS[gifKind]&&GIFS[gifKind].url?`<div class="gifprev"><img src="${esc(GIFS[gifKind].url)}" alt=""><small>Gerade: ${esc(GIFS[gifKind].name||"")} · via GIPHY</small></div>`:"")
+     +cap("Sprüche, GIF des Tages und Konfetti auf der Startseite. Liste, Tafel, Zeitstrahl und Kalender bleiben immer sachlich.");
+    if(haInfo){h+=`<p class="sgt">GIF des Tages · für alle</p>`+(GIFS[gifKind]&&GIFS[gifKind].url?`<div class="gifprev"><img src="${esc(GIFS[gifKind].url)}" alt=""><small>Gerade zu sehen: ${esc(GIFS[gifKind].name||"")} · über GIPHY</small></div>`:"")
        +`<div class="sgrp kin"><input id="gif_key" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="${hi.giphy?"GIPHY-Schlüssel ist eingetragen":"GIPHY-Schlüssel einfügen"}" aria-label="GIPHY-Schlüssel"></div>`
        +grp(srow('data-act="gifsave"',"<b class=\"acc\">Schlüssel sichern</b>",null,null,false)+(hi.giphy?srow('data-act="gifnew"',"Heute andere GIFs",null,null,false)+srow('data-act="gifdel"',"<span class=\"bad\">Schlüssel entfernen</span>",null,null,false):""))
-       +cap("Je Lage (alles erledigt, Serie, überfällig, noch nichts, halb geschafft) höchstens ein GIF am Tag, für alle gleich. Es werden nur bestehende Memes von GIPHY gezeigt. Kostenloser Schlüssel: developers.giphy.com → Create an App → API. Der Schlüssel ist für den Browser gedacht und wird darum an die App ausgeliefert (anders als der Gemini-Schlüssel).")
+       +cap("Für jede Situation des Tages (alles erledigt, mehrere Tage am Stück, etwas überfällig, noch nichts erledigt, schon einiges geschafft) gibt es höchstens ein GIF am Tag, für alle dasselbe. Gezeigt werden nur bestehende Memes von GIPHY. Einen kostenlosen Schlüssel gibt es auf developers.giphy.com unter „Create an App“ → „API“. Dieser Schlüssel ist für den Browser bestimmt und wird deshalb an die App übertragen, anders als der Gemini-Schlüssel.")
        +`<p class="sgt">Eigene Suchbegriffe</p><div class="sgrp kin"><input id="gif_terms" type="text" autocomplete="off" value="${esc(((hi.gifterms)||[]).join(", "))}" placeholder="z. B. stromberg finger, dog zoomies" aria-label="Eigene GIF-Suchbegriffe"></div>`
        +grp(srow('data-act="giftermsave"',"<b class=\"acc\">Suchbegriffe sichern</b>",null,null,false))
        +cap("Mit Komma trennen. Der Planner wechselt täglich zwischen eingebauten Themen (Büro-Comedy, Zeichentrick, Gaming, Fußball, Tiere) und euren Begriffen. Mit Gemini-Schlüssel wählt die KI einmal am Tag passende bekannte Memes für jede Lage aus (eine Anfrage).")}
@@ -1577,7 +1600,7 @@ function drawSettings(){
   }else if(sPage==="me"){
     h=grp([["","Keine Angabe"],["Lasse","Lasse"],["Melanie","Melanie"]].map(([k,n])=>sopt(`data-set="me:${k}"`,n,k===me)).join(""))+cap("Damit weiß die App, welche Aufgaben deine sind.");
   }else if(sPage==="keys"){
-    h=`<dl class="keys"><dt>N</dt><dd>Neue Aufgabe</dd><dt>/</dt><dd>Suchen</dd><dt>1 – 5</dt><dd>Start, Liste, Board, Zeitstrahl, Kalender</dd><dt>S</dt><dd>Mehrfachauswahl</dd><dt>A</dt><dd>Alle auswählen</dd><dt>Entf</dt><dd>Auswahl löschen</dd><dt>H</dt><dd>Zeitstrahl: zu Heute</dd><dt>Esc</dt><dd>Auswahl beenden</dd></dl>`;
+    h=`<dl class="keys"><dt>N</dt><dd>Neue Aufgabe</dd><dt>/</dt><dd>Suchen</dd><dt>1 – 5</dt><dd>Start, Liste, Tafel, Zeitstrahl, Kalender</dd><dt>S</dt><dd>Mehrfachauswahl</dd><dt>A</dt><dd>Alle auswählen</dd><dt>Entf</dt><dd>Auswahl löschen</dd><dt>H</dt><dd>Zeitstrahl: zu Heute</dd><dt>Esc</dt><dd>Auswahl beenden</dd></dl>`;
   }
   $("s_body").innerHTML=h;
 }
@@ -1612,15 +1635,15 @@ $("s_body").onclick=async e=>{
   else if(d.act==="kisave"){const k=$("ki_key").value.replace(/\s+/g,"").replace(/^["'„“]+|["'„“”]+$/g,"");
     if(!k){kiMsg=["Erst den Schlüssel ins Feld einfügen.",1];drawSettings();return}
     if(!/^[A-Za-z0-9._-]{20,200}$/.test(k)){kiMsg=[`Das sieht nicht nach einem vollständigen Gemini-Schlüssel aus (${k.length} Zeichen). Er beginnt mit „AIza“ oder „AQ.“ und enthält keine Leerzeichen.`,1];drawSettings();return}
-    kiMsg=["Sichere und teste die Verbindung …",0];drawSettings();
+    kiMsg=["Schlüssel wird gesichert und geprüft …",0];drawSettings();
     try{const r=await fetch("api/ha-settings",{method:"POST",headers:{"Content-Type":"application/json","X-Planner":"1"},body:JSON.stringify({ai_key:k})}),j=await r.json().catch(()=>({}));
       if(!r.ok){kiMsg=[j.error||"Speichern fehlgeschlagen ("+r.status+").",1];drawSettings();return}
       if(j.ha)haInfo=j.ha;const err=await kiCheck();
-      kiMsg=err?["Gesichert, aber der Test schlägt fehl: "+err,1]:["Gesichert. Die KI antwortet, alles bereit.",0]}
+      kiMsg=err?["Gesichert, aber die Prüfung ist fehlgeschlagen: "+err,1]:["Gesichert. Die KI antwortet, alles ist bereit.",0]}
     catch(e){kiMsg=["Der Planner-Server ist nicht erreichbar.",1]}
     drawSettings()}
   else if(d.act==="kidel"){if(!await confirmSheet("Gemini-Schlüssel entfernen?","Entfernen"))return;await haSave({ai_key:""});kiMsg=["Schlüssel entfernt.",0];drawSettings()}
-  else if(d.act==="kitest"){kiMsg=["Teste …",0];drawSettings();const err=await kiCheck();kiMsg=err?["Test fehlgeschlagen: "+err,1]:["Die KI antwortet, alles bereit.",0];drawSettings()}
+  else if(d.act==="kitest"){kiMsg=["Teste …",0];drawSettings();const err=await kiCheck();kiMsg=err?["Prüfung fehlgeschlagen: "+err,1]:["Die KI antwortet, alles ist bereit.",0];drawSettings()}
   else if(d.act==="hatest"){try{const r=await api("api/ha-test",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});$("dls").close();toast(r.ok?"Testnachricht gesendet":"Fehlgeschlagen: "+r.error)}catch(e){toast("Server nicht erreichbar")}}
 };
 
@@ -2003,8 +2026,11 @@ function homeBody(tasks,allT){
   const cur=TL[ht],LL=cur[1];
   const list=`<section class="pnl hlist" style="--i:${k++}"><h3><span>${cur[0]}</span><em>${LL.length}</em></h3>${LL.length?LL.slice(0,40).map(hrow).join(""):`<div class="none">${cur[4]}</div>`}</section>`;
   const kind=rn&&!todayL.length?"done":over.length?"late":ms.streak>=3?"streak":rd?"good":todayL.length?"start":"done";
-  /* Kopf: persönliche Spiel-Karte ganz oben (Ring, Serie, Woche, Spruch + GIF, Abzeichen), danach Kacheln, Eingabe, Liste */
-  const hero=`<section class="hero game" style="--i:0"><div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div><div class="hbody"><div class="hh">Heute: ${rd} von ${rn} erledigt</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>${nx?`<div class="hnext"><small>Nächste Frist</small><strong>${esc(nx.title)}</strong><span>${[nx.area,rel(nx)].filter(Boolean).map(esc).join(" · ")}</span></div>`:""}${funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length})}${badgeStrip(ms)}</section>`;
+  /* Startseite als Geschichte (1.36): 1. Dein Tag (Stand + das Nächste zum Abhaken) → 2. Meme zur Lage (Belohnung/Anstoß)
+     → 3. Nächstes Abzeichen (langfristiges Ziel) → Kacheln, Eingabe, Liste (Arbeit) → Übersichten → Gemeinsam (ganz unten) */
+  const nextT=todayL[0],ring=`<div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div>`;
+  const hero=`<section class="hero game" style="--i:0">${ring}<div class="hbody"><small class="eyebrow">Dein Tag</small><div class="hh">${rn?`${rd} von ${rn} geschafft`:"Heute ist nichts fällig"}</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>`
+    +(nextT?`<div class="hnow"><small class="eyebrow">Als Nächstes</small>${hrow(nextT,0)}</div>`:"")+`</section>`+funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length})+badgeCard(ms);
   return`<div class="home">${hero}${tiles}${qa}${list}`+
     (pjs.length?P("","Projekte",pjs.length,pbars):"")+
     P("","Tags",areas.length,bars||'<div class="none">Noch keine Tags.</div>')+
@@ -2069,7 +2095,7 @@ function render(){
   if(view!=="home"&&isPhone())$("sub").innerHTML=n?`${n} ${n===1?"Aufgabe":"Aufgaben"} · ${pct} % erledigt`+(late?` · <b class="hot">${late} überfällig</b>`:""):"Noch keine Aufgaben";
   else $("sub").textContent=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
   $("kpis").innerHTML=view==="home"?"":`<div class="kp"><div class="kn"><b><span data-n="${pct}">${pct}</span><i>%</i></b><span>erledigt · ${d} von ${n}</span></div><div class="kn"><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="kn ${late?"hot":""}"><b data-n="${late}">${late}</b><span>überfällig</span></div><div class="kn"><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div>${n?`<div class="stripe" title="Erledigt · In Arbeit · Offen"><i class="s-x" style="flex:${d}"></i><i class="s-d" style="flex:${doing}"></i><i class="s-o" style="flex:${op}"></i></div>`:""}`;
-  document.body.dataset.view=view;$("ttl").textContent=view==="home"?"Start":{board:"Board",list:"Liste",gantt:"Zeitstrahl",cal:"Kalender"}[view];
+  document.body.dataset.view=view;$("ttl").textContent=view==="home"?"Start":{board:"Tafel",list:"Liste",gantt:"Zeitstrahl",cal:"Kalender"}[view];
     const whos=allWho(),curw=$("fw").value;
   $("fw").innerHTML='<option value="">Alle Personen</option>'+whos.map(a=>`<option ${a===curw?"selected":""}>${esc(a)}</option>`).join("")+`<option value="__none" ${curw==="__none"?"selected":""}>Nicht zugewiesen</option>`;
   const fw2=$("fw").value,ch=(attr,val,label,c,on)=>`<button data-${attr}="${esc(val)}" class="${on?"on":""}"><span>${attr==="cw"&&val&&val!=="__none"?`<i class="wd ${avc(val)}"></i>`:""}${esc(label)}</span><em>${c}</em></button>`;
@@ -2103,7 +2129,7 @@ function lrow(t,i){const dn_=t.status==="done";return`<div class="hrow lrow" dat
 function table(list){
   if(isPhone())return`<div class="ilist">`+groups(list).map(g=>(g.l!=null?`<h3 class="igh"><i class="dt" style="background:${g.c}"></i><span>${esc(g.l)}</span><em>${g.L.length}</em></h3>`:"")+`<div class="igrp">${g.L.map(lrow).join("")}</div>`).join("")+`</div>`;
   const row=t=>`<tr class="row" data-id="${t.id}"${t.prio?` data-pr="${t.prio}"`:""}><td>${pjh(t)}${pb(t)}${esc(t.title)} ${isBlocked(t)?'<span class="blk">blockiert</span>':""}<span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}</span></td><td>${tgs(t).map(chip).join("")}</td><td>${esc(t.who)}</td><td>${fd(t.start)}</td><td class="${isLate(t)?"late":""}">${fd(t.end)}</td><td><span class="st ${t.status}">${ST[t.status]}</span></td></tr>`;
-  return`<div class="wrap"><table><tr><th>Aufgabe</th><th>Tags</th><th>Ressource</th><th>Start</th><th>Ende</th><th>Status</th></tr>`+
+  return`<div class="wrap"><table><tr><th>Aufgabe</th><th>Tags</th><th>Wer</th><th>Beginn</th><th>Ende</th><th>Status</th></tr>`+
   groups(list).map(g=>(g.l!=null?`<tr class="grp"><td colspan="6"><i class="dt" style="background:${g.c}"></i>${esc(g.l)}<em>${g.L.length}</em></td></tr>`:"")+g.L.map(row).join("")).join("")+`</table></div>`;
 }
 let gmode="day";
@@ -2206,11 +2232,11 @@ function motStats(L){
 /* Abzeichen: [id, Name, Beschreibung, Fortschritt(s) → [erreicht, Ziel]]. Freigeschaltet, wenn erreicht ≥ Ziel. */
 const BADGES=[
   ["d10","Erste 10","10 Aufgaben erledigt",s=>[s.done,10]],["d50","Fünfzig","50 Aufgaben erledigt",s=>[s.done,50]],["d100","Hundert","100 Aufgaben erledigt",s=>[s.done,100]],
-  ["s7","Eine Woche dran","7 Tage in Folge alles für den Tag erledigt",s=>[s.maxStreak,7]],["s30","Ausdauer","30 Tage in Folge alles für den Tag erledigt",s=>[s.maxStreak,30]],
+  ["s7","Eine Woche durchgezogen","7 Tage in Folge alles für den Tag erledigt",s=>[s.maxStreak,7]],["s30","Ausdauer","30 Tage in Folge alles für den Tag erledigt",s=>[s.maxStreak,30]],
   ["clean","Weiße Weste","Eine ganze Woche (Mo–So) ohne Überfälliges, mindestens 3 Aufgaben erledigt",s=>[s.cleanWeek?1:0,1]],
   ["proj","Projekt geschafft","Alle Aufgaben eines Projekts erledigt (mindestens 3)",s=>s.projDone?[1,1]:s.projBest],
   ["early","Frühstarter","10 Aufgaben vor dem Fälligkeitstag erledigt",s=>[s.early,10]],
-  ["team","Teamwork","5 Aufgaben mit mehreren Personen erledigt",s=>[s.team,5]],
+  ["team","Gemeinsam stark","5 Aufgaben mit mehreren Personen erledigt",s=>[s.team,5]],
   ["ck","Abgehakt","Eine Checkliste mit mindestens 10 Punkten komplett erledigt",s=>[s.bigCk?1:0,1]]];
 const bOn=(b,s)=>{const[c,g]=b[3](s);return c>=g};
 const MEDAL='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.5l2.2 5M16 3.5l-2.2 5"/><circle cx="12" cy="14.5" r="5.5"/><path d="M12 12v5"/></svg>';
@@ -2221,16 +2247,19 @@ function doneBy(t){const names=allWho(),L=t.log||[];
   const w=wl(t);return w.length===1?w[0]:"Gemeinsam"}
 const motCol=w=>/^melanie/i.test(w)?"var(--brick)":/^lasse/i.test(w)?"var(--sea)":w==="Gemeinsam"?"var(--mut)":"var(--sky)";
 function streakHtml(s){
-  return`<span class="hstreak${s.todayIn?" lit":""}" title="Tage in Folge mit vollem Tagesring">${FLAME}<span>${s.streak?`<b>${s.streak} ${s.streak===1?"Tag":"Tage"}</b> Serie`:"Serie startet heute"}</span></span>`}
-function weekHtml(s){const d=s.wk-s.wkPrev;return`<span class="hwk"><b>${s.wk}</b> diese Woche${s.wkPrev||s.wk?` · ${d>0?"+"+d:d<0?d:"±0"} zur Vorwoche`:""}</span>`}
+  return`<span class="hstreak${s.todayIn?" lit":""}" title="Tage in Folge mit vollem Tagesring">${FLAME}<span>${s.streak?`<b>${s.streak} ${s.streak===1?"Tag":"Tage"}</b> am Stück`:"Schaffst du heute alles, beginnt deine Serie"}</span></span>`}
+function weekHtml(s){const d=s.wk-s.wkPrev;return`<span class="hwk">Diese Woche <b>${s.wk}</b> erledigt${s.wkPrev||s.wk?`, ${d>0?d+" mehr als letzte Woche":d<0?-d+" weniger als letzte Woche":"so viele wie letzte Woche"}`:""}</span>`}
 /* Abzeichen kompakt: freigeschaltete als Symbole, dazu das nächste mit Fortschritt; antippen klappt alle auf */
-function badgeStrip(s){
+/* Abzeichen als kleine Karte: das nächste Ziel in einem Satz, freigeschaltete als Symbole; antippen klappt alle auf */
+const BLEFT={d10:n=>`noch ${n} ${n===1?"Aufgabe":"Aufgaben"}`,d50:n=>`noch ${n} Aufgaben`,d100:n=>`noch ${n} Aufgaben`,s7:n=>`noch ${n} ${n===1?"Tag":"Tage"} am Stück`,
+  s30:n=>`noch ${n} Tage am Stück`,early:n=>`noch ${n}-mal vor dem Fälligkeitstag`,team:n=>`noch ${n} gemeinsame Aufgaben`,proj:n=>`noch ${n} Aufgaben bis zum ersten fertigen Projekt`};
+function badgeCard(s){
   try{if(localStorage.getItem(badgeKey())===null)localStorage.setItem(badgeKey(),JSON.stringify(BADGES.filter(b=>bOn(b,s)).map(b=>b[0])))}catch(_){}
   const got=BADGES.filter(b=>bOn(b,s)),open=BADGES.filter(b=>!bOn(b,s)).map(b=>[b,b[3](s)]).sort((a,b)=>b[1][0]/b[1][1]-a[1][0]/a[1][1]),nx=open[0];
-  const all=BADGES.map(b=>{const[c,g]=b[3](s),on=c>=g;return`<button type="button" class="bdg${on?" on":""}" data-bdg="${b[0]}">${MEDAL}<span>${esc(b[1])}</span><small>${on?"geschafft":Math.min(c,g)+"/"+g}</small></button>`}).join("");
-  return`<details class="bdx"><summary><span class="bgot">${got.length?got.map(b=>`<i title="${esc(b[1])}">${MEDAL}</i>`).join(""):`<i class="off">${MEDAL}</i>`}<em>${got.length}/${BADGES.length}</em></span>`
-    +(nx?`<span class="bnext"><small>Nächstes: ${esc(nx[0][1])}</small><span class="pb"><i style="width:${Math.round(Math.min(1,nx[1][0]/nx[1][1])*100)}%"></i></span><em>${Math.min(nx[1][0],nx[1][1])}/${nx[1][1]}</em></span>`:`<span class="bnext"><small>Alle Abzeichen geschafft 🏆</small></span>`)
-    +`</summary><div class="bdgs">${all}</div></details>`}
+  const all=BADGES.map(b=>{const[c,g]=b[3](s),on=c>=g;return`<button type="button" class="bdg${on?" on":""}" data-bdg="${b[0]}">${MEDAL}<span>${esc(b[1])}</span><small>${on?"geschafft":Math.min(c,g)+" von "+g}</small></button>`}).join("");
+  const left=nx?(BLEFT[nx[0][0]]||(()=>nx[0][2]))(nx[1][1]-nx[1][0]):"";
+  return`<details class="pnl bdx" style="--i:2"><summary><span class="bmed">${MEDAL}</span><span class="bnext">${nx?`<small>Nächstes Abzeichen</small><b>${esc(nx[0][1])}</b><span class="bleft">${esc(left)}</span><span class="pb"><i style="width:${Math.round(Math.min(1,nx[1][0]/nx[1][1])*100)}%"></i></span>`:`<b>Alle Abzeichen geschafft 🏆</b>`}</span>`
+    +`<span class="bgot" aria-label="${got.length} von ${BADGES.length} freigeschaltet">${got.map(b=>`<i title="${esc(b[1])}">${MEDAL}</i>`).join("")}<em>${got.length} von ${BADGES.length}</em></span></summary><div class="bdgs">${all}</div></details>`}
 function motPanel(i){
   const T=today(),mon=T-mo(fromDn(T).getUTCDay()),all=RAW.filter(t=>!t.del&&t.status==="done");
   const wk=all.filter(t=>{const d=doneOn(t);return d>=mon&&d<=T}),prev=all.filter(t=>{const d=doneOn(t);return d>=mon-7&&d<=T-7}).length;
@@ -2238,7 +2267,7 @@ function motPanel(i){
   const bar=wk.length?`<div class="wbar">${parts.map(([w,c])=>`<i style="flex:${c};background:${motCol(w)}" title="${esc(w)}: ${c}"></i>`).join("")}</div>`:`<div class="wbar"></div>`;
   const leg=parts.map(([w,c])=>`<span><i style="background:${motCol(w)}"></i>${esc(w)} ${c}</span>`).join("");
   const diff=wk.length-prev,wd=WDLONG[fromDn(T).getUTCDay()];
-  const cmp=T===mon?`Vorwoche gesamt: ${all.filter(t=>{const d=doneOn(t);return d>=mon-7&&d<mon}).length}`:`Vorwoche bis ${wd}: ${prev}`+(diff>0?` · ${diff} mehr`:diff<0?` · ${-diff} weniger`:" · gleich viel");
+  const cmp=T===mon?`Letzte Woche insgesamt: ${all.filter(t=>{const d=doneOn(t);return d>=mon-7&&d<mon}).length}`:`Letzte Woche bis ${wd}: ${prev}`+(diff>0?` · ${diff} mehr`:diff<0?` · ${-diff} weniger`:" · gleich viel");
   return`<section class="pnl mot" style="--i:${i}"><h3><span>Gemeinsam diese Woche</span><em>${wk.length} erledigt</em></h3>${bar}<div class="wleg">${leg||"<span>Noch nichts erledigt – los geht’s.</span>"}</div><p class="wcmp">${cmp}</p></section>`}
 /* Abzeichen antippen: Beschreibung */
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-bdg]");if(!b)return;const x=BADGES.find(y=>y[0]===b.dataset.bdg);
@@ -2279,11 +2308,11 @@ function memeText(kind,v){const L=MEME_BASE[kind]||[];if(!L.length)return"";
    Memes mit GIPHY-Suchbegriff vor (api/sprueche), sonst die eingebaute Liste unten; eigene Suchbegriffe aus den Einstellungen kommen dazu.
    Je Lage und Tag sucht das erste Gerät einmal bei GIPHY (GIPHY verlangt die Suche im Browser), der Server merkt sich das GIF für alle. */
 const GIF_BASE={
-  done:[["stromberg applaus","Stromberg: Applaus"],["gta mission passed","GTA: Mission Passed"],["homer woohoo","Homer: Woo-hoo!"],["michael scott yes","Michael Scott: Yes!"],["happy dog zoomies","Hund mit Zoomies"],["success kid","Success Kid"]],
-  streak:[["leonardo dicaprio cheers","DiCaprio: Cheers"],["dwight schrute perfect","Dwight: Perfekt"],["proud dog","Stolzer Hund"],["football goal celebration","Torjubel"],["nba jam on fire","He's on fire!"]],
-  late:[["this is fine dog","This is fine"],["homer backs into bush","Homer verschwindet in der Hecke"],["gta wasted","GTA: Wasted"],["cat knocking things off table","Katze räumt den Tisch ab"],["stromberg","Stromberg"],["peter griffin","Peter Griffin"]],
-  start:[["lets do this","Let's do this"],["dog waiting","Hund wartet"],["capybara","Capybara"],["kick off football","Anpfiff"],["michael scott","Michael Scott"]],
-  good:[["mr burns excellent","Mr. Burns: Excellent"],["keep going","Keep going"],["excited dog","Aufgeregter Hund"],["nice","Nice"],["thumbs up dog","Daumen hoch"]]};
+  done:[["stromberg applaus","Stromberg klatscht Beifall"],["gta mission passed","GTA: Mission bestanden"],["homer woohoo","Homer jubelt"],["michael scott yes","Michael Scott freut sich"],["happy dog zoomies","Hund dreht vor Freude durch"],["success kid","Der Erfolgs-Junge mit Faust"]],
+  streak:[["leonardo dicaprio cheers","DiCaprio prostet euch zu"],["dwight schrute perfect","Dwight findet es perfekt"],["proud dog","Stolzer Hund"],["football goal celebration","Torjubel"],["nba jam on fire","Er brennt!"]],
+  late:[["this is fine dog","Hund im brennenden Zimmer: „Alles gut“"],["homer backs into bush","Homer verschwindet in der Hecke"],["gta wasted","GTA: Hinüber"],["cat knocking things off table","Katze räumt den Tisch ab"],["stromberg","Stromberg zieht eine Grimasse"],["peter griffin","Peter Griffin"]],
+  start:[["lets do this","Auf geht’s"],["dog waiting","Hund wartet ungeduldig"],["capybara","Ganz entspanntes Capybara"],["kick off football","Anpfiff"],["michael scott","Michael Scott motiviert"]],
+  good:[["mr burns excellent","Mr. Burns: „Ausgezeichnet“"],["keep going","Weiter so"],["excited dog","Aufgeregter Hund"],["nice","Sauber"],["thumbs up dog","Hund mit Daumen hoch"]]};
 let GIFS={},gifAsked=false;const gifBusy=new Set();
 function gifPick(kind){const own=((haInfo&&haInfo.gifterms)||[]).map(q=>({q,n:q}));
   const L=[...((MEMES&&MEMES[kind])||GIF_BASE[kind].map(([q,n])=>({q,n}))),...own];return L[(today()*7+kind.length)%L.length]}
@@ -2302,14 +2331,16 @@ function gifReady(kind){if(view==="home")render();gifPop(kind,false)}
 function gifPop(kind,force){const g=GIFS[kind];if(!g||!g.url||!funOn()||document.querySelector("dialog[open],.gifpop"))return;
   const key=tdy()+":"+kind;let seen="";try{seen=localStorage.getItem("haus-gifseen")||""}catch(_){}
   if(!force&&seen.split(",").includes(key))return;try{localStorage.setItem("haus-gifseen",[...seen.split(",").filter(x=>x.startsWith(tdy())),key].join(","))}catch(_){}
-  const o=document.createElement("div");o.className="gifpop";o.innerHTML=`<figure><img src="${esc(g.url)}" alt="${esc(g.name||g.title||"GIF")}"><figcaption><b>${esc(g.name||"")}</b> · via GIPHY</figcaption></figure>`;
+  const o=document.createElement("div");o.className="gifpop";o.innerHTML=`<figure><img src="${esc(g.url)}" alt="${esc(g.name||g.title||"GIF")}"><figcaption><b>${esc(g.name||"")}</b> · über GIPHY</figcaption></figure>`;
   const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),250)};o.onclick=close;document.body.appendChild(o);setTimeout(close,5000)}
 let gifKind="start";
 document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-gif]"))gifPop(gifKind,true)});
-/* In der Spiel-Karte: GIF der aktuellen Lage mit dem Namen des Memes; ohne GIPHY-Schlüssel ein kurzer Spruch */
+/* Meme-Karte: GIF der aktuellen Lage vollständig sichtbar, darunter der Name des Memes; ohne GIPHY-Schlüssel ein kurzer Spruch */
+const LAGE={done:"Alles geschafft",streak:"Läuft bei dir",late:"Da ist was liegen geblieben",start:"Noch nichts geschafft",good:"Gut dabei"};
 function funHtml(kind,v){if(!funOn())return"";gifKind=kind;if(haInfo&&haInfo.giphy&&!GIFS[kind])setTimeout(()=>gifToday(kind),0);const g=GIFS[kind];
-  if(g&&g.url)return`<div class="hfun"><button type="button" class="gifth" data-gif aria-label="GIF ansehen"><img src="${esc(g.url)}" alt="" loading="lazy"><small>GIPHY</small></button><p class="meme mname">${esc(g.name||g.title||"")}</p></div>`;
-  return`<div class="hfun"><p class="meme">${esc(memeText(kind,v))}</p></div>`}
+  const head=`<div class="mhead"><small class="eyebrow">Passend zu deinem Tag</small><span>${LAGE[kind]}</span></div>`;
+  if(g&&g.url)return`<section class="pnl memec" style="--i:1">${head}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button><p class="mname"><b>${esc(g.name||g.title||"")}</b><small>über GIPHY</small></p></section>`;
+  return`<section class="pnl memec" style="--i:1">${head}<p class="meme">${esc(memeText(kind,v))}</p></section>`}
 /* Ressource: Auswahl oder Freitext */
 /* Verantwortlich: Mehrfachauswahl */
 let selWho=[];
@@ -2640,7 +2671,7 @@ $("more").onclick=()=>{
   if(v==="board"||v==="list"||v==="gantt")items.push({t:"Sortieren",val:sortm==="prio"?"Priorität":"Datum",sub:[["date","Datum"],["prio","Priorität"]].map(([k,l])=>({t:l,chk:sortm===k,fn:()=>{$("srt").value=k;$("srt").dispatchEvent(new Event("change"))}}))});
   if(v==="list"||v==="gantt")items.push({t:"Gruppieren",val:GRPL[grp],sub:Object.entries(GRPL).map(([k,l])=>({t:l,chk:grp===k,fn:()=>{$("grp").value=k;$("grp").dispatchEvent(new Event("change"))}}))});
   if(items.length)items.push({sep:true});
-  items.push({t:"Tags und Projekte",ic:"tag",fn:openMan},{t:"Archiv und Papierkorb",ic:"arch",fn:openArch},{t:"Export und Backup",ic:"exp",fn:()=>{$("dlx").showModal();$("dlx").scrollTop=0;preloadExport()}},{t:"Einstellungen",ic:"cfg",fn:openSettings});
+  items.push({t:"Tags und Projekte",ic:"tag",fn:openMan},{t:"Archiv und Papierkorb",ic:"arch",fn:openArch},{t:"Export und Sicherung",ic:"exp",fn:()=>{$("dlx").showModal();$("dlx").scrollTop=0;preloadExport()}},{t:"Einstellungen",ic:"cfg",fn:openSettings});
   hap(8);popMenu($("more"),items)};
 matchMedia("(max-width:699px)").addEventListener("change",()=>{renderedView=null;render()});
 $("add").onclick=()=>openDlg();
@@ -2650,7 +2681,7 @@ async function onboard(){if(KIOSK||prefGet("onb")||prefGet("me")||document.query
   toast("Tipp: Auf der Startseite oben einfach tippen, z. B. „Rasen mähen Sa #Garten“",null,null,8000)}
 setTimeout(onboard,1600);
 /* Export */
-async function dl(name,data){try{const d=await window.claude.use("downloads");if(!d){$("note").textContent="Download ist hier nicht verfügbar.";return}await d.save({filename:name,data});$("dlx").close()}catch(e){if(!e||e.code!=="declined")$("note").textContent="Download fehlgeschlagen: "+((e&&(e.message||e.code))||"unbekannt")}}
+async function dl(name,data){try{const d=await window.claude.use("downloads");if(!d){$("note").textContent="Herunterladen ist hier nicht möglich.";return}await d.save({filename:name,data});$("dlx").close()}catch(e){if(!e||e.code!=="declined")$("note").textContent="Herunterladen fehlgeschlagen: "+((e&&(e.message||e.code))||"unbekannt")}}
 const stamp=()=>iso(new Date()),fdl=s=>fromDn(dn(s)).toLocaleDateString("de-DE",{timeZone:"UTC"});
 $("exp").onclick=()=>{$("dlx").showModal();preloadExport()};
 $("x_close").onclick=()=>$("dlx").close();
@@ -2708,12 +2739,12 @@ async function buildXlsx(){
   const ws=wb.addWorksheet("Liste",{views:[{state:"frozen",xSplit:2,ySplit:4,showGridLines:false}],properties:{tabColor:{argb:C.ink}}});
   ws.columns=[{width:6},{width:34},{width:14},{width:13},{width:12},{width:12},{width:12},{width:14},{width:34},{width:30},{width:12},{width:30},{width:6,hidden:true},{width:6,hidden:true},{width:6,hidden:true},{width:16},{width:10}];
   ws.getCell("A1").value="Planner";ws.getCell("A1").font={bold:true,size:18};
-  ws.getCell("H1").value="Neue Aufgabe: einfach in der nächsten freien Zeile eintragen. Board und Zeitstrahl aktualisieren sich automatisch (bis Zeile 304).";
+  ws.getCell("H1").value="Neue Aufgabe: einfach in der nächsten freien Zeile eintragen. Tafel und Zeitstrahl aktualisieren sich automatisch (bis Zeile 304).";
   ws.getCell("H1").font={italic:true,color:{argb:C.grey},size:10};
   const kp=[["B","Aufgaben",`COUNTIF(B${R0}:B${R1},"?*")`,"0"],["C","Erledigt",`IFERROR(COUNTIF(G${R0}:G${R1},"Erledigt")/B3,0)`,"0%"],["D","In Arbeit",`COUNTIF(G${R0}:G${R1},"In Arbeit")`,"0"],["E","Überfällig",`SUMPRODUCT((B${R0}:B${R1}<>"")*(G${R0}:G${R1}<>"Erledigt")*ISNUMBER(F${R0}:F${R1})*(F${R0}:F${R1}<TODAY()))`,"0"],["F","Konflikte",`COUNTIF(L${R0}:L${R1},"?*")`,"0"]];
   kp.forEach(([c,l,f,nf])=>{const a=ws.getCell(c+"2"),b=ws.getCell(c+"3");a.value=l;a.font={size:9,color:{argb:C.grey}};b.value={formula:f};b.numFmt=nf;b.font={bold:true,size:18};a.border={top:edge,left:edge,right:edge};b.border={bottom:edge,left:edge,right:edge};b.alignment={horizontal:"left"}});
   ws.getRow(3).height=28;
-  ["Nr","Aufgabe","Tags","Ressource","Start","Ende","Status","Abhängig von (Nr, z. B. 2,5)","Checkliste (eine Zeile je Punkt, [x] = erledigt)","Notizen","Checkl.-Stand","Hinweis","Offen","In Arbeit","Erledigt","Projekt","Priorität"].forEach((h,i)=>hdr(ws.getCell(4,i+1),h));
+  ["Nr","Aufgabe","Tags","Wer","Beginn","Ende","Status","Abhängig von (Nr, z. B. 2,5)","Checkliste (eine Zeile je Punkt, [x] = erledigt)","Notizen","Checkl.-Stand","Hinweis","Offen","In Arbeit","Erledigt","Projekt","Priorität"].forEach((h,i)=>hdr(ws.getCell(4,i+1),h));
   ws.getRow(4).height=36;
   for(let r=R0;r<=R1;r++){
     const t=list[r-R0],row=ws.getRow(r);
@@ -2749,9 +2780,9 @@ async function buildXlsx(){
   ws.addConditionalFormatting({ref:`B${R0}:B${R1}`,rules:[{type:"expression",formulae:[`$G${R0}="Erledigt"`],style:{font:{strike:true,color:{argb:C.grey}}}}]});
 
   /* ---------- Blatt 2: Board (wird aus der Liste befüllt) ---------- */
-  const wb2=wb.addWorksheet("Board",{views:[{showGridLines:false}],properties:{tabColor:{argb:C.bDoing}}});
+  const wb2=wb.addWorksheet("Tafel",{views:[{showGridLines:false}],properties:{tabColor:{argb:C.bDoing}}});
   wb2.columns=[{width:4,hidden:true},{width:38},{width:2},{width:4,hidden:true},{width:38}];
-  wb2.getCell("B1").value="Board";wb2.getCell("B1").font={bold:true,size:18};
+  wb2.getCell("B1").value="Tafel";wb2.getCell("B1").font={bold:true,size:18};
   wb2.getCell("B2").value="Wird automatisch aus der Liste befüllt. Status in der Liste ändern, um eine Karte zu verschieben.";wb2.getCell("B2").font={italic:true,color:{argb:C.grey},size:10};
   const cols=[["A","B","Offen","M",C.todo],["D","E","In Arbeit","N",C.doing],["G","H","Erledigt","O",C.done]];
   const SL=40;
@@ -2782,7 +2813,7 @@ async function buildXlsx(){
   wg.getCell("B2").value="Anzeige ab (überschreibbar):";wg.getCell("B2").font={size:10,color:{argb:C.grey}};
   wg.getCell("C2").value={formula:`IF(COUNT(${L}E${R0}:E${R1})=0,TODAY()-2,MIN(${L}E${R0}:E${R1})-2)`};wg.getCell("C2").numFmt="dd.mm.yyyy";wg.getCell("C2").font={bold:true};
   wg.getCell("E2").value="Abhängigkeiten: Spalte „Abh.“ zeigt die Vorgänger-Nr.; (!) = Start liegt nicht nach dem Ende des Vorgängers.";wg.getCell("E2").font={italic:true,size:10,color:{argb:C.grey}};
-  ["Nr","Aufgabe","Ressource","Start","Ende","Status","Abh."].forEach((h,i)=>hdr(wg.getCell(4,i+1),h));
+  ["Nr","Aufgabe","Wer","Beginn","Ende","Status","Abh."].forEach((h,i)=>hdr(wg.getCell(4,i+1),h));
   const colL=n=>wg.getColumn(n).letter,F1=colL(FC),F2=colL(FC+DAYS-1);
   for(let k=0;k<DAYS;k++){
     const cl=colL(FC+k),pv=colL(FC+k-1),h=wg.getCell(cl+"4"),m=wg.getCell(cl+"3");

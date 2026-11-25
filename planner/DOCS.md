@@ -1,6 +1,6 @@
 # Planner
 
-Aufgaben, Board, Liste und Zeitstrahl für zu Hause. Läuft komplett lokal auf deinem Home Assistant.
+Aufgaben als Liste, Tafel und Zeitstrahl für zu Hause. Läuft komplett lokal auf deinem Home Assistant.
 
 ## Wo liegen meine Daten?
 

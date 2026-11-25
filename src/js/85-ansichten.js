@@ -34,8 +34,11 @@ function homeBody(tasks,allT){
   const cur=TL[ht],LL=cur[1];
   const list=`<section class="pnl hlist" style="--i:${k++}"><h3><span>${cur[0]}</span><em>${LL.length}</em></h3>${LL.length?LL.slice(0,40).map(hrow).join(""):`<div class="none">${cur[4]}</div>`}</section>`;
   const kind=rn&&!todayL.length?"done":over.length?"late":ms.streak>=3?"streak":rd?"good":todayL.length?"start":"done";
-  /* Kopf: persönliche Spiel-Karte ganz oben (Ring, Serie, Woche, Spruch + GIF, Abzeichen), danach Kacheln, Eingabe, Liste */
-  const hero=`<section class="hero game" style="--i:0"><div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div><div class="hbody"><div class="hh">Heute: ${rd} von ${rn} erledigt</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>${nx?`<div class="hnext"><small>Nächste Frist</small><strong>${esc(nx.title)}</strong><span>${[nx.area,rel(nx)].filter(Boolean).map(esc).join(" · ")}</span></div>`:""}${funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length})}${badgeStrip(ms)}</section>`;
+  /* Startseite als Geschichte (1.36): 1. Dein Tag (Stand + das Nächste zum Abhaken) → 2. Meme zur Lage (Belohnung/Anstoß)
+     → 3. Nächstes Abzeichen (langfristiges Ziel) → Kacheln, Eingabe, Liste (Arbeit) → Übersichten → Gemeinsam (ganz unten) */
+  const nextT=todayL[0],ring=`<div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div>`;
+  const hero=`<section class="hero game" style="--i:0">${ring}<div class="hbody"><small class="eyebrow">Dein Tag</small><div class="hh">${rn?`${rd} von ${rn} geschafft`:"Heute ist nichts fällig"}</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>`
+    +(nextT?`<div class="hnow"><small class="eyebrow">Als Nächstes</small>${hrow(nextT,0)}</div>`:"")+`</section>`+funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length})+badgeCard(ms);
   return`<div class="home">${hero}${tiles}${qa}${list}`+
     (pjs.length?P("","Projekte",pjs.length,pbars):"")+
     P("","Tags",areas.length,bars||'<div class="none">Noch keine Tags.</div>')+
@@ -100,7 +103,7 @@ function render(){
   if(view!=="home"&&isPhone())$("sub").innerHTML=n?`${n} ${n===1?"Aufgabe":"Aufgaben"} · ${pct} % erledigt`+(late?` · <b class="hot">${late} überfällig</b>`:""):"Noch keine Aufgaben";
   else $("sub").textContent=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
   $("kpis").innerHTML=view==="home"?"":`<div class="kp"><div class="kn"><b><span data-n="${pct}">${pct}</span><i>%</i></b><span>erledigt · ${d} von ${n}</span></div><div class="kn"><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="kn ${late?"hot":""}"><b data-n="${late}">${late}</b><span>überfällig</span></div><div class="kn"><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div>${n?`<div class="stripe" title="Erledigt · In Arbeit · Offen"><i class="s-x" style="flex:${d}"></i><i class="s-d" style="flex:${doing}"></i><i class="s-o" style="flex:${op}"></i></div>`:""}`;
-  document.body.dataset.view=view;$("ttl").textContent=view==="home"?"Start":{board:"Board",list:"Liste",gantt:"Zeitstrahl",cal:"Kalender"}[view];
+  document.body.dataset.view=view;$("ttl").textContent=view==="home"?"Start":{board:"Tafel",list:"Liste",gantt:"Zeitstrahl",cal:"Kalender"}[view];
     const whos=allWho(),curw=$("fw").value;
   $("fw").innerHTML='<option value="">Alle Personen</option>'+whos.map(a=>`<option ${a===curw?"selected":""}>${esc(a)}</option>`).join("")+`<option value="__none" ${curw==="__none"?"selected":""}>Nicht zugewiesen</option>`;
   const fw2=$("fw").value,ch=(attr,val,label,c,on)=>`<button data-${attr}="${esc(val)}" class="${on?"on":""}"><span>${attr==="cw"&&val&&val!=="__none"?`<i class="wd ${avc(val)}"></i>`:""}${esc(label)}</span><em>${c}</em></button>`;
@@ -134,7 +137,7 @@ function lrow(t,i){const dn_=t.status==="done";return`<div class="hrow lrow" dat
 function table(list){
   if(isPhone())return`<div class="ilist">`+groups(list).map(g=>(g.l!=null?`<h3 class="igh"><i class="dt" style="background:${g.c}"></i><span>${esc(g.l)}</span><em>${g.L.length}</em></h3>`:"")+`<div class="igrp">${g.L.map(lrow).join("")}</div>`).join("")+`</div>`;
   const row=t=>`<tr class="row" data-id="${t.id}"${t.prio?` data-pr="${t.prio}"`:""}><td>${pjh(t)}${pb(t)}${esc(t.title)} ${isBlocked(t)?'<span class="blk">blockiert</span>':""}<span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}</span></td><td>${tgs(t).map(chip).join("")}</td><td>${esc(t.who)}</td><td>${fd(t.start)}</td><td class="${isLate(t)?"late":""}">${fd(t.end)}</td><td><span class="st ${t.status}">${ST[t.status]}</span></td></tr>`;
-  return`<div class="wrap"><table><tr><th>Aufgabe</th><th>Tags</th><th>Ressource</th><th>Start</th><th>Ende</th><th>Status</th></tr>`+
+  return`<div class="wrap"><table><tr><th>Aufgabe</th><th>Tags</th><th>Wer</th><th>Beginn</th><th>Ende</th><th>Status</th></tr>`+
   groups(list).map(g=>(g.l!=null?`<tr class="grp"><td colspan="6"><i class="dt" style="background:${g.c}"></i>${esc(g.l)}<em>${g.L.length}</em></td></tr>`:"")+g.L.map(row).join("")).join("")+`</table></div>`;
 }
 let gmode="day";

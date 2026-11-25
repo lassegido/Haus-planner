@@ -477,7 +477,8 @@ BESTEHENDES, bekanntes Meme als GIF erscheinen (nichts erfinden). Wähle aus die
 Lagen: done = alles für heute erledigt (feiern); streak = mehrere Tage in Folge geschafft (stolz); late = Aufgaben überfällig
 (augenzwinkernd: Chaos, „This is fine“, Ausreden); start = heute noch nichts erledigt (Motivation, Anpfiff); good = schon etwas geschafft, aber noch offen (weiter so).
 Gib je Lage 4 verschiedene bekannte Memes an, jeweils mit einem kurzen GIPHY-Suchbegriff (englisch oder deutsch, 2 bis 4 Wörter,
-so dass genau dieses Meme gefunden wird) und dem üblichen Namen des Memes (höchstens 40 Zeichen).
+so dass genau dieses Meme gefunden wird) und einer kurzen DEUTSCHEN Beschreibung, was im GIF passiert (höchstens 40 Zeichen,
+z. B. „DiCaprio prostet euch zu“, „Hund im brennenden Zimmer“; keine englischen Titel).
 Bevorzuge, was gerade aktuell und bekannt ist, und wechsle die Bereiche ab. Nichts Anzügliches oder Herabwürdigendes, bei Politik ausgewogen.
 Heute ist der %s. Nimm nicht wieder diese von gestern: %s
 Antworte als JSON: {"done": [{"q": "...", "n": "..."}, ...], "streak": [...], "late": [...], "start": [...], "good": [...]}"""

@@ -22,11 +22,11 @@ function motStats(L){
 /* Abzeichen: [id, Name, Beschreibung, Fortschritt(s) → [erreicht, Ziel]]. Freigeschaltet, wenn erreicht ≥ Ziel. */
 const BADGES=[
   ["d10","Erste 10","10 Aufgaben erledigt",s=>[s.done,10]],["d50","Fünfzig","50 Aufgaben erledigt",s=>[s.done,50]],["d100","Hundert","100 Aufgaben erledigt",s=>[s.done,100]],
-  ["s7","Eine Woche dran","7 Tage in Folge alles für den Tag erledigt",s=>[s.maxStreak,7]],["s30","Ausdauer","30 Tage in Folge alles für den Tag erledigt",s=>[s.maxStreak,30]],
+  ["s7","Eine Woche durchgezogen","7 Tage in Folge alles für den Tag erledigt",s=>[s.maxStreak,7]],["s30","Ausdauer","30 Tage in Folge alles für den Tag erledigt",s=>[s.maxStreak,30]],
   ["clean","Weiße Weste","Eine ganze Woche (Mo–So) ohne Überfälliges, mindestens 3 Aufgaben erledigt",s=>[s.cleanWeek?1:0,1]],
   ["proj","Projekt geschafft","Alle Aufgaben eines Projekts erledigt (mindestens 3)",s=>s.projDone?[1,1]:s.projBest],
   ["early","Frühstarter","10 Aufgaben vor dem Fälligkeitstag erledigt",s=>[s.early,10]],
-  ["team","Teamwork","5 Aufgaben mit mehreren Personen erledigt",s=>[s.team,5]],
+  ["team","Gemeinsam stark","5 Aufgaben mit mehreren Personen erledigt",s=>[s.team,5]],
   ["ck","Abgehakt","Eine Checkliste mit mindestens 10 Punkten komplett erledigt",s=>[s.bigCk?1:0,1]]];
 const bOn=(b,s)=>{const[c,g]=b[3](s);return c>=g};
 const MEDAL='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.5l2.2 5M16 3.5l-2.2 5"/><circle cx="12" cy="14.5" r="5.5"/><path d="M12 12v5"/></svg>';
@@ -37,16 +37,19 @@ function doneBy(t){const names=allWho(),L=t.log||[];
   const w=wl(t);return w.length===1?w[0]:"Gemeinsam"}
 const motCol=w=>/^melanie/i.test(w)?"var(--brick)":/^lasse/i.test(w)?"var(--sea)":w==="Gemeinsam"?"var(--mut)":"var(--sky)";
 function streakHtml(s){
-  return`<span class="hstreak${s.todayIn?" lit":""}" title="Tage in Folge mit vollem Tagesring">${FLAME}<span>${s.streak?`<b>${s.streak} ${s.streak===1?"Tag":"Tage"}</b> Serie`:"Serie startet heute"}</span></span>`}
-function weekHtml(s){const d=s.wk-s.wkPrev;return`<span class="hwk"><b>${s.wk}</b> diese Woche${s.wkPrev||s.wk?` · ${d>0?"+"+d:d<0?d:"±0"} zur Vorwoche`:""}</span>`}
+  return`<span class="hstreak${s.todayIn?" lit":""}" title="Tage in Folge mit vollem Tagesring">${FLAME}<span>${s.streak?`<b>${s.streak} ${s.streak===1?"Tag":"Tage"}</b> am Stück`:"Schaffst du heute alles, beginnt deine Serie"}</span></span>`}
+function weekHtml(s){const d=s.wk-s.wkPrev;return`<span class="hwk">Diese Woche <b>${s.wk}</b> erledigt${s.wkPrev||s.wk?`, ${d>0?d+" mehr als letzte Woche":d<0?-d+" weniger als letzte Woche":"so viele wie letzte Woche"}`:""}</span>`}
 /* Abzeichen kompakt: freigeschaltete als Symbole, dazu das nächste mit Fortschritt; antippen klappt alle auf */
-function badgeStrip(s){
+/* Abzeichen als kleine Karte: das nächste Ziel in einem Satz, freigeschaltete als Symbole; antippen klappt alle auf */
+const BLEFT={d10:n=>`noch ${n} ${n===1?"Aufgabe":"Aufgaben"}`,d50:n=>`noch ${n} Aufgaben`,d100:n=>`noch ${n} Aufgaben`,s7:n=>`noch ${n} ${n===1?"Tag":"Tage"} am Stück`,
+  s30:n=>`noch ${n} Tage am Stück`,early:n=>`noch ${n}-mal vor dem Fälligkeitstag`,team:n=>`noch ${n} gemeinsame Aufgaben`,proj:n=>`noch ${n} Aufgaben bis zum ersten fertigen Projekt`};
+function badgeCard(s){
   try{if(localStorage.getItem(badgeKey())===null)localStorage.setItem(badgeKey(),JSON.stringify(BADGES.filter(b=>bOn(b,s)).map(b=>b[0])))}catch(_){}
   const got=BADGES.filter(b=>bOn(b,s)),open=BADGES.filter(b=>!bOn(b,s)).map(b=>[b,b[3](s)]).sort((a,b)=>b[1][0]/b[1][1]-a[1][0]/a[1][1]),nx=open[0];
-  const all=BADGES.map(b=>{const[c,g]=b[3](s),on=c>=g;return`<button type="button" class="bdg${on?" on":""}" data-bdg="${b[0]}">${MEDAL}<span>${esc(b[1])}</span><small>${on?"geschafft":Math.min(c,g)+"/"+g}</small></button>`}).join("");
-  return`<details class="bdx"><summary><span class="bgot">${got.length?got.map(b=>`<i title="${esc(b[1])}">${MEDAL}</i>`).join(""):`<i class="off">${MEDAL}</i>`}<em>${got.length}/${BADGES.length}</em></span>`
-    +(nx?`<span class="bnext"><small>Nächstes: ${esc(nx[0][1])}</small><span class="pb"><i style="width:${Math.round(Math.min(1,nx[1][0]/nx[1][1])*100)}%"></i></span><em>${Math.min(nx[1][0],nx[1][1])}/${nx[1][1]}</em></span>`:`<span class="bnext"><small>Alle Abzeichen geschafft 🏆</small></span>`)
-    +`</summary><div class="bdgs">${all}</div></details>`}
+  const all=BADGES.map(b=>{const[c,g]=b[3](s),on=c>=g;return`<button type="button" class="bdg${on?" on":""}" data-bdg="${b[0]}">${MEDAL}<span>${esc(b[1])}</span><small>${on?"geschafft":Math.min(c,g)+" von "+g}</small></button>`}).join("");
+  const left=nx?(BLEFT[nx[0][0]]||(()=>nx[0][2]))(nx[1][1]-nx[1][0]):"";
+  return`<details class="pnl bdx" style="--i:2"><summary><span class="bmed">${MEDAL}</span><span class="bnext">${nx?`<small>Nächstes Abzeichen</small><b>${esc(nx[0][1])}</b><span class="bleft">${esc(left)}</span><span class="pb"><i style="width:${Math.round(Math.min(1,nx[1][0]/nx[1][1])*100)}%"></i></span>`:`<b>Alle Abzeichen geschafft 🏆</b>`}</span>`
+    +`<span class="bgot" aria-label="${got.length} von ${BADGES.length} freigeschaltet">${got.map(b=>`<i title="${esc(b[1])}">${MEDAL}</i>`).join("")}<em>${got.length} von ${BADGES.length}</em></span></summary><div class="bdgs">${all}</div></details>`}
 function motPanel(i){
   const T=today(),mon=T-mo(fromDn(T).getUTCDay()),all=RAW.filter(t=>!t.del&&t.status==="done");
   const wk=all.filter(t=>{const d=doneOn(t);return d>=mon&&d<=T}),prev=all.filter(t=>{const d=doneOn(t);return d>=mon-7&&d<=T-7}).length;
@@ -54,7 +57,7 @@ function motPanel(i){
   const bar=wk.length?`<div class="wbar">${parts.map(([w,c])=>`<i style="flex:${c};background:${motCol(w)}" title="${esc(w)}: ${c}"></i>`).join("")}</div>`:`<div class="wbar"></div>`;
   const leg=parts.map(([w,c])=>`<span><i style="background:${motCol(w)}"></i>${esc(w)} ${c}</span>`).join("");
   const diff=wk.length-prev,wd=WDLONG[fromDn(T).getUTCDay()];
-  const cmp=T===mon?`Vorwoche gesamt: ${all.filter(t=>{const d=doneOn(t);return d>=mon-7&&d<mon}).length}`:`Vorwoche bis ${wd}: ${prev}`+(diff>0?` · ${diff} mehr`:diff<0?` · ${-diff} weniger`:" · gleich viel");
+  const cmp=T===mon?`Letzte Woche insgesamt: ${all.filter(t=>{const d=doneOn(t);return d>=mon-7&&d<mon}).length}`:`Letzte Woche bis ${wd}: ${prev}`+(diff>0?` · ${diff} mehr`:diff<0?` · ${-diff} weniger`:" · gleich viel");
   return`<section class="pnl mot" style="--i:${i}"><h3><span>Gemeinsam diese Woche</span><em>${wk.length} erledigt</em></h3>${bar}<div class="wleg">${leg||"<span>Noch nichts erledigt – los geht’s.</span>"}</div><p class="wcmp">${cmp}</p></section>`}
 /* Abzeichen antippen: Beschreibung */
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-bdg]");if(!b)return;const x=BADGES.find(y=>y[0]===b.dataset.bdg);
@@ -95,11 +98,11 @@ function memeText(kind,v){const L=MEME_BASE[kind]||[];if(!L.length)return"";
    Memes mit GIPHY-Suchbegriff vor (api/sprueche), sonst die eingebaute Liste unten; eigene Suchbegriffe aus den Einstellungen kommen dazu.
    Je Lage und Tag sucht das erste Gerät einmal bei GIPHY (GIPHY verlangt die Suche im Browser), der Server merkt sich das GIF für alle. */
 const GIF_BASE={
-  done:[["stromberg applaus","Stromberg: Applaus"],["gta mission passed","GTA: Mission Passed"],["homer woohoo","Homer: Woo-hoo!"],["michael scott yes","Michael Scott: Yes!"],["happy dog zoomies","Hund mit Zoomies"],["success kid","Success Kid"]],
-  streak:[["leonardo dicaprio cheers","DiCaprio: Cheers"],["dwight schrute perfect","Dwight: Perfekt"],["proud dog","Stolzer Hund"],["football goal celebration","Torjubel"],["nba jam on fire","He's on fire!"]],
-  late:[["this is fine dog","This is fine"],["homer backs into bush","Homer verschwindet in der Hecke"],["gta wasted","GTA: Wasted"],["cat knocking things off table","Katze räumt den Tisch ab"],["stromberg","Stromberg"],["peter griffin","Peter Griffin"]],
-  start:[["lets do this","Let's do this"],["dog waiting","Hund wartet"],["capybara","Capybara"],["kick off football","Anpfiff"],["michael scott","Michael Scott"]],
-  good:[["mr burns excellent","Mr. Burns: Excellent"],["keep going","Keep going"],["excited dog","Aufgeregter Hund"],["nice","Nice"],["thumbs up dog","Daumen hoch"]]};
+  done:[["stromberg applaus","Stromberg klatscht Beifall"],["gta mission passed","GTA: Mission bestanden"],["homer woohoo","Homer jubelt"],["michael scott yes","Michael Scott freut sich"],["happy dog zoomies","Hund dreht vor Freude durch"],["success kid","Der Erfolgs-Junge mit Faust"]],
+  streak:[["leonardo dicaprio cheers","DiCaprio prostet euch zu"],["dwight schrute perfect","Dwight findet es perfekt"],["proud dog","Stolzer Hund"],["football goal celebration","Torjubel"],["nba jam on fire","Er brennt!"]],
+  late:[["this is fine dog","Hund im brennenden Zimmer: „Alles gut“"],["homer backs into bush","Homer verschwindet in der Hecke"],["gta wasted","GTA: Hinüber"],["cat knocking things off table","Katze räumt den Tisch ab"],["stromberg","Stromberg zieht eine Grimasse"],["peter griffin","Peter Griffin"]],
+  start:[["lets do this","Auf geht’s"],["dog waiting","Hund wartet ungeduldig"],["capybara","Ganz entspanntes Capybara"],["kick off football","Anpfiff"],["michael scott","Michael Scott motiviert"]],
+  good:[["mr burns excellent","Mr. Burns: „Ausgezeichnet“"],["keep going","Weiter so"],["excited dog","Aufgeregter Hund"],["nice","Sauber"],["thumbs up dog","Hund mit Daumen hoch"]]};
 let GIFS={},gifAsked=false;const gifBusy=new Set();
 function gifPick(kind){const own=((haInfo&&haInfo.gifterms)||[]).map(q=>({q,n:q}));
   const L=[...((MEMES&&MEMES[kind])||GIF_BASE[kind].map(([q,n])=>({q,n}))),...own];return L[(today()*7+kind.length)%L.length]}
@@ -118,11 +121,13 @@ function gifReady(kind){if(view==="home")render();gifPop(kind,false)}
 function gifPop(kind,force){const g=GIFS[kind];if(!g||!g.url||!funOn()||document.querySelector("dialog[open],.gifpop"))return;
   const key=tdy()+":"+kind;let seen="";try{seen=localStorage.getItem("haus-gifseen")||""}catch(_){}
   if(!force&&seen.split(",").includes(key))return;try{localStorage.setItem("haus-gifseen",[...seen.split(",").filter(x=>x.startsWith(tdy())),key].join(","))}catch(_){}
-  const o=document.createElement("div");o.className="gifpop";o.innerHTML=`<figure><img src="${esc(g.url)}" alt="${esc(g.name||g.title||"GIF")}"><figcaption><b>${esc(g.name||"")}</b> · via GIPHY</figcaption></figure>`;
+  const o=document.createElement("div");o.className="gifpop";o.innerHTML=`<figure><img src="${esc(g.url)}" alt="${esc(g.name||g.title||"GIF")}"><figcaption><b>${esc(g.name||"")}</b> · über GIPHY</figcaption></figure>`;
   const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),250)};o.onclick=close;document.body.appendChild(o);setTimeout(close,5000)}
 let gifKind="start";
 document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-gif]"))gifPop(gifKind,true)});
-/* In der Spiel-Karte: GIF der aktuellen Lage mit dem Namen des Memes; ohne GIPHY-Schlüssel ein kurzer Spruch */
+/* Meme-Karte: GIF der aktuellen Lage vollständig sichtbar, darunter der Name des Memes; ohne GIPHY-Schlüssel ein kurzer Spruch */
+const LAGE={done:"Alles geschafft",streak:"Läuft bei dir",late:"Da ist was liegen geblieben",start:"Noch nichts geschafft",good:"Gut dabei"};
 function funHtml(kind,v){if(!funOn())return"";gifKind=kind;if(haInfo&&haInfo.giphy&&!GIFS[kind])setTimeout(()=>gifToday(kind),0);const g=GIFS[kind];
-  if(g&&g.url)return`<div class="hfun"><button type="button" class="gifth" data-gif aria-label="GIF ansehen"><img src="${esc(g.url)}" alt="" loading="lazy"><small>GIPHY</small></button><p class="meme mname">${esc(g.name||g.title||"")}</p></div>`;
-  return`<div class="hfun"><p class="meme">${esc(memeText(kind,v))}</p></div>`}
+  const head=`<div class="mhead"><small class="eyebrow">Passend zu deinem Tag</small><span>${LAGE[kind]}</span></div>`;
+  if(g&&g.url)return`<section class="pnl memec" style="--i:1">${head}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button><p class="mname"><b>${esc(g.name||g.title||"")}</b><small>über GIPHY</small></p></section>`;
+  return`<section class="pnl memec" style="--i:1">${head}<p class="meme">${esc(memeText(kind,v))}</p></section>`}

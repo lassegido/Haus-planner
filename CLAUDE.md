@@ -1,6 +1,6 @@
 # Arbeitsanweisung für Claude: Planner
 
-Haus-Aufgaben-Tool von Lasse und Melanie (Kanban, Liste, Gantt). Sprache der Oberfläche und aller Texte: natürliches Deutsch. Lasse bevorzugt Kennzahlen zuerst, kompakte visuelle Signale, kurze Antworten.
+Haus-Aufgaben-Tool von Lasse und Melanie (Kanban, Liste, Gantt). Sprache der Oberfläche und aller Texte: natürliches Deutsch, so formuliert, wie man es auf Deutsch sagen würde (Satzbau und Wortwahl nicht aus dem Englischen übertragen, keine englischen Begriffe, wenn es ein gängiges deutsches Wort gibt: Tafel statt Board, Sicherung statt Backup). Ausnahmen: Eigennamen (GIPHY, Gemini) und gewollte Jugendsprache in den Sprüchen. Lasse bevorzugt Kennzahlen zuerst, kompakte visuelle Signale, kurze Antworten.
 
 ## Zwei Versionen, eine Quelle
 

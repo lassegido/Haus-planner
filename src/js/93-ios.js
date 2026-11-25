@@ -124,7 +124,7 @@ $("more").onclick=()=>{
   if(v==="board"||v==="list"||v==="gantt")items.push({t:"Sortieren",val:sortm==="prio"?"Priorität":"Datum",sub:[["date","Datum"],["prio","Priorität"]].map(([k,l])=>({t:l,chk:sortm===k,fn:()=>{$("srt").value=k;$("srt").dispatchEvent(new Event("change"))}}))});
   if(v==="list"||v==="gantt")items.push({t:"Gruppieren",val:GRPL[grp],sub:Object.entries(GRPL).map(([k,l])=>({t:l,chk:grp===k,fn:()=>{$("grp").value=k;$("grp").dispatchEvent(new Event("change"))}}))});
   if(items.length)items.push({sep:true});
-  items.push({t:"Tags und Projekte",ic:"tag",fn:openMan},{t:"Archiv und Papierkorb",ic:"arch",fn:openArch},{t:"Export und Backup",ic:"exp",fn:()=>{$("dlx").showModal();$("dlx").scrollTop=0;preloadExport()}},{t:"Einstellungen",ic:"cfg",fn:openSettings});
+  items.push({t:"Tags und Projekte",ic:"tag",fn:openMan},{t:"Archiv und Papierkorb",ic:"arch",fn:openArch},{t:"Export und Sicherung",ic:"exp",fn:()=>{$("dlx").showModal();$("dlx").scrollTop=0;preloadExport()}},{t:"Einstellungen",ic:"cfg",fn:openSettings});
   hap(8);popMenu($("more"),items)};
 matchMedia("(max-width:699px)").addEventListener("change",()=>{renderedView=null;render()});
 $("add").onclick=()=>openDlg();

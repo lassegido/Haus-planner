@@ -32,7 +32,7 @@ fit();addEventListener('resize',fit)}catch(e){d.classList.add('emb')}})();</scri
   <nav class="tabs" id="tabs">
     <button data-v="home" class="on"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg><span>Start</span></button>
     <button data-v="list"><svg viewBox="0 0 24 24"><path d="M9 6.5h11M9 12h11M9 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01" stroke-width="2.4"/></svg><span>Liste</span></button>
-    <button data-v="board"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="4.5" height="15" rx="1.2"/><rect x="9.75" y="4.5" width="4.5" height="9" rx="1.2"/><rect x="16" y="4.5" width="4.5" height="12" rx="1.2"/></svg><span>Board</span></button>
+    <button data-v="board"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="4.5" height="15" rx="1.2"/><rect x="9.75" y="4.5" width="4.5" height="9" rx="1.2"/><rect x="16" y="4.5" width="4.5" height="12" rx="1.2"/></svg><span>Tafel</span></button>
     <button data-v="gantt"><svg viewBox="0 0 24 24"><path d="M4 6.5h8M8 12h10M12 17.5h8" stroke-width="2.6"/></svg><span>Zeitstrahl</span></button>
     <button data-v="cal"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg><span>Kalender</span></button>
   </nav>
@@ -40,7 +40,7 @@ fit();addEventListener('resize',fit)}catch(e){d.classList.add('emb')}})();</scri
 </aside>
 <div class="stage">
   <header class="bar">
-    <div class="ttl"><h1 id="ttl">Board</h1><div class="sub" id="sub"></div></div>
+    <div class="ttl"><h1 id="ttl">Tafel</h1><div class="sub" id="sub"></div></div>
     <div class="filters" id="filters"><input id="q" type="search" placeholder="Suchen …" enterkeyhint="search"><select id="fw" aria-label="Person"><option value="">Alle Personen</option></select></div>
     <div class="hb"><button class="ib" id="ftog" type="button" aria-label="Suchen"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button><button class="ib fb" id="fbtn" type="button" aria-label="Filter"><svg viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></svg><b id="fcnt"></b></button><button class="ib" id="more" type="button" aria-label="Mehr" aria-haspopup="menu"><svg viewBox="0 0 24 24" class="dots3"><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/></svg></button></div>
   </header>
@@ -71,11 +71,11 @@ fit();addEventListener('resize',fit)}catch(e){d.classList.add('emb')}})();</scri
 <dialog id="dsh" aria-label="Aktionen"></dialog>
 <div id="popx" hidden></div><div id="pop" role="menu" hidden></div>
 <dialog id="dlx">
-  <div class="shd"><div class="dh">Export und Backup</div><button class="tb r b" id="x_close" type="button">Fertig</button></div>
+  <div class="shd"><div class="dh">Export und Sicherung</div><button class="tb r b" id="x_close" type="button">Fertig</button></div>
   <p class="sgt">Exportieren</p>
-  <div class="sgrp"><button class="xb" id="x_pdf"><span>PDF<small>Liste mit Checklisten und Zeitstrahl</small></span></button><button class="xb" id="x_xlsx"><span>Excel<small>Liste, Board und Zeitstrahl als Tabellenblätter</small></span></button><button class="xb" id="x_ics"><span>Kalender-Datei (.ics)<small>Offene Aufgaben für Apple, Google oder Outlook</small></span></button></div>
+  <div class="sgrp"><button class="xb" id="x_pdf"><span>PDF<small>Liste mit Checklisten und Zeitstrahl</small></span></button><button class="xb" id="x_xlsx"><span>Excel<small>Liste, Tafel und Zeitstrahl als Tabellenblätter</small></span></button><button class="xb" id="x_ics"><span>Kalender-Datei (.ics)<small>Offene Aufgaben für Apple, Google oder Outlook</small></span></button></div>
   <p class="sgt">Sichern</p>
-  <div class="sgrp"><button class="xb" id="x_json"><span>Backup-Datei speichern<small>Alle Aufgaben, Tags und Projekte als JSON</small></span></button><button class="xb" id="x_imp"><span>Backup einspielen<small>Aus einer Backup-Datei wiederherstellen</small></span></button></div>
+  <div class="sgrp"><button class="xb" id="x_json"><span>Sicherung speichern<small>Alle Aufgaben, Tags und Projekte als JSON</small></span></button><button class="xb" id="x_imp"><span>Sicherung einspielen<small>Aus einer Sicherungsdatei wiederherstellen</small></span></button></div>
   <input type="file" id="imp" accept=".json,application/json" hidden>
   <div class="ver" id="ver"></div>
 </dialog>

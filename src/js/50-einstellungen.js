@@ -59,7 +59,7 @@ function drawSettings(){
     if(matchMedia("(hover:hover)").matches)h+=`<p class="sgt">Hilfe</p>`+grp(srow('data-go="keys"',"Tastaturkürzel"));
   }else if(sPage==="rem"){
     const sel=new Set((haInfo&&haInfo.notify)||[]),av=haAvail;
-    if(av===null)h=cap("Lade Geräte …");
+    if(av===null)h=cap("Geräte werden geladen …");
     else{const names=[...new Set([...av,...sel])];
       const nw=(haInfo&&haInfo.nwho)||{};
       h=`<p class="sgt">Geräte</p>`+(names.length?grp(names.map(x=>sopt(`data-set="ntf:${x}"`,esc(ntfName(x)),sel.has(x))).join("")):cap("Es wurde kein Gerät gefunden. Installiere die Home-Assistant-App auf dem Handy oder iPad und melde dich an."))
@@ -88,11 +88,11 @@ function drawSettings(){
   }else if(sPage==="fun"){
     const hi=haInfo||{},on=funOn();
     h=`<p class="sgt">Nur für dich</p>`+grp(sopt('data-set="fun:1"',"An",on)+sopt('data-set="fun:0"',"Aus",!on))
-     +cap("Sprüche, GIF des Tages und Konfetti auf der Startseite. Liste, Board, Zeitstrahl und Kalender bleiben immer sachlich.");
-    if(haInfo){h+=`<p class="sgt">GIF des Tages · für alle</p>`+(GIFS[gifKind]&&GIFS[gifKind].url?`<div class="gifprev"><img src="${esc(GIFS[gifKind].url)}" alt=""><small>Gerade: ${esc(GIFS[gifKind].name||"")} · via GIPHY</small></div>`:"")
+     +cap("Sprüche, GIF des Tages und Konfetti auf der Startseite. Liste, Tafel, Zeitstrahl und Kalender bleiben immer sachlich.");
+    if(haInfo){h+=`<p class="sgt">GIF des Tages · für alle</p>`+(GIFS[gifKind]&&GIFS[gifKind].url?`<div class="gifprev"><img src="${esc(GIFS[gifKind].url)}" alt=""><small>Gerade zu sehen: ${esc(GIFS[gifKind].name||"")} · über GIPHY</small></div>`:"")
        +`<div class="sgrp kin"><input id="gif_key" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="${hi.giphy?"GIPHY-Schlüssel ist eingetragen":"GIPHY-Schlüssel einfügen"}" aria-label="GIPHY-Schlüssel"></div>`
        +grp(srow('data-act="gifsave"',"<b class=\"acc\">Schlüssel sichern</b>",null,null,false)+(hi.giphy?srow('data-act="gifnew"',"Heute andere GIFs",null,null,false)+srow('data-act="gifdel"',"<span class=\"bad\">Schlüssel entfernen</span>",null,null,false):""))
-       +cap("Je Lage (alles erledigt, Serie, überfällig, noch nichts, halb geschafft) höchstens ein GIF am Tag, für alle gleich. Es werden nur bestehende Memes von GIPHY gezeigt. Kostenloser Schlüssel: developers.giphy.com → Create an App → API. Der Schlüssel ist für den Browser gedacht und wird darum an die App ausgeliefert (anders als der Gemini-Schlüssel).")
+       +cap("Für jede Situation des Tages (alles erledigt, mehrere Tage am Stück, etwas überfällig, noch nichts erledigt, schon einiges geschafft) gibt es höchstens ein GIF am Tag, für alle dasselbe. Gezeigt werden nur bestehende Memes von GIPHY. Einen kostenlosen Schlüssel gibt es auf developers.giphy.com unter „Create an App“ → „API“. Dieser Schlüssel ist für den Browser bestimmt und wird deshalb an die App übertragen, anders als der Gemini-Schlüssel.")
        +`<p class="sgt">Eigene Suchbegriffe</p><div class="sgrp kin"><input id="gif_terms" type="text" autocomplete="off" value="${esc(((hi.gifterms)||[]).join(", "))}" placeholder="z. B. stromberg finger, dog zoomies" aria-label="Eigene GIF-Suchbegriffe"></div>`
        +grp(srow('data-act="giftermsave"',"<b class=\"acc\">Suchbegriffe sichern</b>",null,null,false))
        +cap("Mit Komma trennen. Der Planner wechselt täglich zwischen eingebauten Themen (Büro-Comedy, Zeichentrick, Gaming, Fußball, Tiere) und euren Begriffen. Mit Gemini-Schlüssel wählt die KI einmal am Tag passende bekannte Memes für jede Lage aus (eine Anfrage).")}
@@ -118,7 +118,7 @@ function drawSettings(){
   }else if(sPage==="me"){
     h=grp([["","Keine Angabe"],["Lasse","Lasse"],["Melanie","Melanie"]].map(([k,n])=>sopt(`data-set="me:${k}"`,n,k===me)).join(""))+cap("Damit weiß die App, welche Aufgaben deine sind.");
   }else if(sPage==="keys"){
-    h=`<dl class="keys"><dt>N</dt><dd>Neue Aufgabe</dd><dt>/</dt><dd>Suchen</dd><dt>1 – 5</dt><dd>Start, Liste, Board, Zeitstrahl, Kalender</dd><dt>S</dt><dd>Mehrfachauswahl</dd><dt>A</dt><dd>Alle auswählen</dd><dt>Entf</dt><dd>Auswahl löschen</dd><dt>H</dt><dd>Zeitstrahl: zu Heute</dd><dt>Esc</dt><dd>Auswahl beenden</dd></dl>`;
+    h=`<dl class="keys"><dt>N</dt><dd>Neue Aufgabe</dd><dt>/</dt><dd>Suchen</dd><dt>1 – 5</dt><dd>Start, Liste, Tafel, Zeitstrahl, Kalender</dd><dt>S</dt><dd>Mehrfachauswahl</dd><dt>A</dt><dd>Alle auswählen</dd><dt>Entf</dt><dd>Auswahl löschen</dd><dt>H</dt><dd>Zeitstrahl: zu Heute</dd><dt>Esc</dt><dd>Auswahl beenden</dd></dl>`;
   }
   $("s_body").innerHTML=h;
 }
@@ -153,15 +153,15 @@ $("s_body").onclick=async e=>{
   else if(d.act==="kisave"){const k=$("ki_key").value.replace(/\s+/g,"").replace(/^["'„“]+|["'„“”]+$/g,"");
     if(!k){kiMsg=["Erst den Schlüssel ins Feld einfügen.",1];drawSettings();return}
     if(!/^[A-Za-z0-9._-]{20,200}$/.test(k)){kiMsg=[`Das sieht nicht nach einem vollständigen Gemini-Schlüssel aus (${k.length} Zeichen). Er beginnt mit „AIza“ oder „AQ.“ und enthält keine Leerzeichen.`,1];drawSettings();return}
-    kiMsg=["Sichere und teste die Verbindung …",0];drawSettings();
+    kiMsg=["Schlüssel wird gesichert und geprüft …",0];drawSettings();
     try{const r=await fetch("api/ha-settings",{method:"POST",headers:{"Content-Type":"application/json","X-Planner":"1"},body:JSON.stringify({ai_key:k})}),j=await r.json().catch(()=>({}));
       if(!r.ok){kiMsg=[j.error||"Speichern fehlgeschlagen ("+r.status+").",1];drawSettings();return}
       if(j.ha)haInfo=j.ha;const err=await kiCheck();
-      kiMsg=err?["Gesichert, aber der Test schlägt fehl: "+err,1]:["Gesichert. Die KI antwortet, alles bereit.",0]}
+      kiMsg=err?["Gesichert, aber die Prüfung ist fehlgeschlagen: "+err,1]:["Gesichert. Die KI antwortet, alles ist bereit.",0]}
     catch(e){kiMsg=["Der Planner-Server ist nicht erreichbar.",1]}
     drawSettings()}
   else if(d.act==="kidel"){if(!await confirmSheet("Gemini-Schlüssel entfernen?","Entfernen"))return;await haSave({ai_key:""});kiMsg=["Schlüssel entfernt.",0];drawSettings()}
-  else if(d.act==="kitest"){kiMsg=["Teste …",0];drawSettings();const err=await kiCheck();kiMsg=err?["Test fehlgeschlagen: "+err,1]:["Die KI antwortet, alles bereit.",0];drawSettings()}
+  else if(d.act==="kitest"){kiMsg=["Teste …",0];drawSettings();const err=await kiCheck();kiMsg=err?["Prüfung fehlgeschlagen: "+err,1]:["Die KI antwortet, alles ist bereit.",0];drawSettings()}
   else if(d.act==="hatest"){try{const r=await api("api/ha-test",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});$("dls").close();toast(r.ok?"Testnachricht gesendet":"Fehlgeschlagen: "+r.error)}catch(e){toast("Server nicht erreichbar")}}
 };
 

@@ -55,12 +55,12 @@ async function buildXlsx(){
   const ws=wb.addWorksheet("Liste",{views:[{state:"frozen",xSplit:2,ySplit:4,showGridLines:false}],properties:{tabColor:{argb:C.ink}}});
   ws.columns=[{width:6},{width:34},{width:14},{width:13},{width:12},{width:12},{width:12},{width:14},{width:34},{width:30},{width:12},{width:30},{width:6,hidden:true},{width:6,hidden:true},{width:6,hidden:true},{width:16},{width:10}];
   ws.getCell("A1").value="Planner";ws.getCell("A1").font={bold:true,size:18};
-  ws.getCell("H1").value="Neue Aufgabe: einfach in der nächsten freien Zeile eintragen. Board und Zeitstrahl aktualisieren sich automatisch (bis Zeile 304).";
+  ws.getCell("H1").value="Neue Aufgabe: einfach in der nächsten freien Zeile eintragen. Tafel und Zeitstrahl aktualisieren sich automatisch (bis Zeile 304).";
   ws.getCell("H1").font={italic:true,color:{argb:C.grey},size:10};
   const kp=[["B","Aufgaben",`COUNTIF(B${R0}:B${R1},"?*")`,"0"],["C","Erledigt",`IFERROR(COUNTIF(G${R0}:G${R1},"Erledigt")/B3,0)`,"0%"],["D","In Arbeit",`COUNTIF(G${R0}:G${R1},"In Arbeit")`,"0"],["E","Überfällig",`SUMPRODUCT((B${R0}:B${R1}<>"")*(G${R0}:G${R1}<>"Erledigt")*ISNUMBER(F${R0}:F${R1})*(F${R0}:F${R1}<TODAY()))`,"0"],["F","Konflikte",`COUNTIF(L${R0}:L${R1},"?*")`,"0"]];
   kp.forEach(([c,l,f,nf])=>{const a=ws.getCell(c+"2"),b=ws.getCell(c+"3");a.value=l;a.font={size:9,color:{argb:C.grey}};b.value={formula:f};b.numFmt=nf;b.font={bold:true,size:18};a.border={top:edge,left:edge,right:edge};b.border={bottom:edge,left:edge,right:edge};b.alignment={horizontal:"left"}});
   ws.getRow(3).height=28;
-  ["Nr","Aufgabe","Tags","Ressource","Start","Ende","Status","Abhängig von (Nr, z. B. 2,5)","Checkliste (eine Zeile je Punkt, [x] = erledigt)","Notizen","Checkl.-Stand","Hinweis","Offen","In Arbeit","Erledigt","Projekt","Priorität"].forEach((h,i)=>hdr(ws.getCell(4,i+1),h));
+  ["Nr","Aufgabe","Tags","Wer","Beginn","Ende","Status","Abhängig von (Nr, z. B. 2,5)","Checkliste (eine Zeile je Punkt, [x] = erledigt)","Notizen","Checkl.-Stand","Hinweis","Offen","In Arbeit","Erledigt","Projekt","Priorität"].forEach((h,i)=>hdr(ws.getCell(4,i+1),h));
   ws.getRow(4).height=36;
   for(let r=R0;r<=R1;r++){
     const t=list[r-R0],row=ws.getRow(r);
@@ -96,9 +96,9 @@ async function buildXlsx(){
   ws.addConditionalFormatting({ref:`B${R0}:B${R1}`,rules:[{type:"expression",formulae:[`$G${R0}="Erledigt"`],style:{font:{strike:true,color:{argb:C.grey}}}}]});
 
   /* ---------- Blatt 2: Board (wird aus der Liste befüllt) ---------- */
-  const wb2=wb.addWorksheet("Board",{views:[{showGridLines:false}],properties:{tabColor:{argb:C.bDoing}}});
+  const wb2=wb.addWorksheet("Tafel",{views:[{showGridLines:false}],properties:{tabColor:{argb:C.bDoing}}});
   wb2.columns=[{width:4,hidden:true},{width:38},{width:2},{width:4,hidden:true},{width:38}];
-  wb2.getCell("B1").value="Board";wb2.getCell("B1").font={bold:true,size:18};
+  wb2.getCell("B1").value="Tafel";wb2.getCell("B1").font={bold:true,size:18};
   wb2.getCell("B2").value="Wird automatisch aus der Liste befüllt. Status in der Liste ändern, um eine Karte zu verschieben.";wb2.getCell("B2").font={italic:true,color:{argb:C.grey},size:10};
   const cols=[["A","B","Offen","M",C.todo],["D","E","In Arbeit","N",C.doing],["G","H","Erledigt","O",C.done]];
   const SL=40;
@@ -129,7 +129,7 @@ async function buildXlsx(){
   wg.getCell("B2").value="Anzeige ab (überschreibbar):";wg.getCell("B2").font={size:10,color:{argb:C.grey}};
   wg.getCell("C2").value={formula:`IF(COUNT(${L}E${R0}:E${R1})=0,TODAY()-2,MIN(${L}E${R0}:E${R1})-2)`};wg.getCell("C2").numFmt="dd.mm.yyyy";wg.getCell("C2").font={bold:true};
   wg.getCell("E2").value="Abhängigkeiten: Spalte „Abh.“ zeigt die Vorgänger-Nr.; (!) = Start liegt nicht nach dem Ende des Vorgängers.";wg.getCell("E2").font={italic:true,size:10,color:{argb:C.grey}};
-  ["Nr","Aufgabe","Ressource","Start","Ende","Status","Abh."].forEach((h,i)=>hdr(wg.getCell(4,i+1),h));
+  ["Nr","Aufgabe","Wer","Beginn","Ende","Status","Abh."].forEach((h,i)=>hdr(wg.getCell(4,i+1),h));
   const colL=n=>wg.getColumn(n).letter,F1=colL(FC),F2=colL(FC+DAYS-1);
   for(let k=0;k<DAYS;k++){
     const cl=colL(FC+k),pv=colL(FC+k-1),h=wg.getCell(cl+"4"),m=wg.getCell(cl+"3");

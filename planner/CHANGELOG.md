@@ -1,5 +1,13 @@
 # Änderungen
 
+## 1.36.0
+- **Startseite folgt jetzt einer klaren Reihenfolge:**
+  1. **Dein Tag:** Stand mit Ring, „4 Tage am Stück“, „3 diese Woche · 2 mehr als letzte“ und darunter **Als Nächstes**: die eine Aufgabe, die jetzt dran ist, direkt zum Abhaken.
+  2. **Meme zur Lage:** Das GIF ist jetzt vollständig und groß zu sehen (vorher abgeschnitten), mit einer deutschen Beschreibung darunter.
+  3. **Nächstes Abzeichen:** in Worten, z. B. „Erste 10 – noch 2 Aufgaben“; antippen zeigt alle.
+  4. Danach wie gewohnt Kacheln, Eingabe und Liste; „Gemeinsam diese Woche“ ganz unten.
+- **Durchgehend natürliches Deutsch:** „Tafel“ statt „Board“, „Sicherung“ statt „Backup“, „Wer“ und „Beginn“ in Tabellen und Excel, Meldungen umformuliert (z. B. „Diese Woche 3 erledigt, 2 mehr als letzte Woche“, „Schlüssel wird gesichert und geprüft …“). Meme-Beschreibungen auf Deutsch, auch bei der täglichen Auswahl durch Gemini. Abzeichen heißen jetzt u. a. „Eine Woche durchgezogen“ und „Gemeinsam stark“.
+
 ## 1.35.0
 - **Startseite neu sortiert:** Ganz oben steht jetzt deine persönliche Spiel-Karte: Tagesring, Serie, „x diese Woche“, Spruch mit GIF und Abzeichen. Danach folgen Kacheln, Eingabe und Liste. „Gemeinsam diese Woche“ ist ganz nach unten gewandert.
 - **Echte Memes als GIF je Lage (GIPHY):** Es werden nur bestehende, bekannte Memes gezeigt, nichts erfunden. Zu jeder Lage (alles erledigt, Serie, überfällig, noch nichts, halb geschafft) gibt es höchstens ein GIF am Tag, für alle gleich. Es erscheint einmal kurz groß und bleibt dann klein mit dem Namen des Memes in der Karte. Ändert sich die Lage (z. B. letzte Aufgabe erledigt), kommt das passende GIF.

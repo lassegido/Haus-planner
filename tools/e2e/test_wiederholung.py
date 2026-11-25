@@ -97,5 +97,7 @@ def test_reihenfolge_leiste(t, browser):
             for v in order:
                 if v not in first:
                     first.append(v)
-            t.check("Leiste: Start, Liste, Board, Zeitstrahl, Kalender", first == ["home", "list", "board", "gantt", "cal"], order)
+            t.check("Leiste: Start, Liste, Tafel, Zeitstrahl, Kalender", first == ["home", "list", "board", "gantt", "cal"], order)
+            labels = p.js("[...document.querySelectorAll('nav [data-v] span,#tabs [data-v] span')].map(s=>s.textContent)")
+            t.check("Beschriftungen auf Deutsch", all(x in labels for x in ["Start", "Liste", "Tafel", "Zeitstrahl", "Kalender"]) and "Board" not in labels, labels)
             p.close()
