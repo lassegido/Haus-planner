@@ -139,13 +139,24 @@ def clean_tags(lst):
 
 
 def clean_rec(r):
+    """Wiederholung: n, u (d/w/m/y); ab 1.34 optional wd (Wochentage 0–6, nur w), mw "nth" (nur m), until (Datum)."""
     if isinstance(r, dict) and r.get("u") in ("d", "w", "m", "y"):
         try:
             n = int(r.get("n", 1))
         except (TypeError, ValueError):
             return None
         if 1 <= n <= 60:
-            return {"n": n, "u": r["u"]}
+            out = {"n": n, "u": r["u"]}
+            wd = r.get("wd")
+            if r["u"] == "w" and isinstance(wd, list):
+                days = sorted({d for d in wd if isinstance(d, int) and not isinstance(d, bool) and 0 <= d <= 6}, key=lambda d: (d + 6) % 7)
+                if days:
+                    out["wd"] = days
+            if r["u"] == "m" and r.get("mw") == "nth":
+                out["mw"] = "nth"
+            if isinstance(r.get("until"), str) and real_date(r["until"]):
+                out["until"] = r["until"]
+            return out
     return None
 
 
@@ -393,12 +404,21 @@ def ai_usage_save(u):
 
 
 def ai_call(prompt, raw=False):
+    d = ai_request(prompt)
+    if raw:  # freie Zuordnungen (z. B. Tag -> Symbol), nur kurze Texte
+        return {str(k)[:60]: str(v)[:40] for k, v in list(d.items())[:100]}
+    items = [str(x).strip()[:120] for x in d.get("checklist", []) if str(x).strip()] if isinstance(d.get("checklist"), list) else []
+    return {"notes": str(d.get("notes", "")).strip()[:1000], "checklist": items[:10]}
+
+
+def ai_request(prompt, system=AI_SYSTEM):
+    """Eine Gemini-Anfrage (zählt fürs Limit), Antwort als JSON-Objekt."""
     ai_limit()
     key = ai_key()
     if not key:
         raise RuntimeError("Kein Gemini-Schlüssel eingetragen")
     model = ai_model()
-    body = {"system_instruction": {"parts": [{"text": AI_SYSTEM}]},
+    body = {"system_instruction": {"parts": [{"text": system}]},
             "contents": [{"role": "user", "parts": [{"text": prompt[:4000]}]}],
             "generationConfig": {"maxOutputTokens": 2000, "responseMimeType": "application/json"}}
     req = urllib.request.Request("%s/%s:generateContent" % (GEMINI, model), method="POST", data=json.dumps(body).encode(),
@@ -427,10 +447,67 @@ def ai_call(prompt, raw=False):
     if a < 0 or z < a:
         raise RuntimeError("Unerwartete Antwort")
     d = json.loads(text[a:z + 1])
-    if raw:  # freie Zuordnungen (z. B. Tag -> Symbol), nur kurze Texte
-        return {str(k)[:60]: str(v)[:40] for k, v in list(d.items())[:100]}
-    items = [str(x).strip()[:120] for x in d.get("checklist", []) if str(x).strip()] if isinstance(d.get("checklist"), list) else []
-    return {"notes": str(d.get("notes", "")).strip()[:1000], "checklist": items[:10]}
+    if not isinstance(d, dict):
+        raise RuntimeError("Unerwartete Antwort")
+    return d
+
+
+# 1.34: Sprüche für die Startseite. Höchstens eine Gemini-Anfrage pro Tag, nur wenn weniger als die Hälfte des
+# Tageslimits verbraucht ist. Ohne Schlüssel oder bei Fehlern nutzt die App ihre eingebauten Sprüche.
+MEMES = os.path.join(D, "sprueche.json")
+MEME_KINDS = ("done", "streak", "late", "start", "good")
+MEME_TRY = {"day": ""}
+MEME_SYSTEM = "Du schreibst kurze, witzige deutsche Sprüche für eine Haushalts-App. Antworte nur im verlangten JSON-Format."
+# Themen, aus denen die Sprüche schöpfen (übergeordnet; Beispiele nur zur Orientierung). Hier ergänzen, wenn sich der Geschmack ändert.
+MEME_THEMES = [
+    "Büro- und Arbeitsplatz-Comedy (z. B. Stromberg, The Office)",
+    "US-Zeichentrick-Sitcoms (z. B. Die Simpsons, Family Guy)",
+    "Videospiele und Gaming-Sprüche (z. B. GTA: Mission bestanden, Wanted-Level)",
+    "Fußball-Memes und Fußball-Sprüche",
+    "Tier-Memes, vor allem Hunde (z. B. Doge, „This is fine“, Good Boy), aber auch Katzen und andere Tiere",
+    "aktuelle amerikanische und deutsche Internet-Memes",
+    "Polit-Satire im Stil deutscher Satire-Shows über bekannte Polit-Momente aus Deutschland und der Welt, quer durch alle Parteien",
+]
+MEME_PROMPT = """Schreibe kurze Motivationssprüche (Deutsch, je höchstens 90 Zeichen) für die Startseite einer Aufgaben-App,
+die ein Paar um die 30 für Haushalt, Haus und Garten nutzt. Stil: augenzwinkernde Anspielungen auf Popkultur und Memes aus diesen Bereichen:
+%s.
+Bevorzuge, was gerade aktuell oder angesagt ist, und wechsle die Bereiche ab. Wortwahl locker und jugendsprachlich, aber gut verständlich.
+Nur kurze Anspielungen oder sehr kurze bekannte Sprüche, keine langen Zitate, höchstens ein Emoji pro Spruch.
+Grenzen: nichts Beleidigendes oder Anzügliches, niemanden beschämen; bei Politik ausgewogen und ohne eigene Meinung zu Parteien,
+keine Herabwürdigung, keine erfundenen Zitate echter Personen.
+Heute ist der %s. Wiederhole diese Sprüche von gestern nicht: %s
+Kategorien: done = alles für heute erledigt; streak = mehrere Tage in Folge geschafft; late = Aufgaben überfällig (anspornen, nicht schimpfen);
+start = heute noch nichts erledigt; good = schon etwas geschafft, aber noch offen.
+Antworte als JSON: {"done": [8 Sprüche], "streak": [8], "late": [8], "start": [8], "good": [8]}"""
+
+
+def memes():
+    d = read_json(MEMES, "Sprüche")
+    today = ai_today()
+    if d.get("day") != today and MEME_TRY["day"] != today and ai_key():
+        u = ai_usage_info()
+        if not u["blocked"] and u["used"] < u["limit"] // 2:
+            MEME_TRY["day"] = today
+            threading.Thread(target=memes_fetch, args=(today,), daemon=True).start()
+    lines = d.get("lines") if isinstance(d.get("lines"), dict) else None
+    return {"day": d.get("day", ""), "lines": lines}
+
+
+def memes_fetch(today):
+    try:
+        old = read_json(MEMES, "Sprüche").get("lines") or {}
+        prev = " | ".join(x for v in old.values() if isinstance(v, list) for x in v[:3])[:800] or "keine"
+        r = ai_request(MEME_PROMPT % ("; ".join(MEME_THEMES), today, prev), MEME_SYSTEM)
+        lines = {k: [re.sub(r"\s+", " ", x).strip()[:120] for x in r.get(k, []) if isinstance(x, str) and x.strip()][:10]
+                 for k in MEME_KINDS if isinstance(r.get(k), list)}
+        if sum(len(v) for v in lines.values()) < 10:
+            raise RuntimeError("zu wenige Sprüche")
+        tmp = MEMES + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump({"day": today, "lines": lines}, f, ensure_ascii=False)
+        os.replace(tmp, MEMES)
+    except Exception as e:
+        print("Sprüche nicht erneuert (eingebaute bleiben):", e, flush=True)
 
 
 def ha_call(method, path, body=None):
@@ -1200,6 +1277,8 @@ class H(BaseHTTPRequestHandler):
                 return self.out(200, {"ok": True, "services": out})
             except Exception as e:
                 return self.out(200, {"ok": False, "error": str(e)[:200], "services": []})
+        if u.path.endswith("/api/sprueche"):
+            return self.out(200, memes())
         if u.path.endswith("/api/me"):
             usr = self.ha_user()
             if not usr:

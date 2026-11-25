@@ -65,6 +65,10 @@ Beispiel: `Zaun streichen Sa #Garten !1 @Melanie`. Unter dem Feld siehst du vor 
 
 **Frühere Aufgaben als Vorlage** (wie im Apple Kalender): Beim Tippen erscheinen bis zu vier frühere Aufgaben, deren Titel so beginnt (ab drei Zeichen auch ein Wort mitten im Titel), auch erledigte und archivierte. Gibt es einen Titel mehrfach, zählt die jüngste Aufgabe. Antippen übernimmt Tags, Projekt, Person, Priorität, Dauer, Wiederholung, Notizen und die Checkliste (alle Punkte wieder offen); Datum ab heute oder ab dem getippten Tag. Was du selbst tippst (`Sa`, `@Melanie`, `#Tag`), hat Vorrang. Nicht übernommen: Abhängigkeiten, Verlauf, Kommentare und Dateien. Auf der Startseite öffnet sich danach das Aufgabenblatt zum Prüfen, im Blatt gibt es „Rückgängig“. Enter legt wie gewohnt ohne Vorlage an.
 
+**Wiederholen** (im Aufgabenblatt unter „Wiederholen und Abhängigkeiten“): Schnellauswahl oder „Benutzerdefiniert …“ mit Abstand (alle n Tage/Wochen/Monate/Jahre), Wochentagen (z. B. Di und Do), bei Monaten „am 12.“ oder „am 2. Dienstag“ bzw. „am letzten Freitag“ und optionalem Enddatum. Beim Erledigen legt der Planner die nächste Aufgabe an; nach dem Enddatum nicht mehr.
+
+**Motivation:** Auf der Startseite zeigen eine Serie (Tage in Folge mit vollem Tagesring), „Gemeinsam diese Woche“ (wer wie viel erledigt hat, aus dem Verlauf) und Abzeichen den Fortschritt. Ist die letzte Aufgabe des Tages erledigt, gibt es Konfetti. Gespeichert wird dafür nichts extra; alles wird aus den Aufgaben berechnet. Dazu ein Spruch passend zur Lage; mit Gemini-Schlüssel werden die Sprüche einmal am Tag neu geschrieben (eine Anfrage, nur wenn weniger als die Hälfte des Tageslimits verbraucht ist, gespeichert in `/data/sprueche.json`). Die Themen stehen in `MEME_THEMES` in `server.py`.
+
 **Ring auf der Startseite:** zeigt nur den heutigen Tag der oben gewählten Person („Meine“, eine andere Person oder „Alle“): überfällige, heute anstehende und heute erledigte Aufgaben.
 
 ## Per Sprache: Siri-Kurzbefehl

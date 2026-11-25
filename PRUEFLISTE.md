@@ -26,6 +26,11 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] Neue Aufgabe, Titel anfangen („Ras…“): frühere Aufgaben erscheinen; Antippen füllt alles aus, „Rückgängig“ unten lässt sich antippen.
 - [ ] Startseite: „Rasen…“ tippen, Vorschlag antippen: Blatt öffnet sich ausgefüllt, Tastatur bleibt zu.
 
+- [ ] Wiederholen → Benutzerdefiniert: Wochentage antippen (Di, Do), „Alle 2“ eingeben, Enddatum wählen; Hinweis darunter stimmt. Beim Erledigen entsteht die nächste am richtigen Tag.
+- [ ] Startseite: Serie mit Flamme, „Gemeinsam diese Woche“ mit beiden Namen, Abzeichen antippen. Letzte Aufgabe des Tages abhaken: Konfetti und Vibration.
+- [ ] Leiste unten: Start, Liste, Board, Zeitstrahl, Kalender.
+- [ ] Am Tag nach dem Update: Spruch auf der Startseite kommt von Gemini (neu formuliert), KI-Verbrauch in den Einstellungen nur +1.
+
 ## 4. Export (iPhone)
 - [ ] PDF: Teilen-Menü erscheint, PDF lässt sich in Dateien sichern oder per Mail senden.
 - [ ] Excel: ebenso; Datei öffnet sich in Numbers oder Excel.

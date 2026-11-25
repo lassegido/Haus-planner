@@ -18,20 +18,40 @@ const RECI='<svg class="mi" viewBox="0 0 24 24" aria-label="Wiederholt sich"><pa
 const MSI='<svg class="mi" viewBox="0 0 24 24" aria-label="Meilenstein"><path d="M12 3l9 9-9 9-9-9z"/></svg>';
 const dr=t=>t.ms?fd(t.start):`${fd(t.start)}–${fd(t.end)}`;
 const newId=()=>"t"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+/* 1.34: Wiederholung. rec={n, u:"d"|"w"|"m"|"y", wd:[0..6] nur bei w (0 = Sonntag), mw:"nth" nur bei m (z. B. 2. Dienstag, 5 = letzter),
+   until:"JJJJ-MM-TT" (letzter möglicher Beginn)}. Alte Einträge {n,u} gelten unverändert. */
+const WDLONG=["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
+const wdOf=d=>fromDn(dn(d)).getUTCDay(),mo=k=>(k+6)%7;
+function nthOf(d){const dt=fromDn(dn(d)),day=dt.getUTCDate(),last=new Date(Date.UTC(dt.getUTCFullYear(),dt.getUTCMonth()+1,0)).getUTCDate();return day+7>last?5:Math.ceil(day/7)}
 function addInterval(d,r){
   const dt=fromDn(dn(d));
   if(r.u==="d")dt.setUTCDate(dt.getUTCDate()+r.n);
-  else if(r.u==="w")dt.setUTCDate(dt.getUTCDate()+7*r.n);
+  else if(r.u==="w"){const wd=(r.wd||[]).slice().sort((a,b)=>mo(a)-mo(b)),cur=mo(dt.getUTCDay());
+    if(!wd.length)dt.setUTCDate(dt.getUTCDate()+7*r.n);
+    else{const later=wd.find(x=>mo(x)>cur);dt.setUTCDate(dt.getUTCDate()+(later!==undefined?mo(later)-cur:7*r.n-cur+mo(wd[0])))}}
+  else if(r.u==="m"&&r.mw==="nth"){const k=nthOf(d),w=dt.getUTCDay();dt.setUTCDate(1);dt.setUTCMonth(dt.getUTCMonth()+r.n);
+    const y=dt.getUTCFullYear(),m=dt.getUTCMonth(),last=new Date(Date.UTC(y,m+1,0)).getUTCDate();let day=(w-dt.getUTCDay()+7)%7+1+7*(k-1);
+    if(k===5||day>last){day=(w-dt.getUTCDay()+7)%7+1;while(day+7<=last)day+=7}dt.setUTCDate(day)}
   else{const m=r.u==="y"?r.n*12:r.n,day=dt.getUTCDate();dt.setUTCDate(1);dt.setUTCMonth(dt.getUTCMonth()+m);dt.setUTCDate(Math.min(day,new Date(Date.UTC(dt.getUTCFullYear(),dt.getUTCMonth()+1,0)).getUTCDate()))}
   return iso(dt)}
 function nextOcc(t){
   const len=dn(t.end)-dn(t.start);let s=t.start,e=t.end,g=0;
   do{s=addInterval(s,t.rec);e=iso(fromDn(dn(s)+len))}while(dn(e)<today()&&++g<500);
+  if(t.rec.until&&dn(s)>dn(t.rec.until))return null;
   return{...t,id:newId(),status:"todo",start:s,end:e,checklist:(t.checklist||[]).map(c=>({...c,d:false})),deps:[],spawned:""}}
+/* Wiederholung in Worten, z. B. „Alle 2 Wochen am Di und Do“ */
+function recText(r,start){if(!r)return"";const n=r.n||1,list=a=>a.length>1?a.slice(0,-1).join(", ")+" und "+a[a.length-1]:a[0]||"";let t;
+  if(r.u==="d")t=n===1?"Täglich":`Alle ${n} Tage`;
+  else if(r.u==="w"){const wd=(r.wd||[]).slice().sort((a,b)=>mo(a)-mo(b));
+    t=n===1&&wd.join()==="1,2,3,4,5"?"Werktags":(n===1?"Wöchentlich":`Alle ${n} Wochen`)+(wd.length?" am "+list(wd.map(x=>WDL[x])):"")}
+  else if(r.u==="m"){t=n===1?"Monatlich":n===3?"Vierteljährlich":`Alle ${n} Monate`;
+    if(start&&r.mw==="nth"){const k=nthOf(start);t+=` am ${k===5?"letzten":k+"."} ${WDLONG[wdOf(start)]}`}}
+  else t=n===1?"Jährlich":`Alle ${n} Jahre`;
+  return t+(r.until?" bis "+fd(r.until):"")}
 async function setStatus(t,next){
   const u={...t,status:next};u.log=diffLog(t,u);let sp=null;
-  if(next==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);u.spawned=sp.id}
-  await saveTask(u);if(sp)await saveTask(sp);return sp}
+  if(next==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);if(sp)u.spawned=sp.id}
+  await saveTask(u);if(sp)await saveTask(sp);if(next==="done"&&t.status!=="done")cheer();return sp}
 /* Zeitstrahl: Balken ziehen */
 const dependsOn=(a,b,seen=new Set())=>{if(seen.has(a))return false;seen.add(a);const t=byId(a);return!!t&&(t.deps||[]).some(d=>d===b||dependsOn(d,b,seen))};
 function ganttDrag(){

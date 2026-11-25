@@ -51,7 +51,8 @@ def test_checkliste_ziehen_und_ki_anpassen(t, browser):
         saved = [c["t"] for c in s.tasks()[0]["checklist"]]
         t.check("Gespeichert: eigene Reihenfolge plus übernommene Vorschläge", saved[:3] == ["Drei", "Eins", "Zwei"] and "Boden verlegen" in saved, saved)
         use = s.api("api/tasks")["ha"]["aiuse"]
-        t.check("Jede KI-Anfrage wird für das Tageslimit gezählt (2 Anfragen)", use.get("used") == 2 and not use.get("blocked"), use)
+        extra = sum(1 for x in g.prompts if "Motivationssprüche" in x)  # Tagessprüche der Startseite (höchstens 1)
+        t.check("Jede KI-Anfrage wird für das Tageslimit gezählt (2 + %d Tagessprüche)" % extra, extra <= 1 and use.get("used") == 2 + extra and not use.get("blocked"), use)
         t.check("keine Skriptfehler", not p.errors, p.errors)
         p.close()
     g.close()

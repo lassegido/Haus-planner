@@ -107,7 +107,7 @@ function drawSettings(){
   }else if(sPage==="me"){
     h=grp([["","Keine Angabe"],["Lasse","Lasse"],["Melanie","Melanie"]].map(([k,n])=>sopt(`data-set="me:${k}"`,n,k===me)).join(""))+cap("Damit weiß die App, welche Aufgaben deine sind.");
   }else if(sPage==="keys"){
-    h=`<dl class="keys"><dt>N</dt><dd>Neue Aufgabe</dd><dt>/</dt><dd>Suchen</dd><dt>1 – 5</dt><dd>Start, Board, Liste, Zeitstrahl, Kalender</dd><dt>S</dt><dd>Mehrfachauswahl</dd><dt>A</dt><dd>Alle auswählen</dd><dt>Entf</dt><dd>Auswahl löschen</dd><dt>H</dt><dd>Zeitstrahl: zu Heute</dd><dt>Esc</dt><dd>Auswahl beenden</dd></dl>`;
+    h=`<dl class="keys"><dt>N</dt><dd>Neue Aufgabe</dd><dt>/</dt><dd>Suchen</dd><dt>1 – 5</dt><dd>Start, Liste, Board, Zeitstrahl, Kalender</dd><dt>S</dt><dd>Mehrfachauswahl</dd><dt>A</dt><dd>Alle auswählen</dd><dt>Entf</dt><dd>Auswahl löschen</dd><dt>H</dt><dd>Zeitstrahl: zu Heute</dd><dt>Esc</dt><dd>Auswahl beenden</dd></dl>`;
   }
   $("s_body").innerHTML=h;
 }

@@ -31,7 +31,7 @@ def test_vorschlaege_im_aufgabenblatt(t, browser):
         t.check("Vorschläge beim Tippen: gleicher Anfang, gleiche Titel nur einmal, Papierkorb nicht",
                 sorted(got) == ["Rasen mähen", "Rasenkanten schneiden", "Rasenmäher warten"] and got[0] == "Rasen mähen", got)
         meta = p.js("document.querySelector('#f_sug .vsg small').textContent")
-        t.check("Vorschlag zeigt die jüngste Aufgabe mit diesem Titel", "2 Punkte" in meta and "wiederholt" in meta, meta)
+        t.check("Vorschlag zeigt die jüngste Aufgabe mit diesem Titel", "2 Punkte" in meta and "Wöchentlich" in meta, meta)
         pg.fill("#f_title", "putz")
         p.js("document.getElementById('f_title').dispatchEvent(new Event('input'))")
         t.check("Treffer auch bei einem Wort im Titel", p.js(SUG % "#f_sug") == ["Fenster putzen"])

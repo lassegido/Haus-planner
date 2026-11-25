@@ -51,7 +51,7 @@ $("f_rp").onmouseover=e=>{if(!rpStep)return;const d=e.target.closest("[data-d]")
 function sumDlg(){
   const set=(id,t)=>{const e=document.querySelector("#"+id+" summary em");if(e)e.textContent=t||""};
   const ck=cklist.filter(x=>x.t.trim()),dd=ck.filter(x=>x.d).length;set("d_ck",ck.length?dd+"/"+ck.length:"");
-  const nd=document.querySelectorAll("#f_deps input:checked").length,r=$("f_rec").value;set("d_pl",[r?"wiederholt":"",nd?nd+" Abhängigkeit"+(nd>1?"en":""):""].filter(Boolean).join(" · "));
+  const nd=document.querySelectorAll("#f_deps input:checked").length;set("d_pl",[recCur?recText(recCur):"",nd?nd+" Abhängigkeit"+(nd>1?"en":""):""].filter(Boolean).join(" · "));
   set("f_filesec",(editing&&(editing.files||[]).length)?String(editing.files.length):"");
   set("f_logsec",(editing&&(editing.log||[]).length)?String(editing.log.length):"");
 }
@@ -107,7 +107,7 @@ function sugFind(text){
     const o=best.get(k);if(!o||dn(t.start)>dn(o.t.start))best.set(k,{t,r})}
   return[...best.values()].sort((a,b)=>a.r-b.r||dn(b.t.start)-dn(a.t.start)).slice(0,4).map(x=>x.t)}
 function sugMeta(t){const d=dn(t.end)-dn(t.start)+1,ck=(t.checklist||[]).length;
-  return[t.proj,...tgs(t),t.who,t.ms?"Meilenstein":d>1?d+" Tage":"",ck?ck+(ck===1?" Punkt":" Punkte"):"",t.rec?"wiederholt sich":"","zuletzt "+fd(t.start)].filter(Boolean).join(" · ")}
+  return[t.proj,...tgs(t),t.who,t.ms?"Meilenstein":d>1?d+" Tage":"",ck?ck+(ck===1?" Punkt":" Punkte"):"",t.rec?recText(t.rec,t.start):"","zuletzt "+fd(t.start)].filter(Boolean).join(" · ")}
 const sugHtml=L=>L.map(t=>`<button type="button" class="vsg" data-sid="${t.id}">${SUGI}<span><b>${esc(t.title)}</b><small>${esc(sugMeta(t))}</small></span></button>`).join("");
 /* Neue Aufgabe aus einer alten: Getipptes (Datum, #Tag, @Person, +Projekt, !Prio) hat Vorrang, Dauer bleibt gleich */
 function fromTemplate(src,text,fb){
@@ -149,10 +149,34 @@ function syncMs(){if($("f_ms").checked)$("f_end").value=$("f_start").value;drawR
 function initExtra(t){
   const pn=allProjs();$("f_proj").innerHTML='<option value="">Kein Projekt</option>'+pn.map(n=>`<option>${esc(n)}</option>`).join("")+'<option value="__new">Neues Projekt …</option>';
   $("f_proj").value=t.proj||"";tintProj();$("f_projnew").value="";$("f_projnew").style.display="none";
-  $("f_rec").value=t.rec?t.rec.n+t.rec.u:"";$("f_rechint").style.display=t.rec?"":"none";
+  $("f_rec").value=t.rec?recKey(t.rec):"";setRec(t.rec||null);
   $("f_ms").checked=!!t.ms;syncMs()}
 $("f_ms").onchange=syncMs;
-$("f_rec").onchange=()=>{$("f_rechint").style.display=$("f_rec").value?"":"none"};
+/* 1.34: Wiederholen: Schnellauswahl oder benutzerdefiniert (Abstand, Wochentage, Monatstag/n-ter Wochentag, Ende) */
+const RPRE={"1d":{n:1,u:"d"},wk:{n:1,u:"w",wd:[1,2,3,4,5]},"1w":{n:1,u:"w"},"2w":{n:2,u:"w"},"1m":{n:1,u:"m"},"3m":{n:3,u:"m"},"1y":{n:1,u:"y"}};
+let recCur=null;
+const recNorm=r=>{if(!r)return null;const o={n:Math.min(60,Math.max(1,+r.n||1)),u:r.u};if(o.u==="w"&&(r.wd||[]).length)o.wd=[...new Set(r.wd)].sort((a,b)=>mo(a)-mo(b));if(o.u==="m"&&r.mw==="nth")o.mw="nth";if(r.until)o.until=r.until;return o};
+function recKey(r){r=recNorm(r);const j=JSON.stringify(r);return Object.keys(RPRE).find(k=>JSON.stringify(recNorm(RPRE[k]))===j)||"c"}
+const recStart=()=>$("f_start").value||tdy();
+function setRec(r){recCur=recNorm(r);$("f_recj").value=recCur?JSON.stringify(recCur):"";drawRec()}
+function drawRec(){const r=recCur,c=$("f_rec").value==="c",st=recStart();$("f_rcus").hidden=!(c&&r);
+  if(c&&r){document.querySelectorAll("#f_ru button").forEach(b=>b.classList.toggle("on",b.dataset.u===r.u));
+    if(document.activeElement!==$("f_rn"))$("f_rn").value=r.n;
+    $("f_rnu").textContent={d:["Tag","Tage"],w:["Woche","Wochen"],m:["Monat","Monate"],y:["Jahr","Jahre"]}[r.u][r.n===1?0:1];
+    $("f_rwd").hidden=r.u!=="w";document.querySelectorAll("#f_rwd button").forEach(b=>b.classList.toggle("on",(r.wd||[wdOf(st)]).includes(+b.dataset.d)));
+    $("f_rmo").hidden=r.u!=="m";const k=nthOf(st),bm=document.querySelectorAll("#f_rmo button");
+    bm[0].textContent="Am "+fromDn(dn(st)).getUTCDate()+".";bm[1].textContent=`Am ${k===5?"letzten":k+"."} ${WDLONG[wdOf(st)]}`;bm.forEach(b=>b.classList.toggle("on",(b.dataset.m||"")===(r.mw||"")));
+    $("f_runtil").value=r.until||""}
+  const h=$("f_rechint");h.style.display=r?"":"none";h.textContent=r?recText(r,st).replace(/\.$/,"")+". Beim Erledigen wird die nächste Aufgabe automatisch angelegt.":"";
+  if(typeof sumDlg==="function")sumDlg()}
+$("f_rec").onchange=()=>{const v=$("f_rec").value;setRec(v==="c"?recCur||{n:1,u:"w",wd:[wdOf(recStart())]}:RPRE[v]||null)};
+$("f_ru").onclick=e=>{const b=e.target.closest("[data-u]");if(!b||!recCur)return;const u=b.dataset.u;setRec({...recCur,u,wd:u==="w"?(recCur.wd||[wdOf(recStart())]):null,mw:null})};
+$("f_rn").oninput=()=>{if(recCur&&$("f_rn").value)setRec({...recCur,n:+$("f_rn").value})};
+$("f_rn").onblur=()=>drawRec();
+$("f_rwd").onclick=e=>{const b=e.target.closest("[data-d]");if(!b||!recCur)return;const d=+b.dataset.d,cur=recCur.wd||[wdOf(recStart())];
+  const wd=cur.includes(d)?cur.filter(x=>x!==d):[...cur,d];if(wd.length)setRec({...recCur,wd});hap(6)};
+$("f_rmo").onclick=e=>{const b=e.target.closest("[data-m]");if(b&&recCur)setRec({...recCur,mw:b.dataset.m||null})};
+$("f_runtil").onchange=()=>{if(recCur)setRec({...recCur,until:$("f_runtil").value||null})};
 function tintProj(){const v=$("f_proj").value;$("f_proj").style.setProperty("--tc",v&&v!=="__new"?pcol(v):"var(--line2)")}
 $("f_proj").onchange=()=>{tintProj();const n=$("f_proj").value==="__new";$("f_projnew").style.display=n?"":"none";if(n)$("f_projnew").focus()};
 $("f_title").addEventListener("input",()=>{$("f_qp").innerHTML=qChips(parseQuick($("f_title").value))});
@@ -164,14 +188,14 @@ $("b_save").onclick=async()=>{
   let proj=$("f_proj").value;if(proj==="__new")proj=$("f_projnew").value.trim().slice(0,30);
   {const ex=allProjs().find(x=>x.toLowerCase()===proj.toLowerCase());if(ex)proj=ex}
   if(q.found){q.tags.forEach(n=>{if(!selTags.includes(n))selTags.push(n)});q.who.forEach(n=>{if(!selWho.includes(n))selWho.push(n)});if(q.proj)proj=q.proj;const qd=qDates(q);if(qd&&!ms){s=qd[0];e=qd[1]}else if(qd){s=e=qd[1]}}
-  const rm=/^(\d+)([dwmy])$/.exec($("f_rec").value),rec=rm?{n:+rm[1],u:rm[2]}:null;
+  const rec=recCur?{...recCur}:null;
   const t={...(editing||{}),id:editing?editing.id:newId(),title,tags:selTags.slice(),area:selTags[0]||"",proj,rec,ms,who:selWho.join(", "),
     status:$("f_status").value,prio:q.prio||+$("f_prio").value||0,start:s,end:e,notes:$("f_notes").value,checklist:cklist.filter(x=>x.t.trim()),deps:[...document.querySelectorAll("#f_deps input:checked")].map(i=>i.value)};
   $("dlg").close();
-  let sp=null;if(t.status==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);t.spawned=sp.id}
+  let sp=null;if(t.status==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);if(sp)t.spawned=sp.id}
   {const r=regDraft;if(r){if(proj&&!r.some(x=>x.p&&x.n===proj))r.push({n:proj,c:nextPColor(),p:1});selTags.forEach(n=>{if(!r.some(x=>!x.p&&x.n===n))r.push({n,c:colorKey(n)})});if(JSON.stringify(r)!==JSON.stringify(reg))saveReg(r)}}
   if(editing)t.log=diffLog(editing,t);
-  await saveTask(t,{check:true});if(sp)await saveTask(sp);
+  await saveTask(t,{check:true});if(sp)await saveTask(sp);if(t.status==="done"&&(!prev||prev.status!=="done"))cheer();
   if(prev)toast("Änderungen gespeichert",async()=>{const c=byId(prev.id);await saveTask({...prev,v:c?c.v:prev.v})});
   else toast("„"+t.title+"“ angelegt",()=>delTask(t.id));
 };

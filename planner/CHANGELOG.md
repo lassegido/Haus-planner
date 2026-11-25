@@ -1,5 +1,18 @@
 # Änderungen
 
+## 1.34.0
+- **Motivation auf der Startseite:**
+  - **Serie:** Die Flamme zählt die Tage in Folge, an denen alles für den Tag erledigt war. Tage ohne Fälliges unterbrechen sie nicht, mehr als 7 Tage ganz ohne Erledigtes schon.
+  - **Gemeinsam diese Woche:** Erledigte Aufgaben seit Montag mit dem Anteil jeder Person und dem Vergleich zur Vorwoche. Wer erledigt hat, kommt aus dem Verlauf.
+  - **10 Abzeichen:** z. B. Erste 10, Eine Woche dran, Weiße Weste, Projekt geschafft, Frühstarter. Antippen erklärt das Abzeichen.
+  - **Feiern:** Ist die letzte Aufgabe des Tages erledigt, gibt es Konfetti und eine kurze Vibration; neue Abzeichen werden gemeldet.
+  - **Sprüche** passend zur Lage (alles erledigt, Serie, überfällig, noch nichts, halb geschafft): Popkultur, Gaming, Fußball, Tiere, Polit-Satire, locker formuliert. Mit Gemini-Schlüssel erneuert der Planner sie einmal am Tag (genau eine Anfrage und nur, wenn weniger als die Hälfte des Tageslimits verbraucht ist), sonst eingebaute Sprüche. Nur auf der Startseite; Liste, Board, Zeitstrahl und Kalender bleiben sachlich.
+- **Wiederholen mit mehr Möglichkeiten:**
+  - Schnellauswahl: Täglich, Werktags (Mo–Fr), Wöchentlich, Alle 2 Wochen, Monatlich, Vierteljährlich, Jährlich.
+  - **Benutzerdefiniert:** alle n Tage, Wochen, Monate oder Jahre; bei Wochen bestimmte Wochentage (z. B. Di und Do); bei Monaten am selben Tag oder am n-ten Wochentag (z. B. 1. Dienstag, letzter Freitag); optional ein Enddatum.
+  - Bestehende Wiederholungen bleiben unverändert.
+- **Leiste unten neu sortiert:** Start, Liste, Board, Zeitstrahl, Kalender (auch die Tasten 1–5 am Mac).
+
 ## 1.33.0
 - **Frühere Aufgaben als Vorlage** (wie im Apple Kalender): Beim Eintippen eines Titels, im Aufgabenblatt und in der Schnelleingabe auf der Startseite, erscheinen frühere Aufgaben mit gleichem Anfang. Antippen übernimmt Tags, Projekt, Person, Priorität, Dauer, Wiederholung, Notizen und die Checkliste (Punkte wieder offen). Datum ab heute oder ab dem getippten Tag; Getipptes wie `@Melanie` hat Vorrang. Abhängigkeiten, Verlauf und Dateien bleiben bei der alten Aufgabe.
 - **Ring auf der Startseite zeigt nur heute:** überfällige, heute anstehende und heute erledigte Aufgaben der oben gewählten Person (standardmäßig „Meine“), z. B. „Heute: 2 von 5 erledigt“. Die Übersichten darunter zählen weiter alles.

@@ -72,7 +72,7 @@ document.addEventListener("keydown",e=>{
   switch(e.key){
     case"n":e.preventDefault();openDlg();break;
     case"/":e.preventDefault();$("q").focus();break;
-    case"1":tab("home");break;case"2":tab("board");break;case"3":tab("list");break;case"4":tab("gantt");break;case"5":tab("cal");break;
+    case"1":tab("home");break;case"2":tab("list");break;case"3":tab("board");break;case"4":tab("gantt");break;case"5":tab("cal");break;
     case"s":setSel(!selMode);break;
     case"a":if(selMode){filtered().forEach(t=>sel.add(t.id));applySel()}break;
     case"Delete":case"Backspace":if(selMode&&sel.size){e.preventDefault();$("selbar").querySelector('[data-ba="del"]').click()}break;
