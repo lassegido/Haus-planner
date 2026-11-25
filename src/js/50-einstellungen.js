@@ -22,7 +22,7 @@ $("a_empty").onclick=async()=>{const T=RAW.filter(t=>t.del);if(T.length&&await c
 /* Einstellungen */
 let sPage="main";
 const CH='<svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',CK='<svg class="ck" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
-const THN={auto:"Automatisch",light:"Hell",dark:"Dunkel"},STT={alexa:"Alexa",show:"Anzeige für Echo Show",des:"Farbwelt",font:"Schrift",ki:"KI-Assistent",rem:"Erinnerung",remt:"Uhrzeit",theme:"Darstellung",me:"Ich bin",keys:"Tastaturkürzel"};
+const THN={auto:"Automatisch",light:"Hell",dark:"Dunkel"},STT={alexa:"Alexa",show:"Anzeige für Echo Show",des:"Farbwelt",font:"Schrift",ki:"KI-Assistent",fun:"Sprüche und GIFs",rem:"Erinnerung",remt:"Uhrzeit",theme:"Darstellung",me:"Ich bin",keys:"Tastaturkürzel"};
 const PREV='<div class="prev" aria-label="Vorschau"><div class="pv-side"><i></i><i></i><i></i></div><div class="pv-main"><div class="pv-h">Planner</div><div class="pv-cols"><div><em class="c1"></em><span>Dachrinne reinigen</span></div><div><em class="c2"></em><span>Kinderzimmer streichen</span></div><div><em class="c3"></em><span>Steuer abheften</span></div></div><div class="pv-b"><b>Speichern</b><u>Abbrechen</u></div></div></div>';
 const srow=(a,l,v,x,chev=true)=>`<button class="srow" ${a}>${x||""}<span>${l}</span>${v!=null?`<em>${v}</em>`:""}${chev?CH:""}</button>`;
 const REMT=[];for(let h=5;h<=22;h++){REMT.push(String(h).padStart(2,"0")+":00");if(h<22)REMT.push(String(h).padStart(2,"0")+":30")}
@@ -43,7 +43,7 @@ function drawSettings(){
     const dn=tasks.filter(t=>t.status==="done").length,A=RAW.filter(t=>t.arch&&!t.del).length,T=RAW.filter(t=>t.del).length;
     const dsx=DES.find(x=>x[0]===ds)||DES[0];
     h=`<p class="sgt sgh">Nur für dich${USER?" · "+esc(USER):""}</p>`+cap(USER?"Gilt für dich auf all deinen Geräten, die anderen behalten ihre eigene Auswahl.":"Gilt nur für dieses Gerät.")
-     +grp(srow('data-go="theme"',"Darstellung",THN[th])+srow('data-go="des"',"Farbwelt",`<i class="sdot sm" style="background:var(--acc)"></i> `+dsx[1])+srow('data-go="font"',"Schrift",(FONTS.find(x=>x[0]===fk)||FONTS[0])[1])+srow('data-go="me"',"Ich bin",me||"Keine Angabe"))
+     +grp(srow('data-go="theme"',"Darstellung",THN[th])+srow('data-go="des"',"Farbwelt",`<i class="sdot sm" style="background:var(--acc)"></i> `+dsx[1])+srow('data-go="font"',"Schrift",(FONTS.find(x=>x[0]===fk)||FONTS[0])[1])+srow('data-go="me"',"Ich bin",me||"Keine Angabe")+srow('data-go="fun"',"Sprüche und GIFs",funOn()?"An":"Aus"))
      +`<p class="sgt sgh">Für alle im Haushalt</p>`+cap("Änderungen hier gelten für alle, die den Planner nutzen.")
      +`<p class="sgt">Aufgaben</p>`+grp(srow(`data-act="arch"${dn?"":" disabled"}`,"Erledigte archivieren",dn?String(dn):"Keine",null,false)+srow('data-act="open"',"Archiv und Papierkorb",A+T?(A+T)+(A+T===1?" Eintrag":" Einträge"):"Leer"));
     const hi=haInfo;
@@ -85,6 +85,17 @@ function drawSettings(){
      +`<p class="sgt">Adresse</p><div class="sgrp kin"><input id="show_url" type="text" readonly value="${esc(url)}" aria-label="Adresse der Anzeige"></div>`
      +grp(srow('data-act="showcopy"',"<b class=\"acc\">Adresse kopieren</b>",null,null,false)+srow('data-act="showopen"',"Hier ansehen",null,null,false))
      +cap("Am Echo Show: „Alexa, öffne Silk“ (oder „Alexa, öffne Browser“), die Adresse eingeben und als Lesezeichen speichern. Den Teil „&wer=…“ weglassen für alle Personen, „&dunkel“ weglassen für hell. Funktioniert nur im Heimnetz und braucht Port 8099. Hinweis: Der Echo Show kehrt nach einer Weile zu seinem Startbildschirm zurück, das kann der Planner nicht verhindern.");
+  }else if(sPage==="fun"){
+    const hi=haInfo||{},on=funOn();
+    h=`<p class="sgt">Nur für dich</p>`+grp(sopt('data-set="fun:1"',"An",on)+sopt('data-set="fun:0"',"Aus",!on))
+     +cap("Sprüche, GIF des Tages und Konfetti auf der Startseite. Liste, Board, Zeitstrahl und Kalender bleiben immer sachlich.");
+    if(haInfo){h+=`<p class="sgt">GIF des Tages · für alle</p>`+(GIF&&GIF.url?`<div class="gifprev"><img src="${esc(GIF.url)}" alt=""><small>Heute: „${esc(GIF.term||"")}“ · via GIPHY</small></div>`:"")
+       +`<div class="sgrp kin"><input id="gif_key" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="${hi.giphy?"GIPHY-Schlüssel ist eingetragen":"GIPHY-Schlüssel einfügen"}" aria-label="GIPHY-Schlüssel"></div>`
+       +grp(srow('data-act="gifsave"',"<b class=\"acc\">Schlüssel sichern</b>",null,null,false)+(hi.giphy?srow('data-act="gifnew"',"Heute ein anderes GIF",null,null,false)+srow('data-act="gifdel"',"<span class=\"bad\">Schlüssel entfernen</span>",null,null,false):""))
+       +cap("Ein GIF pro Tag für alle, eine einzige Suche bei GIPHY. Kostenloser Schlüssel: developers.giphy.com → Create an App → API. Der Schlüssel ist für den Browser gedacht und wird darum an die App ausgeliefert (anders als der Gemini-Schlüssel).")
+       +`<p class="sgt">Eigene Suchbegriffe</p><div class="sgrp kin"><input id="gif_terms" type="text" autocomplete="off" value="${esc(((hi.gifterms)||[]).join(", "))}" placeholder="z. B. stromberg finger, dog zoomies" aria-label="Eigene GIF-Suchbegriffe"></div>`
+       +grp(srow('data-act="giftermsave"',"<b class=\"acc\">Suchbegriffe sichern</b>",null,null,false))
+       +cap("Mit Komma trennen. Der Planner wechselt täglich zwischen eingebauten Themen (Büro-Comedy, Zeichentrick, Gaming, Fußball, Tiere) und euren Begriffen. Die Sprüche schreibt Gemini einmal am Tag neu, wenn ein Gemini-Schlüssel eingetragen ist.")}
   }else if(sPage==="ki"){
     const hi=haInfo||{},on=!!hi.ai;
     const au=hi.aiuse||{used:0,limit:100};
@@ -127,10 +138,15 @@ $("s_body").onclick=async e=>{
     else if(k==="rtime"){await haSave({time:v});sPage="rem"}
     else if(k==="aimodel")await haSave({ai_model:v});
     else if(k==="alexa"){await haSave({alexa:v==="1"});setTimeout(async()=>{try{if(typeof pull==="function")await pull(true)}catch(_){}if(sPage==="alexa")drawSettings()},6000)}
+    else if(k==="fun"){prefSet("fun",v==="1"?"":"0");render()}
     else if(k==="acc"){prefSet("acc",v);applyTheme()}else if(k==="font"){prefSet("font",v);applyFont()}else if(k==="me")prefSet("me",v);
     drawSettings();return}
   if(d.act==="arch"){const L=tasks.filter(t=>t.status==="done");if(!L.length)return;await saveMany(L.map(t=>({...t,arch:true})));$("dls").close();toast(L.length+" erledigte archiviert",()=>saveMany(L))}
   else if(d.act==="open"){$("dls").close();openArch()}
+  else if(d.act==="gifsave"||d.act==="gifdel"){const k=d.act==="gifdel"?"":$("gif_key").value.trim();if(d.act==="gifsave"&&!k){toast("Erst den Schlüssel einfügen");return}
+    try{await haSave({giphy_key:k});toast(k?"GIPHY-Schlüssel gesichert":"GIPHY-Schlüssel entfernt");if(k){GIF=null;gifAsked=false;await gifToday()}}catch(e){toast("Speichern fehlgeschlagen")}drawSettings()}
+  else if(d.act==="giftermsave"){await haSave({gif_terms:$("gif_terms").value.split(",").map(x=>x.trim()).filter(Boolean)});toast("Suchbegriffe gesichert");drawSettings()}
+  else if(d.act==="gifnew"){try{await api("api/gif",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({reset:true})});GIF=null;try{localStorage.removeItem("haus-gifday")}catch(_){}$("dls").close();await gifToday()}catch(_){toast("Kein neues GIF gefunden")}}
   else if(d.act==="showcopy"){const u=$("show_url").value;try{await navigator.clipboard.writeText(u);toast("Adresse kopiert")}catch(_){$("show_url").focus();$("show_url").select();toast("Adresse markiert, bitte kopieren")}}
   else if(d.act==="showopen"){window.open(location.pathname+"?anzeige"+(prefGet("me")?"&wer="+encodeURIComponent(prefGet("me")):""),"_blank")}
   else if(d.act==="kipaste"){try{const t=await navigator.clipboard.readText();$("ki_key").value=t.replace(/\s+/g,"");toast(t.trim()?"Eingefügt, jetzt sichern":"Zwischenablage ist leer")}catch(e){$("ki_key").focus();toast("Bitte lange ins Feld tippen und „Einsetzen“ wählen")}}

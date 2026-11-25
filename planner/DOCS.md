@@ -69,6 +69,8 @@ Beispiel: `Zaun streichen Sa #Garten !1 @Melanie`. Unter dem Feld siehst du vor 
 
 **Motivation:** Auf der Startseite zeigen eine Serie (Tage in Folge mit vollem Tagesring), „Gemeinsam diese Woche“ (wer wie viel erledigt hat, aus dem Verlauf) und Abzeichen den Fortschritt. Ist die letzte Aufgabe des Tages erledigt, gibt es Konfetti. Gespeichert wird dafür nichts extra; alles wird aus den Aufgaben berechnet. Dazu ein Spruch passend zur Lage; mit Gemini-Schlüssel werden die Sprüche einmal am Tag neu geschrieben (eine Anfrage, nur wenn weniger als die Hälfte des Tageslimits verbraucht ist, gespeichert in `/data/sprueche.json`). Die Themen stehen in `MEME_THEMES` in `server.py`.
 
+**GIF des Tages:** Mit einem kostenlosen GIPHY-Schlüssel (developers.giphy.com → Create an App → API) unter Einstellungen → Sprüche und GIFs. Das erste Gerät des Tages sucht einmal bei GIPHY (Jugendschutzstufe pg-13), alle sehen dasselbe GIF. Eigene Suchbegriffe ergänzen die eingebauten Themen. Der GIPHY-Schlüssel ist ein Browser-Schlüssel und wird an die App ausgeliefert; die Suche läuft vom Gerät aus, wie GIPHY es verlangt.
+
 **Ring auf der Startseite:** zeigt nur den heutigen Tag der oben gewählten Person („Meine“, eine andere Person oder „Alle“): überfällige, heute anstehende und heute erledigte Aufgaben.
 
 ## Per Sprache: Siri-Kurzbefehl

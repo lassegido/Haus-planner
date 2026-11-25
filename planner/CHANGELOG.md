@@ -1,5 +1,11 @@
 # Änderungen
 
+## 1.35.0
+- **Startseite neu sortiert:** Ganz oben steht jetzt deine persönliche Spiel-Karte: Tagesring, Serie, „x diese Woche“, Spruch mit GIF und Abzeichen. Danach folgen Kacheln, Eingabe und Liste. „Gemeinsam diese Woche“ ist ganz nach unten gewandert.
+- **GIF des Tages (GIPHY):** ein GIF pro Tag für alle, beim ersten Öffnen des Tages kurz groß und dann klein neben dem Spruch. Antippen zeigt es noch einmal, beim Feiern kommt es zurück. Es braucht einen kostenlosen GIPHY-Schlüssel (Einstellungen → Sprüche und GIFs), dort lassen sich auch eigene Suchbegriffe eintragen.
+- **Abzeichen mit Fortschritt:** Die Karte zeigt die freigeschalteten Abzeichen und das nächste mit Balken (z. B. „Erste 10 · 8/10“). Antippen klappt alle Abzeichen mit ihrem Stand auf.
+- Sprüche und GIFs lassen sich je Person abschalten (Einstellungen → Nur für dich → Sprüche und GIFs).
+
 ## 1.34.0
 - **Motivation auf der Startseite:**
   - **Serie:** Die Flamme zählt die Tage in Folge, an denen alles für den Tag erledigt war. Tage ohne Fälliges unterbrechen sie nicht, mehr als 7 Tage ganz ohne Erledigtes schon.

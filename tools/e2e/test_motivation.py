@@ -29,7 +29,10 @@ def test_serie_woche_abzeichen_feiern(t, browser):
         p.pg.click("[data-v=home]")
         p.pg.wait_for_timeout(300)
         st = p.js("document.querySelector('.hstreak').textContent")
-        t.check("Serie: 4 Tage (leerer Tag unterbricht nicht, verspäteter Tag beendet)", st.startswith("4 Tage in Folge") and "heute weitermachen" in st, st)
+        t.check("Serie: 4 Tage (leerer Tag unterbricht nicht, verspäteter Tag beendet)", st == "4 Tage Serie", st)
+        order = p.js("[...document.querySelector('.home').children].map(e=>e.className.split(' ')[0]).slice(0,4)")
+        t.check("Spiel-Karte steht ganz oben, gemeinsamer Teil ganz unten", order[:2] in (["hpick", "hero"], ["hero", "tiles"]) and p.js("document.querySelector('.home').lastElementChild.classList.contains('mot')"), order)
+        t.check("Persönliche Woche in der Karte", "diese Woche" in p.js("document.querySelector('.hero .hwk').textContent"))
         mon = T - datetime.timedelta(T.weekday())
         wk = [x for x in daten() if x["status"] == "done" and mon <= datetime.date.fromisoformat(x["log"][0]["t"][:10]) <= T]
         h = p.js("document.querySelector('.mot h3 em').textContent")
@@ -40,6 +43,9 @@ def test_serie_woche_abzeichen_feiern(t, browser):
         t.check("Vergleich zur Vorwoche angezeigt", "Vorwoche" in p.js("document.querySelector('.mot .wcmp').textContent"))
         badges = p.js("[...document.querySelectorAll('.bdg.on span')].map(x=>x.textContent)")
         t.check("Noch kein Abzeichen bei 8 eigenen Erledigten", badges == [], badges)
+        nx = p.js("document.querySelector('.bnext').textContent")
+        t.check("Nächstes Abzeichen mit Fortschritt (Erste 10: 8/10)", "Erste 10" in nx and "8/10" in nx, nx)
+        p.pg.click(".bdx summary")
         p.pg.click(".bdg[data-bdg=d10]")
         t.check("Abzeichen antippen erklärt es", "Noch offen: Erste 10" in (p.pg.text_content("#toast") or ""))
         s.api("api/import", {"tasks": [erledigt("a10", "Neun", -30, -30)]})
@@ -52,7 +58,7 @@ def test_serie_woche_abzeichen_feiern(t, browser):
         t.check("Gleichzeitig neues Abzeichen gemeldet (10 erledigt)", "Neues Abzeichen: Erste 10" in msg, msg)
         p.pg.wait_for_timeout(300)
         st = p.js("document.querySelector('.hstreak').textContent")
-        t.check("Serie jetzt 5 Tage, Flamme leuchtet", st.startswith("5 Tage in Folge") and p.js("document.querySelector('.hstreak').classList.contains('lit')"), st)
+        t.check("Serie jetzt 5 Tage, Flamme leuchtet", st == "5 Tage Serie" and p.js("document.querySelector('.hstreak').classList.contains('lit')"), st)
         t.check("Abzeichen „Erste 10“ freigeschaltet", "Erste 10" in p.js("[...document.querySelectorAll('.bdg.on span')].map(x=>x.textContent)"))
         p.pg.reload()
         p.ready()
@@ -71,7 +77,7 @@ def test_ohne_geschichte_kein_alarm(t, browser):
         p = Page(browser, s.url, PHONE, setup=ALS_LASSE)
         p.pg.click("[data-v=home]")
         p.pg.wait_for_timeout(300)
-        t.check("Ohne Serie: Einladung statt 0", "starte eine Serie" in p.js("document.querySelector('.hstreak').textContent"))
+        t.check("Ohne Serie: Einladung statt 0", "Serie startet heute" in p.js("document.querySelector('.hstreak').textContent"))
         t.check("Bestehende Abzeichen beim ersten Öffnen nicht als neu gemeldet", p.js("JSON.parse(localStorage.getItem('haus-badges-Lasse'))").count("d10") == 1)
         p.js("void setStatus(byId('h'),'doing')")
         p.pg.wait_for_timeout(400)
@@ -113,3 +119,41 @@ def test_sprueche_einmal_am_tag(t, browser):
         t.check("Dann eingebaute Sprüche", p.js("!!document.querySelector('.hero .meme')") and "Gemini" not in p.js("document.querySelector('.hero .meme').textContent"))
         p.close()
     g.close()
+
+
+GIFS = {"data": [{"title": "Testhund", "url": "https://giphy.com/gifs/test", "images": {"fixed_height": {"webp": "https://media.giphy.com/media/test/200.webp"}}}]}
+
+
+def giphy_mock(pg, calls):
+    import json, os
+    icon = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "planner", "icons", "icon-192.png"), "rb").read()
+    def api(route):
+        calls.append(route.request.url)
+        route.fulfill(status=200, content_type="application/json", body=json.dumps(GIFS))
+    pg.route("https://api.giphy.com/**", api)
+    pg.route("https://media.giphy.com/**", lambda r: r.fulfill(status=200, content_type="image/png", body=icon))
+
+
+def test_gif_des_tages(t, browser):
+    with Server(settings={"giphy_key": "TestGiphyKey1234567890abcd"}) as s:
+        s.seed([task("h", "Heute", D(0), D(0), who="Lasse")])
+        calls = []
+        p = Page(browser, s.url, PHONE, setup=lambda pg: (ALS_LASSE(pg), giphy_mock(pg, calls)))
+        p.pg.wait_for_timeout(500)  # Start ist die erste Ansicht
+        t.check("Erstes Öffnen am Tag: eine GIPHY-Suche, GIF groß eingeblendet", len(calls) == 1 and p.js("!!document.querySelector('.gifpop img')"), calls)
+        t.check("Suche mit Schlüssel und Jugendschutz pg-13", "api_key=TestGiphyKey" in calls[0] and "rating=pg-13" in calls[0])
+        p.pg.click(".gifpop")
+        p.pg.wait_for_timeout(400)
+        t.check("Antippen schließt, GIF bleibt klein in der Karte", not p.js("!!document.querySelector('.gifpop')") and p.js("!!document.querySelector('.hero .gifth img')"))
+        t.check("Server merkt sich das GIF des Tages", s.api("api/gif").get("url", "").startswith("https://media.giphy.com/"))
+        p.close()
+        calls2 = []
+        p = Page(browser, s.url, PHONE, setup=lambda pg: (ALS_LASSE(pg), giphy_mock(pg, calls2)))
+        p.pg.click("[data-v=home]")
+        p.pg.wait_for_timeout(800)
+        t.check("Zweites Gerät: keine neue Suche, gleiches GIF", calls2 == [] and p.js("!!document.querySelector('.hero .gifth img')"), calls2)
+        p.js("prefSet('fun','0');render()")
+        t.check("Abschaltbar je Person: dann weder Spruch noch GIF", not p.js("!!document.querySelector('.hero .meme,.hero .gifth')"))
+        t.check("Fremde GIF-Adressen lehnt der Server ab", s.api("api/gif", {"url": "https://evil.example/x.gif"}).get("_status") == 400)
+        t.check("keine Skriptfehler", not p.errors, p.errors)
+        p.close()

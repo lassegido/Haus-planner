@@ -29,6 +29,8 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] Wiederholen → Benutzerdefiniert: Wochentage antippen (Di, Do), „Alle 2“ eingeben, Enddatum wählen; Hinweis darunter stimmt. Beim Erledigen entsteht die nächste am richtigen Tag.
 - [ ] Startseite: Serie mit Flamme, „Gemeinsam diese Woche“ mit beiden Namen, Abzeichen antippen. Letzte Aufgabe des Tages abhaken: Konfetti und Vibration.
 - [ ] Leiste unten: Start, Liste, Board, Zeitstrahl, Kalender.
+- [ ] GIPHY-Schlüssel eintragen: GIF erscheint kurz groß, danach klein in der Karte; auf dem zweiten iPhone dasselbe GIF. Antippen zeigt es wieder.
+- [ ] Startseite oben: Ring, Serie, Woche, Spruch mit GIF, „Nächstes Abzeichen“ ohne Scrollen sichtbar.
 - [ ] Am Tag nach dem Update: Spruch auf der Startseite kommt von Gemini (neu formuliert), KI-Verbrauch in den Einstellungen nur +1.
 
 ## 4. Export (iPhone)

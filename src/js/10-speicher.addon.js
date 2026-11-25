@@ -41,7 +41,7 @@ async function saveMany(list){
 }
 const aiAvail=()=>!!(haInfo&&haInfo.ai);
 async function aiJson(prompt,raw){const r=await api("api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,raw:!!raw})});if(!r.ok)throw new Error(r.error||"KI-Fehler");return r.data}
-const PK=["theme","design","font","me","sort","glw","hwho","htile"];
+const PK=["theme","design","font","me","sort","glw","hwho","htile","fun"];
 function prefSync(k,v){if(!USER||!PK.includes(k))return;fetch("api/me",{method:"POST",headers:{"Content-Type":"application/json","X-Planner":"1"},body:JSON.stringify({[k]:v||""})}).catch(()=>{})}
 async function initUser(){
   try{const r=await fetch("api/me",{cache:"no-store"}),j=await r.json();if(!j.user)return;USER=j.user;const sp=j.prefs||{};

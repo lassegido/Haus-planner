@@ -324,7 +324,9 @@ def ha_info():
             "sensors": bool(o.get("sensors", True)),
             "ai": bool(ai_key()), "model": ai_model(), "aiapp": bool(app_settings().get("ai_key")),
             "aicfg": bool(str(o.get("gemini_api_key") or "").strip()), "aiuse": ai_usage_info(),
-            "alexa": bool(app_settings().get("alexa")), "echos": ALEXA["n"], "wsok": wsok["ok"]}
+            "alexa": bool(app_settings().get("alexa")), "echos": ALEXA["n"], "wsok": wsok["ok"],
+            # GIPHY-Schlüssel ist ein öffentlicher Browser-Schlüssel: GIPHY verlangt, dass die Suche im Browser läuft
+            "giphy": str(app_settings().get("giphy_key") or ""), "gifterms": app_settings().get("gif_terms") or []}
 
 
 AI_MODELS = ("gemini-flash-lite-latest", "gemini-flash-latest")
@@ -455,6 +457,7 @@ def ai_request(prompt, system=AI_SYSTEM):
 # 1.34: Sprüche für die Startseite. Höchstens eine Gemini-Anfrage pro Tag, nur wenn weniger als die Hälfte des
 # Tageslimits verbraucht ist. Ohne Schlüssel oder bei Fehlern nutzt die App ihre eingebauten Sprüche.
 MEMES = os.path.join(D, "sprueche.json")
+GIF_FILE = os.path.join(D, "gif.json")
 MEME_KINDS = ("done", "streak", "late", "start", "good")
 MEME_TRY = {"day": ""}
 MEME_SYSTEM = "Du schreibst kurze, witzige deutsche Sprüche für eine Haushalts-App. Antworte nur im verlangten JSON-Format."
@@ -1182,7 +1185,7 @@ BROWSER_LOG = []  # Zeitpunkte der letzten Browser-Fehlermeldungen (Begrenzung)
 LOG_LOCK = threading.Lock()
 PREFS = os.path.join(D, "prefs.json")  # persönliche Einstellungen je Home-Assistant-Benutzer
 PREFS_LOCK = threading.Lock()
-PREF_KEYS = ("theme", "design", "font", "me", "sort", "glw", "hwho", "htile")
+PREF_KEYS = ("theme", "design", "font", "me", "sort", "glw", "hwho", "htile", "fun")
 
 
 def prefs_all():
@@ -1277,6 +1280,9 @@ class H(BaseHTTPRequestHandler):
                 return self.out(200, {"ok": True, "services": out})
             except Exception as e:
                 return self.out(200, {"ok": False, "error": str(e)[:200], "services": []})
+        if u.path.endswith("/api/gif"):
+            g = read_json(GIF_FILE, "GIF des Tages")
+            return self.out(200, g if g.get("day") == ai_today() else {})
         if u.path.endswith("/api/sprueche"):
             return self.out(200, memes())
         if u.path.endswith("/api/me"):
@@ -1364,7 +1370,8 @@ class H(BaseHTTPRequestHandler):
     POST_ROUTES = {"/api/ai": ("post_ai", 200_000), "/api/me": ("post_me", 20_000), "/api/voice": ("post_voice", 20_000),
                    "/api/quick": ("post_quick", 20_000), "/api/ha-settings": ("post_ha_settings", 50_000),
                    "/api/ha-test": ("post_ha_test", 1_000), "/api/tags": ("post_tags", 200_000), "/api/task": ("post_task", 2_000_000),
-                   "/api/import": ("post_import", 25_000_000), "/api/log": ("post_log", 8_000)}
+                   "/api/import": ("post_import", 25_000_000), "/api/log": ("post_log", 8_000),
+                   "/api/gif": ("post_gif", 4_000)}
 
     def do_POST(self):
         if not self.guard() or not self.csrf_ok():
@@ -1488,6 +1495,16 @@ class H(BaseHTTPRequestHandler):
                 st["ai_key"] = k
             else:
                 return self.out(400, {"error": "Das sieht nicht wie ein Gemini-Schlüssel aus"})
+        if isinstance(data.get("giphy_key"), str):
+            k = data["giphy_key"].strip()
+            if not k:
+                st.pop("giphy_key", None)
+            elif re.fullmatch(r"[A-Za-z0-9]{20,64}", k):
+                st["giphy_key"] = k
+            else:
+                return self.out(400, {"error": "Das sieht nicht wie ein GIPHY-Schlüssel aus"})
+        if isinstance(data.get("gif_terms"), list):
+            st["gif_terms"] = [re.sub(r"\s+", " ", str(x)).strip()[:40] for x in data["gif_terms"][:12] if str(x).strip()]
         if data.get("ai_model") in AI_MODELS:
             st["ai_model"] = data["ai_model"]
         if isinstance(data.get("notify_who"), dict):
@@ -1545,6 +1562,30 @@ class H(BaseHTTPRequestHandler):
             state["rev"] += 1
             save()
             return self.out(200, {"rev": state["rev"], "count": len(items), "v": items[0]["v"]})
+
+    def post_gif(self, data):
+        # GIF des Tages (einer für alle, ausgesucht im Browser über GIPHY). Nur Adressen von GIPHY. {"reset": true} löscht es.
+        d = data if isinstance(data, dict) else {}
+        if d.get("reset"):
+            try:
+                os.remove(GIF_FILE)
+            except OSError:
+                pass
+            return self.out(200, {"ok": True})
+        url = str(d.get("url") or "")
+        if not re.fullmatch(r"https://media[0-9]?\.giphy\.com/[A-Za-z0-9/_.\-?=&]{5,400}", url):
+            return self.out(400, {"error": "Nur GIFs von GIPHY"})
+        g = {"day": ai_today(), "url": url, "title": str(d.get("title") or "")[:120], "term": str(d.get("term") or "")[:40],
+             "link": str(d.get("link") or "")[:200] if str(d.get("link") or "").startswith("https://giphy.com/") else ""}
+        with LOCK:
+            old = read_json(GIF_FILE, "GIF des Tages")
+            if old.get("day") == g["day"]:
+                return self.out(200, old)  # anderes Gerät war schneller: alle sehen dasselbe GIF
+            tmp = GIF_FILE + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(g, f, ensure_ascii=False)
+            os.replace(tmp, GIF_FILE)
+        return self.out(200, g)
 
     def post_log(self, data):
         # Skriptfehler aus dem Browser ins Add-on-Protokoll (Home Assistant → Add-on → Protokoll). Höchstens 30 pro Stunde.
