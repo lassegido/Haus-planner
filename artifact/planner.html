@@ -1130,6 +1130,24 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
 .mwhy{margin:0 0 .55rem;font-size:.86rem;line-height:1.35;color:var(--tx)}
 .mwhy .eyebrow{margin-bottom:.15rem}
 .hmeme .mname{align-items:center}
+/* 1.39: Tageskarte lebendiger, aber ruhig: weicher Farbverlauf, langsam wandernder Lichtfleck, Ring füllt sich beim Öffnen,
+   Flamme flackert leicht, GIF blendet ein. Bei „Bewegung reduzieren“ steht alles still (globale Regel). */
+.hero.game{position:relative;overflow:hidden;isolation:isolate;background:linear-gradient(150deg,color-mix(in srgb,var(--acc) 12%,var(--card)) 0%,var(--card) 55%)}
+.hero.game::before,.hero.game::after{content:"";position:absolute;z-index:-1;border-radius:50%;pointer-events:none;filter:blur(8px)}
+.hero.game::before{width:15rem;height:15rem;top:-6rem;right:-5rem;background:radial-gradient(circle,color-mix(in srgb,var(--acc) 26%,transparent),transparent 70%);animation:hblob 16s ease-in-out infinite alternate}
+.hero.game::after{width:11rem;height:11rem;bottom:-5rem;left:-4rem;background:radial-gradient(circle,color-mix(in srgb,var(--sun) 18%,transparent),transparent 70%);animation:hblob2 19s ease-in-out infinite alternate}
+@keyframes hblob{to{transform:translate(-4rem,3rem) scale(1.15)}}
+@keyframes hblob2{to{transform:translate(3rem,-2rem) scale(1.1)}}
+.hero.game .rg{stroke:url(#rgG);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--acc) 35%,transparent))}
+main.enter .hero.game .rg{animation:ringin 1.2s .15s cubic-bezier(.2,.8,.2,1) both}
+@keyframes ringin{from{stroke-dashoffset:326.7}to{stroke-dashoffset:var(--off)}}
+.hstreak.lit svg{transform-origin:50% 90%;animation:flick 1.8s ease-in-out infinite}
+@keyframes flick{0%,100%{transform:scale(1) rotate(0)}40%{transform:scale(1.12) rotate(-5deg)}70%{transform:scale(.96) rotate(3deg)}}
+.hwk{display:inline-flex;align-items:center;gap:.3rem;padding:.18rem .55rem .18rem .4rem;border-radius:1rem;background:color-mix(in srgb,var(--sea) 14%,transparent);color:var(--tx);font-size:.8rem}
+.hwk svg{width:.95rem;height:.95rem;fill:none;stroke:var(--sea);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.hwk i{font-style:normal;font-weight:700;color:var(--sea)}
+.gifbox img{animation:gfade .6s ease both}
+@keyframes gfade{from{opacity:0;transform:scale(1.02)}}
 </style>
 </head>
 <body>
@@ -2057,7 +2075,7 @@ function homeBody(tasks,allT){
   const kind=rn&&!todayL.length?"done":over.length?"late":rd?"good":ms.streak>=3?"streak":todayL.length?"start":"done";
   const A=n=>n===1?"Aufgabe":"Aufgaben",nOpen=todayL.length;
   const why={done:rn?`Für heute ist alles erledigt (${rd} von ${rn}).`:"Für heute ist nichts fällig.",
-    late:`${over.length===1?"Eine Aufgabe ist":over.length+" Aufgaben sind"} liegen geblieben. Hol sie auf, dann wechselt das GIF.`,
+    late:`${over.length===1?"Eine Aufgabe ist":over.length+" Aufgaben sind"} liegen geblieben.`,
     good:`Du hast heute schon ${rd} ${A(rd)} erledigt, ${nOpen} ${nOpen===1?"ist":"sind"} noch offen.`,
     streak:`Du hast ${ms.streak} Tage am Stück alles geschafft. Heute warten noch ${nOpen} ${A(nOpen)}.`,
     start:`Heute ist noch nichts erledigt, ${nOpen} ${A(nOpen)} ${nOpen===1?"wartet":"warten"}.`}[kind];
@@ -2066,7 +2084,7 @@ function homeBody(tasks,allT){
      2. Handeln: Eingabe, dann die Liste mit Umschalter Heute / 7 Tage / In Arbeit / Überfällig
      3. Dranbleiben: nächstes Abzeichen in einer Zeile
      4. Überblick: Projekte, Tags, Personen, Gemeinsam (zugeklappt) */
-  const ring=`<div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div>`;
+  const ring=`<div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="rgG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--acc)"/><stop offset="1" style="stop-color:var(--sky)"/></linearGradient></defs><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" style="--off:${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div>`;
   const me=prefGet("me")||"",hw=homeW(),who1=hw==="__all"?"":hw===me?"":hw;
   const hero=`<section class="hero game" style="--i:0">${ring}<div class="hbody"><small class="eyebrow">${who1?"Tag von "+esc(who1):greet()+(me?", "+esc(me):"")}</small><div class="hh">${rn?`${rd} von ${rn} erledigt`:"Heute ist nichts fällig"}</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>${funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length,why})}</section>`;
   const seg=`<div class="hseg" role="tablist">`+Object.entries(TL).map(([k,[l,L]])=>`<button type="button" role="tab" class="${k===ht?"on":""}${k==="late"&&L.length?" hot":""}" data-ht="${k}" aria-selected="${k===ht}">${l}<b>${L.length}</b></button>`).join("")+`</div>`;
@@ -2287,8 +2305,9 @@ function doneBy(t){const names=allWho(),L=t.log||[];
   const w=wl(t);return w.length===1?w[0]:"Gemeinsam"}
 const motCol=w=>/^melanie/i.test(w)?"var(--brick)":/^lasse/i.test(w)?"var(--sea)":w==="Gemeinsam"?"var(--mut)":"var(--sky)";
 function streakHtml(s){
-  return`<span class="hstreak${s.todayIn?" lit":""}" title="Tage in Folge mit vollem Tagesring">${FLAME}<span>${s.streak?`<b>${s.streak} ${s.streak===1?"Tag":"Tage"}</b> am Stück`:"Schaffst du heute alles, beginnt deine Serie"}</span></span>`}
-function weekHtml(s){const d=s.wk-s.wkPrev;return`<span class="hwk">Diese Woche <b>${s.wk}</b> erledigt${s.wkPrev||s.wk?`, ${d>0?d+" mehr als letzte Woche":d<0?-d+" weniger als letzte Woche":"so viele wie letzte Woche"}`:""}</span>`}
+  return`<span class="hstreak${s.todayIn?" lit":""}" title="Tage in Folge mit vollem Tagesring">${FLAME}<span>${s.streak?`<b>${s.streak} ${s.streak===1?"Tag":"Tage"}</b> am Stück`:"Serie startet heute"}</span></span>`}
+function weekHtml(s){const d=s.wk-s.wkPrev,cmp=s.wkPrev||s.wk?(d>0?d+" mehr als letzte Woche":d<0?-d+" weniger als letzte Woche":"so viele wie letzte Woche"):"";
+  return`<span class="hwk" title="${cmp}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span><b>${s.wk}</b> diese Woche${d>0?` <i>+${d}</i>`:""}</span></span>`}
 /* Abzeichen kompakt: freigeschaltete als Symbole, dazu das nächste mit Fortschritt; antippen klappt alle auf */
 /* Abzeichen als kleine Karte: das nächste Ziel in einem Satz, freigeschaltete als Symbole; antippen klappt alle auf */
 const BLEFT={d10:n=>`noch ${n} ${n===1?"Aufgabe":"Aufgaben"}`,d50:n=>`noch ${n} Aufgaben`,d100:n=>`noch ${n} Aufgaben`,s7:n=>`noch ${n} ${n===1?"Tag":"Tage"} am Stück`,
@@ -2375,7 +2394,7 @@ function gifReady(kind){if(view==="home")render();if(gifCheer===kind){gifCheer=n
 function gifPop(kind,force){const g=GIFS[kind];if(!g||!g.url||!funOn()||document.querySelector("dialog[open],.gifpop"))return;
   const key=tdy()+":"+kind;let seen="";try{seen=localStorage.getItem("haus-gifseen")||""}catch(_){}
   if(!force&&seen.split(",").includes(key))return;try{localStorage.setItem("haus-gifseen",[...seen.split(",").filter(x=>x.startsWith(tdy())),key].join(","))}catch(_){}
-  const o=document.createElement("div");o.className="gifpop";o.innerHTML=`<figure><img src="${esc(g.url)}" alt="${esc(g.name||g.title||"GIF")}"><figcaption><b>${esc(g.name||"")}</b> · über GIPHY</figcaption></figure>`;
+  const o=document.createElement("div");o.className="gifpop";o.innerHTML=`<figure><img src="${esc(g.url)}" alt="${esc(g.name||g.title||"GIF")}"></figure>`;
   const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),250)};o.onclick=close;document.body.appendChild(o);setTimeout(close,5000)}
 let gifKind="start";
 document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-gif]"))gifPop(gifKind,true)});
@@ -2383,7 +2402,7 @@ document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[da
 const LAGE={done:"Alles geschafft",streak:"Läuft bei dir",late:"Da ist was liegen geblieben",start:"Noch nichts geschafft",good:"Gut dabei"};
 function funHtml(kind,v){if(!funOn())return"";gifKind=kind;if(haInfo&&haInfo.giphy&&(!GIFS[kind]||GIFS[kind].bad))setTimeout(()=>gifToday(kind),0);const g=GIFS[kind]&&!GIFS[kind].bad?GIFS[kind]:null;
   const why=v.why?`<p class="mwhy"><small class="eyebrow">Warum dieses GIF?</small>${esc(v.why)}</p>`:"";
-  if(g&&g.url)return`<div class="hmeme">${why}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button><p class="mname"><b>${esc(g.name||g.title||"")}</b><small>über GIPHY</small></p></div>`;
+  if(g&&g.url)return`<div class="hmeme">${why}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button></div>`;
   return`<div class="hmeme">${why}<p class="meme">${esc(memeText(kind,v))}</p></div>`}
 /* Ressource: Auswahl oder Freitext */
 /* Verantwortlich: Mehrfachauswahl */

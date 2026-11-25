@@ -107,7 +107,7 @@ def test_meme_auswahl_einmal_am_tag(t, browser):
         p = Page(browser, s.url, PHONE, setup=lambda pg: (ALS_LASSE(pg), giphy_mock(pg, calls)))
         p.pg.wait_for_timeout(800)
         t.check("GIPHY-Suche mit dem von Gemini gewählten Meme der Lage „start“", len(calls) == 1 and "q=gemini%20start" in calls[0], calls)
-        t.check("Karte zeigt GIF mit Meme-Namen", p.js("(document.querySelector('.hero .mname b')||{}).textContent") .startswith("Meme start"))
+        t.check("Karte zeigt GIF mit Meme-Namen", p.js("(document.querySelector('.hero .gifbox img')||{}).textContent") .startswith("Meme start"))
         p.js("document.querySelectorAll('.gifpop').forEach(x=>x.remove())")
         p.js("void setStatus(byId('h'),'done')")
         p.pg.wait_for_timeout(900)

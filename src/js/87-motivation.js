@@ -37,8 +37,9 @@ function doneBy(t){const names=allWho(),L=t.log||[];
   const w=wl(t);return w.length===1?w[0]:"Gemeinsam"}
 const motCol=w=>/^melanie/i.test(w)?"var(--brick)":/^lasse/i.test(w)?"var(--sea)":w==="Gemeinsam"?"var(--mut)":"var(--sky)";
 function streakHtml(s){
-  return`<span class="hstreak${s.todayIn?" lit":""}" title="Tage in Folge mit vollem Tagesring">${FLAME}<span>${s.streak?`<b>${s.streak} ${s.streak===1?"Tag":"Tage"}</b> am Stück`:"Schaffst du heute alles, beginnt deine Serie"}</span></span>`}
-function weekHtml(s){const d=s.wk-s.wkPrev;return`<span class="hwk">Diese Woche <b>${s.wk}</b> erledigt${s.wkPrev||s.wk?`, ${d>0?d+" mehr als letzte Woche":d<0?-d+" weniger als letzte Woche":"so viele wie letzte Woche"}`:""}</span>`}
+  return`<span class="hstreak${s.todayIn?" lit":""}" title="Tage in Folge mit vollem Tagesring">${FLAME}<span>${s.streak?`<b>${s.streak} ${s.streak===1?"Tag":"Tage"}</b> am Stück`:"Serie startet heute"}</span></span>`}
+function weekHtml(s){const d=s.wk-s.wkPrev,cmp=s.wkPrev||s.wk?(d>0?d+" mehr als letzte Woche":d<0?-d+" weniger als letzte Woche":"so viele wie letzte Woche"):"";
+  return`<span class="hwk" title="${cmp}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span><b>${s.wk}</b> diese Woche${d>0?` <i>+${d}</i>`:""}</span></span>`}
 /* Abzeichen kompakt: freigeschaltete als Symbole, dazu das nächste mit Fortschritt; antippen klappt alle auf */
 /* Abzeichen als kleine Karte: das nächste Ziel in einem Satz, freigeschaltete als Symbole; antippen klappt alle auf */
 const BLEFT={d10:n=>`noch ${n} ${n===1?"Aufgabe":"Aufgaben"}`,d50:n=>`noch ${n} Aufgaben`,d100:n=>`noch ${n} Aufgaben`,s7:n=>`noch ${n} ${n===1?"Tag":"Tage"} am Stück`,
@@ -125,7 +126,7 @@ function gifReady(kind){if(view==="home")render();if(gifCheer===kind){gifCheer=n
 function gifPop(kind,force){const g=GIFS[kind];if(!g||!g.url||!funOn()||document.querySelector("dialog[open],.gifpop"))return;
   const key=tdy()+":"+kind;let seen="";try{seen=localStorage.getItem("haus-gifseen")||""}catch(_){}
   if(!force&&seen.split(",").includes(key))return;try{localStorage.setItem("haus-gifseen",[...seen.split(",").filter(x=>x.startsWith(tdy())),key].join(","))}catch(_){}
-  const o=document.createElement("div");o.className="gifpop";o.innerHTML=`<figure><img src="${esc(g.url)}" alt="${esc(g.name||g.title||"GIF")}"><figcaption><b>${esc(g.name||"")}</b> · über GIPHY</figcaption></figure>`;
+  const o=document.createElement("div");o.className="gifpop";o.innerHTML=`<figure><img src="${esc(g.url)}" alt="${esc(g.name||g.title||"GIF")}"></figure>`;
   const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),250)};o.onclick=close;document.body.appendChild(o);setTimeout(close,5000)}
 let gifKind="start";
 document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-gif]"))gifPop(gifKind,true)});
@@ -133,5 +134,5 @@ document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[da
 const LAGE={done:"Alles geschafft",streak:"Läuft bei dir",late:"Da ist was liegen geblieben",start:"Noch nichts geschafft",good:"Gut dabei"};
 function funHtml(kind,v){if(!funOn())return"";gifKind=kind;if(haInfo&&haInfo.giphy&&(!GIFS[kind]||GIFS[kind].bad))setTimeout(()=>gifToday(kind),0);const g=GIFS[kind]&&!GIFS[kind].bad?GIFS[kind]:null;
   const why=v.why?`<p class="mwhy"><small class="eyebrow">Warum dieses GIF?</small>${esc(v.why)}</p>`:"";
-  if(g&&g.url)return`<div class="hmeme">${why}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button><p class="mname"><b>${esc(g.name||g.title||"")}</b><small>über GIPHY</small></p></div>`;
+  if(g&&g.url)return`<div class="hmeme">${why}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button></div>`;
   return`<div class="hmeme">${why}<p class="meme">${esc(memeText(kind,v))}</p></div>`}

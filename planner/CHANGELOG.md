@@ -1,5 +1,10 @@
 # Änderungen
 
+## 1.39.0
+- **Tageskarte lebendiger, aber ruhig:** sanfter Farbverlauf mit langsam wandernden Lichtflecken, der Ring füllt sich beim Öffnen mit Farbverlauf, die Flamme flackert leicht, das GIF blendet weich ein. Mit „Bewegung reduzieren“ in iOS steht alles still.
+- Kompakter: „4 Tage am Stück“ und „3 diese Woche +2“ als zwei kleine Marken.
+- Unter dem GIF steht nichts mehr (kein Name, kein „über GIPHY“); die Begründung darüber ist kürzer.
+
 ## 1.38.0
 - **„Warum dieses GIF?“** steht jetzt über dem GIF, z. B. „Eine Aufgabe ist liegen geblieben. Hol sie auf, dann wechselt das GIF.“ oder „Du hast heute schon 2 Aufgaben erledigt, 3 sind noch offen.“
 - **GIF wechselt mit dem Stand:** Ist eine Lage gelöst (z. B. Überfälliges erledigt), kommt sofort ein neues, passendes GIF. Reihenfolge: alles erledigt → etwas liegen geblieben → schon etwas geschafft → Serie läuft → noch nichts.

@@ -1112,3 +1112,21 @@ html.kiosk #main{padding:0;margin:0;max-width:none}
 .mwhy{margin:0 0 .55rem;font-size:.86rem;line-height:1.35;color:var(--tx)}
 .mwhy .eyebrow{margin-bottom:.15rem}
 .hmeme .mname{align-items:center}
+/* 1.39: Tageskarte lebendiger, aber ruhig: weicher Farbverlauf, langsam wandernder Lichtfleck, Ring füllt sich beim Öffnen,
+   Flamme flackert leicht, GIF blendet ein. Bei „Bewegung reduzieren“ steht alles still (globale Regel). */
+.hero.game{position:relative;overflow:hidden;isolation:isolate;background:linear-gradient(150deg,color-mix(in srgb,var(--acc) 12%,var(--card)) 0%,var(--card) 55%)}
+.hero.game::before,.hero.game::after{content:"";position:absolute;z-index:-1;border-radius:50%;pointer-events:none;filter:blur(8px)}
+.hero.game::before{width:15rem;height:15rem;top:-6rem;right:-5rem;background:radial-gradient(circle,color-mix(in srgb,var(--acc) 26%,transparent),transparent 70%);animation:hblob 16s ease-in-out infinite alternate}
+.hero.game::after{width:11rem;height:11rem;bottom:-5rem;left:-4rem;background:radial-gradient(circle,color-mix(in srgb,var(--sun) 18%,transparent),transparent 70%);animation:hblob2 19s ease-in-out infinite alternate}
+@keyframes hblob{to{transform:translate(-4rem,3rem) scale(1.15)}}
+@keyframes hblob2{to{transform:translate(3rem,-2rem) scale(1.1)}}
+.hero.game .rg{stroke:url(#rgG);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--acc) 35%,transparent))}
+main.enter .hero.game .rg{animation:ringin 1.2s .15s cubic-bezier(.2,.8,.2,1) both}
+@keyframes ringin{from{stroke-dashoffset:326.7}to{stroke-dashoffset:var(--off)}}
+.hstreak.lit svg{transform-origin:50% 90%;animation:flick 1.8s ease-in-out infinite}
+@keyframes flick{0%,100%{transform:scale(1) rotate(0)}40%{transform:scale(1.12) rotate(-5deg)}70%{transform:scale(.96) rotate(3deg)}}
+.hwk{display:inline-flex;align-items:center;gap:.3rem;padding:.18rem .55rem .18rem .4rem;border-radius:1rem;background:color-mix(in srgb,var(--sea) 14%,transparent);color:var(--tx);font-size:.8rem}
+.hwk svg{width:.95rem;height:.95rem;fill:none;stroke:var(--sea);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.hwk i{font-style:normal;font-weight:700;color:var(--sea)}
+.gifbox img{animation:gfade .6s ease both}
+@keyframes gfade{from{opacity:0;transform:scale(1.02)}}
