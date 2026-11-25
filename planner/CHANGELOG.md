@@ -1,5 +1,12 @@
 # Änderungen
 
+## 1.40.0
+- **Statt „Warum dieses GIF?“ ein Satz, der motiviert** und den Grund nur andeutet, z. B. „Eine Sache ist liegen geblieben. Die holst du dir jetzt zurück.“, „2 geschafft, nur noch eine. Du bist richtig drin.“ oder „Alle 3 erledigt. Das hast du dir verdient.“
+- **Mehr Tiefe in allen Ansichten, ohne Spielerei:** Karten, Kästen und Listen liegen mit weichem Schatten und feiner Lichtkante auf, die Seite hat einen kaum sichtbaren Farbschimmer. Verläufe nur auf Akzentflächen: Ring (jetzt über drei Farben), Hauptknöpfe, Neu-Knopf, Leiste unten bzw. Seitenleiste. Tafel-Spalten oben leicht in ihrer Statusfarbe getönt, Balken im Zeitstrahl und Fortschrittsbalken mit leichtem Glanz, Kalender-Einträge mit Lichtkante. Karten heben sich am Computer beim Darüberfahren leicht an.
+- **Neue Farbwelt „Polarlicht“ zum Ausprobieren:** Indigo mit Verlauf nach Petrol, hell und dunkel. Einstellungen → Farbwelt. Jede Farbwelt hat jetzt einen zweiten Akzent für die Verläufe.
+- Umschalter (Meine · Melanie · Alle, Heute · 7 Tage …) passen sich der Farbwelt an (vorher überall beige) und sind besser lesbar: nicht gewählte Einträge haben jetzt genug Kontrast (vorher 4,2 : 1, jetzt über 5 : 1).
+- Wartung: 33 nicht mehr genutzte CSS-Regeln entfernt (ohne sichtbare Änderung, mit `style_diff` geprüft). Neuer Test prüft den Kontrast aller Farbwelten automatisch.
+
 ## 1.39.0
 - **Tageskarte lebendiger, aber ruhig:** sanfter Farbverlauf mit langsam wandernden Lichtflecken, der Ring füllt sich beim Öffnen mit Farbverlauf, die Flamme flackert leicht, das GIF blendet weich ein. Mit „Bewegung reduzieren“ in iOS steht alles still.
 - Kompakter: „4 Tage am Stück“ und „3 diese Woche +2“ als zwei kleine Marken.

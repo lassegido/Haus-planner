@@ -31,6 +31,10 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] Leiste unten: Start, Liste, Board, Zeitstrahl, Kalender.
 - [ ] GIPHY-Schlüssel eintragen: GIF erscheint kurz groß, danach klein in der Karte; auf dem zweiten iPhone dasselbe GIF. Antippen zeigt es wieder.
 - [ ] Startseite: Beim Öffnen nichts zum Wegklicken. Tageskarte mit Meme, darunter Eingabe, Umschalter und Liste ohne Scrollen erreichbar. Letzte Aufgabe abhaken: Meme groß und Konfetti.
+- [ ] Über dem GIF steht ein kurzer Satz (z. B. „2 geschafft, nur noch eine. Du bist richtig drin.“), keine Frage „Warum dieses GIF?“.
+- [ ] Hell und Dunkel: Karten, Liste und Tafel wirken leicht plastisch (Schatten, Lichtkante), nichts sieht verwaschen oder grell aus; Ring-Verlauf gut sichtbar.
+- [ ] Einstellungen → Farbwelt → Polarlicht: alle Ansichten gut lesbar, auch im Dunkelmodus; zurück auf Portofino geht.
+- [ ] Zeitstrahl: Balken ziehen und an den Enden verlängern funktioniert wie vorher (Glanz liegt nur darüber).
 - [ ] Am Tag nach dem Update: Spruch auf der Startseite kommt von Gemini (neu formuliert), KI-Verbrauch in den Einstellungen nur +1.
 
 ## 4. Export (iPhone)

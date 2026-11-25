@@ -37,17 +37,18 @@ function homeBody(tasks,allT){
      Ist eine Lage gelöst (z. B. Überfälliges erledigt), greift die nächste und damit ein anderes GIF. */
   const kind=rn&&!todayL.length?"done":over.length?"late":rd?"good":ms.streak>=3?"streak":todayL.length?"start":"done";
   const A=n=>n===1?"Aufgabe":"Aufgaben",nOpen=todayL.length;
-  const why={done:rn?`Für heute ist alles erledigt (${rd} von ${rn}).`:"Für heute ist nichts fällig.",
-    late:`${over.length===1?"Eine Aufgabe ist":over.length+" Aufgaben sind"} liegen geblieben.`,
-    good:`Du hast heute schon ${rd} ${A(rd)} erledigt, ${nOpen} ${nOpen===1?"ist":"sind"} noch offen.`,
-    streak:`Du hast ${ms.streak} Tage am Stück alles geschafft. Heute warten noch ${nOpen} ${A(nOpen)}.`,
-    start:`Heute ist noch nichts erledigt, ${nOpen} ${A(nOpen)} ${nOpen===1?"wartet":"warten"}.`}[kind];
+  /* Ein Satz, der motiviert und den Grund für das GIF mitliefert, ohne ihn zu erklären */
+  const why={done:rn?(rn===1?"Erledigt. Genau so sieht ein guter Tag aus.":`Alle ${rn} erledigt. Das hast du dir verdient.`):"Heute ist nichts fällig. Genieß den freien Tag.",
+    late:over.length===1?"Eine Sache ist liegen geblieben. Die holst du dir jetzt zurück.":`${over.length} Sachen sind liegen geblieben. Zeit für dein Comeback.`,
+    good:`${rd} geschafft, ${nOpen===1?"nur noch eine":"noch "+nOpen}. Du bist richtig drin.`,
+    streak:`${ms.streak} Tage am Stück. Heute ${nOpen===1?"noch eine":"noch "+nOpen}, dann hält die Serie.`,
+    start:nOpen===1?"Eine Aufgabe für heute. Kurz erledigen, dann ist der Tag gewonnen.":`${nOpen} Aufgaben für heute. Fang mit der ersten an, der Rest läuft.`}[kind];
   /* Startseite (1.37), ein Weg von oben nach unten:
      1. Ankommen: Begrüßung, Tagesstand, Serie, Meme zur Lage (eine Karte)
      2. Handeln: Eingabe, dann die Liste mit Umschalter Heute / 7 Tage / In Arbeit / Überfällig
      3. Dranbleiben: nächstes Abzeichen in einer Zeile
      4. Überblick: Projekte, Tags, Personen, Gemeinsam (zugeklappt) */
-  const ring=`<div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="rgG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--acc)"/><stop offset="1" style="stop-color:var(--sky)"/></linearGradient></defs><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" style="--off:${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div>`;
+  const ring=`<div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="rgG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--acc)"/><stop offset=".55" style="stop-color:var(--acc2)"/><stop offset="1" style="stop-color:var(--sky)"/></linearGradient></defs><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" style="--off:${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div>`;
   const me=prefGet("me")||"",hw=homeW(),who1=hw==="__all"?"":hw===me?"":hw;
   const hero=`<section class="hero game" style="--i:0">${ring}<div class="hbody"><small class="eyebrow">${who1?"Tag von "+esc(who1):greet()+(me?", "+esc(me):"")}</small><div class="hh">${rn?`${rd} von ${rn} erledigt`:"Heute ist nichts fällig"}</div><div class="hsub">${sub}</div><div class="hmeta">${streakHtml(ms)}${weekHtml(ms)}</div></div>${funHtml(kind,{n:ms.streak,late:over.length,open:todayL.length,why})}</section>`;
   const seg=`<div class="hseg" role="tablist">`+Object.entries(TL).map(([k,[l,L]])=>`<button type="button" role="tab" class="${k===ht?"on":""}${k==="late"&&L.length?" hot":""}" data-ht="${k}" aria-selected="${k===ht}">${l}<b>${L.length}</b></button>`).join("")+`</div>`;
@@ -208,14 +209,14 @@ function gantt(list){
     const x1=a.x+a.w,y1=a.y+ROW/2,x2=b.x,y2=b.y+ROW/2,mx2=Math.max(x1+8,x2-8);
     gd+=`<path d="M${x1} ${y1}H${mx2}V${y2}H${x2}" fill="none" stroke="var(--mut)" stroke-width="1.4" marker-end="url(#ar)"/>`}));
   list.forEach(t=>{const p=pos[t.id],inside=!t.ms&&p.w>=t.title.length*6.7+20,cy=p.y+ROW/2;
-    const body=t.ms?`<path d="M${p.x+9} ${cy-10}l10 10l-10 10l-10-10z" fill="${col[t.status]}"/>`:`<rect x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="${col[t.status]}"/>`;
+    const body=t.ms?`<path d="M${p.x+9} ${cy-10}l10 10l-10 10l-10-10z" fill="${col[t.status]}"/>`:`<rect x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="${col[t.status]}"/><rect class="ggl" x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="url(#gGl)"/>`;
     const lbl=inside?`<text class="bt ${t.status}" x="${p.x+11}" y="${cy+4.2}">${esc(t.title)}</text>`:`<text class="bo" x="${p.x+p.w+10}" y="${cy+4.2}">${esc(t.title)}</text>`;
     const hd2=t.ms?"":`<rect data-h="s" class="gh1" x="${p.x}" y="${p.y+8}" width="7" height="${ROW-16}"/><rect data-h="e" class="gh1" x="${p.x+p.w-7}" y="${p.y+8}" width="7" height="${ROW-16}"/>`;
     gd+=`<g data-id="${t.id}" class="gbar"${t.status==="done"?' opacity=".72"':""}>${body}${lbl}${hd2}<circle data-h="dep" class="gdep" cx="${p.x+p.w+(t.ms?1:0)}" cy="${cy}" r="5"/></g>`});
   const rows=items.map(it=>it.g?`<div class="gr gh2" style="--tc:${it.g.c}"><i class="dt" style="background:${it.g.c}"></i><span>${esc(it.g.l)}</span><em>${it.g.L.length}</em></div>`:`<div class="gr" data-id="${it.t.id}" title="${esc(it.t.title)}"><i class="dt ${it.t.status}"></i>${pb(it.t)}<span>${esc(it.t.title)}</span></div>`).join("");
   const seg=[["day","Tage"],["month","Monate"],["year","Jahre"]].map(([k,l])=>`<button data-gm="${k}" class="${k===mode?"on":""}">${l}</button>`).join("");
   return`<div class="gctl"><div class="seg">${seg}</div><button class="btn ghost sm" data-gtoday>Heute</button></div>`+
-  `<div class="gwrap"><div class="gl"><div class="glh" style="--hd:${HEAD}px"></div>${rows}<div class="glg" style="--hd:${HEAD}px" role="separator" aria-label="Breite der Beschriftung ändern" title="Ziehen zum Ändern, Doppeltippen zum Zurücksetzen"></div></div><div class="gs" style="width:${W}px"><svg class="gh" width="${W}" height="${HEAD}">${hd}</svg><svg class="gb" width="${W}" height="${BH}" data-tx="${tdx}" data-ppd="${PPD}"><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--mut)"/></marker></defs>${gd}</svg></div></div>`;
+  `<div class="gwrap"><div class="gl"><div class="glh" style="--hd:${HEAD}px"></div>${rows}<div class="glg" style="--hd:${HEAD}px" role="separator" aria-label="Breite der Beschriftung ändern" title="Ziehen zum Ändern, Doppeltippen zum Zurücksetzen"></div></div><div class="gs" style="width:${W}px"><svg class="gh" width="${W}" height="${HEAD}">${hd}</svg><svg class="gb" width="${W}" height="${BH}" data-tx="${tdx}" data-ppd="${PPD}"><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--mut)"/></marker><linearGradient id="gGl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".65" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>${gd}</svg></div></div>`;
 }
 function bind(){
   document.querySelectorAll("[data-id]").forEach(el=>el.onclick=e=>{if(e.target.dataset.adv)return;openDlg(el.dataset.id)});
