@@ -34,7 +34,7 @@ def test_serie_woche_abzeichen_feiern(t, browser):
         t.check("Reihenfolge: Tageskarte, Eingabe, Umschalter, Liste, Abzeichen, Überblick (zugeklappt)",
                 [x for x in order if x != "hpick"] == ["hero", "qadd", "hseg", "pnl", "pnl", "pnl"] and p.js("!document.querySelector('.ovw').open"), order)
         p.js("document.querySelector('.ovw').open=true")
-        t.check("Persönliche Woche in der Karte", "Diese Woche" in p.js("document.querySelector('.hero .hwk').textContent"))
+        t.check("Persönliche Woche in der Karte", "diese Woche" in p.js("document.querySelector('.hero .hwk').textContent"))
         mon = T - datetime.timedelta(T.weekday())
         wk = [x for x in daten() if x["status"] == "done" and mon <= datetime.date.fromisoformat(x["log"][0]["t"][:10]) <= T]
         h = p.js("document.querySelector('.mot h3 em').textContent")
@@ -79,7 +79,7 @@ def test_ohne_geschichte_kein_alarm(t, browser):
         p = Page(browser, s.url, PHONE, setup=ALS_LASSE)
         p.pg.click("[data-v=home]")
         p.pg.wait_for_timeout(300)
-        t.check("Ohne Serie: Einladung statt 0", "beginnt deine Serie" in p.js("document.querySelector('.hstreak').textContent"))
+        t.check("Ohne Serie: Einladung statt 0", "Serie startet heute" in p.js("document.querySelector('.hstreak').textContent"))
         t.check("Bestehende Abzeichen beim ersten Öffnen nicht als neu gemeldet", p.js("JSON.parse(localStorage.getItem('haus-badges-Lasse'))").count("d10") == 1)
         p.js("void setStatus(byId('h'),'doing')")
         p.pg.wait_for_timeout(400)
@@ -107,7 +107,7 @@ def test_meme_auswahl_einmal_am_tag(t, browser):
         p = Page(browser, s.url, PHONE, setup=lambda pg: (ALS_LASSE(pg), giphy_mock(pg, calls)))
         p.pg.wait_for_timeout(800)
         t.check("GIPHY-Suche mit dem von Gemini gewählten Meme der Lage „start“", len(calls) == 1 and "q=gemini%20start" in calls[0], calls)
-        t.check("Karte zeigt GIF mit Meme-Namen", p.js("(document.querySelector('.hero .gifbox img')||{}).textContent") .startswith("Meme start"))
+        t.check("Karte zeigt GIF mit Meme-Namen", (p.js("(document.querySelector('.hero .gifbox img')||{}).alt") or "").startswith("Meme start"))
         p.js("document.querySelectorAll('.gifpop').forEach(x=>x.remove())")
         p.js("void setStatus(byId('h'),'done')")
         p.pg.wait_for_timeout(900)
