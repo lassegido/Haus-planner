@@ -1166,6 +1166,9 @@ main.enter .hero.game .rg{animation:ringin 1.2s .15s cubic-bezier(.2,.8,.2,1) bo
   100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--a)) translateY(calc(-1*var(--d))) scale(1)}}
 @keyframes bfade{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.bust,.bst,.bust.out{animation:none}.bust i{display:none}}
+/* 1.44: Vorschau auf morgige Wiederholungen (entstehen erst beim Abhaken der heutigen) */
+.hrow.pre{opacity:.72}
+.ring.pre{display:inline-block;border-style:dashed}
 </style>
 </head>
 <body>
@@ -2074,7 +2077,8 @@ $("tm_pnew").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();manAdd("p")}};
 function enter(){const m=$("main");m.classList.add("enter");clearTimeout(enterT);enterT=setTimeout(()=>m.classList.remove("enter"),1300);animateNums()}
 function animateNums(){if(reduced())return;document.querySelectorAll("[data-n]").forEach(el=>{const n=+el.dataset.n;if(!n)return;const t0=performance.now(),step=t=>{const k=Math.min(1,(t-t0)/800),e=1-Math.pow(1-k,3);el.textContent=Math.round(n*e);if(k<1)requestAnimationFrame(step)};requestAnimationFrame(step)})}
 function rel(t){const d=dn(t.end)-today();return d<0?`${-d} ${-d===1?"Tag":"Tage"} überfällig`:d===0?"heute":d===1?"morgen":d<=14?`in ${d} Tagen`:fd(t.end)}
-function hrow(t,i){return`<div class="hrow" data-id="${t.id}" style="--i:${Math.min(i,8)}"><button class="ring ${t.status}" data-adv="${t.id}" aria-label="Status: ${ST[t.status]}. Weiterschalten"></button><div class="hm"><div class="ht">${esc(t.title)}</div><div class="hs">${[t.proj,...tgs(t),t.who].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}</div></div><span class="hd ${isLate(t)?"late":""}">${rel(t)}</span></div>`}
+function hrow(t,i){if(t.pre)return`<div class="hrow pre" data-id="${t.id}" style="--i:${Math.min(i,8)}"><span class="ring pre" aria-hidden="true"></span><div class="hm"><div class="ht">${esc(t.title)}</div><div class="hs">${["wiederholt sich, sobald heute abgehakt",t.who].filter(Boolean).map(esc).join(" · ")}</div></div><span class="hd">morgen</span></div>`;
+  return`<div class="hrow" data-id="${t.id}" style="--i:${Math.min(i,8)}"><button class="ring ${t.status}" data-adv="${t.id}" aria-label="Status: ${ST[t.status]}. Weiterschalten"></button><div class="hm"><div class="ht">${esc(t.title)}</div><div class="hs">${[t.proj,...tgs(t),t.who].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}</div></div><span class="hd ${isLate(t)?"late":""}">${rel(t)}</span></div>`}
 /* 1.33: Tag, an dem eine Aufgabe erledigt wurde (aus dem Verlauf, Ortszeit); NaN, wenn unbekannt */
 const DONE_RX=/^Status: (?:[^→]*→ )?Erledigt(?: \(|$)/;
 /* Abgeschlossen = erledigt oder nicht geschafft (1.42) */
@@ -2085,7 +2089,12 @@ function doneDay(t){const L=t.log||[];for(let i=L.length-1;i>=0;i--){const x=L[i
 function homeBody(tasks,allT){
   const T=today(),n=tasks.filter(t=>!isFail(t)).length,d=tasks.filter(isOk).length;
   const doing=tasks.filter(t=>t.status==="doing").length,over=tasks.filter(isLate).sort((a,b)=>dn(a.end)-dn(b.end)),blk=tasks.filter(isBlocked).length;
-  const week=tasks.filter(t=>t.status!=="done"&&!isLate(t)&&dn(t.start)<=T+7&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end)||dn(a.start)-dn(b.start));
+  /* 1.44: Morgen = beginnt oder ist fällig morgen (lange Aufgaben, die morgen weder anfangen noch enden, nicht).
+     Wiederholungen von heute gibt es morgen erst, wenn die heutige abgehakt ist; sie stehen deshalb als Vorschau dabei. */
+  const M=T+1,tmrL=tasks.filter(t=>t.status!=="done"&&!isLate(t)&&dn(t.start)<=M&&dn(t.end)>=M&&(dn(t.start)===M||dn(t.end)===M)),
+    tmrIds=new Set(tmrL.map(t=>t.title+"|"+(t.who||""))),
+    tmrPre=tasks.filter(t=>t.status!=="done"&&t.rec&&!t.spawned&&dn(t.end)<M).map(t=>{const n=nextOcc(t);return n&&dn(n.start)<=M&&dn(n.end)>=M&&!tmrIds.has(t.title+"|"+(t.who||""))?{...t,start:n.start,end:n.end,pre:1}:null}).filter(Boolean),
+    week=[...tmrL,...tmrPre].sort((a,b)=>dn(a.end)-dn(b.end)||(a.pre||0)-(b.pre||0)||a.title.localeCompare(b.title,"de"));
   const nx=tasks.filter(t=>t.status!=="done"&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end))[0],C=326.7,open=n-d;
   const areas=allTags().filter(a=>tasks.some(t=>tgs(t).includes(a)));
   const bars=areas.map(a=>{const L=tasks.filter(t=>tgs(t).includes(a)&&!isFail(t)),x=L.filter(isOk).length;return`<div class="prg" style="--tc:${tcol(a)}"><span class="pn">${tIc(a)}${esc(a)}</span><div class="pb"><i style="width:${L.length?Math.round(x/L.length*100):0}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
@@ -2104,7 +2113,7 @@ function homeBody(tasks,allT){
   const NF=nf?` ${nf} nicht geschafft.`:"";
   const sub=!rn?"Für heute ist nichts geplant.":!todayL.length?(nf?NF.trim():"Alles für heute erledigt."):`Noch ${todayL.length} offen`+(over.length?`, davon ${over.length} überfällig.`:".")+NF;
   const TL={heute:["Heute",todayL,"var(--acc)",'<rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/><circle cx="12" cy="15" r="1.6" fill="currentColor" stroke="none"/>',"Für heute ist nichts geplant."],
-    woche:["7 Tage",week,"#6F8796",'<rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4M8 14.5h8"/>',"In den nächsten 7 Tagen ist nichts fällig."],
+    morgen:["Morgen",week,"#6F8796",'<rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4M10 13.5l2.5 2.5-2.5 2.5"/>',"Für morgen ist nichts geplant."],
     doing:["In Arbeit",doingL,"var(--sun)",'<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/>',"Gerade ist nichts in Arbeit."],
     late:["Überfällig",over,"var(--brick)",'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.3v.2"/>',"Nichts überfällig."]};
   let ht="heute";try{ht=localStorage.getItem("haus-htile")||"heute"}catch(_){}if(!TL[ht])ht="heute";
@@ -2124,7 +2133,7 @@ function homeBody(tasks,allT){
     start:!nOpen&&nf?"Heute hat’s nicht geklappt. Morgen holst du dir die volle Runde.":nOpen===1?"Eine Aufgabe für heute. Kurz erledigen, dann ist der Tag gewonnen.":`${nOpen} Aufgaben für heute. Fang mit der ersten an, der Rest läuft.`}[kind];
   /* Startseite (1.37), ein Weg von oben nach unten:
      1. Ankommen: Begrüßung, Tagesstand, Serie, Meme zur Lage (eine Karte)
-     2. Handeln: Eingabe, dann die Liste mit Umschalter Heute / 7 Tage / In Arbeit / Überfällig
+     2. Handeln: Eingabe, dann die Liste mit Umschalter Heute / Morgen / In Arbeit / Überfällig
      3. Dranbleiben: nächstes Abzeichen in einer Zeile
      4. Überblick: Projekte, Tags, Personen, Gemeinsam (zugeklappt) */
   const ring=`<div class="hring"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="rgG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--acc)"/><stop offset=".55" style="stop-color:var(--acc2)"/><stop offset="1" style="stop-color:var(--acc3)"/></linearGradient></defs><circle class="rt" cx="60" cy="60" r="52"/><circle class="rg" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}" style="--off:${off}" transform="rotate(-90 60 60)"/></svg><div class="hn">${rn?`<span data-n="${rpct}">${rpct}</span><i>%</i>`:"<span>–</span>"}</div></div>`;

@@ -1148,3 +1148,6 @@ main.enter .hero.game .rg{animation:ringin 1.2s .15s cubic-bezier(.2,.8,.2,1) bo
   100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--a)) translateY(calc(-1*var(--d))) scale(1)}}
 @keyframes bfade{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.bust,.bst,.bust.out{animation:none}.bust i{display:none}}
+/* 1.44: Vorschau auf morgige Wiederholungen (entstehen erst beim Abhaken der heutigen) */
+.hrow.pre{opacity:.72}
+.ring.pre{display:inline-block;border-style:dashed}

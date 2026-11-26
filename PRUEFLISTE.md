@@ -41,6 +41,7 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] Dasselbe in der Liste oder im Board: kein „BUSTED!“. Auf dem anderen iPhone auch nicht.
 - [ ] Board: zuletzt Abgehaktes steht in „Erledigt“ ganz oben; nicht Geschafftes mit ✕.
 - [ ] iPad hochkant und quer: GIF rechts neben dem Ring, gut groß; iPhone: GIF darunter.
+- [ ] Startseite → „Morgen“: morgige Aufgaben, tägliche als blasse Vorschau; nach dem Abhaken der heutigen steht die echte da, nicht doppelt.
 - [ ] Am Tag nach dem Update: Spruch auf der Startseite kommt von Gemini (neu formuliert), KI-Verbrauch in den Einstellungen nur +1.
 
 ## 4. Export (iPhone)

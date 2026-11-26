@@ -140,3 +140,33 @@ def test_ring_zeigt_heute(t, browser):
         t.check("Nichts für heute: Strich statt 0 %", hh() == ["Heute ist nichts fällig", "Für heute ist nichts geplant.", "–"], hh())
         t.check("keine Skriptfehler", not p.errors, p.errors)
         p.close()
+
+
+def test_umschalter_morgen(t, browser):
+    """1.44: Statt „7 Tage“ zeigt der Umschalter die Aufgaben für morgen, inkl. Vorschau auf tägliche Wiederholungen."""
+    with Server() as s:
+        s.seed([task("d1", "Esther baden", D(0), D(0), who="Lasse", rec={"n": 1, "u": "d"}),
+                task("w1", "Müll", D(0), D(0), who="Lasse", rec={"n": 1, "u": "w"}),
+                task("m1", "Arzttermin", D(1), D(1), who="Lasse"),
+                task("m2", "Steuer bis morgen", D(-2), D(1), who="Lasse"),
+                task("l1", "Renovierung", D(-3), D(10), who="Lasse"),
+                task("u1", "Übermorgen", D(2), D(2), who="Lasse")])
+        p = Page(browser, s.url, PHONE, setup=ALS_LASSE)
+        p.pg.click("[data-v=home]")
+        p.pg.wait_for_timeout(300)
+        labels = p.js("[...document.querySelectorAll('.hseg button')].map(b=>b.textContent)")
+        t.check("Umschalter: Heute, Morgen, In Arbeit, Überfällig", [x.rstrip("0123456789") for x in labels] == ["Heute", "Morgen", "In Arbeit", "Überfällig"], labels)
+        p.pg.click(".hseg [data-ht=morgen]")
+        p.pg.wait_for_timeout(300)
+        rows = p.js("[...document.querySelectorAll('.hlist .hrow')].map(r=>[r.querySelector('.ht').textContent,r.classList.contains('pre')])")
+        titles = [r[0] for r in rows]
+        t.check("Morgen: beginnt oder fällig morgen, nicht Übermorgen oder Langläufer", "Arzttermin" in titles and "Steuer bis morgen" in titles
+                and "Übermorgen" not in titles and "Renovierung" not in titles and "Müll" not in titles, rows)
+        t.check("Tägliche Aufgabe als Vorschau dabei", ["Esther baden", True] in rows, rows)
+        t.check("Zähler stimmt", p.js("document.querySelector('.hseg [data-ht=morgen] b').textContent") == "3")
+        p.js("void setStatus(byId('d1'),'done')")
+        p.pg.wait_for_timeout(700)
+        rows = p.js("[...document.querySelectorAll('.hlist .hrow')].map(r=>[r.querySelector('.ht').textContent,r.classList.contains('pre')])")
+        t.check("Nach dem Abhaken: echte Aufgabe statt Vorschau, nicht doppelt", rows.count(["Esther baden", False]) == 1 and ["Esther baden", True] not in rows, rows)
+        t.check("keine Skriptfehler", not p.errors, p.errors)
+        p.close()

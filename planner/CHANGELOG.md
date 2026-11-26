@@ -1,5 +1,8 @@
 # Änderungen
 
+## 1.44.0
+- **Startseite: „Morgen“ statt „7 Tage“.** Der Umschalter zeigt jetzt, was morgen anfängt oder fällig ist. Wiederholungen (z. B. tägliche Aufgaben) entstehen erst, wenn die heutige abgehakt ist; bis dahin stehen sie blass mit gestricheltem Kreis als Vorschau dabei („wiederholt sich, sobald heute abgehakt“). Lange laufende Aufgaben, die morgen weder anfangen noch enden, fehlen bewusst.
+
 ## 1.43.0
 - **Startseite auf iPad und Computer:** Spruch und GIF stehen jetzt rechts neben Ring und Zahlen statt darunter. Das GIF wird dadurch deutlich größer, und die Tageskarte ist kompakter. Auf dem Handy bleibt alles untereinander.
 
