@@ -10,9 +10,14 @@ document.addEventListener("close",e=>{const el=$("toast");if(e.target.tagName!==
   try{el.hidePopover()}catch(_){}document.body.appendChild(el);if(el.classList.contains("on"))try{el.showPopover()}catch(_){}},true);
 function toast(msg,undo,label,ms){const el=$("toast");el.innerHTML="<span></span>"+(undo?"<button>"+(label||"Rückgängig")+"</button>":"");el.firstChild.textContent=msg;if(undo)el.querySelector("button").onclick=()=>{undo();el.classList.remove("on")};toastHost(el);if(el.showPopover){if(!el.hasAttribute("popover"))el.setAttribute("popover","manual");try{el.hidePopover()}catch(_){}try{el.showPopover()}catch(_){}}el.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("on"),ms||4500)}
 async function advance(id){
-  const t=byId(id);if(!t)return;const prev=t.status,next=NEXT[prev];hap(8);lastMoved=id;
+  const t=byId(id);if(!t)return;const prev=t.status,pf=isFail(t),next=NEXT[prev];hap(8);lastMoved=id;
   const sp=await setStatus(t,next);
-  toast("„"+t.title+"“: "+ST[next]+(sp?" · nächste am "+fd(sp.start):""),async()=>{const c=byId(id);if(c){lastMoved=id;await saveTask({...c,status:prev,spawned:sp?"":c.spawned});if(sp)delTask(sp.id)}})}
+  toast("„"+t.title+"“: "+ST[next]+(sp?" · nächste am "+fd(sp.start):""),async()=>{const c=byId(id);if(c){lastMoved=id;await saveTask({...c,status:prev,fail:pf,spawned:sp?"":c.spawned});if(sp)delTask(sp.id)}})}
+/* 1.42: Nicht geschafft (z. B. tägliche Aufgabe heute nicht machbar). Auf der Startseite gibt es dafür einmal groß „BUSTED!“. */
+async function failTask(id){
+  const t=byId(id);if(!t||t.status==="done")return;const prev=t.status,onHome=view==="home";hap(20);lastMoved=id;
+  const sp=await setStatus(t,"fail");if(onHome)busted(t);
+  toast("„"+t.title+"“: Nicht geschafft"+(sp?" · nächste am "+fd(sp.start):""),async()=>{const c=byId(id);if(c){lastMoved=id;await saveTask({...c,status:prev,fail:false,spawned:sp?"":c.spawned});if(sp)delTask(sp.id)}})}
 /* Wiederholung, Meilenstein */
 const RECI='<svg class="mi" viewBox="0 0 24 24" aria-label="Wiederholt sich"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"/></svg>';
 const MSI='<svg class="mi" viewBox="0 0 24 24" aria-label="Meilenstein"><path d="M12 3l9 9-9 9-9-9z"/></svg>';
@@ -49,8 +54,8 @@ function recText(r,start){if(!r)return"";const n=r.n||1,list=a=>a.length>1?a.sli
   else t=n===1?"Jährlich":`Alle ${n} Jahre`;
   return t+(r.until?" bis "+fd(r.until):"")}
 async function setStatus(t,next){
-  const u={...t,status:next};u.log=diffLog(t,u);let sp=null;
-  if(next==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);if(sp)u.spawned=sp.id}
+  const fail=next==="fail",st=fail?"done":next,u={...t,status:st};if(fail)u.fail=true;else delete u.fail;u.log=diffLog(t,u);let sp=null;
+  if(st==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);if(sp)u.spawned=sp.id}
   await saveTask(u);if(sp)await saveTask(sp);if(next==="done"&&t.status!=="done")cheer();return sp}
 /* Zeitstrahl: Balken ziehen */
 const dependsOn=(a,b,seen=new Set())=>{if(seen.has(a))return false;seen.add(a);const t=byId(a);return!!t&&(t.deps||[]).some(d=>d===b||dependsOn(d,b,seen))};

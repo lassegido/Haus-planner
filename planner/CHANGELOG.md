@@ -1,5 +1,14 @@
 # Änderungen
 
+## 1.42.0
+- **„Nicht geschafft“:** Wenn eine Aufgabe, z. B. eine tägliche, nicht klappt, kann man sie damit abschließen. Das geht über Gedrückt halten → „Nicht geschafft“ oder im Aufgabenblatt beim Status. Danach ist sie nicht mehr offen und es kommt keine Erinnerung mehr. Wiederholt sie sich, wird die nächste wie gewohnt angelegt. „Rückgängig“ im Hinweis unten macht es wieder offen.
+  - Sie zählt **nicht** als erledigt (Ring, Prozent, Abzeichen, gemeinsame Woche) und **beendet die Serie** sofort („Serie startet morgen neu“).
+  - Sie wird mit ✕ statt Haken und dem Hinweis „Nicht geschafft“ angezeigt.
+- **„BUSTED!“:** Wer auf der Startseite „Nicht geschafft“ wählt, bekommt einmal groß einen Stempel „BUSTED!“ mit Ausrufezeichen. Er verschwindet nach gut 2 Sekunden von selbst; Antippen schließt ihn sofort. Das passiert nur auf der Startseite und nur bei der Person, die es antippt. Mit „Sprüche, GIFs und Konfetti“ aus bleibt er weg.
+- **Board:** Erledigte und nicht geschaffte Aufgaben stehen jetzt nach dem Zeitpunkt des Abschließens sortiert, das zuletzt Abgehakte ganz oben. Versehentlich Abgehaktes findet man so sofort wieder.
+- **„Tafel“ heißt wieder „Board“.**
+- Korrektur: Ist „Sprüche, GIFs und Konfetti“ aus, kommt auch kein Konfetti (seit 1.41).
+
 ## 1.41.0
 - **Fünf neue Farbwelten im Stil von Polarlicht:** getönte Flächen, kräftige Leiste, Akzent mit Verlauf und eigener Ring-Farbe, jeweils für Hell und Dunkel.
   - **Wald:** Smaragd bis Moos

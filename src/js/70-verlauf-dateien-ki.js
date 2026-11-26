@@ -5,7 +5,7 @@ const FLI='<svg class="mi" viewBox="0 0 24 24" aria-label="Anhänge"><path d="M2
 function extra(t){const c=(t.log||[]).filter(x=>x.k==="c").length,f=(t.files||[]).length;return(c?`<span class="ex">${CMI}${c}</span>`:"")+(f?`<span class="ex">${FLI}${f}</span>`:"")}
 function diffLog(o,n){
   const L=(o.log||[]).slice(),me=prefGet("me")||"",now=new Date().toISOString().slice(0,16),add=x=>L.push({t:now,a:me,k:"h",x});
-  if(o.status!==n.status)add("Status: "+ST[o.status]+" → "+ST[n.status]);
+  if(o.status!==n.status||isFail(o)!==isFail(n))add("Status: "+stName(o)+" → "+stName(n));
   if(o.start!==n.start||o.end!==n.end)add("Zeitraum: "+dr(o)+" → "+dr(n));
   if((o.who||"")!==(n.who||""))add("Verantwortlich: "+(n.who||"niemand"));
   if((o.proj||"")!==(n.proj||""))add("Projekt: "+(n.proj||"keins"));
@@ -63,7 +63,7 @@ function cal(list){
   for(let i=0;i<weeks*7;i++){
     const d=start+i,ds=iso(fromDn(d)),dt=fromDn(d),L=list.filter(t=>dn(t.start)<=d&&dn(t.end)>=d);
     cells+=`<div class="cd${dt.getUTCMonth()!==m-1?" out":""}${ds===T?" today":""}${ds===calSel?" sel":""}" data-day="${ds}"><span class="n">${dt.getUTCDate()}</span>`
-      +`<div class="pills">${L.slice(0,3).map(t=>`<button class="pill ${t.status}${t.ms?" ms":""}${isLate(t)?" late":""}" data-id="${t.id}">${esc(t.title)}</button>`).join("")}</div>`
+      +`<div class="pills">${L.slice(0,3).map(t=>`<button class="pill ${t.status}${isFail(t)?" fail":""}${t.ms?" ms":""}${isLate(t)?" late":""}" data-id="${t.id}">${esc(t.title)}</button>`).join("")}</div>`
       +`<div class="cdots">${L.slice(0,4).map(t=>`<i class="${t.status}"></i>`).join("")}</div>${L.length>3?`<em>+${L.length-3}</em>`:""}</div>`}
   const sd=dn(calSel),sl=list.filter(t=>dn(t.start)<=sd&&dn(t.end)>=sd),sdt=fromDn(sd);
   return`<div class="calbar"><button class="cnav" data-cm="-1" aria-label="Voriger Monat">‹</button><h2>${MONL[m-1]} ${y}</h2><button class="cnav" data-cm="1" aria-label="Nächster Monat">›</button><button class="cnav t" data-cm="0">Heute</button></div>`

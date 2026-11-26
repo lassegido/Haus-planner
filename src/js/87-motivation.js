@@ -5,19 +5,21 @@ const doneOn=t=>{if(t.status!=="done")return Infinity;const d=doneDay(t);return 
 const motScope=()=>{const hw=homeW();return RAW.filter(t=>!t.del&&(hw==="__all"||wl(t).includes(hw)))};
 const todayOpenOf=L=>{const T=today();return L.filter(t=>t.status!=="done"&&!t.arch&&dn(t.start)<=T&&(dn(t.end)>=T||isLate(t)))};
 /* Tage, an denen etwas Fälliges offen blieb (Tagesring nicht voll) */
-function badDays(L,T){const bad=new Set();for(const t of L){const due=dn(t.end),dd=doneOn(t);for(let x=Math.max(due,T-400);x<Math.min(dd,T+1);x++)bad.add(x)}return bad}
+function badDays(L,T){const bad=new Set();for(const t of L){const due=dn(t.end),dd=doneOn(t);for(let x=Math.max(due,T-400);x<Math.min(dd,T+1);x++)bad.add(x);
+  /* 1.42: Ein „Nicht geschafft“ macht den Tag ebenfalls nicht voll */
+  if(isFail(t)&&dd>=T-400&&dd<=T)bad.add(dd)}return bad}
 /* Serie: Tage in Folge mit vollem Tagesring und mindestens einer erledigten Aufgabe. Tage ohne alles unterbrechen nicht.
    Heute zählt erst, wenn der Ring voll ist; bis dahin läuft die Serie von gestern weiter. */
 function motStats(L){
-  const T=today(),bad=badDays(L,T),doneL=L.filter(t=>t.status==="done"),act=new Map();doneL.forEach(t=>{const d=doneOn(t);act.set(d,(act.get(d)||0)+1)});
+  const T=today(),bad=badDays(L,T),failToday=L.some(t=>isFail(t)&&doneOn(t)===T),doneL=L.filter(isOk),act=new Map();doneL.forEach(t=>{const d=doneOn(t);act.set(d,(act.get(d)||0)+1)});
   /* Mehr als 7 Tage ganz ohne Erledigtes beenden die Serie ebenfalls */
-  let n=0,todayIn=false,gap=0;for(let x=T;x>T-400;x--){if(bad.has(x)){if(x===T)continue;break}if(act.has(x)){n++;gap=0;if(x===T)todayIn=true}else if(x<T&&++gap>7)break}
+  let n=0,todayIn=false,gap=0;for(let x=T;x>T-400;x--){if(bad.has(x)){if(x===T&&!failToday)continue;break}if(act.has(x)){n++;gap=0;if(x===T)todayIn=true}else if(x<T&&++gap>7)break}
   let run=0,maxS=0;gap=0;for(let x=T-400;x<=T;x++){if(bad.has(x)&&x<T)run=0;else if(act.has(x)){run++;gap=0;maxS=Math.max(maxS,run)}else if(++gap>7)run=0}
   let cleanWeek=false;for(let m=T-mo(fromDn(T).getUTCDay())-7;m>T-400&&!cleanWeek;m-=7){let ok=true,c=0;for(let x=m;x<m+7;x++){if(bad.has(x))ok=false;c+=act.get(x)||0}if(ok&&c>=3)cleanWeek=true}
-  let projDone=false,projBest=[0,3];allProjs().forEach(p=>{const P=L.filter(t=>t.proj===p&&!t.del);if(P.length<3)return;const d=P.filter(t=>t.status==="done").length;
+  let projDone=false,projBest=[0,3];allProjs().forEach(p=>{const P=L.filter(t=>t.proj===p&&!t.del&&!isFail(t));if(P.length<3)return;const d=P.filter(isOk).length;
     if(d===P.length)projDone=true;else if(d/P.length>projBest[0]/projBest[1])projBest=[d,P.length]});
   const mon=T-mo(fromDn(T).getUTCDay()),wk=doneL.filter(t=>{const d=doneOn(t);return d>=mon&&d<=T}).length,wkPrev=doneL.filter(t=>{const d=doneOn(t);return d>=mon-7&&d<=T-7}).length;
-  return{streak:n,todayIn,maxStreak:maxS,done:doneL.length,cleanWeek,projDone,projBest,wk,wkPrev,early:doneL.filter(t=>doneOn(t)<dn(t.end)).length,
+  return{streak:n,todayIn,failToday,maxStreak:maxS,done:doneL.length,cleanWeek,projDone,projBest,wk,wkPrev,early:doneL.filter(t=>doneOn(t)<dn(t.end)).length,
     team:doneL.filter(t=>wl(t).length>1).length,bigCk:doneL.some(t=>(t.checklist||[]).length>=10&&t.checklist.every(c=>c.d))}}
 /* Abzeichen: [id, Name, Beschreibung, Fortschritt(s) → [erreicht, Ziel]]. Freigeschaltet, wenn erreicht ≥ Ziel. */
 const BADGES=[
@@ -37,7 +39,7 @@ function doneBy(t){const names=allWho(),L=t.log||[];
   const w=wl(t);return w.length===1?w[0]:"Gemeinsam"}
 const motCol=w=>/^melanie/i.test(w)?"var(--brick)":/^lasse/i.test(w)?"var(--sea)":w==="Gemeinsam"?"var(--mut)":"var(--sky)";
 function streakHtml(s){
-  return`<span class="hstreak${s.todayIn?" lit":""}" title="Tage in Folge mit vollem Tagesring">${FLAME}<span>${s.streak?`<b>${s.streak} ${s.streak===1?"Tag":"Tage"}</b> am Stück`:"Serie startet heute"}</span></span>`}
+  return`<span class="hstreak${s.todayIn?" lit":""}" title="Tage in Folge mit vollem Tagesring">${FLAME}<span>${s.streak?`<b>${s.streak} ${s.streak===1?"Tag":"Tage"}</b> am Stück`:s.failToday?"Serie startet morgen neu":"Serie startet heute"}</span></span>`}
 function weekHtml(s){const d=s.wk-s.wkPrev,cmp=s.wkPrev||s.wk?(d>0?d+" mehr als letzte Woche":d<0?-d+" weniger als letzte Woche":"so viele wie letzte Woche"):"";
   return`<span class="hwk" title="${cmp}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span><b>${s.wk}</b> diese Woche${d>0?` <i>+${d}</i>`:""}</span></span>`}
 /* Abzeichen kompakt: freigeschaltete als Symbole, dazu das nächste mit Fortschritt; antippen klappt alle auf */
@@ -52,7 +54,7 @@ function badgeCard(s){
   return`<details class="pnl bdx" style="--i:3"><summary><span class="bmed">${MEDAL}</span><span class="bnext">${nx?`<small>Nächstes Abzeichen</small><b>${esc(nx[0][1])}</b><span class="bleft">${esc(left)}</span><span class="pb"><i style="width:${Math.round(Math.min(1,nx[1][0]/nx[1][1])*100)}%"></i></span>`:`<b>Alle Abzeichen geschafft 🏆</b>`}</span>`
     +`<span class="bgot" aria-label="${got.length} von ${BADGES.length} freigeschaltet">${got.map(b=>`<i title="${esc(b[1])}">${MEDAL}</i>`).join("")}<em>${got.length} von ${BADGES.length}</em></span></summary><div class="bdgs">${all}</div></details>`}
 function motPanel(i){
-  const T=today(),mon=T-mo(fromDn(T).getUTCDay()),all=RAW.filter(t=>!t.del&&t.status==="done");
+  const T=today(),mon=T-mo(fromDn(T).getUTCDay()),all=RAW.filter(t=>!t.del&&isOk(t));
   const wk=all.filter(t=>{const d=doneOn(t);return d>=mon&&d<=T}),prev=all.filter(t=>{const d=doneOn(t);return d>=mon-7&&d<=T-7}).length;
   const by=new Map();wk.forEach(t=>{const w=doneBy(t);by.set(w,(by.get(w)||0)+1)});const parts=[...by].sort((a,b)=>(a[0]==="Gemeinsam")-(b[0]==="Gemeinsam")||b[1]-a[1]);
   const bar=wk.length?`<div class="wbar">${parts.map(([w,c])=>`<i style="flex:${c};background:${motCol(w)}" title="${esc(w)}: ${c}"></i>`).join("")}</div>`:`<div class="wbar"></div>`;
@@ -75,7 +77,7 @@ function newBadges(){const s=motStats(motScope()),got=BADGES.filter(b=>bOn(b,s))
   try{localStorage.setItem(badgeKey(),JSON.stringify(got))}catch(_){}
   return seen?BADGES.filter(b=>got.includes(b[0])&&!seen.includes(b[0])):[]}
 function cheer(){
-  const L=motScope(),T=today(),doneToday=L.some(t=>t.status==="done"&&doneOn(t)===T),fresh=newBadges();
+  const L=motScope(),T=today(),doneToday=L.some(t=>isOk(t)&&doneOn(t)===T),fresh=newBadges();
   const all=!todayOpenOf(L).length&&doneToday,nb=fresh.length?"Neues Abzeichen: "+fresh.map(b=>b[1]).join(", "):"";
   if(all||nb){confetti();hap(30);toast(all?"Alles für heute erledigt – stark! 🎉"+(nb?" "+nb:""):"🏅 "+nb,null,null,5000);if(all){if(GIFS.done)gifPop("done",true);else gifCheer="done"}}}
 /* 1.34: Sprüche auf der Startseite (nur dort). Eingebaut; im Add-on erneuert Gemini sie höchstens einmal am Tag (api/sprueche).
@@ -136,3 +138,13 @@ function funHtml(kind,v){if(!funOn())return"";gifKind=kind;if(haInfo&&haInfo.gip
   const why=v.why?`<p class="mwhy">${esc(v.why)}</p>`:"";
   if(g&&g.url)return`<div class="hmeme">${why}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button></div>`;
   return`<div class="hmeme">${why}<p class="meme">${esc(memeText(kind,v))}</p></div>`}
+/* 1.42: „BUSTED!“ einmal groß, wenn man auf der Startseite „Nicht geschafft“ wählt (nur dort und nur für die Person, die es antippt).
+   Verschwindet von selbst, Antippen schließt sofort. Mit „Sprüche, GIFs und Konfetti“ aus bleibt es weg. */
+function busted(t){
+  if(!funOn())return;document.querySelectorAll(".bust").forEach(x=>x.remove());
+  const el=document.createElement("div");el.className="bust";el.setAttribute("role","status");
+  el.innerHTML=`<div class="bst"><b>BUSTED!</b><small>„${esc(t.title)}“ nicht geschafft</small></div>`+
+    Array.from({length:8},(_,i)=>`<i aria-hidden="true" style="--a:${i*45+12}deg;--d:${i%2?7:9.5}rem;--s:${(.8+(i%3)*.35).toFixed(2)}">!</i>`).join("");
+  document.body.appendChild(el);hap([40,60,90]);
+  let gone=false;const off=()=>{if(gone)return;gone=true;el.classList.add("out");setTimeout(()=>el.remove(),280)};
+  el.addEventListener("click",off);setTimeout(off,2600)}

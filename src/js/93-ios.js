@@ -14,11 +14,12 @@ async function confirmSheet(msg,label,primary){return(await sheet(msg,[{items:[{
 async function taskMenu(id){
   const t=byId(id);if(!t)return;
   const v=await sheet(t.title,[
-    {items:[{t:"Bearbeiten",v:"edit"},{t:"Auswählen",v:"sel"}]},
+    {items:[{t:"Bearbeiten",v:"edit"},{t:"Auswählen",v:"sel"},...(t.status!=="done"?[{t:"Nicht geschafft",v:"fail"}]:[])]},
     {items:[{t:"In den Papierkorb",v:"del",bad:true}]}]);
   if(!v)return;
   if(v==="sel"){setSel(true);sel.add(id);applySel()}
   else if(v==="edit")openDlg(id);
+  else if(v==="fail")failTask(id);
   else if(v==="del")trash(id)}
 /* Wischen auf Zeilen: rechts erledigt, links in den Papierkorb */
 (()=>{
@@ -47,8 +48,8 @@ async function taskMenu(id){
     el.style.transform="translateX("+dir*110+"%)";el.style.opacity="0";
     setTimeout(async()=>{el.style.transition="";el.style.transform="";el.style.opacity="";
       const t=byId(id);if(!t)return;
-      if(dir>0){const prev=t.status,next=prev==="done"?"todo":"done";hap(8);lastMoved=id;const sp=await setStatus(t,next);
-        toast("„"+t.title+"“: "+ST[next],async()=>{const c=byId(id);if(c){await saveTask({...c,status:prev,spawned:sp?"":c.spawned});if(sp)delTask(sp.id)}})}
+      if(dir>0){const prev=t.status,pf=isFail(t),next=prev==="done"?"todo":"done";hap(8);lastMoved=id;const sp=await setStatus(t,next);
+        toast("„"+t.title+"“: "+ST[next],async()=>{const c=byId(id);if(c){await saveTask({...c,status:prev,fail:pf,spawned:sp?"":c.spawned});if(sp)delTask(sp.id)}})}
       else trash(id)},210)};
   document.addEventListener("touchend",end);document.addEventListener("touchcancel",()=>{if(row){row.style.transform="";row.style.transition="";strip.style.display="none"}row=null;mode=0});
   document.addEventListener("click",e=>{if(Date.now()-lastSwipe<400&&e.target.closest(sel_)){e.preventDefault();e.stopPropagation()}},true);

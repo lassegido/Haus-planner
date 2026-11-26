@@ -4,26 +4,32 @@ function rel(t){const d=dn(t.end)-today();return d<0?`${-d} ${-d===1?"Tag":"Tage
 function hrow(t,i){return`<div class="hrow" data-id="${t.id}" style="--i:${Math.min(i,8)}"><button class="ring ${t.status}" data-adv="${t.id}" aria-label="Status: ${ST[t.status]}. Weiterschalten"></button><div class="hm"><div class="ht">${esc(t.title)}</div><div class="hs">${[t.proj,...tgs(t),t.who].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}</div></div><span class="hd ${isLate(t)?"late":""}">${rel(t)}</span></div>`}
 /* 1.33: Tag, an dem eine Aufgabe erledigt wurde (aus dem Verlauf, Ortszeit); NaN, wenn unbekannt */
 const DONE_RX=/^Status: (?:[^→]*→ )?Erledigt(?: \(|$)/;
-function doneDay(t){const L=t.log||[];for(let i=L.length-1;i>=0;i--){const x=L[i];if(x.k==="h"&&DONE_RX.test(x.x||"")){const d=new Date(String(x.t)+"Z");return isNaN(d)?NaN:Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5}}return NaN}
+/* Abgeschlossen = erledigt oder nicht geschafft (1.42) */
+const CLOSE_RX=/^Status: (?:[^→]*→ )?(?:Erledigt|Nicht geschafft)(?: \(|$)/;
+/* Zeitpunkt des Abschließens (UTC aus dem Verlauf), sonst das Ende; für „zuletzt abgeschlossen zuerst“ im Board */
+function closedAt(t){const L=t.log||[];for(let i=L.length-1;i>=0;i--){const x=L[i];if(x.k==="h"&&CLOSE_RX.test(x.x||""))return String(x.t)}return String(t.end||"")}
+function doneDay(t){const L=t.log||[];for(let i=L.length-1;i>=0;i--){const x=L[i];if(x.k==="h"&&CLOSE_RX.test(x.x||"")){const d=new Date(String(x.t)+"Z");return isNaN(d)?NaN:Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5}}return NaN}
 function homeBody(tasks,allT){
-  const T=today(),n=tasks.length,d=tasks.filter(t=>t.status==="done").length;
+  const T=today(),n=tasks.filter(t=>!isFail(t)).length,d=tasks.filter(isOk).length;
   const doing=tasks.filter(t=>t.status==="doing").length,over=tasks.filter(isLate).sort((a,b)=>dn(a.end)-dn(b.end)),blk=tasks.filter(isBlocked).length;
   const week=tasks.filter(t=>t.status!=="done"&&!isLate(t)&&dn(t.start)<=T+7&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end)||dn(a.start)-dn(b.start));
   const nx=tasks.filter(t=>t.status!=="done"&&dn(t.end)>=T).sort((a,b)=>dn(a.end)-dn(b.end))[0],C=326.7,open=n-d;
   const areas=allTags().filter(a=>tasks.some(t=>tgs(t).includes(a)));
-  const bars=areas.map(a=>{const L=tasks.filter(t=>tgs(t).includes(a)),x=L.filter(t=>t.status==="done").length;return`<div class="prg" style="--tc:${tcol(a)}"><span class="pn">${tIc(a)}${esc(a)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
+  const bars=areas.map(a=>{const L=tasks.filter(t=>tgs(t).includes(a)&&!isFail(t)),x=L.filter(isOk).length;return`<div class="prg" style="--tc:${tcol(a)}"><span class="pn">${tIc(a)}${esc(a)}</span><div class="pb"><i style="width:${L.length?Math.round(x/L.length*100):0}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
   const names=allWho(),cnt=w=>allT.filter(t=>t.status!=="done"&&wl(t).includes(w)).length,mx=Math.max(1,...names.map(cnt));
   const who=names.map(w=>`<div class="prg"><span>${esc(w)}</span><div class="pb ${avc(w)}"><i style="width:${Math.round(cnt(w)/mx*100)}%"></i></div><em>${cnt(w)}</em></div>`).join("");
-  const pjs=allProjs().filter(n=>tasks.some(t=>t.proj===n)),pbars=pjs.map(n=>{const L=tasks.filter(t=>t.proj===n),x=L.filter(t=>t.status==="done").length;return`<div class="prg" style="--tc:${pcol(n)}"><span>${esc(n)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
+  const pjs=allProjs().filter(n=>tasks.some(t=>t.proj===n)),pbars=pjs.map(n=>{const L=tasks.filter(t=>t.proj===n&&!isFail(t)),x=L.filter(isOk).length;return`<div class="prg" style="--tc:${pcol(n)}"><span>${esc(n)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
   let k=1;const P=(cls,h,c,body)=>`<section class="pnl ${cls}" style="--i:${k++}"><h3><span>${h}</span><em>${c}</em></h3>${body}</section>`;
   const byEnd=(a,b)=>dn(a.end)-dn(b.end)||dn(a.start)-dn(b.start),opn=tasks.filter(t=>t.status!=="done");
   const nowL=opn.filter(t=>!isLate(t)&&dn(t.start)<=T&&dn(t.end)>=T).sort(byEnd),todayL=[...over,...nowL];
   const doingL=opn.filter(t=>t.status==="doing").sort(byEnd);
   /* Ring: nur heute (überfällig, heute anstehend, heute erledigt) der oben gewählten Person */
-  const doneT=tasks.filter(t=>{if(t.status!=="done")return false;const dd=doneDay(t);return isNaN(dd)?dn(t.start)<=T&&dn(t.end)>=T:dd===T});
-  const rd=doneT.length,rn=todayL.length+rd,rpct=rn?Math.round(rd/rn*100):0,off=(C*(1-rpct/100)).toFixed(1);
+  const closedT=tasks.filter(t=>{if(t.status!=="done")return false;const dd=doneDay(t);return isNaN(dd)?dn(t.start)<=T&&dn(t.end)>=T:dd===T});
+  const doneT=closedT.filter(t=>!t.fail),nf=closedT.length-doneT.length;
+  const rd=doneT.length,rn=todayL.length+rd+nf,rpct=rn?Math.round(rd/rn*100):0,off=(C*(1-rpct/100)).toFixed(1);
   const ms=motStats(motScope());
-  const sub=!rn?"Für heute ist nichts geplant.":!todayL.length?"Alles für heute erledigt.":`Noch ${todayL.length} offen`+(over.length?`, davon ${over.length} überfällig.`:".");
+  const NF=nf?` ${nf} nicht geschafft.`:"";
+  const sub=!rn?"Für heute ist nichts geplant.":!todayL.length?(nf?NF.trim():"Alles für heute erledigt."):`Noch ${todayL.length} offen`+(over.length?`, davon ${over.length} überfällig.`:".")+NF;
   const TL={heute:["Heute",todayL,"var(--acc)",'<rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/><circle cx="12" cy="15" r="1.6" fill="currentColor" stroke="none"/>',"Für heute ist nichts geplant."],
     woche:["7 Tage",week,"#6F8796",'<rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4M8 14.5h8"/>',"In den nächsten 7 Tagen ist nichts fällig."],
     doing:["In Arbeit",doingL,"var(--sun)",'<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/>',"Gerade ist nichts in Arbeit."],
@@ -35,14 +41,14 @@ function homeBody(tasks,allT){
   const list=`<section class="pnl hlist" style="--i:${k++}" aria-label="${cur[0]}">${LL.length?LL.slice(0,40).map(hrow).join(""):`<div class="none">${cur[4]}</div>`}</section>`;
   /* Lage für das Meme, in dieser Reihenfolge: alles erledigt → etwas überfällig → schon etwas geschafft → Serie läuft → noch nichts.
      Ist eine Lage gelöst (z. B. Überfälliges erledigt), greift die nächste und damit ein anderes GIF. */
-  const kind=rn&&!todayL.length?"done":over.length?"late":rd?"good":ms.streak>=3?"streak":todayL.length?"start":"done";
+  const kind=rn&&!todayL.length?(nf?(rd?"good":"start"):"done"):over.length?"late":rd?"good":ms.streak>=3?"streak":todayL.length?"start":"done";
   const A=n=>n===1?"Aufgabe":"Aufgaben",nOpen=todayL.length;
   /* Ein Satz, der motiviert und den Grund für das GIF mitliefert, ohne ihn zu erklären */
   const why={done:rn?(rn===1?"Erledigt. Genau so sieht ein guter Tag aus.":`Alle ${rn} erledigt. Das hast du dir verdient.`):"Heute ist nichts fällig. Genieß den freien Tag.",
     late:over.length===1?"Eine Sache ist liegen geblieben. Die holst du dir jetzt zurück.":`${over.length} Sachen sind liegen geblieben. Zeit für dein Comeback.`,
-    good:`${rd} geschafft, ${nOpen===1?"nur noch eine":"noch "+nOpen}. Du bist richtig drin.`,
+    good:nOpen?`${rd} geschafft, ${nOpen===1?"nur noch eine":"noch "+nOpen}. Du bist richtig drin.`:`${rd} geschafft, ${nf} nicht. Morgen holst du dir die volle Runde.`,
     streak:`${ms.streak} Tage am Stück. Heute ${nOpen===1?"noch eine":"noch "+nOpen}, dann hält die Serie.`,
-    start:nOpen===1?"Eine Aufgabe für heute. Kurz erledigen, dann ist der Tag gewonnen.":`${nOpen} Aufgaben für heute. Fang mit der ersten an, der Rest läuft.`}[kind];
+    start:!nOpen&&nf?"Heute hat’s nicht geklappt. Morgen holst du dir die volle Runde.":nOpen===1?"Eine Aufgabe für heute. Kurz erledigen, dann ist der Tag gewonnen.":`${nOpen} Aufgaben für heute. Fang mit der ersten an, der Rest läuft.`}[kind];
   /* Startseite (1.37), ein Weg von oben nach unten:
      1. Ankommen: Begrüßung, Tagesstand, Serie, Meme zur Lage (eine Karte)
      2. Handeln: Eingabe, dann die Liste mit Umschalter Heute / 7 Tage / In Arbeit / Überfällig
@@ -112,12 +118,12 @@ function render(){
   if(KIOSK){$("main").innerHTML=kiosk();document.querySelectorAll("[data-adv]").forEach(b=>b.onclick=e=>{e.stopPropagation();advance(b.dataset.adv)});return}
   if(!purged&&RAW.length){purged=true;const lim=iso(new Date(Date.now()-30*864e5));RAW.filter(t=>t.del&&t.delAt&&t.delAt<lim).forEach(t=>delTask(t.id))}
   for(const id of [...sel])if(!tasks.some(t=>t.id===id))sel.delete(id);
-  const n=tasks.length,d=tasks.filter(t=>t.status==="done").length,pct=n?Math.round(d/n*100):0;
-  const doing=tasks.filter(t=>t.status==="doing").length,late=tasks.filter(isLate).length,blk=tasks.filter(isBlocked).length,op=n-d-doing;
+  const n=tasks.length,d=tasks.filter(isOk).length,nv=n-tasks.filter(isFail).length,pct=nv?Math.round(d/nv*100):0;
+  const doing=tasks.filter(t=>t.status==="doing").length,late=tasks.filter(isLate).length,blk=tasks.filter(isBlocked).length,op=nv-d-doing;
   if(view!=="home"&&isPhone())$("sub").innerHTML=n?`${n} ${n===1?"Aufgabe":"Aufgaben"} · ${pct} % erledigt`+(late?` · <b class="hot">${late} überfällig</b>`:""):"Noch keine Aufgaben";
   else $("sub").textContent=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
-  $("kpis").innerHTML=view==="home"?"":`<div class="kp"><div class="kn"><b><span data-n="${pct}">${pct}</span><i>%</i></b><span>erledigt · ${d} von ${n}</span></div><div class="kn"><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="kn ${late?"hot":""}"><b data-n="${late}">${late}</b><span>überfällig</span></div><div class="kn"><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div>${n?`<div class="stripe" title="Erledigt · In Arbeit · Offen"><i class="s-x" style="flex:${d}"></i><i class="s-d" style="flex:${doing}"></i><i class="s-o" style="flex:${op}"></i></div>`:""}`;
-  document.body.dataset.view=view;$("ttl").textContent=view==="home"?"Start":{board:"Tafel",list:"Liste",gantt:"Zeitstrahl",cal:"Kalender"}[view];
+  $("kpis").innerHTML=view==="home"?"":`<div class="kp"><div class="kn"><b><span data-n="${pct}">${pct}</span><i>%</i></b><span>erledigt · ${d} von ${nv}</span></div><div class="kn"><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="kn ${late?"hot":""}"><b data-n="${late}">${late}</b><span>überfällig</span></div><div class="kn"><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div>${n?`<div class="stripe" title="Erledigt · In Arbeit · Offen"><i class="s-x" style="flex:${d}"></i><i class="s-d" style="flex:${doing}"></i><i class="s-o" style="flex:${op}"></i></div>`:""}`;
+  document.body.dataset.view=view;$("ttl").textContent=view==="home"?"Start":{board:"Board",list:"Liste",gantt:"Zeitstrahl",cal:"Kalender"}[view];
     const whos=allWho(),curw=$("fw").value;
   $("fw").innerHTML='<option value="">Alle Personen</option>'+whos.map(a=>`<option ${a===curw?"selected":""}>${esc(a)}</option>`).join("")+`<option value="__none" ${curw==="__none"?"selected":""}>Nicht zugewiesen</option>`;
   const fw2=$("fw").value,ch=(attr,val,label,c,on)=>`<button data-${attr}="${esc(val)}" class="${on?"on":""}"><span>${attr==="cw"&&val&&val!=="__none"?`<i class="wd ${avc(val)}"></i>`:""}${esc(label)}</span><em>${c}</em></button>`;
@@ -137,20 +143,22 @@ const pjh=t=>t.proj?`<div class="pjh" style="--tc:${pcol(t.proj)}"><i></i>${esc(
 const pb=t=>t.prio?`<span class="pr p${t.prio}" title="Prio ${t.prio}">P${t.prio}</span>`:"";
 const cl=t=>{const a=t.checklist||[];return a.length?`<span class="ckc">${a.filter(x=>x.d).length}/${a.length}</span>`:""};
 function card(t,s,i=0){
-  const a=t.checklist||[],k=a.filter(x=>x.d).length,late=isLate(t);
+  const a=t.checklist||[],k=a.filter(x=>x.d).length,late=isLate(t),fl=isFail(t)?" fail":"";
   const tg=pb(t)+tgs(t).map(chip).join("")+(isBlocked(t)?'<span class="blk">blockiert</span>':"");
-  return`<div class="card ${s}${t.id===lastMoved?" pop":""}"${t.prio?` data-pr="${t.prio}"`:""} draggable="true" data-id="${t.id}" style="--i:${Math.min(i,8)}">${pjh(t)}<div class="ch"><button class="ring ${s}" data-adv="${t.id}" aria-label="Status: ${ST[s]}. Weiterschalten"></button><div class="t">${esc(t.title)}</div>${wl(t).length?`<span class="avs" title="${esc(wl(t).join(", "))}">${wl(t).slice(0,3).map(n=>`<i class="av ${avc(n)}">${esc(n[0].toUpperCase())}</i>`).join("")}${wl(t).length>3?`<i class="av ao">+${wl(t).length-3}</i>`:""}</span>`:""}</div>${tg?`<div class="tg">${tg}</div>`:""}${a.length?`<div class="cb"><i style="width:${Math.round(k/a.length*100)}%"></i></div>`:""}<div class="cm"><span class="${late?"late":""}">${dr(t)}</span><span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}${cl(t)}</span></div></div>`}
+  return`<div class="card ${s}${fl}${t.id===lastMoved?" pop":""}"${t.prio?` data-pr="${t.prio}"`:""} draggable="true" data-id="${t.id}" style="--i:${Math.min(i,8)}">${pjh(t)}<div class="ch"><button class="ring ${s}${fl}" data-adv="${t.id}" aria-label="Status: ${stName(t)}. Weiterschalten"></button><div class="t">${esc(t.title)}</div>${wl(t).length?`<span class="avs" title="${esc(wl(t).join(", "))}">${wl(t).slice(0,3).map(n=>`<i class="av ${avc(n)}">${esc(n[0].toUpperCase())}</i>`).join("")}${wl(t).length>3?`<i class="av ao">+${wl(t).length-3}</i>`:""}</span>`:""}</div>${tg?`<div class="tg">${tg}</div>`:""}${a.length?`<div class="cb"><i style="width:${Math.round(k/a.length*100)}%"></i></div>`:""}<div class="cm"><span class="${late?"late":""}">${fl?'<b class="nfail">Nicht geschafft</b> · ':""}${dr(t)}</span><span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}${cl(t)}</span></div></div>`}
 let showDone=false;const DONE_MAX=20;
 function board(list){
   return`<div class="board">`+Object.keys(ST).map(s=>{let L=list.filter(t=>t.status===s);const all=L.length;
-    const cut=s==="done"&&!showDone&&all>DONE_MAX;if(cut)L=L.slice().sort((x,y)=>dn(y.end)-dn(x.end)).slice(0,DONE_MAX);
+    /* Abgeschlossene: zuletzt abgehakte (oder nicht geschaffte) oben, damit man Versehen schnell findet */
+    if(s==="done"){const ca=new Map(L.map(t=>[t,closedAt(t)]));L=L.slice().sort((x,y)=>ca.get(y)<ca.get(x)?-1:ca.get(y)>ca.get(x)?1:0)}
+    const cut=s==="done"&&!showDone&&all>DONE_MAX;if(cut)L=L.slice(0,DONE_MAX);
     return`<div class="colm" data-s="${s}"><h3><i class="dt ${s}"></i><span>${ST[s]}</span><em>${all}</em></h3>`+(L.length?L.map((t,i)=>card(t,s,i)).join(""):'<div class="none">Keine Aufgaben</div>')+(cut?`<button class="btn ghost sm more" onclick="showDone=true;render()">Alle ${all} anzeigen</button>`:"")+`</div>`}).join("")+`</div>`;
 }
 const isPhone=()=>matchMedia("(max-width:699px)").matches;
-function lrow(t,i){const dn_=t.status==="done";return`<div class="hrow lrow" data-id="${t.id}"${t.prio?` data-pr="${t.prio}"`:""} style="--i:${Math.min(i,8)}"><button class="ring ${t.status}" data-adv="${t.id}" aria-label="Status: ${ST[t.status]}. Weiterschalten"></button><div class="hm"><div class="ht">${pb(t)}<span>${esc(t.title)}</span>${t.ms?MSI:""}${t.rec?RECI:""}</div><div class="hs">${[t.proj,...tgs(t),t.who].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}${isBlocked(t)?' · <span class="blk">blockiert</span>':""}</div></div><span class="hd${isLate(t)?" late":""}">${dn_?fd(t.end):rel(t)}</span></div>`}
+function lrow(t,i){const dn_=t.status==="done",fl=isFail(t);return`<div class="hrow lrow${fl?" fail":""}" data-id="${t.id}"${t.prio?` data-pr="${t.prio}"`:""} style="--i:${Math.min(i,8)}"><button class="ring ${t.status}${fl?" fail":""}" data-adv="${t.id}" aria-label="Status: ${stName(t)}. Weiterschalten"></button><div class="hm"><div class="ht">${pb(t)}<span>${esc(t.title)}</span>${t.ms?MSI:""}${t.rec?RECI:""}</div><div class="hs">${[t.proj,...tgs(t),t.who].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}${isBlocked(t)?' · <span class="blk">blockiert</span>':""}</div></div><span class="hd${isLate(t)?" late":""}">${fl?"nicht geschafft":dn_?fd(t.end):rel(t)}</span></div>`}
 function table(list){
   if(isPhone())return`<div class="ilist">`+groups(list).map(g=>(g.l!=null?`<h3 class="igh"><i class="dt" style="background:${g.c}"></i><span>${esc(g.l)}</span><em>${g.L.length}</em></h3>`:"")+`<div class="igrp">${g.L.map(lrow).join("")}</div>`).join("")+`</div>`;
-  const row=t=>`<tr class="row" data-id="${t.id}"${t.prio?` data-pr="${t.prio}"`:""}><td>${pjh(t)}${pb(t)}${esc(t.title)} ${isBlocked(t)?'<span class="blk">blockiert</span>':""}<span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}</span></td><td>${tgs(t).map(chip).join("")}</td><td>${esc(t.who)}</td><td>${fd(t.start)}</td><td class="${isLate(t)?"late":""}">${fd(t.end)}</td><td><span class="st ${t.status}">${ST[t.status]}</span></td></tr>`;
+  const row=t=>`<tr class="row" data-id="${t.id}"${t.prio?` data-pr="${t.prio}"`:""}><td>${pjh(t)}${pb(t)}${esc(t.title)} ${isBlocked(t)?'<span class="blk">blockiert</span>':""}<span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}</span></td><td>${tgs(t).map(chip).join("")}</td><td>${esc(t.who)}</td><td>${fd(t.start)}</td><td class="${isLate(t)?"late":""}">${fd(t.end)}</td><td><span class="st ${t.status}${isFail(t)?" fail":""}">${stName(t)}</span></td></tr>`;
   return`<div class="wrap"><table><tr><th>Aufgabe</th><th>Tags</th><th>Wer</th><th>Beginn</th><th>Ende</th><th>Status</th></tr>`+
   groups(list).map(g=>(g.l!=null?`<tr class="grp"><td colspan="6"><i class="dt" style="background:${g.c}"></i>${esc(g.l)}<em>${g.L.length}</em></td></tr>`:"")+g.L.map(row).join("")).join("")+`</table></div>`;
 }
@@ -212,7 +220,7 @@ function gantt(list){
     const body=t.ms?`<path d="M${p.x+9} ${cy-10}l10 10l-10 10l-10-10z" fill="${col[t.status]}"/>`:`<rect x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="${col[t.status]}"/><rect class="ggl" x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="url(#gGl)"/>`;
     const lbl=inside?`<text class="bt ${t.status}" x="${p.x+11}" y="${cy+4.2}">${esc(t.title)}</text>`:`<text class="bo" x="${p.x+p.w+10}" y="${cy+4.2}">${esc(t.title)}</text>`;
     const hd2=t.ms?"":`<rect data-h="s" class="gh1" x="${p.x}" y="${p.y+8}" width="7" height="${ROW-16}"/><rect data-h="e" class="gh1" x="${p.x+p.w-7}" y="${p.y+8}" width="7" height="${ROW-16}"/>`;
-    gd+=`<g data-id="${t.id}" class="gbar"${t.status==="done"?' opacity=".72"':""}>${body}${lbl}${hd2}<circle data-h="dep" class="gdep" cx="${p.x+p.w+(t.ms?1:0)}" cy="${cy}" r="5"/></g>`});
+    gd+=`<g data-id="${t.id}" class="gbar${isFail(t)?" gfail":""}"${t.status==="done"?' opacity=".72"':""}>${body}${lbl}${hd2}<circle data-h="dep" class="gdep" cx="${p.x+p.w+(t.ms?1:0)}" cy="${cy}" r="5"/></g>`});
   const rows=items.map(it=>it.g?`<div class="gr gh2" style="--tc:${it.g.c}"><i class="dt" style="background:${it.g.c}"></i><span>${esc(it.g.l)}</span><em>${it.g.L.length}</em></div>`:`<div class="gr" data-id="${it.t.id}" title="${esc(it.t.title)}"><i class="dt ${it.t.status}"></i>${pb(it.t)}<span>${esc(it.t.title)}</span></div>`).join("");
   const seg=[["day","Tage"],["month","Monate"],["year","Jahre"]].map(([k,l])=>`<button data-gm="${k}" class="${k===mode?"on":""}">${l}</button>`).join("");
   return`<div class="gctl"><div class="seg">${seg}</div><button class="btn ghost sm" data-gtoday>Heute</button></div>`+

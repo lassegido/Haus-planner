@@ -42,7 +42,7 @@ $("selbar").onclick=async e=>{
   const pick=(title,opts)=>sheet(title,[{items:opts.map(([v,t])=>({t,v}))}]);
   const k=b.dataset.sa;
   if(k==="status"){const v=await sheet(T,[{row:true,items:Object.entries(ST).map(([v,t])=>({t,v}))}]);if(!v)return;
-    for(const t of L)if(t.status!==v)await setStatus(t,v);toast(T+": "+ST[v]);sel.clear();applySel()}
+    for(const t of L)if(t.status!==v||isFail(t))await setStatus(t,v);toast(T+": "+ST[v]);sel.clear();applySel()}
   else if(k==="who"){const v=await pick(T+" zuweisen",[...allWho().map(w=>[w,w]),["__none","Niemand"]]);if(v)fire("selwho",v)}
   else if(k==="more"){
     const v=await sheet(T,[{items:[{t:"Priorität",v:"prio"},{t:"Tag hinzufügen",v:"tag",dis:!allTags().length},{t:"Projekt",v:"proj"},{t:"Alle auswählen",v:"all"}]},{items:[{t:"Archivieren",v:"arch"},{t:"In den Papierkorb",v:"del",bad:true}]}]);

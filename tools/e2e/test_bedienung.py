@@ -47,7 +47,7 @@ def test_wischen_und_gedrueckt_halten(t, browser):
           el.dispatchEvent(new PointerEvent('pointerdown',o));await new Promise(r=>setTimeout(r,650));
           el.dispatchEvent(new PointerEvent('pointerup',o));el.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}));
           return [...document.querySelectorAll('#dsh[open] button:not(.cancel)')].map(b=>b.textContent.trim())}""")
-        t.check("Gedrückt halten öffnet kurzes Menü (höchstens 3 Einträge)", 1 <= len(menu) <= 3 and any("Auswählen" in m for m in menu), menu)
+        t.check("Gedrückt halten öffnet kurzes Menü (höchstens 4 Einträge, bei offenen Aufgaben mit „Nicht geschafft“)", 1 <= len(menu) <= 4 and any("Auswählen" in m for m in menu), menu)
         p.pg.click("#dsh button:has-text('Auswählen')")
         p.pg.wait_for_timeout(400)
         t.check("„Auswählen“ startet die Mehrfachauswahl", p.js("document.body.classList.contains('selmode')&&document.querySelectorAll('#main .sel').length===1"))

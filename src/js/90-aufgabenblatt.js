@@ -90,7 +90,7 @@ function openDlg(id,tpl){
   $("dlg").showModal();dlgSnap=dlgState();$("dlg").scrollTop=0;if(!editing&&!tpl)setTimeout(()=>$("f_title").focus(),50);
 }
 function fillDlg(t){
-  $("f_title").value=t.title;$("f_qp").innerHTML="";$("f_sug").innerHTML="";selTags=[...tgs(t)];regDraft=reg.map(x=>({...x}));colorFor=null;$("f_tagin").value="";drawTags();selWho=wl(t);$("f_who").value="";$("f_who").style.display="none";drawWho();$("f_status").value=t.status;syncSeg();$("f_prio").value=t.prio||0;syncPr();
+  $("f_title").value=t.title;$("f_qp").innerHTML="";$("f_sug").innerHTML="";selTags=[...tgs(t)];regDraft=reg.map(x=>({...x}));colorFor=null;$("f_tagin").value="";drawTags();selWho=wl(t);$("f_who").value="";$("f_who").style.display="none";drawWho();$("f_status").value=isFail(t)?"fail":t.status;syncSeg();$("f_prio").value=t.prio||0;syncPr();
   $("f_start").value=t.start;$("f_end").value=t.end;initExtra(t);rpOpen(false);drawRange();$("f_notes").value=t.notes||"";
   const others=tasks.filter(x=>!editing||x.id!==editing.id);
   drawDeps(others,t.deps||[]);
@@ -190,12 +190,13 @@ $("b_save").onclick=async()=>{
   if(q.found){q.tags.forEach(n=>{if(!selTags.includes(n))selTags.push(n)});q.who.forEach(n=>{if(!selWho.includes(n))selWho.push(n)});if(q.proj)proj=q.proj;const qd=qDates(q);if(qd&&!ms){s=qd[0];e=qd[1]}else if(qd){s=e=qd[1]}}
   const rec=recCur?{...recCur}:null;
   const t={...(editing||{}),id:editing?editing.id:newId(),title,tags:selTags.slice(),area:selTags[0]||"",proj,rec,ms,who:selWho.join(", "),
-    status:$("f_status").value,prio:q.prio||+$("f_prio").value||0,start:s,end:e,notes:$("f_notes").value,checklist:cklist.filter(x=>x.t.trim()),deps:[...document.querySelectorAll("#f_deps input:checked")].map(i=>i.value)};
+    status:$("f_status").value==="fail"?"done":$("f_status").value,fail:$("f_status").value==="fail",prio:q.prio||+$("f_prio").value||0,start:s,end:e,notes:$("f_notes").value,checklist:cklist.filter(x=>x.t.trim()),deps:[...document.querySelectorAll("#f_deps input:checked")].map(i=>i.value)};
+  if(!t.fail)delete t.fail;const failNew=t.fail&&!isFail(prev);
   $("dlg").close();
   let sp=null;if(t.status==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);if(sp)t.spawned=sp.id}
   {const r=regDraft;if(r){if(proj&&!r.some(x=>x.p&&x.n===proj))r.push({n:proj,c:nextPColor(),p:1});selTags.forEach(n=>{if(!r.some(x=>!x.p&&x.n===n))r.push({n,c:colorKey(n)})});if(JSON.stringify(r)!==JSON.stringify(reg))saveReg(r)}}
   if(editing)t.log=diffLog(editing,t);
-  await saveTask(t,{check:true});if(sp)await saveTask(sp);if(t.status==="done"&&(!prev||prev.status!=="done"))cheer();
+  await saveTask(t,{check:true});if(sp)await saveTask(sp);if(t.status==="done"&&!t.fail&&(!prev||prev.status!=="done"))cheer();if(failNew&&view==="home")busted(t);
   if(prev)toast("Änderungen gespeichert",async()=>{const c=byId(prev.id);await saveTask({...prev,v:c?c.v:prev.v})});
   else toast("„"+t.title+"“ angelegt",()=>delTask(t.id));
 };

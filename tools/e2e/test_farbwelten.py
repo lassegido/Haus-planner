@@ -83,7 +83,7 @@ def test_tiefe_und_verlaeufe(t, browser):
             t.check(th + ": Karten mit Verlauf und Schatten (auch bei festem Dunkelmodus)",
                     "gradient" in (cs(".card", "backgroundImage") or "") and cs(".card", "boxShadow") not in (None, "none"),
                     (cs(".card", "backgroundImage"), cs(".card", "boxShadow")))
-            t.check(th + ": Tafel-Spalten oben in Statusfarbe getönt", "gradient" in (cs(".colm", "backgroundImage") or ""))
+            t.check(th + ": Board-Spalten oben in Statusfarbe getönt", "gradient" in (cs(".colm", "backgroundImage") or ""))
             t.check(th + ": Neu-Knopf mit Verlauf", "gradient" in (cs("#add", "backgroundImage") or cs(".add", "backgroundImage") or ""))
             p.pg.click("[data-v=gantt]")
             p.pg.wait_for_timeout(400)

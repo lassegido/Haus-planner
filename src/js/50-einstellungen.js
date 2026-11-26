@@ -88,7 +88,7 @@ function drawSettings(){
   }else if(sPage==="fun"){
     const hi=haInfo||{},on=funOn();
     h=`<p class="sgt">Nur für dich</p>`+grp(sopt('data-set="fun:1"',"An",on)+sopt('data-set="fun:0"',"Aus",!on))
-     +cap("Sprüche, GIF des Tages und Konfetti auf der Startseite. Liste, Tafel, Zeitstrahl und Kalender bleiben immer sachlich.");
+     +cap("Sprüche, GIF des Tages und Konfetti auf der Startseite. Liste, Board, Zeitstrahl und Kalender bleiben immer sachlich.");
     if(haInfo){h+=`<p class="sgt">GIF des Tages · für alle</p>`+(GIFS[gifKind]&&GIFS[gifKind].url?`<div class="gifprev"><img src="${esc(GIFS[gifKind].url)}" alt=""><small>Gerade zu sehen: ${esc(GIFS[gifKind].name||"")} · über GIPHY</small></div>`:"")
        +`<div class="sgrp kin"><input id="gif_key" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="${hi.giphy?"GIPHY-Schlüssel ist eingetragen":"GIPHY-Schlüssel einfügen"}" aria-label="GIPHY-Schlüssel"></div>`
        +grp(srow('data-act="gifsave"',"<b class=\"acc\">Schlüssel sichern</b>",null,null,false)+(hi.giphy?srow('data-act="gifnew"',"Heute andere GIFs",null,null,false)+srow('data-act="gifdel"',"<span class=\"bad\">Schlüssel entfernen</span>",null,null,false):""))
@@ -118,7 +118,7 @@ function drawSettings(){
   }else if(sPage==="me"){
     h=grp([["","Keine Angabe"],["Lasse","Lasse"],["Melanie","Melanie"]].map(([k,n])=>sopt(`data-set="me:${k}"`,n,k===me)).join(""))+cap("Damit weiß die App, welche Aufgaben deine sind.");
   }else if(sPage==="keys"){
-    h=`<dl class="keys"><dt>N</dt><dd>Neue Aufgabe</dd><dt>/</dt><dd>Suchen</dd><dt>1 – 5</dt><dd>Start, Liste, Tafel, Zeitstrahl, Kalender</dd><dt>S</dt><dd>Mehrfachauswahl</dd><dt>A</dt><dd>Alle auswählen</dd><dt>Entf</dt><dd>Auswahl löschen</dd><dt>H</dt><dd>Zeitstrahl: zu Heute</dd><dt>Esc</dt><dd>Auswahl beenden</dd></dl>`;
+    h=`<dl class="keys"><dt>N</dt><dd>Neue Aufgabe</dd><dt>/</dt><dd>Suchen</dd><dt>1 – 5</dt><dd>Start, Liste, Board, Zeitstrahl, Kalender</dd><dt>S</dt><dd>Mehrfachauswahl</dd><dt>A</dt><dd>Alle auswählen</dd><dt>Entf</dt><dd>Auswahl löschen</dd><dt>H</dt><dd>Zeitstrahl: zu Heute</dd><dt>Esc</dt><dd>Auswahl beenden</dd></dl>`;
   }
   $("s_body").innerHTML=h;
 }

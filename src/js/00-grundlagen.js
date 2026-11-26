@@ -1,6 +1,9 @@
 const wl=t=>String(t.who||"").split(",").map(x=>x.trim()).filter(Boolean);
 const allWho=()=>[...new Set(["Melanie","Lasse",...tasks.flatMap(wl)])];
 const ST={todo:"Offen",doing:"In Arbeit",done:"Erledigt"},NEXT={todo:"doing",doing:"done",done:"todo"};
+/* 1.42: „Nicht geschafft“ ist kein eigener Status, sondern Erledigt + fail:true. Damit gilt die Aufgabe überall als abgeschlossen
+   (nicht mehr offen, keine Erinnerung, Wiederholung legt die nächste an), zählt aber nicht als geschafft. */
+const isFail=t=>!!t&&t.status==="done"&&!!t.fail,isOk=t=>t.status==="done"&&!t.fail,stName=t=>isFail(t)?"Nicht geschafft":ST[t.status];
 let RAW=[],tasks=[],selMode=false,sel=new Set(),haInfo=null,haAvail=null,purged=false,reg=[],ftags=new Set(),fprojs=new Set(),grp="none",fprios=new Set(),sortm=(()=>{try{return localStorage.getItem("haus-sort")||"date"}catch(e){return"date"}})(),selTags=[],regDraft=null,colorFor=null,palOpen=null,view="home",col=null,editing=null,loaded=false;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));

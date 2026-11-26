@@ -236,7 +236,9 @@ def clean(t):
             "status": st if st in ("todo", "doing", "done") else "todo", "prio": (t.get("prio") if t.get("prio") in (1, 2, 3) else 0), "start": s, "end": e,
             "notes": str(t.get("notes", ""))[:4000], "deps": deps, "checklist": ck,
             "arch": bool(t.get("arch")), "del": bool(t.get("del")), "delAt": str(t.get("delAt", "") or "")[:10],
-            "log": clean_log(t.get("log")), "files": clean_files(t.get("files")), "v": 0}
+            "log": clean_log(t.get("log")), "files": clean_files(t.get("files")), "v": 0,
+            # 1.42: „Nicht geschafft“ = erledigt + fail (abgeschlossen, zählt aber nicht als geschafft)
+            **({"fail": True} if st == "done" and t.get("fail") is True else {})}
 
 
 # ---- Home Assistant: Erinnerungen und Sensoren (nur im Add-on, über die Supervisor-Schnittstelle)

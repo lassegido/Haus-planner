@@ -1116,3 +1116,29 @@ main.enter .hero.game .rg{animation:ringin 1.2s .15s cubic-bezier(.2,.8,.2,1) bo
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--acc2:#78CFC8;--sh1:0 1px 2px rgba(0,0,0,.35),0 8px 22px -8px rgba(0,0,0,.55);--sh2:0 2px 6px rgba(0,0,0,.4),0 20px 44px -12px rgba(0,0,0,.65);--hi:inset 0 1px 0 rgba(255,255,255,.07);--surf-grad:linear-gradient(180deg,color-mix(in srgb,#fff 6%,var(--card)) 0%,var(--card) 55%)}}
 :root[data-theme="dark"]{--acc2:#78CFC8;--sh1:0 1px 2px rgba(0,0,0,.35),0 8px 22px -8px rgba(0,0,0,.55);--sh2:0 2px 6px rgba(0,0,0,.4),0 20px 44px -12px rgba(0,0,0,.65);--hi:inset 0 1px 0 rgba(255,255,255,.07);--surf-grad:linear-gradient(180deg,color-mix(in srgb,#fff 6%,var(--card)) 0%,var(--card) 55%)}
 .pb i::after{content:"";display:block;height:100%;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,0) 65%)}
+/* 1.42: Nicht geschafft (abgeschlossen mit ✕ statt Haken, nicht durchgestrichen) und „BUSTED!“ auf der Startseite */
+.ring.done.fail{--c:var(--faint);background:var(--faint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round'%3E%3Cpath d='M7.5 7.5l9 9M16.5 7.5l-9 9'/%3E%3C/svg%3E") center/76% no-repeat}
+.card.done.fail .t{text-decoration:none}
+.nfail{font-weight:650;color:var(--brick-ink,var(--brick))}
+.lrow.fail .hd{color:var(--mut)}
+.pill.done.fail{text-decoration:none;background:color-mix(in srgb,var(--faint) 28%,var(--surf))}
+.st.done.fail{background:color-mix(in srgb,var(--faint) 25%,transparent);color:var(--mut)}
+.gbar.gfail rect:not(.ggl):not(.gh1){fill:var(--faint)}
+.seg3.st3 [data-s=fail]{white-space:normal;line-height:1.05}
+.seg3 [data-s=fail].on{background:color-mix(in srgb,var(--faint) 30%,var(--surf));box-shadow:none}
+.bust{position:fixed;inset:0;z-index:80;display:grid;place-items:center;overflow:hidden;cursor:pointer;
+  background:radial-gradient(circle at 50% 46%,color-mix(in srgb,var(--brick) 24%,transparent),transparent 62%);animation:bfade .18s ease-out}
+.bust.out{animation:bfade .26s ease-in reverse forwards}
+.bst{display:grid;justify-items:center;gap:.4rem;max-width:calc(100vw - 2.5rem);padding:.9rem 1.5rem 1rem;border:.3rem solid var(--brick);border-radius:1rem;
+  background:color-mix(in srgb,var(--card) 94%,transparent);box-shadow:var(--sh2),inset 0 0 0 .18rem color-mix(in srgb,var(--brick) 30%,transparent);
+  transform:rotate(-8deg);animation:bstamp .45s cubic-bezier(.2,1.5,.4,1) both,bshake .36s .5s ease-in-out}
+.bst b{font:900 clamp(3rem,15vw,5.6rem)/.92 var(--disp);letter-spacing:.03em;color:var(--brick)}
+.bst small{font-weight:650;font-size:.95rem;line-height:1.3;color:var(--tx);text-align:center;overflow-wrap:anywhere}
+.bust i{position:absolute;left:50%;top:50%;font:900 calc(2.2rem*var(--s))/1 var(--disp);font-style:normal;color:var(--brick);opacity:0;
+  animation:bbang .95s .12s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes bstamp{0%{transform:scale(2.6) rotate(-16deg);opacity:0}55%{opacity:1}100%{transform:scale(1) rotate(-8deg);opacity:1}}
+@keyframes bshake{0%,100%{transform:rotate(-8deg)}25%{transform:rotate(-11deg) translateX(-.3rem)}75%{transform:rotate(-5deg) translateX(.3rem)}}
+@keyframes bbang{0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--a)) translateY(0) scale(.4)}30%{opacity:1}
+  100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--a)) translateY(calc(-1*var(--d))) scale(1)}}
+@keyframes bfade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.bust,.bst,.bust.out{animation:none}.bust i{display:none}}

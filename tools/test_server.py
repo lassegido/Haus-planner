@@ -45,6 +45,14 @@ try:
     del t["prio"]
     call("api/task", t)
     check("Alte Aufgabe ohne Priorität lesbar", call("api/tasks")[1]["tasks"][0]["prio"] == 0)
+    # 1.42: „Nicht geschafft“ = erledigt + fail, nur bei abgeschlossenen Aufgaben
+    call("api/task", {**t, "status": "done", "fail": True})
+    check("Nicht geschafft bleibt erhalten", call("api/tasks")[1]["tasks"][0].get("fail") is True)
+    call("api/task", {**t, "status": "todo", "fail": True})
+    check("Offene Aufgabe verliert die Markierung", "fail" not in call("api/tasks")[1]["tasks"][0])
+    call("api/task", {**t, "status": "done", "fail": "ja"})
+    check("Nur echtes true zählt als nicht geschafft", "fail" not in call("api/tasks")[1]["tasks"][0])
+    call("api/task", t)
     # Sicherheit: fremder Hostname (DNS-Rebinding) wird abgewiesen, Heimnetz-Namen und IPs nicht
     check("Fremder Hostname wird abgewiesen (403)", call("api/tasks", host="evil.example.com")[0] == 403)
     check("Schreiben über fremden Hostnamen abgewiesen", call("api/task", t, host="evil.example.com:8099")[0] == 403)

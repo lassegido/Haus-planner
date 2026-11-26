@@ -11,7 +11,7 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] Hell und Dunkel: Texte gut lesbar, keine weißen Flächen im Dunkelmodus.
 
 ## 2. Gesten (iPhone)
-- [ ] Karte oder Zeile gedrückt halten: Menü mit höchstens drei Einträgen, **kein** markierter Text, keine Lupe.
+- [ ] Karte oder Zeile gedrückt halten: Menü mit höchstens vier Einträgen (bei offenen Aufgaben auch „Nicht geschafft“), **kein** markierter Text, keine Lupe.
 - [ ] Liste: nach rechts wischen = erledigt, nach links = Papierkorb.
 - [ ] Liste ganz oben nach unten ziehen: aktualisiert; weiter ziehen: Suche öffnet sich.
 - [ ] Blätter (Aufgabe, Filter, Einstellungen) nach unten wischen: schließt; bei Änderungen kommt die Rückfrage.
@@ -32,11 +32,14 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] GIPHY-Schlüssel eintragen: GIF erscheint kurz groß, danach klein in der Karte; auf dem zweiten iPhone dasselbe GIF. Antippen zeigt es wieder.
 - [ ] Startseite: Beim Öffnen nichts zum Wegklicken. Tageskarte mit Meme, darunter Eingabe, Umschalter und Liste ohne Scrollen erreichbar. Letzte Aufgabe abhaken: Meme groß und Konfetti.
 - [ ] Über dem GIF steht ein kurzer Satz (z. B. „2 geschafft, nur noch eine. Du bist richtig drin.“), keine Frage „Warum dieses GIF?“.
-- [ ] Hell und Dunkel: Karten, Liste und Tafel wirken leicht plastisch (Schatten, Lichtkante), nichts sieht verwaschen oder grell aus; Ring-Verlauf gut sichtbar.
+- [ ] Hell und Dunkel: Karten, Liste und Board wirken leicht plastisch (Schatten, Lichtkante), nichts sieht verwaschen oder grell aus; Ring-Verlauf gut sichtbar.
 - [ ] Einstellungen → Farbwelt: alle 7 durchtippen (Portofino, Polarlicht, Wald, Lagune, Orchidee, Feige, Schiefer), jeweils Hell und Dunkel gut lesbar.
 - [ ] Wer vorher Salbei, Beere oder Graphit hatte: nach dem Update Wald, Orchidee bzw. Schiefer, auch auf dem zweiten Gerät.
 - [ ] „Sprüche, GIFs und Konfetti“ aus, letzte Aufgabe abhaken: kein Konfetti, nur der kurze Hinweis.
 - [ ] Zeitstrahl: Balken ziehen und an den Enden verlängern funktioniert wie vorher (Glanz liegt nur darüber).
+- [ ] Startseite: Aufgabe gedrückt halten → „Nicht geschafft“: großes „BUSTED!“, verschwindet von selbst, Vibration; Ring zählt sie nicht als erledigt, Serie „startet morgen neu“. Tägliche Aufgabe: die von morgen ist da.
+- [ ] Dasselbe in der Liste oder im Board: kein „BUSTED!“. Auf dem anderen iPhone auch nicht.
+- [ ] Board: zuletzt Abgehaktes steht in „Erledigt“ ganz oben; nicht Geschafftes mit ✕.
 - [ ] Am Tag nach dem Update: Spruch auf der Startseite kommt von Gemini (neu formuliert), KI-Verbrauch in den Einstellungen nur +1.
 
 ## 4. Export (iPhone)

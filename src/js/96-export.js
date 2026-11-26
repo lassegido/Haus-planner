@@ -12,10 +12,10 @@ $("x_pdf").onclick=async()=>{
   const ln=(txt,sz=10,b=0,ind=0,c=[30,30,30])=>{doc.setFont("helvetica",b?"bold":"normal");doc.setFontSize(sz);doc.setTextColor(...c);for(const l of doc.splitTextToSize(c2(txt),182-ind)){if(y>282){doc.addPage();y=18}doc.text(l,L+ind,y);y+=sz*.45}};
   const grey=[90,90,90],list=tasks.slice().sort((a,b)=>dn(a.start)-dn(b.start)||dn(a.end)-dn(b.end)),n=list.length;
   ln("Planner",20,1);y+=1;
-  ln(`Stand ${new Date().toLocaleDateString("de-DE")} | ${list.filter(t=>t.status==="done").length} von ${n} erledigt | ${tasks.filter(t=>t.status==="doing").length} in Arbeit | ${tasks.filter(isLate).length} überfällig | ${tasks.filter(isBlocked).length} blockiert`,10,0,0,grey);y+=4;
+  ln(`Stand ${new Date().toLocaleDateString("de-DE")} | ${list.filter(isOk).length} von ${n} erledigt | ${tasks.filter(t=>t.status==="doing").length} in Arbeit | ${tasks.filter(isLate).length} überfällig | ${tasks.filter(isBlocked).length} blockiert`,10,0,0,grey);y+=4;
   list.forEach(t=>{
     ln(t.title,12,1);
-    ln(`${ST[t.status]}${t.prio?" | Prio "+t.prio:""} | ${fdl(t.start)} - ${fdl(t.end)}${t.proj?" | Projekt "+t.proj:""}${tgs(t).length?" | "+tgs(t).join(", "):""}${t.who?" | "+t.who:""}`,9,0,0,grey);
+    ln(`${stName(t)}${t.prio?" | Prio "+t.prio:""} | ${fdl(t.start)} - ${fdl(t.end)}${t.proj?" | Projekt "+t.proj:""}${tgs(t).length?" | "+tgs(t).join(", "):""}${t.who?" | "+t.who:""}`,9,0,0,grey);
     const dp=(t.deps||[]).map(i=>byId(i)?.title).filter(Boolean);if(dp.length)ln("Abhängig von: "+dp.join(", "),9,0,0,grey);
     (t.checklist||[]).forEach(c=>ln((c.d?"[x] ":"[ ] ")+c.t,9,0,4));
     if(t.notes)ln("Notiz: "+t.notes,9,0,0,grey);
@@ -55,7 +55,7 @@ async function buildXlsx(){
   const ws=wb.addWorksheet("Liste",{views:[{state:"frozen",xSplit:2,ySplit:4,showGridLines:false}],properties:{tabColor:{argb:C.ink}}});
   ws.columns=[{width:6},{width:34},{width:14},{width:13},{width:12},{width:12},{width:12},{width:14},{width:34},{width:30},{width:12},{width:30},{width:6,hidden:true},{width:6,hidden:true},{width:6,hidden:true},{width:16},{width:10}];
   ws.getCell("A1").value="Planner";ws.getCell("A1").font={bold:true,size:18};
-  ws.getCell("H1").value="Neue Aufgabe: einfach in der nächsten freien Zeile eintragen. Tafel und Zeitstrahl aktualisieren sich automatisch (bis Zeile 304).";
+  ws.getCell("H1").value="Neue Aufgabe: einfach in der nächsten freien Zeile eintragen. Board und Zeitstrahl aktualisieren sich automatisch (bis Zeile 304).";
   ws.getCell("H1").font={italic:true,color:{argb:C.grey},size:10};
   const kp=[["B","Aufgaben",`COUNTIF(B${R0}:B${R1},"?*")`,"0"],["C","Erledigt",`IFERROR(COUNTIF(G${R0}:G${R1},"Erledigt")/B3,0)`,"0%"],["D","In Arbeit",`COUNTIF(G${R0}:G${R1},"In Arbeit")`,"0"],["E","Überfällig",`SUMPRODUCT((B${R0}:B${R1}<>"")*(G${R0}:G${R1}<>"Erledigt")*ISNUMBER(F${R0}:F${R1})*(F${R0}:F${R1}<TODAY()))`,"0"],["F","Konflikte",`COUNTIF(L${R0}:L${R1},"?*")`,"0"]];
   kp.forEach(([c,l,f,nf])=>{const a=ws.getCell(c+"2"),b=ws.getCell(c+"3");a.value=l;a.font={size:9,color:{argb:C.grey}};b.value={formula:f};b.numFmt=nf;b.font={bold:true,size:18};a.border={top:edge,left:edge,right:edge};b.border={bottom:edge,left:edge,right:edge};b.alignment={horizontal:"left"}});
@@ -96,9 +96,9 @@ async function buildXlsx(){
   ws.addConditionalFormatting({ref:`B${R0}:B${R1}`,rules:[{type:"expression",formulae:[`$G${R0}="Erledigt"`],style:{font:{strike:true,color:{argb:C.grey}}}}]});
 
   /* ---------- Blatt 2: Board (wird aus der Liste befüllt) ---------- */
-  const wb2=wb.addWorksheet("Tafel",{views:[{showGridLines:false}],properties:{tabColor:{argb:C.bDoing}}});
+  const wb2=wb.addWorksheet("Board",{views:[{showGridLines:false}],properties:{tabColor:{argb:C.bDoing}}});
   wb2.columns=[{width:4,hidden:true},{width:38},{width:2},{width:4,hidden:true},{width:38}];
-  wb2.getCell("B1").value="Tafel";wb2.getCell("B1").font={bold:true,size:18};
+  wb2.getCell("B1").value="Board";wb2.getCell("B1").font={bold:true,size:18};
   wb2.getCell("B2").value="Wird automatisch aus der Liste befüllt. Status in der Liste ändern, um eine Karte zu verschieben.";wb2.getCell("B2").font={italic:true,color:{argb:C.grey},size:10};
   const cols=[["A","B","Offen","M",C.todo],["D","E","In Arbeit","N",C.doing],["G","H","Erledigt","O",C.done]];
   const SL=40;
