@@ -1,5 +1,14 @@
 # Änderungen
 
+## 1.45.0
+- **Startseite: GIF und Satz passen sich der Tageszeit an.** Jede Lage hat ihr eigenes GIF des Tages, über den Tag gibt es also mehrere.
+  - **Morgens** (bis 11 Uhr), noch nichts erledigt: „8 Aufgaben heute. Klingt viel, du schaffst das.“ Schon etwas erledigt: „Starker Start.“
+  - **Mittags** (bis 17 Uhr), noch nichts erledigt: „Mittag, und noch alle 8 offen. Willst du nicht mal loslegen?“ Gut dabei: „Du bist auf einem guten Weg.“
+  - **Abends**, noch (fast) alles offen, bewusst frech-ironisch: „Digga, du wirst es vermasseln … oder?“, mit GIFs wie „This is fine“. Gut dabei: „Endspurt, das ziehst du durch.“
+  - **Ab 70 % erledigt**, egal wann: „Du hast es fast geschafft.“
+  - Wie bisher: alles erledigt, etwas überfällig, mehrere Tage am Stück.
+- Gemini schlägt einmal am Tag passende bestehende Memes für alle 12 Lagen vor (weiterhin nur eine Anfrage pro Tag). Nach dem Update wird die heutige Auswahl einmal neu geholt.
+
 ## 1.44.0
 - **Startseite: „Morgen“ statt „7 Tage“.** Der Umschalter zeigt jetzt, was morgen anfängt oder fällig ist. Wiederholungen (z. B. tägliche Aufgaben) entstehen erst, wenn die heutige abgehakt ist; bis dahin stehen sie blass mit gestricheltem Kreis als Vorschau dabei („wiederholt sich, sobald heute abgehakt“). Lange laufende Aufgaben, die morgen weder anfangen noch enden, fehlen bewusst.
 

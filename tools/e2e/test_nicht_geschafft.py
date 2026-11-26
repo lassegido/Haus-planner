@@ -30,7 +30,7 @@ def test_nicht_geschafft_auf_der_startseite(t, browser):
         s.seed([erledigt("e1", "Gestern", 1), erledigt("e2", "Vorgestern", 2), erledigt("e3", "Vor drei Tagen", 3),
                 task("m", "Müll rausbringen", D(0), D(0), who="Lasse", rec={"n": 1, "u": "d"}),
                 task("h", "Blumen gießen", D(0), D(0), who="Lasse")])
-        p = Page(browser, s.url, PHONE, setup=ALS_LASSE)
+        p = Page(browser, s.url, PHONE, setup=lambda pg: (ALS_LASSE(pg), pg.add_init_script("window.PLANNER_HOUR=9")))
         p.pg.click("[data-v=home]")
         p.pg.wait_for_timeout(300)
         t.check("Vorher: Serie 3 Tage", "3 Tage" in p.js("document.querySelector('.hstreak').textContent"))
@@ -51,7 +51,7 @@ def test_nicht_geschafft_auf_der_startseite(t, browser):
         t.check("Ring: zählt mit, aber nicht als erledigt (0 von 2)", h[0] == "0 von 2 erledigt" and "1 nicht geschafft" in h[1], h)
         st = p.js("document.querySelector('.hstreak').textContent")
         t.check("Serie reißt sofort", "Serie startet morgen neu" in st, st)
-        t.check("Satz über dem GIF bleibt motivierend", "Eine Aufgabe für heute" in p.js("(document.querySelector('.mwhy')||{}).textContent||''") or
+        t.check("Satz über dem GIF bleibt motivierend", "Eine Aufgabe heute. Kurz erledigen" in p.js("(document.querySelector('.mwhy')||{}).textContent||''") or
                 p.js("!document.querySelector('.mwhy')"))
         p.js("void setStatus(byId('h'),'done')")
         p.pg.wait_for_timeout(700)

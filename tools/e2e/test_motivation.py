@@ -4,6 +4,7 @@ from common import PHONE, Page, Server, task
 
 T = datetime.date.today()
 D = lambda n: str(T + datetime.timedelta(n))
+UM = lambda h: (lambda pg: pg.add_init_script("window.PLANNER_HOUR=%d" % h))
 ALS_LASSE = lambda pg: pg.add_init_script("try{localStorage.setItem('haus-me','Lasse')}catch(e){}")
 
 
@@ -91,7 +92,7 @@ def test_ohne_geschichte_kein_alarm(t, browser):
 def test_meme_auswahl_einmal_am_tag(t, browser):
     from common import FakeGemini
     import json, time
-    kinds = ["done", "streak", "late", "start", "good"]
+    kinds = ["done", "streak", "late", "start", "good", "frueh", "frueh_gut", "mittag", "mittag_gut", "abend", "abend_gut", "fast"]
     g = FakeGemini(lambda prompt: {k: [{"q": "gemini %s %d" % (k, i), "n": "Meme %s %d" % (k, i)} for i in range(4)] for k in kinds})
     with Server(settings={"ai_key": "AQ.TestSchluessel_1234567890abcdef", "giphy_key": "TestGiphyKey1234567890abcd"}, GEMINI_URL=g.url) as s:
         s.seed([task("h", "Heute", D(0), D(0), who="Lasse")])
@@ -104,15 +105,16 @@ def test_meme_auswahl_einmal_am_tag(t, browser):
         t.check("Anfrage verlangt bestehende Memes aus den gewünschten Bereichen", "BESTEHENDES" in g.prompts[0] and all(x in g.prompts[0] for x in ("Stromberg", "Simpsons", "GTA", "Tier", "Polit")))
         t.check("Zählt fürs Tageslimit (1 Anfrage)", s.api("api/tasks")["ha"]["aiuse"]["used"] == 1)
         calls = []
-        p = Page(browser, s.url, PHONE, setup=lambda pg: (ALS_LASSE(pg), giphy_mock(pg, calls)))
+        p = Page(browser, s.url, PHONE, setup=lambda pg: (ALS_LASSE(pg), UM(9)(pg), giphy_mock(pg, calls)))
         p.pg.wait_for_timeout(800)
-        t.check("GIPHY-Suche mit dem von Gemini gewählten Meme der Lage „start“", len(calls) == 1 and "q=gemini%20start" in calls[0], calls)
-        t.check("Karte zeigt GIF mit Meme-Namen", (p.js("(document.querySelector('.hero .gifbox img')||{}).alt") or "").startswith("Meme start"))
+        t.check("GIPHY-Suche mit dem von Gemini gewählten Meme der Lage „frueh“ (morgens, noch nichts)", len(calls) == 1 and "q=gemini%20frueh" in calls[0], calls)
+        t.check("Karte zeigt GIF mit Meme-Namen", (p.js("(document.querySelector('.hero .gifbox img')||{}).alt") or "").startswith("Meme frueh"))
+        t.check("Anfrage nennt alle Lagen nach Tageszeit, abends ironisch erlaubt", all(k in g.prompts[0] for k in ("frueh_gut", "mittag_gut", "abend_gut", "fast")) and "IRONISCH" in g.prompts[0])
         p.js("document.querySelectorAll('.gifpop').forEach(x=>x.remove())")
         p.js("void setStatus(byId('h'),'done')")
         p.pg.wait_for_timeout(900)
         t.check("Lage wechselt (alles erledigt): neues passendes GIF, groß eingeblendet", len(calls) == 2 and "q=gemini%20done" in calls[1] and p.js("!!document.querySelector('.gifpop')"), calls)
-        t.check("Server merkt sich je Lage ein GIF", sorted(s.api("api/gif").get("by", {})) == ["done", "start"])
+        t.check("Server merkt sich je Lage ein GIF", sorted(s.api("api/gif").get("by", {})) == ["done", "frueh"])
         p.pg.click("[data-v=list]")
         t.check("Andere Ansichten bleiben ohne Memes", not p.js("!!document.querySelector('#main .meme,#main .gifbox')"))
         p.close()
@@ -170,17 +172,17 @@ def test_gif_wechselt_mit_der_lage_und_erklaert_sich(t, browser):
     with Server(settings={"giphy_key": "TestGiphyKey1234567890abcd"}) as s:
         s.seed([task("o", "Überfällig", D(-2), D(-1), who="Lasse"), task("h1", "Heute 1", D(0), D(0), who="Lasse"), task("h2", "Heute 2", D(0), D(0), who="Lasse")])
         calls = []
-        p = Page(browser, s.url, PHONE, setup=lambda pg: (ALS_LASSE(pg), giphy_mock(pg, calls)))
+        p = Page(browser, s.url, PHONE, setup=lambda pg: (ALS_LASSE(pg), UM(13)(pg), giphy_mock(pg, calls)))
         p.pg.wait_for_timeout(600)
         why = lambda: p.js("(document.querySelector('.hero .mwhy')||{}).textContent||''")
         t.check("Satz über dem GIF deutet den Grund an: überfällig", why() == "Eine Sache ist liegen geblieben. Die holst du dir jetzt zurück.", why())
         t.check("Keine Frage „Warum dieses GIF?“ mehr", "Warum" not in p.js("document.querySelector('.hero').textContent"))
         p.js("void setStatus(byId('o'),'done')")
         p.pg.wait_for_timeout(800)
-        t.check("Überfälliges gelöst: neue Lage, neue Suche, neue Begründung", len(calls) == 2 and calls[0] != calls[1] and why() == "1 geschafft, noch 2. Du bist richtig drin.", (calls, why()))
+        t.check("Überfälliges gelöst: neue Lage, neue Suche, neue Begründung", len(calls) == 2 and calls[0] != calls[1] and why() == "1 geschafft, noch 2. Du bist auf einem guten Weg.", (calls, why()))
         p.js("void setStatus(byId('h1'),'done')")
         p.pg.wait_for_timeout(600)
-        t.check("Gleiche Lage: kein neues GIF", len(calls) == 2 and why() == "2 geschafft, nur noch eine. Du bist richtig drin.", why())
+        t.check("Gleiche Lage: kein neues GIF", len(calls) == 2 and why() == "2 geschafft, nur noch eine. Du bist auf einem guten Weg.", why())
         p.js("void setStatus(byId('h2'),'done')")
         p.pg.wait_for_timeout(900)
         t.check("Alles erledigt: drittes GIF, groß eingeblendet", len(calls) == 3 and why() == "Alle 3 erledigt. Das hast du dir verdient." and p.js("!!document.querySelector('.gifpop')"), (calls, why()))
@@ -199,8 +201,9 @@ def test_keine_negativen_memes(t, browser):
         p.pg.wait_for_timeout(800)
         t.check("Gespeichertes „Wasted“-GIF wird ersetzt", len(calls) == 1 and "wasted" not in calls[0].lower() and s.api("api/gif")["by"]["late"]["term"] != "gta wasted", calls)
         t.check("Karte zeigt nie das negative GIF", "Hinüber" not in p.js("document.querySelector('.hero').textContent"))
-        bad = p.js("Object.values(GIF_BASE).flat().filter(x=>GIF_BAD.test(x[0]+' '+x[1])).length")
-        t.check("Eingebaute Auswahl enthält keine Scheitern-Memes", bad == 0, bad)
+        bad = p.js("Object.entries(GIF_BASE).filter(([k])=>k!=='abend').flatMap(([k,v])=>v).filter(x=>GIF_BAD.test(x[0]+' '+x[1])).length")
+        t.check("Eingebaute Auswahl enthält keine Scheitern-Memes (außer der ironischen Abend-Lage)", bad == 0, bad)
+        t.check("Abends, wenn noch alles offen ist, ist Ironie erlaubt („This is fine“)", p.js("!gifBad('abend','this is fine')&&gifBad('mittag','this is fine')"))
         p.close()
 
 
@@ -236,3 +239,28 @@ def test_tageskarte_breit_gif_rechts(t, browser):
             t.check(name + (": GIF rechts neben dem Ring" if nebeneinander else ": GIF unter dem Ring"), ok, r)
             t.check(name + ": keine Skriptfehler", not p.errors, p.errors)
             p.close()
+
+
+def test_lage_nach_tageszeit(t, browser):
+    """1.45: Satz und GIF-Lage hängen von Tageszeit und Fortschritt ab; abends ironisch, sonst anspornend."""
+    with Server() as s:
+        s.seed([task("h%d" % i, "Heute %d" % i, D(0), D(0), who="Lasse") for i in range(8)])
+        def lage(h, erledigt):
+            p = Page(browser, s.url, PHONE, setup=lambda pg: (ALS_LASSE(pg), UM(h)(pg)))
+            for i in range(8):
+                p.js("([id,st])=>{const t=byId(id);if(t)t.status=st}", ["h%d" % i, "done" if i < erledigt else "todo"])
+            p.js("for(const t of tasks)if(t.status==='done')t.log=[{t:new Date().toISOString().slice(0,16),a:'Lasse',k:'h',x:'Status: Offen → Erledigt'}];render()")
+            p.pg.wait_for_timeout(200)
+            r = (p.js("gifKind"), p.js("(document.querySelector('.hero .mwhy')||{}).textContent||''"), p.errors)
+            p.close()
+            return r
+        for h, n, kind, text in ((8, 0, "frueh", "8 Aufgaben heute. Klingt viel, du schaffst das."),
+                                 (9, 2, "frueh_gut", "2 schon weg, und es ist noch nicht mal Mittag. Starker Start."),
+                                 (13, 0, "mittag", "Mittag, und noch alle 8 offen. Willst du nicht mal loslegen?"),
+                                 (14, 3, "mittag_gut", "3 geschafft, noch 5. Du bist auf einem guten Weg."),
+                                 (19, 0, "abend", "Abend, und noch alle 8 offen. Digga, du wirst es vermasseln … oder?"),
+                                 (20, 1, "abend", "Erst 1 von 8, und es ist Abend. Digga, das wird knapp."),
+                                 (19, 4, "abend_gut", "4 geschafft, noch 4. Endspurt, das ziehst du durch."),
+                                 (15, 6, "fast", "Nur noch 2. Du hast es fast geschafft.")):
+            k, w, err = lage(h, n)
+            t.check("%d Uhr, %d von 8: %s" % (h, n, kind), k == kind and w == text and not err, (k, w, err))

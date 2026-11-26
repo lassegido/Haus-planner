@@ -42,6 +42,7 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] Board: zuletzt Abgehaktes steht in „Erledigt“ ganz oben; nicht Geschafftes mit ✕.
 - [ ] iPad hochkant und quer: GIF rechts neben dem Ring, gut groß; iPhone: GIF darunter.
 - [ ] Startseite → „Morgen“: morgige Aufgaben, tägliche als blasse Vorschau; nach dem Abhaken der heutigen steht die echte da, nicht doppelt.
+- [ ] Startseite morgens, mittags und abends öffnen: Satz und GIF passen zur Tageszeit; abends mit vielen offenen Aufgaben frech, sonst anspornend.
 - [ ] Am Tag nach dem Update: Spruch auf der Startseite kommt von Gemini (neu formuliert), KI-Verbrauch in den Einstellungen nur +1.
 
 ## 4. Export (iPhone)

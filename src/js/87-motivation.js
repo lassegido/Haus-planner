@@ -82,7 +82,17 @@ function cheer(){
   if(all||nb){confetti();hap(30);toast(all?"Alles für heute erledigt – stark! 🎉"+(nb?" "+nb:""):"🏅 "+nb,null,null,5000);if(all){if(GIFS.done)gifPop("done",true);else gifCheer="done"}}}
 /* 1.34: Sprüche auf der Startseite (nur dort). Eingebaut; im Add-on erneuert Gemini sie höchstens einmal am Tag (api/sprueche).
    Platzhalter: {n} Serie, {late} überfällig, {open} offen. */
+/* 1.45: Tageszeit für die Lage der Startseite; PLANNER_HOUR nur für Tests */
+const hourNow=()=>typeof window.PLANNER_HOUR==="number"?window.PLANNER_HOUR:new Date().getHours();
+const dayPhase=(h=hourNow())=>h<11?"frueh":h<17?"mittag":"abend";
 const MEME_BASE={
+  frueh:["Neuer Tag, volle Liste. Du schaffst das.","Kaffee rein, Liste raus. Los geht’s.","Der Hund glaubt an dich 🐕","Anpfiff! Heute holst du die Punkte."],
+  frueh_gut:["Der frühe Vogel hakt ab.","Starker Start. Weiter so.","Noch nicht mal Mittag und schon am Liefern."],
+  mittag:["Mittagspause ist vorbei … oder noch gar nicht angefangen?","Die Liste schaut dich an. Du schaust zurück. Einer muss anfangen.","Hallo? Jemand da? Die Aufgaben warten."],
+  mittag_gut:["Halbzeitführung. Weiter so.","Läuft bei dir. Noch {open}.","Auf Kurs. Noch {open} bis Feierabend."],
+  abend:["Digga, das wird knapp. 😬","This is fine. 🐶🔥 Oder du legst jetzt los.","Nachspielzeit läuft. Noch {open}."],
+  abend_gut:["Endspurt! Noch {open}.","Letzte Runde. Du ziehst das durch.","Nur noch {open}, dann Couch."],
+  fast:["Fast geschafft! Noch {open}.","Ziellinie in Sicht.","So nah dran. Noch {open}."],
   done:["Mission bestanden. Respekt + 🏆","Woo-hoo! Alles erledigt. Homer gönnt sich jetzt einen Donut.","Das hätte nicht mal Bernd Stromberg kleinreden können.",
     "Michael Scott würde jetzt eine Dundie-Verleihung veranstalten.","Abpfiff, Sieg, Feierabend. Ab in die Kabine.","Giggity! Liste leer.","Wanted-Level 0. Ihr seid sauber.","Such wow, very erledigt 🐕","Good-Boy-Energy: alles erledigt, Leckerli verdient 🦴","No cap, ihr habt heute gegessen.","Sheesh. Liste leer, Couch voll.","Wir schaffen das. – Und zwar heute schon 💅","Raute machen, zurücklehnen. Läuft."],
   streak:["{n} Tage in Folge. Das ist keine Glückssträhne mehr, das ist Führungsqualität.","Respekt + {n}. Los Santos hat Angst vor euch.",
@@ -101,6 +111,13 @@ function memeText(kind,v){const L=MEME_BASE[kind]||[];if(!L.length)return"";
    Memes mit GIPHY-Suchbegriff vor (api/sprueche), sonst die eingebaute Liste unten; eigene Suchbegriffe aus den Einstellungen kommen dazu.
    Je Lage und Tag sucht das erste Gerät einmal bei GIPHY (GIPHY verlangt die Suche im Browser), der Server merkt sich das GIF für alle. */
 const GIF_BASE={
+  frueh:[["you got this","Du schaffst das"],["good morning coffee","Erst Kaffee, dann los"],["rocky stairs","Rocky läuft die Treppe hoch"],["dog good morning","Hund sagt guten Morgen"],["michael scott motivational","Michael Scott motiviert"]],
+  frueh_gut:[["early bird","Der frühe Vogel"],["nailed it","Sitzt"],["happy dog running","Hund rennt vor Freude"],["thumbs up","Daumen hoch"]],
+  mittag:[["waiting","Wird das heute noch was?"],["tapping fingers impatient","Ungeduldiges Fingertrommeln"],["dog staring","Hund starrt dich an"],["wake up","Aufwachen!"],["hello is anybody there","Hallo, jemand da?"]],
+  mittag_gut:[["on the right track","Auf gutem Weg"],["keep going","Weiter so"],["impressive","Beeindruckend"],["proud dog","Stolzer Hund"]],
+  abend:[["this is fine","Hund im brennenden Zimmer"],["nervous sweating","Schwitzen vor Nervosität"],["panic","Leichte Panik"],["homer hides bush","Homer verschwindet in der Hecke"],["clock ticking","Die Uhr tickt"]],
+  abend_gut:[["final sprint","Endspurt"],["you can do it","Du schaffst das"],["dog running fast","Hund gibt Vollgas"],["almost there","Gleich geschafft"]],
+  fast:[["almost there","Fast da"],["so close","So nah dran"],["finish line","Ziellinie in Sicht"],["excited dog","Aufgeregter Hund"]],
   done:[["stromberg applaus","Stromberg klatscht Beifall"],["gta mission passed","GTA: Mission bestanden"],["homer woohoo","Homer jubelt"],["michael scott yes","Michael Scott freut sich"],["happy dog zoomies","Hund dreht vor Freude durch"],["success kid","Der Erfolgs-Junge mit Faust"]],
   streak:[["leonardo dicaprio cheers","DiCaprio prostet euch zu"],["dwight schrute perfect","Dwight findet es perfekt"],["proud dog","Stolzer Hund"],["football goal celebration","Torjubel"],["nba jam on fire","Er brennt!"]],
   late:[["challenge accepted","Herausforderung angenommen"],["lets do this","Packen wir’s an"],["rocky training","Rocky trainiert fürs Comeback"],["dog running fast","Hund gibt Vollgas"],["michael scott lets go","Michael Scott: Los geht’s"],["cleaning montage","Aufräumen im Zeitraffer"]],
@@ -109,11 +126,13 @@ const GIF_BASE={
 let GIFS={},gifAsked=false;const gifBusy=new Set();
 /* Die Karte hat eine Botschaft: motivieren. Memes über Scheitern passen nie, auch nicht, wenn Gemini sie vorschlägt */
 const GIF_BAD=/wasted|fail|death|dead|dying|crying|sad|disaster|this is fine|game over|loser/i;
+/* Abends, wenn noch (fast) alles offen ist, darf es frech-ironisch sein (ausdrücklicher Wunsch, 1.45) */
+const gifBad=(kind,s)=>kind!=="abend"&&GIF_BAD.test(s);
 function gifPick(kind){const own=((haInfo&&haInfo.gifterms)||[]).map(q=>({q,n:q}));
-  let L=[...((MEMES&&MEMES[kind])||[]),...GIF_BASE[kind].map(([q,n])=>({q,n})),...own].filter(m=>!GIF_BAD.test(m.q+" "+m.n));if(MEMES&&MEMES[kind]){const g=L.filter(m=>MEMES[kind].includes(m));if(g.length)L=g}return L[(today()*7+kind.length)%L.length]}
+  let L=[...((MEMES&&MEMES[kind])||[]),...GIF_BASE[kind].map(([q,n])=>({q,n})),...own].filter(m=>!gifBad(kind,m.q+" "+m.n));if(MEMES&&MEMES[kind]){const g=L.filter(m=>MEMES[kind].includes(m));if(g.length)L=g}return L[(today()*7+kind.length)%L.length]}
 async function gifToday(kind){
   if(typeof api!=="function"||!funOn())return;
-  try{if(!gifAsked){gifAsked=true;const j=await api("api/gif");GIFS=(j&&j.by)||{};for(const k in GIFS)if(GIF_BAD.test((GIFS[k].term||"")+" "+(GIFS[k].name||"")+" "+(GIFS[k].title||""))){GIFS[k].bad=1}if(GIFS[kind]&&!GIFS[kind].bad)return gifReady(kind)}
+  try{if(!gifAsked){gifAsked=true;const j=await api("api/gif");GIFS=(j&&j.by)||{};for(const k in GIFS)if(gifBad(k,(GIFS[k].term||"")+" "+(GIFS[k].name||"")+" "+(GIFS[k].title||""))){GIFS[k].bad=1}if(GIFS[kind]&&!GIFS[kind].bad)return gifReady(kind)}
     if((GIFS[kind]&&!GIFS[kind].bad)||gifBusy.has(kind))return;const k=haInfo&&haInfo.giphy;if(!k)return;gifBusy.add(kind);const m=gifPick(kind);
     const r=await fetch("https://api.giphy.com/v1/gifs/search?api_key="+encodeURIComponent(k)+"&q="+encodeURIComponent(m.q)+"&limit=12&rating=pg-13&lang=de").then(x=>x.json());
     const L=(r.data||[]).filter(x=>x.images&&x.images.fixed_height&&(x.images.fixed_height.webp||x.images.fixed_height.url));if(!L.length)return;
@@ -133,7 +152,7 @@ function gifPop(kind,force){const g=GIFS[kind];if(!g||!g.url||!funOn()||document
 let gifKind="start";
 document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-gif]"))gifPop(gifKind,true)});
 /* Meme-Karte: GIF der aktuellen Lage vollständig sichtbar, darunter der Name des Memes; ohne GIPHY-Schlüssel ein kurzer Spruch */
-const LAGE={done:"Alles geschafft",streak:"Läuft bei dir",late:"Da ist was liegen geblieben",start:"Noch nichts geschafft",good:"Gut dabei"};
+const LAGE={frueh:"Morgens, alles offen",frueh_gut:"Starker Start",mittag:"Mittags, noch nichts",mittag_gut:"Auf gutem Weg",abend:"Abends, wird knapp",abend_gut:"Endspurt",fast:"Fast geschafft",done:"Alles geschafft",streak:"Läuft bei dir",late:"Da ist was liegen geblieben",start:"Noch nichts geschafft",good:"Gut dabei"};
 function funHtml(kind,v){if(!funOn())return"";gifKind=kind;if(haInfo&&haInfo.giphy&&(!GIFS[kind]||GIFS[kind].bad))setTimeout(()=>gifToday(kind),0);const g=GIFS[kind]&&!GIFS[kind].bad?GIFS[kind]:null;
   const why=v.why?`<p class="mwhy">${esc(v.why)}</p>`:"";
   if(g&&g.url)return`<div class="hmeme">${why}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button></div>`;

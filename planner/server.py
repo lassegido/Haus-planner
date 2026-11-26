@@ -415,7 +415,7 @@ def ai_call(prompt, raw=False):
     return {"notes": str(d.get("notes", "")).strip()[:1000], "checklist": items[:10]}
 
 
-def ai_request(prompt, system=AI_SYSTEM):
+def ai_request(prompt, system=AI_SYSTEM, max_out=2000, max_in=4000):
     """Eine Gemini-Anfrage (zählt fürs Limit), Antwort als JSON-Objekt."""
     ai_limit()
     key = ai_key()
@@ -423,8 +423,8 @@ def ai_request(prompt, system=AI_SYSTEM):
         raise RuntimeError("Kein Gemini-Schlüssel eingetragen")
     model = ai_model()
     body = {"system_instruction": {"parts": [{"text": system}]},
-            "contents": [{"role": "user", "parts": [{"text": prompt[:4000]}]}],
-            "generationConfig": {"maxOutputTokens": 2000, "responseMimeType": "application/json"}}
+            "contents": [{"role": "user", "parts": [{"text": prompt[:max_in]}]}],
+            "generationConfig": {"maxOutputTokens": max_out, "responseMimeType": "application/json"}}
     req = urllib.request.Request("%s/%s:generateContent" % (GEMINI, model), method="POST", data=json.dumps(body).encode(),
                                  headers={"x-goog-api-key": key, "content-type": "application/json"})
     try:
@@ -461,7 +461,8 @@ def ai_request(prompt, system=AI_SYSTEM):
 # Nur wenn weniger als die Hälfte des Tageslimits verbraucht ist. Ohne Schlüssel nutzt die App ihre eingebaute Auswahl.
 MEMES = os.path.join(D, "sprueche.json")
 GIF_FILE = os.path.join(D, "gif.json")
-MEME_KINDS = ("done", "streak", "late", "start", "good")
+MEME_KINDS = ("done", "streak", "late", "start", "good", "frueh", "frueh_gut", "mittag", "mittag_gut", "abend", "abend_gut", "fast")
+MEME_VER = 2  # 1.45: neue Lagen nach Tageszeit; ältere Tagesauswahl wird einmal neu geholt
 MEME_TRY = {"day": ""}
 MEME_SYSTEM = "Du kennst Memes, GIFs und Popkultur sehr gut. Antworte nur im verlangten JSON-Format."
 # Themen (übergeordnet; Beispiele nur zur Orientierung). Hier ergänzen, wenn sich der Geschmack ändert.
@@ -476,20 +477,25 @@ MEME_THEMES = [
 ]
 MEME_PROMPT = """Ein Paar um die 30 nutzt eine Aufgaben-App für Haushalt, Haus und Garten. Auf der Startseite soll je nach Lage ein
 BESTEHENDES, bekanntes Meme als GIF erscheinen (nichts erfinden). Wähle aus diesen Bereichen: %s.
-Lagen: done = alles für heute erledigt (feiern); streak = mehrere Tage in Folge geschafft (stolz); late = etwas ist liegen geblieben
+Lagen (die App wählt je nach Tageszeit und Fortschritt):
+frueh = morgens, viel vor, noch nichts erledigt (aufbauend: „Das schaffst du“); frueh_gut = morgens schon etwas erledigt (starker Start);
+mittag = mittags, noch nichts erledigt (frech anstupsen: „Willst du nicht mal loslegen?“, Warten, Ungeduld); mittag_gut = mittags gut dabei (Bestätigung: „Du bist auf einem guten Weg“);
+abend = abends, noch (fast) alles offen (IRONISCH-frech: „Digga, das wird knapp“, Panik, Schwitzen, „This is fine“ ist hier ausdrücklich erlaubt, aber nichts Gemeines);
+abend_gut = abends gut dabei (Endspurt); fast = nur noch wenig offen (fast geschafft);
+done = alles für heute erledigt (feiern); streak = mehrere Tage in Folge geschafft (stolz); late = etwas ist liegen geblieben
 (anspornen: aufholen, Comeback, „packen wir’s an“; KEIN Scheitern, keine Niederlage, kein Tod, kein „Wasted“, kein „This is fine“); start = heute noch nichts erledigt (Motivation, Anpfiff); good = schon etwas geschafft, aber noch offen (weiter so).
 Gib je Lage 4 verschiedene bekannte Memes an, jeweils mit einem kurzen GIPHY-Suchbegriff (englisch oder deutsch, 2 bis 4 Wörter,
 so dass genau dieses Meme gefunden wird) und einer kurzen DEUTSCHEN Beschreibung, was im GIF passiert (höchstens 40 Zeichen,
 z. B. „DiCaprio prostet euch zu“, „Hund im brennenden Zimmer“; keine englischen Titel).
-Jede Lage ist eine positive, anspornende Botschaft (die App soll motivieren, nie herunterziehen). Bevorzuge, was gerade aktuell und bekannt ist, und wechsle die Bereiche ab. Nichts Anzügliches oder Herabwürdigendes, bei Politik ausgewogen.
+Jede Lage außer abend ist eine positive, anspornende Botschaft (die App soll motivieren, nie herunterziehen). Bevorzuge, was gerade aktuell und bekannt ist, und wechsle die Bereiche ab. Nichts Anzügliches oder Herabwürdigendes, bei Politik ausgewogen.
 Heute ist der %s. Nimm nicht wieder diese von gestern: %s
-Antworte als JSON: {"done": [{"q": "...", "n": "..."}, ...], "streak": [...], "late": [...], "start": [...], "good": [...]}"""
+Antworte als JSON mit genau diesen Schlüsseln: {"done": [{"q": "...", "n": "..."}, ...], "streak": [...], "late": [...], "start": [...], "good": [...], "frueh": [...], "frueh_gut": [...], "mittag": [...], "mittag_gut": [...], "abend": [...], "abend_gut": [...], "fast": [...]}"""
 
 
 def memes():
     d = read_json(MEMES, "Meme-Auswahl")
     today = ai_today()
-    if d.get("day") != today and MEME_TRY["day"] != today and ai_key():
+    if (d.get("day") != today or d.get("v") != MEME_VER) and MEME_TRY["day"] != today and ai_key():
         u = ai_usage_info()
         if not u["blocked"] and u["used"] < u["limit"] // 2:
             MEME_TRY["day"] = today
@@ -502,7 +508,7 @@ def memes_fetch(today):
     try:
         old = read_json(MEMES, "Meme-Auswahl").get("gifs") or {}
         prev = ", ".join(x.get("n", "") for v in old.values() if isinstance(v, list) for x in v if isinstance(x, dict))[:600] or "keine"
-        r = ai_request(MEME_PROMPT % ("; ".join(MEME_THEMES), today, prev), MEME_SYSTEM)
+        r = ai_request(MEME_PROMPT % ("; ".join(MEME_THEMES), today, prev), MEME_SYSTEM, max_out=6000, max_in=8000)
         gifs = {}
         for k in MEME_KINDS:
             items = [{"q": re.sub(r"\s+", " ", str(x.get("q", ""))).strip()[:50], "n": re.sub(r"\s+", " ", str(x.get("n", ""))).strip()[:40]}
@@ -513,7 +519,7 @@ def memes_fetch(today):
             raise RuntimeError("zu wenige Vorschläge")
         tmp = MEMES + ".tmp"
         with open(tmp, "w", encoding="utf-8") as f:
-            json.dump({"day": today, "gifs": gifs}, f, ensure_ascii=False)
+            json.dump({"day": today, "v": MEME_VER, "gifs": gifs}, f, ensure_ascii=False)
         os.replace(tmp, MEMES)
     except Exception as e:
         print("Meme-Auswahl nicht erneuert (eingebaute bleibt):", e, flush=True)

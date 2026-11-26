@@ -47,13 +47,24 @@ function homeBody(tasks,allT){
   const list=`<section class="pnl hlist" style="--i:${k++}" aria-label="${cur[0]}">${LL.length?LL.slice(0,40).map(hrow).join(""):`<div class="none">${cur[4]}</div>`}</section>`;
   /* Lage für das Meme, in dieser Reihenfolge: alles erledigt → etwas überfällig → schon etwas geschafft → Serie läuft → noch nichts.
      Ist eine Lage gelöst (z. B. Überfälliges erledigt), greift die nächste und damit ein anderes GIF. */
-  const kind=rn&&!todayL.length?(nf?(rd?"good":"start"):"done"):over.length?"late":rd?"good":ms.streak>=3?"streak":todayL.length?"start":"done";
+  /* 1.45: Tageszeit zählt mit. Morgens (bis 11 Uhr) anspornen, mittags (bis 17 Uhr) anstupsen oder bestätigen, abends frech-ironisch
+     oder Endspurt; ab 70 % „fast geschafft“. Jede Lage hat ihr eigenes GIF des Tages. */
+  const ph=dayPhase(),offen=todayL.length;
+  const kind=rn&&!offen?(nf?(rd?"good":"start"):"done"):over.length?"late":rd&&rpct>=70?"fast":
+    ph==="frueh"?(rd?"frueh_gut":ms.streak>=3?"streak":"frueh"):ph==="mittag"?(rd?"mittag_gut":"mittag"):(rpct>=30?"abend_gut":"abend");
   const A=n=>n===1?"Aufgabe":"Aufgaben",nOpen=todayL.length;
   /* Ein Satz, der motiviert und den Grund für das GIF mitliefert, ohne ihn zu erklären */
   const why={done:rn?(rn===1?"Erledigt. Genau so sieht ein guter Tag aus.":`Alle ${rn} erledigt. Das hast du dir verdient.`):"Heute ist nichts fällig. Genieß den freien Tag.",
     late:over.length===1?"Eine Sache ist liegen geblieben. Die holst du dir jetzt zurück.":`${over.length} Sachen sind liegen geblieben. Zeit für dein Comeback.`,
     good:nOpen?`${rd} geschafft, ${nOpen===1?"nur noch eine":"noch "+nOpen}. Du bist richtig drin.`:`${rd} geschafft, ${nf} nicht. Morgen holst du dir die volle Runde.`,
     streak:`${ms.streak} Tage am Stück. Heute ${nOpen===1?"noch eine":"noch "+nOpen}, dann hält die Serie.`,
+    frueh:nOpen===1?"Eine Aufgabe heute. Kurz erledigen, dann ist der Tag gewonnen.":`${nOpen} Aufgaben heute. Klingt viel, du schaffst das.`,
+    frueh_gut:`${rd} schon weg, und es ist noch nicht mal Mittag. Starker Start.`,
+    mittag:nOpen===1?"Mittag, und die eine Aufgabe wartet noch. Wie wär’s?":`Mittag, und noch alle ${nOpen} offen. Willst du nicht mal loslegen?`,
+    mittag_gut:`${rd} geschafft, ${nOpen===1?"nur noch eine":"noch "+nOpen}. Du bist auf einem guten Weg.`,
+    abend:rd?`Erst ${rd} von ${rn}, und es ist Abend. Digga, das wird knapp.`:`Abend, und noch alle ${nOpen} offen. Digga, du wirst es vermasseln … oder?`,
+    abend_gut:`${rd} geschafft, ${nOpen===1?"nur noch eine":"noch "+nOpen}. Endspurt, das ziehst du durch.`,
+    fast:`Nur noch ${nOpen===1?"eine":nOpen}. Du hast es fast geschafft.`,
     start:!nOpen&&nf?"Heute hat’s nicht geklappt. Morgen holst du dir die volle Runde.":nOpen===1?"Eine Aufgabe für heute. Kurz erledigen, dann ist der Tag gewonnen.":`${nOpen} Aufgaben für heute. Fang mit der ersten an, der Rest läuft.`}[kind];
   /* Startseite (1.37), ein Weg von oben nach unten:
      1. Ankommen: Begrüßung, Tagesstand, Serie, Meme zur Lage (eine Karte)
