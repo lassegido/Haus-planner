@@ -50,7 +50,8 @@ function homeBody(tasks,allT){
   /* 1.45: Tageszeit zählt mit. Morgens (bis 11 Uhr) anspornen, mittags (bis 17 Uhr) anstupsen oder bestätigen, abends frech-ironisch
      oder Endspurt; ab 70 % „fast geschafft“. Jede Lage hat ihr eigenes GIF des Tages. */
   const ph=dayPhase(),offen=todayL.length;
-  const kind=rn&&!offen?(nf?(rd?"good":"start"):"done"):over.length?"late":rd&&rpct>=70?"fast":
+  /* Nichts fällig = freier Tag (Lage „done“), egal zu welcher Uhrzeit */
+  const kind=!rn?"done":!offen?(nf?(rd?"good":"start"):"done"):over.length?"late":rd&&rpct>=70?"fast":
     ph==="frueh"?(rd?"frueh_gut":ms.streak>=3?"streak":"frueh"):ph==="mittag"?(rd?"mittag_gut":"mittag"):(rpct>=30?"abend_gut":"abend");
   const A=n=>n===1?"Aufgabe":"Aufgaben",nOpen=todayL.length;
   /* Ein Satz, der motiviert und den Grund für das GIF mitliefert, ohne ihn zu erklären */

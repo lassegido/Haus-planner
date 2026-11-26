@@ -1,5 +1,8 @@
 # Änderungen
 
+## 1.45.1
+- Korrektur: Ist heute nichts fällig, steht wieder „Heute ist nichts fällig. Genieß den freien Tag.“ statt „Mittag, und noch alle 0 offen …“.
+
 ## 1.45.0
 - **Startseite: GIF und Satz passen sich der Tageszeit an.** Jede Lage hat ihr eigenes GIF des Tages, über den Tag gibt es also mehrere.
   - **Morgens** (bis 11 Uhr), noch nichts erledigt: „8 Aufgaben heute. Klingt viel, du schaffst das.“ Schon etwas erledigt: „Starker Start.“

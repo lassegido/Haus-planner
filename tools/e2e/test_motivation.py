@@ -264,3 +264,15 @@ def test_lage_nach_tageszeit(t, browser):
                                  (15, 6, "fast", "Nur noch 2. Du hast es fast geschafft.")):
             k, w, err = lage(h, n)
             t.check("%d Uhr, %d von 8: %s" % (h, n, kind), k == kind and w == text and not err, (k, w, err))
+
+
+def test_nichts_faellig_ist_freier_tag(t, browser):
+    """1.45.1: Ist heute nichts fällig, gibt es zu keiner Uhrzeit „noch alle 0 offen“."""
+    with Server() as s:
+        s.seed([task("m", "Morgen", D(1), D(1), who="Lasse")])
+        for h in (8, 13, 20):
+            p = Page(browser, s.url, PHONE, setup=lambda pg, h=h: (ALS_LASSE(pg), UM(h)(pg)))
+            p.pg.wait_for_timeout(300)
+            w = p.js("(document.querySelector('.hero .mwhy')||{}).textContent||''")
+            t.check("%d Uhr, nichts fällig: freier Tag" % h, p.js("gifKind") == "done" and w == "Heute ist nichts fällig. Genieß den freien Tag." and "0" not in w, w)
+            p.close()
