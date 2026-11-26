@@ -217,3 +217,22 @@ def test_ohne_spass_kein_konfetti(t, browser):
         t.check("Der kurze Glückwunsch kommt trotzdem", "Alles für heute erledigt" in msg, msg)
         t.check("keine Skriptfehler", not p.errors, p.errors)
         p.close()
+
+
+def test_tageskarte_breit_gif_rechts(t, browser):
+    """1.43: Auf iPad und Computer steht das GIF rechts neben Ring und Zahlen, auf dem Handy darunter."""
+    from common import IPAD, DESKTOP
+    with Server(settings={"giphy_key": "TestGiphyKey1234567890abcd"}) as s:
+        s.seed(daten())
+        for name, dev, nebeneinander in (("iPad", IPAD, True), ("iPad quer", {**IPAD, "viewport": {"width": 1180, "height": 820}}, True),
+                                         ("Computer", DESKTOP, True), ("Handy", PHONE, False)):
+            calls = []
+            p = Page(browser, s.url, dev, setup=lambda pg: (ALS_LASSE(pg), giphy_mock(pg, calls)))
+            p.pg.click("[data-v=home]")
+            p.pg.wait_for_timeout(600)
+            r = p.js("""(()=>{const b=s=>document.querySelector(s).getBoundingClientRect();const g=b('.hero .hring'),m=b('.hero .hmeme'),h=b('.hero');
+              return {side:m.left>g.right&&m.top<g.bottom,below:m.top>=g.bottom-1,inside:m.right<=h.right+1,w:Math.round(m.width)}})()""")
+            ok = (r["side"] and r["inside"]) if nebeneinander else r["below"]
+            t.check(name + (": GIF rechts neben dem Ring" if nebeneinander else ": GIF unter dem Ring"), ok, r)
+            t.check(name + ": keine Skriptfehler", not p.errors, p.errors)
+            p.close()

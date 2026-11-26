@@ -1,5 +1,8 @@
 # Änderungen
 
+## 1.43.0
+- **Startseite auf iPad und Computer:** Spruch und GIF stehen jetzt rechts neben Ring und Zahlen statt darunter. Das GIF wird dadurch deutlich größer, und die Tageskarte ist kompakter. Auf dem Handy bleibt alles untereinander.
+
 ## 1.42.0
 - **„Nicht geschafft“:** Wenn eine Aufgabe, z. B. eine tägliche, nicht klappt, kann man sie damit abschließen. Das geht über Gedrückt halten → „Nicht geschafft“ oder im Aufgabenblatt beim Status. Danach ist sie nicht mehr offen und es kommt keine Erinnerung mehr. Wiederholt sie sich, wird die nächste wie gewohnt angelegt. „Rückgängig“ im Hinweis unten macht es wieder offen.
   - Sie zählt **nicht** als erledigt (Ring, Prozent, Abzeichen, gemeinsame Woche) und **beendet die Serie** sofort („Serie startet morgen neu“).

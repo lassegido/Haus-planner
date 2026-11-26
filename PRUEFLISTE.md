@@ -40,6 +40,7 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] Startseite: Aufgabe gedrückt halten → „Nicht geschafft“: großes „BUSTED!“, verschwindet von selbst, Vibration; Ring zählt sie nicht als erledigt, Serie „startet morgen neu“. Tägliche Aufgabe: die von morgen ist da.
 - [ ] Dasselbe in der Liste oder im Board: kein „BUSTED!“. Auf dem anderen iPhone auch nicht.
 - [ ] Board: zuletzt Abgehaktes steht in „Erledigt“ ganz oben; nicht Geschafftes mit ✕.
+- [ ] iPad hochkant und quer: GIF rechts neben dem Ring, gut groß; iPhone: GIF darunter.
 - [ ] Am Tag nach dem Update: Spruch auf der Startseite kommt von Gemini (neu formuliert), KI-Verbrauch in den Einstellungen nur +1.
 
 ## 4. Export (iPhone)
