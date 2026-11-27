@@ -241,6 +241,8 @@ def clean(t):
             **({"fail": True} if st == "done" and t.get("fail") is True else {}),
             # 1.46: Sammelkorb = noch ohne festen Tag; zählt nirgends als fällig oder überfällig
             **({"inbox": True} if st != "done" and t.get("inbox") is True else {}),
+            # 1.52: „frühestens ab“ bei abhängigen Aufgaben
+            **({"snet": t["snet"]} if isinstance(t.get("snet"), str) and real_date(t["snet"]) else {}),
             # 1.48: eigene Reihenfolge (Zahl; fehlt sie, gilt das Startdatum)
             **({"ord": round(float(t["ord"]), 3)} if isinstance(t.get("ord"), (int, float)) and not isinstance(t.get("ord"), bool) and math.isfinite(t["ord"]) and abs(t["ord"]) < 1e9 else {})}
 

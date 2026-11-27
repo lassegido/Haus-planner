@@ -86,7 +86,7 @@ $("f_reset").onclick=()=>{fClear();render()};
 $("fbody").onclick=e=>{const b=e.target.closest("[data-fa]");if(!b)return;fToggle(b.dataset.fa,b.dataset.fv);render()};
 $("tchips").onclick=e=>{const b=e.target.closest("[data-a]");if(!b)return;if(b.dataset.a==="all")fClear();else fToggle(b.dataset.a,b.dataset.v);render()};
 $("grp").onchange=e=>{grp=e.target.value;render()};
-$("srt").onchange=e=>{sortm=e.target.value;try{localStorage.setItem("haus-sort",sortm)}catch(_){}render()};
+$("srt").onchange=e=>{sortm=e.target.value;gOrd=null;try{localStorage.setItem("haus-sort",sortm)}catch(_){}render()};
 /* Tag-Auswahl im Aufgaben-Dialog */
 function drawTags(){
   $("f_tsel").innerHTML=selTags.map((n,i)=>`<span class="tag rm${colorFor===n?" sel":""}" data-pick="${i}" style="--tc:${tcol(n)}"><span>${esc(n)}</span><b data-rm="${i}" aria-label="Entfernen">×</b></span>`).join("");

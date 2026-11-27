@@ -1,5 +1,15 @@
 # Änderungen
 
+## 1.52.0
+- **Abhängigkeiten planen jetzt vollautomatisch**, nach den üblichen Regeln aus MS Project („Ende → Anfang“, so früh wie möglich):
+  - Eine offene Aufgabe mit Vorgängern startet am frühesten möglichen Tag, die Dauer bleibt gleich.
+  - Offener Vorgänger: frühestens am Tag nach seinem geplanten Ende. Ist dieses Ende schon vorbei, dann frühestens morgen.
+  - **Vorgänger früher fertig → Nachfolger rückt nach vorn**, frühestens auf heute. Die ganze Kette rückt mit.
+  - Wer eine Aufgabe bewusst später legt, dem bleibt das („frühestens ab“). Früher als möglich geht nicht, dann wird sie auf den frühesten Tag gesetzt.
+  - „In Arbeit“ und Erledigtes wird nie verschoben.
+  - Das gilt sofort beim Laden, also auch für alle bestehenden Aufgaben, nicht erst beim nächsten Speichern. Ein Hinweis sagt, was neu eingeplant wurde.
+- **Zeitstrahl: Zeilen bleiben beim Bearbeiten stehen.** Verschieben, Kürzer- oder Längerziehen sortiert die Zeilen nicht mehr sofort um. Neu sortiert wird beim Neuladen oder wenn man unter ⋯ die Sortierung wechselt. Eigenes Verschieben am Griff gilt weiter sofort.
+
 ## 1.51.0
 - **Filter „Verantwortlich“ mit Mehrfachauswahl**, wie bei Tag, Projekt und Priorität: z. B. Lasse und Melanie gleichzeitig. Gilt auch für „Wer“ in der Seitenleiste; „Alle“ setzt zurück.
 - **Startseite:** Von den Filtern gilt hier nur „Verantwortlich“. Tag, Projekt, Priorität und Suche wirken auf Start nicht. Ist der Personenfilter aktiv, zeigen die Knöpfe oben (Meine · Melanie · Alle) genau diese Auswahl und schalten sie um.

@@ -14,7 +14,7 @@ async function pull(force){
   }catch(e){$("note").textContent="Keine Verbindung zum Server – Änderungen werden evtl. nicht gespeichert."}
 }
 async function saveTask(t,o){
-  const i=RAW.findIndex(x=>x.id===t.id);i>=0?RAW[i]=t:RAW.push(t);render();depLater(t);
+  const i=RAW.findIndex(x=>x.id===t.id);i>=0?RAW[i]=t:RAW.push(t);render();depLater(t,o);
   try{await api("api/task",{method:"POST",headers:{"Content-Type":"application/json",...(o&&o.check?{"X-Check":"1"}:{})},body:JSON.stringify(t)})}
   catch(e){
     if(e.conflict&&e.conflict.task){const s=e.conflict.task,j=RAW.findIndex(x=>x.id===s.id);if(j>=0)RAW[j]=s;render();

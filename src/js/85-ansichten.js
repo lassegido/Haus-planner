@@ -141,6 +141,7 @@ function kiosk(){
     <div class="kst"><div><b>${L.length}</b><span>heute</span></div><div class="${late.length?"hot":""}"><b>${late.length}</b><span>überfällig</span></div><div><b>${next.length}</b><span>7 Tage</span></div></div>${who?`<div class="kwho">${esc(who)}</div>`:""}</section>
     <section class="kr">${L.length?`<h3>Heute</h3>${L.slice(0,6).map(row).join("")}`:`<div class="kfree"><b>Für heute ist nichts geplant.</b><span>Genieß den Tag.</span></div>`}${nx.length?`<h3>Als Nächstes</h3>${nx.map(row).join("")}`:""}${L.length>6?`<p class="kmore">und ${L.length-6} weitere</p>`:""}</section></div>`}
 function render(){
+  if(!KIOSK&&!schedBusy&&!schedT&&RAW.some(t=>(t.deps||[]).length&&t.status==="todo"))schedT=setTimeout(()=>{schedT=null;schedule()},300);
   tasks=RAW.filter(t=>!t.arch&&!t.del&&!t.inbox).map(t=>t.status==="backlog"?{...t,status:"todo"}:t);
   if(KIOSK){$("main").innerHTML=kiosk();document.querySelectorAll("[data-adv]").forEach(b=>b.onclick=e=>{e.stopPropagation();advance(b.dataset.adv)});return}
   if(!purged&&RAW.length){purged=true;const lim=iso(new Date(Date.now()-30*864e5));RAW.filter(t=>t.del&&t.delAt&&t.delAt<lim).forEach(t=>delTask(t.id))}
@@ -199,6 +200,10 @@ const MON=["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","D
 function gantt(list){
   if(!list.length)return'<div class="empty">Keine Treffer.</div>';
   const T=today(),ROW=42,GH=30,mode=gmode,G=groups(list),items=[];let BH=0;
+  /* 1.52: Beim Bearbeiten bleibt die Zeilenfolge stehen (sonst springen Zeilen nach jedem Ziehen). Neu sortiert wird erst beim
+     Neuladen oder wenn man unter ⋯ die Sortierung wechselt; eigenes Verschieben (Griff, Nach oben/unten) gilt sofort. */
+  if(!gOrd)gOrd=list.map(t=>t.id);else for(const t of list)if(!gOrd.includes(t.id))gOrd.push(t.id);
+  const gi=new Map(gOrd.map((id,i)=>[id,i]));G.forEach(g=>g.L.sort((a,b)=>gi.get(a.id)-gi.get(b.id)));
   G.forEach(g=>{if(g.l!=null){items.push({g,y:BH});BH+=GH}g.L.forEach(t=>{items.push({t,gk:g.k,y:BH});BH+=ROW})});
   const mn=Math.min(T,...list.map(t=>dn(t.start))),mx=Math.max(T,...list.map(t=>dn(t.end)));
   const dp=d=>{const x=fromDn(d);return[x.getUTCFullYear(),x.getUTCMonth(),x.getUTCDate(),x.getUTCDay()]};

@@ -55,6 +55,8 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] Zeitstrahl: rechten Griff eines Balkens mit dem Finger ziehen (länger/kürzer); verknüpfte Folgeaufgaben rücken mit.
 - [ ] Aufgabenblatt: Schalter „Meilenstein“ sieht aus wie ein iOS-Schalter und lässt sich umlegen.
 - [ ] Filter: bei „Verantwortlich“ zwei Personen antippen; Kennzahlen oben ändern sich passend. Start zeigt nur diese Personen, Tag-Filter wirkt dort nicht.
+- [ ] Zeitstrahl nach dem Update öffnen: verknüpfte Aufgaben liegen hinter ihren Vorgängern. Vorgänger abhaken → Nachfolger rückt nach vorn.
+- [ ] Zeitstrahl: Balken verschieben oder kürzer ziehen → Zeilen bleiben, wo sie sind; nach Neuladen nach Datum sortiert.
 - [ ] Am Tag nach dem Update: Spruch auf der Startseite kommt von Gemini (neu formuliert), KI-Verbrauch in den Einstellungen nur +1.
 
 ## 4. Export (iPhone)

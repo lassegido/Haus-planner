@@ -59,19 +59,37 @@ async function setStatus(t,next){
   await saveTask(u);if(sp)await saveTask(sp);if(next==="done"&&t.status!=="done")cheer();return sp}
 /* Zeitstrahl: Balken ziehen */
 /* 1.48: Verknüpfen (A → B: B startet nach A), auch per Menü „Verknüpfen mit …“ und dann Ziel antippen */
-let linkFrom=null;
-/* 1.50: Abhängigkeiten planen automatisch: Eine Aufgabe startet frühestens am Tag nach dem Ende aller offenen Vorgänger.
-   Wird ein Vorgänger länger oder später, rücken die Nachfolger (und deren Nachfolger) mit; wer eine Aufgabe zu früh legt, wird an die Grenze gesetzt. */
-let depMoved=[],depT=null;
-function depLater(t){if(t&&t.id)setTimeout(()=>depShift(t),0)}
-function depNote(msg){depMoved.push(msg);clearTimeout(depT);depT=setTimeout(()=>{const n=depMoved.length;toast(n===1?depMoved[0]:n+" Aufgaben wegen Abhängigkeiten verschoben");depMoved=[]},450)}
+let linkFrom=null,gOrd=null;
+/* 1.52: Abhängigkeiten werden automatisch eingeplant (Ende-Anfang-Beziehung wie in MS Project, „so früh wie möglich“):
+   - Eine offene Aufgabe mit Vorgängern startet am frühesten möglichen Tag, die Dauer bleibt gleich.
+   - Offener Vorgänger: frühestens am Tag nach seinem geplanten Ende (liegt das Ende schon zurück: frühestens morgen).
+   - Erledigter Vorgänger: frühestens am Tag, an dem er erledigt wurde, aber nicht in der Vergangenheit (also ab heute).
+     Wird ein Vorgänger früher fertig, rückt die Aufgabe deshalb nach vorn.
+   - Wer die Aufgabe bewusst später legt, setzt „frühestens ab“ (snet); früher als möglich geht nicht.
+   - Aufgaben „In Arbeit“ oder erledigt werden nie verschoben (sie haben schon angefangen).
+   Läuft nach jedem Speichern und nach jedem Laden, in Reihenfolge der Abhängigkeiten, damit Ketten in einem Durchgang stimmen. */
+let schedT=null,schedBusy=false;const userTouched=new Set();
+function depLater(t,o){if(t&&t.id&&!(o&&o.sched))userTouched.add(t.id);clearTimeout(schedT);schedT=setTimeout(()=>{schedT=null;schedule()},120)}
 const shiftBy=(t,d)=>({...t,start:iso(fromDn(dn(t.start)+d)),end:iso(fromDn(dn(t.end)+d))});
-async function depShift(t){
-  if(!t||t.del||t.inbox||t.arch)return;const open=p=>p&&!p.del&&!p.arch&&p.status!=="done";
-  if(open(t)&&(t.deps||[]).length){const P=t.deps.map(byId).filter(open);if(P.length){const m=Math.max(...P.map(p=>dn(p.end)+1));
-    if(dn(t.start)<m){const u=shiftBy(t,m-dn(t.start));u.log=diffLog(t,u);depNote("„"+t.title+"“ startet frühestens am "+fd(u.start)+" (nach „"+P.find(p=>dn(p.end)+1===m).title+"“)");return saveTask(u)}}}
-  if(!open(t))return;const m=dn(t.end)+1;
-  for(const s of RAW.filter(x=>open(x)&&(x.deps||[]).includes(t.id)))if(dn(s.start)<m){const u=shiftBy(s,m-dn(s.start));u.log=diffLog(s,u);depNote("„"+s.title+"“ rückt auf den "+fd(u.start)+" (nach „"+t.title+"“)");await saveTask(u)}}
+function earliest(t,T){const live=p=>p&&!p.del&&!p.arch;let m=-Infinity,why=null;
+  for(const id of t.deps||[]){const p=RAW.find(x=>x.id===id);if(!live(p))continue;
+    let c;if(p.status==="done"){const dd=doneDay(p);c=isNaN(dd)?T:Math.max(dd,T)}else c=Math.max(dn(p.end),T)+1;
+    if(c>m){m=c;why=p}}
+  return m===-Infinity?null:{m,why}}
+async function schedule(){
+  if(schedBusy||!RAW.length)return;schedBusy=true;const T=today(),moved=[];
+  try{const byI=new Map(RAW.map(t=>[t.id,t])),seen=new Set(),order=[];
+    const visit=t=>{if(!t||seen.has(t.id))return;seen.add(t.id);(t.deps||[]).forEach(d=>visit(byI.get(d)));order.push(t)};RAW.forEach(visit);
+    for(const t0 of order){const t=RAW.find(x=>x.id===t0.id);if(!t||t.del||t.arch||t.inbox||t.status!=="todo"||!(t.deps||[]).length)continue;
+      const e=earliest(t,T);if(!e)continue;let u=null;
+      if(userTouched.has(t.id)){userTouched.delete(t.id);const s=dn(t.start);
+        if(s>e.m){if(t.snet!==t.start)u={...t,snet:t.start}}            /* bewusst später gelegt */
+        else if(t.snet){u={...t};delete u.snet}}
+      const base=u||t,want=Math.max(e.m,base.snet?dn(base.snet):-Infinity);
+      if(dn(base.start)!==want){u=shiftBy(base,want-dn(base.start));if(u.snet&&dn(u.snet)<=e.m)delete u.snet;moved.push([t,u,e.why])}
+      if(u){u.log=diffLog(t,u);const i=RAW.findIndex(x=>x.id===t.id);RAW[i]=u;await saveTask(u,{sched:true})}}
+  }finally{schedBusy=false}
+  if(moved.length){const [t,u,w]=moved[0];toast(moved.length===1?`„${t.title}“ ${dn(u.start)<dn(t.start)?"rückt vor":"rückt"} auf den ${fd(u.start)} (nach „${w.title}“)`:`${moved.length} Aufgaben nach ihren Abhängigkeiten neu eingeplant`)}}
 async function addDep(fromId,toId){const f=byId(fromId),to=byId(toId);if(!f||!to||f.id===to.id)return false;
   if((to.deps||[]).includes(f.id)){toast("Ist schon verknüpft");return false}
   if(dependsOn(f.id,to.id)){toast("Das wäre ein Kreis: „"+f.title+"“ hängt schon von „"+to.title+"“ ab.");return false}
@@ -95,7 +113,7 @@ function ordBetween(beforeId,afterId,t){const a=beforeId&&byId(beforeId),b=after
 function ordOn(){if(sortm!=="ord"){sortm="ord";try{localStorage.setItem("haus-sort","ord")}catch(_){}if($("srt"))$("srt").value="ord"}}
 /* Eine Aufgabe neu einordnen: Reihenfolge (zwischen Nachbarn), Gruppe und optional Zeitraum in einem Schritt, mit Rückgängig */
 async function dropRow(id,{before,after,from,to,order=true,dates=null}={}){const t=byId(id);if(!t)return;const u={...t,...regroupFields(t,from,to),...(dates||{})};
-  if(order){ordOn();u.ord=ordBetween(before,after,t)}u.log=diffLog(t,u);await saveTask(u);hap(8);
+  if(order){ordOn();u.ord=ordBetween(before,after,t);if(gOrd){gOrd=gOrd.filter(x=>x!==id);const bi=before?gOrd.indexOf(before):-1,ai=after?gOrd.indexOf(after):-1;gOrd.splice(bi>=0?bi+1:ai>=0?ai:gOrd.length,0,id)}}u.log=diffLog(t,u);await saveTask(u);hap(8);
   const moved=grp!=="none"&&from!==to&&from!==undefined&&to!==undefined;
   toast(moved?"„"+t.title+"“ → "+grpName(to):order?"Reihenfolge geändert":"„"+t.title+"“ verschoben",async()=>{const c=byId(id);if(!c)return;const r={...c,proj:t.proj,tags:t.tags,area:t.area,who:t.who,prio:t.prio,start:t.start,end:t.end};if(typeof t.ord==="number")r.ord=t.ord;else delete r.ord;await saveTask(r)})}
 async function reorder(id,beforeId,afterId){return dropRow(id,{before:beforeId,after:afterId})}

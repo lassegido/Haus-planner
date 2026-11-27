@@ -167,7 +167,7 @@ def test_abhaengigkeiten_planen_automatisch(t, browser):
         b, c = s.task("b"), s.task("c")
         t.check("Verknüpfen: Nachfolger rückt hinter den Vorgänger (10 Tage)", b["start"] == D(10) and b["end"] == D(11), b)
         t.check("… und dessen Nachfolger rückt mit", c["start"] == D(12), c)
-        t.check("Hinweis erklärt die Verschiebung", "Aufgaben wegen Abhängigkeiten verschoben" in (p.pg.text_content("#toast") or "") or "rückt" in (p.pg.text_content("#toast") or ""))
+        t.check("Hinweis erklärt die Verschiebung", "eingeplant" in (p.pg.text_content("#toast") or "") or "rückt" in (p.pg.text_content("#toast") or ""))
         # Vorgänger am Ende verlängern (Griff rechts ziehen)
         e = p.pg.locator("g[data-id=a] rect[data-h=e]").bounding_box()
         ppd = p.js("+document.querySelector('.gb').dataset.ppd")
@@ -210,4 +210,48 @@ def test_meilenstein_schalter(t, browser):
         p.pg.wait_for_timeout(400)
         w = p.js("[parseFloat(getComputedStyle(f_ms).width),parseFloat(getComputedStyle(f_ms).height)]")
         t.check("Schalter Meilenstein hat Schalterform (breiter als hoch)", w[0] > 40 and w[0] > w[1] * 1.4, w)
+        p.close()
+
+
+def test_frueher_fertig_zieht_vor(t, browser):
+    """1.52: Wie MS Project („so früh wie möglich“): früher fertig → Nachfolger rückt vor; bewusst später gelegt bleibt; In Arbeit wird nie verschoben."""
+    with Server() as s:
+        s.seed([task("y", "Fliesen legen", D(0), D(9)), task("x", "Fugen", D(2), D(3), deps=["y"]), task("z", "Silikon", D(1), D(1), deps=["x"]),
+                task("w", "Schon begonnen", D(0), D(2), deps=["y"], status="doing")])
+        p = Page(browser, s.url, GROSS)
+        zeitstrahl(p)
+        p.pg.wait_for_timeout(1200)
+        t.check("Beim Laden: Kette wird eingeplant (x nach y, z nach x)", s.task("x")["start"] == D(10) and s.task("x")["end"] == D(11) and s.task("z")["start"] == D(12),
+                (s.task("x")["start"], s.task("z")["start"]))
+        t.check("„In Arbeit“ wird nicht verschoben", s.task("w")["start"] == D(0))
+        p.js("void setStatus(byId('y'),'done')")
+        p.pg.wait_for_timeout(1500)
+        t.check("Vorgänger heute fertig → Nachfolger rückt auf heute vor", s.task("x")["start"] == D(0) and s.task("x")["end"] == D(1), s.task("x"))
+        t.check("… und die Kette rückt mit", s.task("z")["start"] == D(2), s.task("z"))
+        t.check("Hinweis „neu eingeplant“", "eingeplant" in (p.pg.text_content("#toast") or "") or "rückt" in (p.pg.text_content("#toast") or ""))
+        p.js("void saveTask({...byId('x'),start:'%s',end:'%s'})" % (D(5), D(6)))
+        p.pg.wait_for_timeout(1500)
+        x = s.task("x")
+        t.check("Bewusst später gelegt: bleibt dort (frühestens ab)", x["start"] == D(5) and x.get("snet") == D(5), x)
+        t.check("Nachfolger richtet sich danach", s.task("z")["start"] == D(7), s.task("z"))
+        p.js("void saveTask({...byId('x'),start:'%s',end:'%s'})" % (D(-3), D(-2)))
+        p.pg.wait_for_timeout(1500)
+        x = s.task("x")
+        t.check("Früher als möglich: wird auf den frühesten Tag gesetzt, „frühestens ab“ entfällt", x["start"] == D(0) and "snet" not in x, x)
+        t.check("keine Skriptfehler", not p.errors, p.errors)
+        p.close()
+
+
+def test_reihenfolge_bleibt_beim_bearbeiten(t, browser):
+    """1.52: Datum ziehen sortiert die Zeilen nicht sofort um; erst nach Neuladen."""
+    with Server() as s:
+        s.seed([task("a", "Eins", D(0), D(1)), task("b", "Zwei", D(2), D(3)), task("c", "Drei", D(4), D(5))])
+        p = Page(browser, s.url, GROSS)
+        zeitstrahl(p)
+        p.js("void saveTask({...byId('a'),start:'%s',end:'%s'})" % (D(8), D(9)))
+        p.pg.wait_for_timeout(800)
+        t.check("Nach dem Verschieben: Zeile bleibt oben", rows(p) == ["a", "b", "c"], rows(p))
+        p.pg.reload()
+        zeitstrahl(p)
+        t.check("Nach dem Neuladen: nach Datum sortiert", rows(p) == ["b", "c", "a"], rows(p))
         p.close()
