@@ -1203,3 +1203,9 @@ body.pdragging{cursor:grabbing;-webkit-user-select:none;user-select:none}
   .plan{grid-template-columns:15rem minmax(0,1fr)}
   .pbox{position:sticky;top:0;max-height:calc(100dvh - 9rem);overflow:auto}
   .pbox .pchips{grid-template-columns:1fr}}
+/* 1.47: Startseite „Heute“: oben fällig, darunter „Läuft heute, fällig später“ (zählt nicht im Ring) */
+.hsub2{display:flex;align-items:center;gap:.45rem;margin:.9rem .9rem .3rem;font:650 .75rem/1.2 var(--fb);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.hsub2.first{margin-top:.6rem}
+.hsub2 em{font-style:normal;letter-spacing:0;padding:0 .4rem;border-radius:1rem;background:var(--seg-tr)}
+.hsub2:not(.first)~.hrow{opacity:.82}
+.hmeme .gifbox{min-height:8rem}

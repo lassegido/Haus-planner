@@ -46,6 +46,8 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] Kalender → Planen auf dem iPad (hochkant und quer): 2 und 5 Wochen, Aufgabe am Griff mit dem Finger auf einen anderen Tag ziehen; am unteren Rand scrollt die Seite mit.
 - [ ] Planen auf dem iPhone: Griff antippen, dann Tag antippen. Sammelkorb: mehrere Aufgaben hintereinander eintippen, Tastatur bleibt offen.
 - [ ] Aufgaben im Sammelkorb tauchen nicht in der Erinnerung oder bei „Alexa, was steht heute an“ auf.
+- [ ] Startseite, weit nach unten scrollen, Kreis antippen (Offen → In Arbeit → Erledigt): Seite bleibt stehen.
+- [ ] Ring zählt nur heute Fällige; mehrtägige Aufgaben stehen unter „Läuft heute, fällig später“.
 - [ ] Am Tag nach dem Update: Spruch auf der Startseite kommt von Gemini (neu formuliert), KI-Verbrauch in den Einstellungen nur +1.
 
 ## 4. Export (iPhone)

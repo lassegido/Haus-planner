@@ -3,7 +3,7 @@
    (Ausnahme: welche Abzeichen dieses Gerät schon gemeldet hat, im Browser unter haus-badges). */
 const doneOn=t=>{if(t.status!=="done")return Infinity;const d=doneDay(t);return isNaN(d)?dn(t.end):d};
 const motScope=()=>{const hw=homeW();return RAW.filter(t=>!t.del&&!t.inbox&&(hw==="__all"||wl(t).includes(hw)))};
-const todayOpenOf=L=>{const T=today();return L.filter(t=>t.status!=="done"&&!t.arch&&dn(t.start)<=T&&(dn(t.end)>=T||isLate(t)))};
+const todayOpenOf=L=>{const T=today();return L.filter(t=>t.status!=="done"&&!t.arch&&!t.inbox&&dn(t.end)<=T)};
 /* Tage, an denen etwas Fälliges offen blieb (Tagesring nicht voll) */
 function badDays(L,T){const bad=new Set();for(const t of L){const due=dn(t.end),dd=doneOn(t);for(let x=Math.max(due,T-400);x<Math.min(dd,T+1);x++)bad.add(x);
   /* 1.42: Ein „Nicht geschafft“ macht den Tag ebenfalls nicht voll */
@@ -155,7 +155,7 @@ document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[da
 const LAGE={frueh:"Morgens, alles offen",frueh_gut:"Starker Start",mittag:"Mittags, noch nichts",mittag_gut:"Auf gutem Weg",abend:"Abends, wird knapp",abend_gut:"Endspurt",fast:"Fast geschafft",done:"Alles geschafft",streak:"Läuft bei dir",late:"Da ist was liegen geblieben",start:"Noch nichts geschafft",good:"Gut dabei"};
 function funHtml(kind,v){if(!funOn())return"";gifKind=kind;if(haInfo&&haInfo.giphy&&(!GIFS[kind]||GIFS[kind].bad))setTimeout(()=>gifToday(kind),0);const g=GIFS[kind]&&!GIFS[kind].bad?GIFS[kind]:null;
   const why=v.why?`<p class="mwhy">${esc(v.why)}</p>`:"";
-  if(g&&g.url)return`<div class="hmeme">${why}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button></div>`;
+  if(g&&g.url)return`<div class="hmeme">${why}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}"></button></div>`;
   return`<div class="hmeme">${why}<p class="meme">${esc(memeText(kind,v))}</p></div>`}
 /* 1.42: „BUSTED!“ einmal groß, wenn man auf der Startseite „Nicht geschafft“ wählt (nur dort und nur für die Person, die es antippt).
    Verschwindet von selbst, Antippen schließt sofort. Mit „Sprüche, GIFs und Konfetti“ aus bleibt es weg. */

@@ -1,5 +1,10 @@
 # Änderungen
 
+## 1.47.0
+- **Startseite: Ring zählt nur, was heute fällig ist** (und Überfälliges). Aufgaben, die heute laufen, aber erst später fällig sind, zählen nicht mehr. Wird eine heute fällige Aufgabe auf später verschoben, ist sie aus dem Ring raus.
+- **„Heute“ ist zweigeteilt:** oben „Heute fällig“, darunter „Läuft heute, fällig später“ (etwas blasser).
+- **Kein Springen beim Abhaken:** Nach dem Antippen des Kreises (Offen → In Arbeit → Erledigt) bleibt die Seite an derselben Stelle, vor allem auf der Startseite. Ursache war, dass das GIF bei jedem Neuzeichnen neu geladen wurde und Zeilen ihre Höhe erst verzögert bekommen; dabei hat iOS die Scrollposition nach oben gezogen.
+
 ## 1.46.0
 - **Planen:** Im Kalender oben „Monat | Planen“ umschalten.
   - Zeitraum 1, 2 oder 5 Wochen ab Montag, mit ‹ › wochenweise vor und zurück und „Heute“. Jeder Tag zeigt, wie viele Aufgaben offen sind; ab 4 färbt sich die Zahl orange.

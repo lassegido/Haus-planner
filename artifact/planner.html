@@ -1221,6 +1221,12 @@ body.pdragging{cursor:grabbing;-webkit-user-select:none;user-select:none}
   .plan{grid-template-columns:15rem minmax(0,1fr)}
   .pbox{position:sticky;top:0;max-height:calc(100dvh - 9rem);overflow:auto}
   .pbox .pchips{grid-template-columns:1fr}}
+/* 1.47: Startseite „Heute“: oben fällig, darunter „Läuft heute, fällig später“ (zählt nicht im Ring) */
+.hsub2{display:flex;align-items:center;gap:.45rem;margin:.9rem .9rem .3rem;font:650 .75rem/1.2 var(--fb);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.hsub2.first{margin-top:.6rem}
+.hsub2 em{font-style:normal;letter-spacing:0;padding:0 .4rem;border-radius:1rem;background:var(--seg-tr)}
+.hsub2:not(.first)~.hrow{opacity:.82}
+.hmeme .gifbox{min-height:8rem}
 </style>
 </head>
 <body>
@@ -2247,7 +2253,9 @@ function homeBody(tasks,allT){
   const pjs=allProjs().filter(n=>tasks.some(t=>t.proj===n)),pbars=pjs.map(n=>{const L=tasks.filter(t=>t.proj===n&&!isFail(t)),x=L.filter(isOk).length;return`<div class="prg" style="--tc:${pcol(n)}"><span>${esc(n)}</span><div class="pb"><i style="width:${Math.round(x/L.length*100)}%"></i></div><em>${x}/${L.length}</em></div>`}).join("");
   let k=1;const P=(cls,h,c,body)=>`<section class="pnl ${cls}" style="--i:${k++}"><h3><span>${h}</span><em>${c}</em></h3>${body}</section>`;
   const byEnd=(a,b)=>dn(a.end)-dn(b.end)||dn(a.start)-dn(b.start),opn=tasks.filter(t=>t.status!=="done");
-  const nowL=opn.filter(t=>!isLate(t)&&dn(t.start)<=T&&dn(t.end)>=T).sort(byEnd),todayL=[...over,...nowL];
+  /* 1.47: Für den Ring und „Heute“ zählt nur, was heute fällig ist (oder überfällig). Was heute läuft, aber später fällig ist,
+     steht in der Liste darunter getrennt und zählt nicht. Wer eine fällige Aufgabe heute verschiebt, nimmt sie aus dem Ring. */
+  const nowL=opn.filter(t=>!isLate(t)&&dn(t.start)<=T&&dn(t.end)>=T).sort(byEnd),dueL=nowL.filter(t=>dn(t.end)===T),runL=nowL.filter(t=>dn(t.end)>T),todayL=[...over,...dueL];
   const doingL=opn.filter(t=>t.status==="doing").sort(byEnd);
   /* Ring: nur heute (überfällig, heute anstehend, heute erledigt) der oben gewählten Person */
   const closedT=tasks.filter(t=>{if(t.status!=="done")return false;const dd=doneDay(t);return isNaN(dd)?dn(t.start)<=T&&dn(t.end)>=T:dd===T});
@@ -2264,7 +2272,8 @@ function homeBody(tasks,allT){
   const tiles=`<div class="tiles">`+Object.entries(TL).map(([k,[l,L,c,ic]])=>`<button type="button" class="tile${k===ht?" on":""}" data-ht="${k}" style="--tc:${c}"><span class="ti2"><svg viewBox="0 0 24 24">${ic}</svg></span><b>${L.length}</b><span class="tl">${l}</span></button>`).join("")+`</div>`;
   const qa=`<section class="qadd"><div class="qbox"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><input id="qadd" placeholder="Neue Aufgabe, z. B. Rasen mähen Sa" enterkeyhint="done" autocomplete="off" autocorrect="on" aria-label="Schnelleingabe"></div><div class="qprev" id="qprev"></div><div class="vsug qsug" id="qsug" role="list" aria-label="Frühere Aufgaben"></div><p class="qhint">Erkannt werden: heute · morgen · Sa · 12.12. · in 3 Tagen · bis Fr · #Tag · +Projekt · @Person · !1</p></section>`;
   const cur=TL[ht],LL=cur[1];
-  const list=`<section class="pnl hlist" style="--i:${k++}" aria-label="${cur[0]}">${LL.length?LL.slice(0,40).map(hrow).join(""):`<div class="none">${cur[4]}</div>`}</section>`;
+  const runH=ht==="heute"&&runL.length?`<h4 class="hsub2"><span>Läuft heute, fällig später</span><em>${runL.length}</em></h4>`+runL.slice(0,40).map((t,i)=>hrow(t,i+LL.length)).join(""):"";
+  const list=`<section class="pnl hlist" style="--i:${k++}" aria-label="${cur[0]}">${LL.length?(runH?`<h4 class="hsub2 first"><span>Heute fällig</span><em>${LL.length}</em></h4>`:"")+LL.slice(0,40).map(hrow).join(""):`<div class="none">${runH?"Heute ist nichts fällig.":cur[4]}</div>`}${runH}</section>`;
   /* Lage für das Meme, in dieser Reihenfolge: alles erledigt → etwas überfällig → schon etwas geschafft → Serie läuft → noch nichts.
      Ist eine Lage gelöst (z. B. Überfälliges erledigt), greift die nächste und damit ein anderes GIF. */
   /* 1.45: Tageszeit zählt mit. Morgens (bis 11 Uhr) anspornen, mittags (bis 17 Uhr) anstupsen oder bestätigen, abends frech-ironisch
@@ -2330,13 +2339,18 @@ function glResize(){
 }
 function gToday(smooth){const g=document.querySelector(".gwrap"),sv=g&&g.querySelector(".gb");if(!sv)return;const l=g.querySelector(".gl").offsetWidth;g.scrollTo({left:Math.max(0,(+sv.dataset.tx||0)-(g.clientWidth-l)*.3),behavior:smooth?"smooth":"auto"})}
 function stickyLabels(){const g=document.querySelector(".gwrap");if(!g)return;const x0=g.scrollLeft;g.querySelectorAll(".l1").forEach(t=>{const a=+t.dataset.a,b=+t.dataset.b,w=t.getComputedTextLength?t.getComputedTextLength():60;t.setAttribute("x",Math.max(a+10,Math.min(x0+10,b-w-10)))})}
+/* 1.47: Nach dem Neuzeichnen an derselben Stelle bleiben. Zeilen mit content-visibility und Bilder bekommen ihre Höhe erst
+   nach und nach; bis dahin klemmt der Browser die Scrollposition. Deshalb mehrmals nachziehen, solange niemand selbst scrollt. */
+let userScrollAt=0;["wheel","touchstart","keydown"].forEach(ev=>addEventListener(ev,()=>{userScrollAt=Date.now()},{passive:true}));
+function keepScroll(m,y){const t0=Date.now(),fix=()=>{if(userScrollAt>t0||Math.abs(m.scrollTop-y)<1)return;m.scrollTop=y};
+  requestAnimationFrame(()=>{fix();requestAnimationFrame(fix)});[60,160,400].forEach(ms=>setTimeout(fix,ms))}
 function after(o){
   const entering=o.v!==view;renderedView=view;if(entering)enter();setTimeout(()=>{lastMoved=null},500);
   if(view==="board"){$("main").insertAdjacentHTML("beforeend",'<div class="dots"><i class="on"></i><i></i><i></i></div>');
     const b=document.querySelector(".board"),dots=[...document.querySelectorAll(".dots i")];
     if(b){const mark=()=>{const w=b.firstElementChild.offsetWidth+12,i=Math.max(0,Math.min(2,Math.round(b.scrollLeft/w)));dots.forEach((d,k)=>d.classList.toggle("on",k===i))};b.onscroll=mark;if(o.v==="board"&&o.b)b.scrollLeft=o.b;mark()}}
   const g=document.querySelector(".gwrap");
-  if(o.v===view){$("main").scrollTop=o.m;scrollTo(0,o.y);if(g&&o.g!=null){g.scrollLeft=o.g;g.scrollTop=o.gy||0}}
+  if(o.v===view){const m=$("main");m.scrollTop=o.m;scrollTo(0,o.y);keepScroll(m,o.m);if(g&&o.g!=null){g.scrollLeft=o.g;g.scrollTop=o.gy||0}}
   else if(g)gToday(false);
   if(g){g.onscroll=stickyLabels;stickyLabels();ganttDrag();glResize()}
 }
@@ -2372,9 +2386,11 @@ function render(){
   const planOn=view==="cal"; /* Kalender (auch Planen mit Sammelkorb) zeigt immer sein Raster */
   if(!n&&view!=="home"&&!planOn){$("main").innerHTML='<div class="empty">Noch keine Aufgaben.<br><br><button class="btn" onclick="openDlg()">Erste Aufgabe anlegen</button></div>';return}
   if(view!=="home"&&!list.length&&!planOn){$("main").innerHTML='<div class="empty">Keine Aufgaben mit diesen Filtern.<br><br><button class="btn ghost" id="fclr">Filter zurücksetzen</button></div>';$("fclr").onclick=()=>{fClear();$("q").value="";render()};applySel();return}
-  const qa0=$("qadd"),qv0=qa0?qa0.value:"",qf0=!!qa0&&document.activeElement===qa0;
+  const qa0=$("qadd"),qv0=qa0?qa0.value:"",qf0=!!qa0&&document.activeElement===qa0,gif0=document.querySelector(".hero .gifbox img");
   {const pi=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.pin;if(pi)planKeep={k:pi,v:document.activeElement.value}}
   $("main").innerHTML=view==="home"?home():view==="board"?board(list):view==="list"?table(list):view==="cal"?cal(list):gantt(list);
+  /* 1.47: Das GIF nicht neu laden (sonst ist die Karte kurz niedriger und iOS springt nach oben) */
+  {const g1=document.querySelector(".hero .gifbox img");if(gif0&&g1&&gif0.getAttribute("src")===g1.getAttribute("src"))g1.replaceWith(gif0)}
   bind();after(old);applySel();
   if(planKeep){const pi=document.querySelector(`[data-pin="${planKeep.k}"]`);if(pi){pi.value=planKeep.v||"";pi.focus({preventScroll:true})}planKeep=null}
   const qa1=$("qadd");if(qa1){qa1.value=qv0;if(qv0)$("qprev").innerHTML=qChips(parseQuick(qv0));if(qv0&&qf0)$("qsug").innerHTML=sugHtml(sugFind(qv0));if(qf0||qaddKeep){qa1.focus({preventScroll:true});qaddKeep=null}}
@@ -2484,7 +2500,7 @@ function bind(){
    (Ausnahme: welche Abzeichen dieses Gerät schon gemeldet hat, im Browser unter haus-badges). */
 const doneOn=t=>{if(t.status!=="done")return Infinity;const d=doneDay(t);return isNaN(d)?dn(t.end):d};
 const motScope=()=>{const hw=homeW();return RAW.filter(t=>!t.del&&!t.inbox&&(hw==="__all"||wl(t).includes(hw)))};
-const todayOpenOf=L=>{const T=today();return L.filter(t=>t.status!=="done"&&!t.arch&&dn(t.start)<=T&&(dn(t.end)>=T||isLate(t)))};
+const todayOpenOf=L=>{const T=today();return L.filter(t=>t.status!=="done"&&!t.arch&&!t.inbox&&dn(t.end)<=T)};
 /* Tage, an denen etwas Fälliges offen blieb (Tagesring nicht voll) */
 function badDays(L,T){const bad=new Set();for(const t of L){const due=dn(t.end),dd=doneOn(t);for(let x=Math.max(due,T-400);x<Math.min(dd,T+1);x++)bad.add(x);
   /* 1.42: Ein „Nicht geschafft“ macht den Tag ebenfalls nicht voll */
@@ -2636,7 +2652,7 @@ document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[da
 const LAGE={frueh:"Morgens, alles offen",frueh_gut:"Starker Start",mittag:"Mittags, noch nichts",mittag_gut:"Auf gutem Weg",abend:"Abends, wird knapp",abend_gut:"Endspurt",fast:"Fast geschafft",done:"Alles geschafft",streak:"Läuft bei dir",late:"Da ist was liegen geblieben",start:"Noch nichts geschafft",good:"Gut dabei"};
 function funHtml(kind,v){if(!funOn())return"";gifKind=kind;if(haInfo&&haInfo.giphy&&(!GIFS[kind]||GIFS[kind].bad))setTimeout(()=>gifToday(kind),0);const g=GIFS[kind]&&!GIFS[kind].bad?GIFS[kind]:null;
   const why=v.why?`<p class="mwhy">${esc(v.why)}</p>`:"";
-  if(g&&g.url)return`<div class="hmeme">${why}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}" loading="lazy"></button></div>`;
+  if(g&&g.url)return`<div class="hmeme">${why}<button type="button" class="gifbox" data-gif aria-label="GIF groß ansehen"><img src="${esc(g.url)}" alt="${esc(g.name||"")}"></button></div>`;
   return`<div class="hmeme">${why}<p class="meme">${esc(memeText(kind,v))}</p></div>`}
 /* 1.42: „BUSTED!“ einmal groß, wenn man auf der Startseite „Nicht geschafft“ wählt (nur dort und nur für die Person, die es antippt).
    Verschwindet von selbst, Antippen schließt sofort. Mit „Sprüche, GIFs und Konfetti“ aus bleibt es weg. */
