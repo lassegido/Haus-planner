@@ -752,7 +752,6 @@ td .pjh{margin-left:0}
 #fbtn b:empty{display:none}
 #fbtn.on{background:var(--acc);color:var(--on-acc);box-shadow:none}
 body[data-view=home] #ftog,body[data-view=home] #fbtn{display:none!important}
-#fw{display:none!important}
 .sub b.hot{color:var(--brick-ink);font-weight:650}
 @media (min-width:700px){#ftog{display:none!important}.hb{order:3}}
 @media (max-width:699px){
@@ -1250,7 +1249,7 @@ body.pdragging{cursor:grabbing;-webkit-user-select:none;user-select:none}
 .gbar:hover .ghv,.gbar.drag .ghv{opacity:.85}
 @media (pointer:coarse){.ghv{opacity:.75}}
 </style>
-<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"><script>(function(){var n=0,seen={};function send(m,w){try{m=String(m||"").slice(0,400);w=String(w||"");if(n>=8||seen[m+w])return;seen[m+w]=1;n++;var v=(document.body&&document.body.dataset.view)||"";fetch("api/log",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json","X-Planner":"1"},body:JSON.stringify({msg:m,where:w,ver:"1.50.0",view:v,ua:navigator.userAgent.slice(0,120)})}).catch(function(){})}catch(_){}}addEventListener("error",function(e){var t=e.target;if(t&&t!==window){if(t.tagName==="SCRIPT"||t.tagName==="LINK")send("Datei nicht geladen: "+String(t.src||t.href).split("/").pop().split("?")[0],"");return}send(e.message,String(e.filename||"").split("/").pop()+":"+e.lineno+":"+e.colno)},true);addEventListener("unhandledrejection",function(e){var r=e.reason||{};send("Unbehandelt: "+(r.message||r),String(r.stack||"").split("\n")[1]||"")})})();</script></head>
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"><script>(function(){var n=0,seen={};function send(m,w){try{m=String(m||"").slice(0,400);w=String(w||"");if(n>=8||seen[m+w])return;seen[m+w]=1;n++;var v=(document.body&&document.body.dataset.view)||"";fetch("api/log",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json","X-Planner":"1"},body:JSON.stringify({msg:m,where:w,ver:"1.51.0",view:v,ua:navigator.userAgent.slice(0,120)})}).catch(function(){})}catch(_){}}addEventListener("error",function(e){var t=e.target;if(t&&t!==window){if(t.tagName==="SCRIPT"||t.tagName==="LINK")send("Datei nicht geladen: "+String(t.src||t.href).split("/").pop().split("?")[0],"");return}send(e.message,String(e.filename||"").split("/").pop()+":"+e.lineno+":"+e.colno)},true);addEventListener("unhandledrejection",function(e){var r=e.reason||{};send("Unbehandelt: "+(r.message||r),String(r.stack||"").split("\n")[1]||"")})})();</script></head>
 <body>
 <svg id="icsp" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-bad" viewBox="0 0 24 24"><path d="M3 12h18v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-2z"/><path d="M6 12V6.5A2.5 2.5 0 0 1 8.5 4 2.5 2.5 0 0 1 11 6.5"/><path d="M7 18l-1 2M17 18l1 2"/></symbol><symbol id="i-kueche" viewBox="0 0 24 24"><path d="M5 10h14v7a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-7z"/><path d="M3 10h2M19 10h2M9 6.5c0-1.2 1-1.2 1-2.5M14 6.5c0-1.2 1-1.2 1-2.5"/></symbol><symbol id="i-sofa" viewBox="0 0 24 24"><path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><path d="M3 13a2 2 0 0 1 4 0v1h10v-1a2 2 0 0 1 4 0v4H3v-4z"/><path d="M6 17v2M18 17v2"/></symbol><symbol id="i-bett" viewBox="0 0 24 24"><path d="M3 19V6M3 14.5h18V19M21 14.5V12a3 3 0 0 0-3-3h-7v5.5"/><circle cx="7" cy="11" r="1.8"/></symbol><symbol id="i-kind" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="6.5"/><circle cx="6.6" cy="6.8" r="2.2"/><circle cx="17.4" cy="6.8" r="2.2"/><circle cx="12" cy="15.2" r="2"/><path d="M9.6 11.6h.01M14.4 11.6h.01"/></symbol><symbol id="i-tuer" viewBox="0 0 24 24"><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M4 21h16"/><circle cx="15" cy="12.5" r=".9" fill="currentColor"/></symbol><symbol id="i-pflanze" viewBox="0 0 24 24"><path d="M12 21v-9"/><path d="M12 12c0-4 3-6.5 7-6.5 0 4-2.5 6.5-7 6.5z"/><path d="M12 15.5c0-3-2.3-5-6-5 0 3.2 2 5 6 5z"/></symbol><symbol id="i-baum" viewBox="0 0 24 24"><path d="M12 21v-6"/><path d="M12 15c-4 0-6.5-2.5-6.5-5.5C5.5 6 8.5 3.5 12 3.5s6.5 2.5 6.5 6c0 3-2.5 5.5-6.5 5.5z"/></symbol><symbol id="i-sonne" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.8"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></symbol><symbol id="i-treppe" viewBox="0 0 24 24"><path d="M3.5 20.5h17M5 20.5v-4h4v-4h4v-4h4v-4"/></symbol><symbol id="i-dach" viewBox="0 0 24 24"><path d="M2.5 13L12 5l9.5 8"/><path d="M17 8.5V5h2v5.2"/><path d="M6 11.5V19h12v-7.5"/></symbol><symbol id="i-fenster" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="17" rx="1.5"/><path d="M12 3.5v17M4.5 12h15"/></symbol><symbol id="i-flamme" viewBox="0 0 24 24"><path d="M12 21c-3.9 0-6-2.5-6-5.7 0-3.6 3.2-5.5 3.7-9.3C12.4 7.4 18 10.2 18 15.3c0 3.2-2.1 5.7-6 5.7z"/><path d="M12 21c-1.6 0-2.6-1-2.6-2.5 0-1.5 1.6-2.2 2.6-3.7 1 1.5 2.6 2.2 2.6 3.7 0 1.5-1 2.5-2.6 2.5z"/></symbol><symbol id="i-blitz" viewBox="0 0 24 24"><path d="M13 3L5.5 13.5H11L10 21l7.5-10.5H12L13 3z"/></symbol><symbol id="i-tropfen" viewBox="0 0 24 24"><path d="M12 3.5c3.2 4 6 7 6 10.2a6 6 0 0 1-12 0C6 10.5 8.8 7.5 12 3.5z"/></symbol><symbol id="i-werkzeug" viewBox="0 0 24 24"><path d="M14 4.5l5.5 5.5-2.8 2.8-5.5-5.5z"/><path d="M12.2 9.7L4.8 17.1a1.9 1.9 0 0 0 2.7 2.7l7.4-7.4"/></symbol><symbol id="i-roller" viewBox="0 0 24 24"><rect x="4" y="3.5" width="14" height="5.5" rx="1.5"/><path d="M18 6h2.5v5.5h-8V14"/><rect x="10.7" y="14" width="3.6" height="6.5" rx="1.2"/></symbol><symbol id="i-boden" viewBox="0 0 24 24"><path d="M12 4l9 5-9 5-9-5z"/><path d="M3 13.5l9 5 9-5"/></symbol><symbol id="i-dokument" viewBox="0 0 24 24"><path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-16z"/><path d="M14 3.5v4h4M9.5 12.5h5M9.5 16h5"/></symbol><symbol id="i-muenze" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M15.2 9.2a4 4 0 1 0 0 5.6M8.3 11h5M8.3 13h5"/></symbol><symbol id="i-schild" viewBox="0 0 24 24"><path d="M12 3.5l7 2.5v5.5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z"/><path d="M9 12l2.2 2.2L15.2 10"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><path d="M4 16v-3.5L6 7.5h12l2 5V16"/><path d="M4 12.5h16M4 16h16"/><circle cx="7.5" cy="16.5" r="1.7"/><circle cx="16.5" cy="16.5" r="1.7"/></symbol><symbol id="i-wagen" viewBox="0 0 24 24"><path d="M3 4.5h2.5l2 10.5h10.5l2-8H7"/><circle cx="9.2" cy="19" r="1.2"/><circle cx="16.8" cy="19" r="1.2"/></symbol><symbol id="i-eimer" viewBox="0 0 24 24"><path d="M5 9h14l-1.6 11H6.6z"/><path d="M5 9c0-2.6 3-4.2 7-4.2s7 1.6 7 4.2"/></symbol><symbol id="i-karton" viewBox="0 0 24 24"><path d="M3.5 8L12 4l8.5 4v8.5L12 20.5l-8.5-4z"/><path d="M3.5 8L12 12l8.5-4M12 12v8.5"/></symbol><symbol id="i-pfote" viewBox="0 0 24 24"><ellipse cx="12" cy="15.5" rx="4" ry="3.2"/><circle cx="6.3" cy="11" r="1.6"/><circle cx="9.7" cy="6.8" r="1.6"/><circle cx="14.3" cy="6.8" r="1.6"/><circle cx="17.7" cy="11" r="1.6"/></symbol><symbol id="i-herz" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.5-7.5-10A4.2 4.2 0 0 1 12 7.6 4.2 4.2 0 0 1 19.5 10C19.5 15.5 12 20 12 20z"/></symbol><symbol id="i-koffer" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v2M4 13.5h16"/></symbol><symbol id="i-geschenk" viewBox="0 0 24 24"><rect x="4" y="9.5" width="16" height="10.5" rx="1.5"/><path d="M3 9.5h18M12 9.5V20"/><path d="M12 9.5C11 6 7.5 6 8 8c.3 1.4 4 1.5 4 1.5zM12 9.5c1-3.5 4.5-3.5 4-1.5-.3 1.4-4 1.5-4 1.5z"/></symbol><symbol id="i-schloss" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><circle cx="12" cy="15.5" r="1"/></symbol><symbol id="i-wlan" viewBox="0 0 24 24"><path d="M3.5 9.5a12 12 0 0 1 17 0M6.5 12.8a7.8 7.8 0 0 1 11 0M9.5 16a3.5 3.5 0 0 1 5 0"/><circle cx="12" cy="19" r=".9" fill="currentColor"/></symbol><symbol id="i-birne" viewBox="0 0 24 24"><path d="M9 17.5h6M10 20.5h4"/><path d="M12 3.5a5.5 5.5 0 0 0-3.2 10c.6.5 1.2 1.3 1.2 2.5h4c0-1.2.6-2 1.2-2.5A5.5 5.5 0 0 0 12 3.5z"/></symbol><symbol id="i-waschmaschine" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="17" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 7h.01M11 7h2"/></symbol><symbol id="i-kalender" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v3.5M15.5 3.5v3.5"/></symbol><symbol id="i-tonne" viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13"/><path d="M10.5 11v5.5M13.5 11v5.5"/></symbol><symbol id="i-stuhl" viewBox="0 0 24 24"><path d="M7 12V5a1.5 1.5 0 0 1 1.5-1.5h7A1.5 1.5 0 0 1 17 5v7"/><path d="M5.5 12h13v3.5h-13zM7.5 15.5V21M16.5 15.5V21"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M3.5 12.5V4.5a1 1 0 0 1 1-1h8L21 12l-8.5 8.5z"/><circle cx="8" cy="8" r="1.2"/></symbol></defs></svg>
 
@@ -1273,7 +1272,7 @@ body.pdragging{cursor:grabbing;-webkit-user-select:none;user-select:none}
 <div class="stage">
   <header class="bar">
     <div class="ttl"><h1 id="ttl">Board</h1><div class="sub" id="sub"></div></div>
-    <div class="filters" id="filters"><input id="q" type="search" placeholder="Suchen …" enterkeyhint="search"><select id="fw" aria-label="Person"><option value="">Alle Personen</option></select></div>
+    <div class="filters" id="filters"><input id="q" type="search" placeholder="Suchen …" enterkeyhint="search"></div>
     <div class="hb"><button class="ib" id="ftog" type="button" aria-label="Suchen"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button><button class="ib fb" id="fbtn" type="button" aria-label="Filter"><svg viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></svg><b id="fcnt"></b></button><button class="ib" id="more" type="button" aria-label="Mehr" aria-haspopup="menu"><svg viewBox="0 0 24 24" class="dots3"><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/></svg></button></div>
   </header>
   <div id="note"></div>
@@ -1728,7 +1727,7 @@ applyTheme();
 matchMedia("(prefers-color-scheme:dark)").addEventListener("change",applyTheme);
 
 /* Fremdcode-Adressen. Das Add-on bekommt lokale Dateien aus planner/vendor/ (tools/build.py ersetzt diese Zeile). */
-const LIB={pdf:"vendor/jspdf.umd.min.js?v=1.50.0",xlsx:"vendor/exceljs.min.js?v=1.50.0",font:()=>"vendor/fonts.css?v=1.50.0"};
+const LIB={pdf:"vendor/jspdf.umd.min.js?v=1.51.0",xlsx:"vendor/exceljs.min.js?v=1.51.0",font:()=>"vendor/fonts.css?v=1.51.0"};
 const SYSF='-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
 const FONTS=[["figtree","Figtree","Figtree:wght@400;500;600;700;800",'"Figtree",'+SYSF,"Freundlich und klar (Standard)"],
  ["sys","Systemschrift","",SYSF,"Sachlich wie iOS (auf dem iPhone San Francisco), lädt sofort"],
@@ -2139,7 +2138,7 @@ function plan(list){
    +`</aside><div class="pgrid">${weeks}</div></div>`}
 /* Kalenderwoche nach ISO: zählt nach dem Donnerstag der Woche */
 function kw(d){const th=monOf(d)+3,y=fromDn(th).getUTCFullYear();return 1+Math.floor((th-Date.UTC(y,0,1)/864e5)/7)}
-const fActive=()=>!!($("fw")&&$("fw").value)||!!($("q")&&$("q").value.trim());
+const fActive=()=>!!fwho.size||!!($("q")&&$("q").value.trim());
 
 async function planMove(id,target){
   const t=byId(id);if(!t)return;let u;
@@ -2225,6 +2224,9 @@ const pcol=n=>TC[pcolorKey(n)];
 const nextPColor=()=>{const used=new Set(allProjs().map(pcolorKey));return TCK.find(k=>!used.has(k))||TCK[allProjs().length%TCK.length]};
 const projChip=t=>t.proj?`<span class="tag proj" style="--tc:${pcol(t.proj)}">${esc(t.proj)}</span>`:"";
 const fullReg=()=>[...allTags().map(n=>{const o={n,c:colorKey(n)},i=tagIconStored(n);if(i)o.i=i;return o}),...allProjs().map(n=>({n,c:pcolorKey(n),p:1}))];
+/* 1.51: Verantwortlich ist jetzt auch Mehrfachauswahl (wie Tag, Projekt, Priorität); „__none“ = nicht zugewiesen */
+let fwho=new Set();
+const whoOk=t=>!fwho.size||[...fwho].some(k=>k==="__none"?!t.who:wl(t).includes(k));
 const tagOk=t=>(!ftags.size||[...ftags].some(k=>k==="__none"?!tgs(t).length:tgs(t).includes(k)))&&(!fprojs.size||[...fprojs].some(k=>k==="__none"?!t.proj:t.proj===k))&&(!fprios.size||fprios.has(t.prio||0));
 function groups(list){
   if(grp==="none")return[{l:null,L:list}];
@@ -2238,12 +2240,12 @@ function groups(list){
 }
 let migrated=false,regLoaded=false;
 function migrateReg(){if(migrated||!regLoaded||!tasks.length)return;migrated=true;if(allTags().some(n=>!reg.some(x=>!x.p&&x.n===n))||allProjs().some(n=>!reg.some(x=>x.p&&x.n===n)))saveReg(fullReg())}
-const fCount=()=>ftags.size+fprojs.size+fprios.size+($("fw").value?1:0);
+const fCount=()=>ftags.size+fprojs.size+fprios.size+fwho.size;
 function drawTbar(){
   const names=allTags(),pn=allProjs(),box=$("tchips");
   ftags=new Set([...ftags].filter(x=>x==="__none"||names.includes(x)));fprojs=new Set([...fprojs].filter(x=>x==="__none"||pn.includes(x)));
   const ac=(a,k,l,col,pre)=>`<button class="tc on" data-a="${a}" data-v="${esc(k)}"${col?` style="--tc:${col}"`:""}>${pre||""}<span>${esc(l)}</span><em>×</em></button>`;
-  const w=$("fw").value,act=[...fprojs].map(k=>ac("p",k,k==="__none"?"Ohne Projekt":k,k==="__none"?"var(--faint)":pcol(k),"<i></i>")).concat([...ftags].map(k=>ac("t",k,k==="__none"?"Ohne Tag":k,k==="__none"?"var(--faint)":tcol(k),k==="__none"?"<i></i>":tIc(k))),[...fprios].sort().map(r=>ac("r",String(r),r?"Prio "+r:"Ohne Prio",r?`var(--p${r})`:"var(--faint)","<i></i>")),w?[ac("w",w,w==="__none"?"Nicht zugewiesen":w,"var(--sea)","<i></i>")]:[]);
+  const act=[...fprojs].map(k=>ac("p",k,k==="__none"?"Ohne Projekt":k,k==="__none"?"var(--faint)":pcol(k),"<i></i>")).concat([...ftags].map(k=>ac("t",k,k==="__none"?"Ohne Tag":k,k==="__none"?"var(--faint)":tcol(k),k==="__none"?"<i></i>":tIc(k))),[...fprios].sort().map(r=>ac("r",String(r),r?"Prio "+r:"Ohne Prio",r?`var(--p${r})`:"var(--faint)","<i></i>")),[...fwho].map(w=>ac("w",w,w==="__none"?"Nicht zugewiesen":w,"var(--sea)","<i></i>")));
   if(act.length>1)act.push('<button class="tclr" data-a="all">Alle entfernen</button>');
   box.innerHTML=act.join("");
   const n=fCount();$("fcnt").textContent=n||"";$("fbtn").classList.toggle("on",n>0);
@@ -2251,22 +2253,22 @@ function drawTbar(){
   if($("dlf").open)drawF();
 }
 function drawF(){
-  const names=allTags(),pn=allProjs(),none=tasks.filter(t=>!tgs(t).length).length,noP=tasks.filter(t=>!t.proj).length,whos=allWho(),w=$("fw").value;
+  const names=allTags(),pn=allProjs(),none=tasks.filter(t=>!tgs(t).length).length,noP=tasks.filter(t=>!t.proj).length,whos=allWho();
   const ch=(a,k,l,cnt,on,col,pre)=>`<button class="tc${on?" on":""}" data-fa="${a}" data-fv="${esc(k)}"${col?` style="--tc:${col}"`:""}>${pre===undefined?(col?"<i></i>":""):pre}<span>${esc(l)}</span><em>${cnt}</em></button>`;
   let h="";
   if(pn.length)h+=`<label>Projekt</label><div class="fch">`+pn.map(x=>ch("p",x,x,tasks.filter(t=>t.proj===x).length,fprojs.has(x),pcol(x))).join("")+(noP&&noP<tasks.length?ch("p","__none","Ohne Projekt",noP,fprojs.has("__none"),"var(--faint)"):"")+"</div>";
   h+=`<label>Priorität</label><div class="fch">`+[1,2,3].map(r=>ch("r",String(r),"Prio "+r,tasks.filter(t=>t.prio===r).length,fprios.has(r),`var(--p${r})`)).join("")+ch("r","0","Ohne Prio",tasks.filter(t=>!t.prio).length,fprios.has(0),"var(--faint)")+"</div>";
   if(names.length)h+=`<label>Tag</label><div class="fch">`+names.map(x=>ch("t",x,x,tasks.filter(t=>tgs(t).includes(x)).length,ftags.has(x),tcol(x),tIc(x))).join("")+(none?ch("t","__none","Ohne Tag",none,ftags.has("__none"),"var(--faint)"):"")+"</div>";
-  if(whos.length)h+=`<label>Verantwortlich</label><div class="fch">`+whos.map(x=>ch("w",x,x,tasks.filter(t=>wl(t).includes(x)).length,w===x,null)).join("")+ch("w","__none","Nicht zugewiesen",tasks.filter(t=>!t.who).length,w==="__none",null)+"</div>";
+  if(whos.length)h+=`<label>Verantwortlich</label><div class="fch">`+whos.map(x=>ch("w",x,x,tasks.filter(t=>wl(t).includes(x)).length,fwho.has(x),null)).join("")+ch("w","__none","Nicht zugewiesen",tasks.filter(t=>!t.who).length,fwho.has("__none"),null)+"</div>";
   $("fbody").innerHTML=h;
   const c=filtered().length;$("f_cnt").textContent=fCount()?`${c} von ${tasks.length} Aufgaben passen`:`${tasks.length} Aufgaben, kein Filter aktiv`;$("f_reset").disabled=!fCount();
 }
-function fClear(){ftags.clear();fprojs.clear();fprios.clear();$("fw").value=""}
+function fClear(){ftags.clear();fprojs.clear();fprios.clear();fwho.clear()}
 function fToggle(a,v){
   if(a==="p")fprojs.has(v)?fprojs.delete(v):fprojs.add(v);
   else if(a==="t")ftags.has(v)?ftags.delete(v):ftags.add(v);
   else if(a==="r"){const k=+v;fprios.has(k)?fprios.delete(k):fprios.add(k)}
-  else if(a==="w")$("fw").value=$("fw").value===v?"":v;
+  else if(a==="w")fwho.has(v)?fwho.delete(v):fwho.add(v);
 }
 $("fbtn").onclick=()=>{drawF();$("dlf").showModal();$("dlf").scrollTop=0};
 $("f_ok").onclick=()=>$("dlf").close();
@@ -2431,12 +2433,13 @@ document.addEventListener("toggle",e=>{if(e.target.classList&&e.target.classList
 const homeW=()=>{let v=null;try{v=localStorage.getItem("haus-hwho")}catch(_){}const me=prefGet("me")||"";return v||me||"__all"};
 function home(){
   const hw=homeW(),me=prefGet("me")||"",who=allWho(),opts=[...(me?[me]:[]),...who.filter(w=>w!==me)];
-  const sc=hw==="__all"?tasks:tasks.filter(t=>wl(t).includes(hw));
-  const pick=`<div class="hpick" role="group" aria-label="Aufgaben von">`+opts.map(w=>`<button type="button" data-hw="${esc(w)}" class="${w===hw?"on":""}">${w===me?"Meine":esc(w)}</button>`).join("")+`<button type="button" data-hw="__all" class="${hw==="__all"?"on":""}">Alle</button></div>`;
+  /* 1.51: Auf Start gilt von den Filtern nur „Verantwortlich“ (Tag, Projekt, Priorität, Suche nicht) */
+  const sc=fwho.size?tasks.filter(whoOk):hw==="__all"?tasks:tasks.filter(t=>wl(t).includes(hw)),on=w=>fwho.size?fwho.has(w):w===hw;
+  const pick=`<div class="hpick" role="group" aria-label="Aufgaben von">`+opts.map(w=>`<button type="button" data-hw="${esc(w)}" class="${on(w)?"on":""}">${w===me?"Meine":esc(w)}</button>`).join("")+`<button type="button" data-hw="__all" class="${!fwho.size&&hw==="__all"?"on":""}">Alle</button></div>`;
   return homeBody(sc,tasks).replace('<div class="home">','<div class="home">'+pick)}
 function filtered(){
-  const q=$("q").value.toLowerCase(),w=$("fw").value;
-  return tasks.filter(t=>tagOk(t)&&(!w||(w==="__none"?!t.who:wl(t).includes(w)))&&(!q||(t.title+" "+tgs(t).join(" ")+" "+(t.who||"")).toLowerCase().includes(q)))
+  const q=$("q").value.toLowerCase();
+  return tasks.filter(t=>tagOk(t)&&whoOk(t)&&(!q||(t.title+" "+tgs(t).join(" ")+" "+(t.who||"")).toLowerCase().includes(q)))
     .sort((x,y)=>(sortm==="prio"?((x.prio||9)-(y.prio||9)):sortm==="ord"?ordKey(x)-ordKey(y):0)||dn(x.start)-dn(y.start)||dn(x.end)-dn(y.end));
 }
 let renderedView=null;
@@ -2487,19 +2490,19 @@ function render(){
   if(KIOSK){$("main").innerHTML=kiosk();document.querySelectorAll("[data-adv]").forEach(b=>b.onclick=e=>{e.stopPropagation();advance(b.dataset.adv)});return}
   if(!purged&&RAW.length){purged=true;const lim=iso(new Date(Date.now()-30*864e5));RAW.filter(t=>t.del&&t.delAt&&t.delAt<lim).forEach(t=>delTask(t.id))}
   for(const id of [...sel])if(!tasks.some(t=>t.id===id))sel.delete(id);
-  const n=tasks.length,d=tasks.filter(isOk).length,nv=n-tasks.filter(isFail).length,pct=nv?Math.round(d/nv*100):0;
-  const doing=tasks.filter(t=>t.status==="doing").length,late=tasks.filter(isLate).length,blk=tasks.filter(isBlocked).length,op=nv-d-doing;
-  if(view!=="home"&&isPhone())$("sub").innerHTML=n?`${n} ${n===1?"Aufgabe":"Aufgaben"} · ${pct} % erledigt`+(late?` · <b class="hot">${late} überfällig</b>`:""):"Noch keine Aufgaben";
+  /* 1.51: Kennzahlen beziehen sich immer auf die aktuell gefilterten Aufgaben */
+  const F=filtered(),n=tasks.length,fn=F.length,d=F.filter(isOk).length,nv=fn-F.filter(isFail).length,pct=nv?Math.round(d/nv*100):0;
+  const doing=F.filter(t=>t.status==="doing").length,late=F.filter(isLate).length,blk=F.filter(isBlocked).length,op=nv-d-doing;
+  if(view!=="home"&&isPhone())$("sub").innerHTML=n?`${fn} ${fn===1?"Aufgabe":"Aufgaben"}${fCount()||$("q").value.trim()?" (gefiltert)":""} · ${pct} % erledigt`+(late?` · <b class="hot">${late} überfällig</b>`:""):"Noch keine Aufgaben";
   else $("sub").textContent=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
   $("kpis").innerHTML=view==="home"?"":`<div class="kp"><div class="kn"><b><span data-n="${pct}">${pct}</span><i>%</i></b><span>erledigt · ${d} von ${nv}</span></div><div class="kn"><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="kn ${late?"hot":""}"><b data-n="${late}">${late}</b><span>überfällig</span></div><div class="kn"><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div>${n?`<div class="stripe" title="Erledigt · In Arbeit · Offen"><i class="s-x" style="flex:${d}"></i><i class="s-d" style="flex:${doing}"></i><i class="s-o" style="flex:${op}"></i></div>`:""}`;
   document.body.dataset.view=view;$("ttl").textContent=view==="home"?"Start":{board:"Board",list:"Liste",gantt:"Zeitstrahl",cal:"Kalender"}[view];
-    const whos=allWho(),curw=$("fw").value;
-  $("fw").innerHTML='<option value="">Alle Personen</option>'+whos.map(a=>`<option ${a===curw?"selected":""}>${esc(a)}</option>`).join("")+`<option value="__none" ${curw==="__none"?"selected":""}>Nicht zugewiesen</option>`;
-  const fw2=$("fw").value,ch=(attr,val,label,c,on)=>`<button data-${attr}="${esc(val)}" class="${on?"on":""}"><span>${attr==="cw"&&val&&val!=="__none"?`<i class="wd ${avc(val)}"></i>`:""}${esc(label)}</span><em>${c}</em></button>`;
-  $("chips").innerHTML=`<div class="cg"><h4>Wer</h4>${ch("cw","","Alle",n,!fw2)}${whos.map(w=>ch("cw",w,w,tasks.filter(t=>wl(t).includes(w)).length,w===fw2)).join("")}${ch("cw","__none","Nicht zugewiesen",tasks.filter(t=>!t.who).length,fw2==="__none")}</div>`;
+    const whos=allWho();
+  const ch=(attr,val,label,c,on)=>`<button data-${attr}="${esc(val)}" class="${on?"on":""}"><span>${attr==="cw"&&val&&val!=="__none"?`<i class="wd ${avc(val)}"></i>`:""}${esc(label)}</span><em>${c}</em></button>`;
+  $("chips").innerHTML=`<div class="cg"><h4>Wer</h4>${ch("cw","","Alle",n,!fwho.size)}${whos.map(w=>ch("cw",w,w,tasks.filter(t=>wl(t).includes(w)).length,fwho.has(w))).join("")}${ch("cw","__none","Nicht zugewiesen",tasks.filter(t=>!t.who).length,fwho.has("__none"))}</div>`;
   drawTbar();migrateReg();if(!iconTried)setTimeout(iconSync,1200);
   $("main").classList.toggle("g",view==="gantt"&&n>0);
-  const old=snap(),list=filtered();
+  const old=snap(),list=F;
   const planOn=view==="cal"; /* Kalender (auch Planen mit Sammelkorb) zeigt immer sein Raster */
   if(!n&&view!=="home"&&!planOn){$("main").innerHTML='<div class="empty">Noch keine Aufgaben.<br><br><button class="btn" onclick="openDlg()">Erste Aufgabe anlegen</button></div>';return}
   if(view!=="home"&&!list.length&&!planOn){$("main").innerHTML='<div class="empty">Keine Aufgaben mit diesen Filtern.<br><br><button class="btn ghost" id="fclr">Filter zurücksetzen</button></div>';$("fclr").onclick=()=>{fClear();$("q").value="";render()};applySel();return}
@@ -3320,9 +3323,11 @@ $("main").addEventListener("input",e=>{if(e.target.id==="qadd"){const v=e.target
 $("main").addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("#qsug [data-sid]");if(b)sugOpen(b.dataset.sid)});
 $("main").addEventListener("keydown",async e=>{if(e.target.id!=="qadd")return;if(e.key==="ArrowDown")return sugDown(e,$("qsug"));if(e.key!=="Enter")return;e.preventDefault();const v=e.target.value;if(!v.trim())return;
   qaddKeep=true;e.target.value="";$("qprev").innerHTML="";$("qsug").innerHTML="";if(!await quickAdd(v)){e.target.value=v}});
-$("main").addEventListener("click",e=>{const b=e.target.closest("[data-hw]");if(!b)return;prefSet("hwho",b.dataset.hw);render()});
-$("q").oninput=render;$("fw").onchange=render;
-$("chips").onclick=e=>{const b=e.target.closest("button");if(!b)return;if("cw" in b.dataset)$("fw").value=b.dataset.cw;render()};
+/* Startseite: Ist der Filter „Verantwortlich“ aktiv, schalten die Knöpfe oben genau diesen Filter um (1.51) */
+$("main").addEventListener("click",e=>{const b=e.target.closest("[data-hw]");if(!b)return;const v=b.dataset.hw;
+  if(fwho.size){if(v==="__all")fwho.clear();else fwho.has(v)?fwho.delete(v):fwho.add(v)}else prefSet("hwho",v);render()});
+$("q").oninput=render;
+$("chips").onclick=e=>{const b=e.target.closest("button");if(!b)return;if("cw" in b.dataset){const v=b.dataset.cw;if(!v)fwho.clear();else fwho.has(v)?fwho.delete(v):fwho.add(v)}render()};
 $("tabs").onclick=e=>{const bt=e.target.closest("button"),v=bt&&bt.dataset.v;if(!v)return;view=v;[...$("tabs").children].forEach(b=>b.classList.toggle("on",b.dataset.v===v));render()};
 (function(){const s=$("splash");let seen=false;try{seen=sessionStorage.getItem("hp-start")}catch(e){}
   if(seen||reduced()){s.remove();return}

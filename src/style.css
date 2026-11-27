@@ -734,7 +734,6 @@ td .pjh{margin-left:0}
 #fbtn b:empty{display:none}
 #fbtn.on{background:var(--acc);color:var(--on-acc);box-shadow:none}
 body[data-view=home] #ftog,body[data-view=home] #fbtn{display:none!important}
-#fw{display:none!important}
 .sub b.hot{color:var(--brick-ink);font-weight:650}
 @media (min-width:700px){#ftog{display:none!important}.hb{order:3}}
 @media (max-width:699px){

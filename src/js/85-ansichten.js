@@ -88,12 +88,13 @@ document.addEventListener("toggle",e=>{if(e.target.classList&&e.target.classList
 const homeW=()=>{let v=null;try{v=localStorage.getItem("haus-hwho")}catch(_){}const me=prefGet("me")||"";return v||me||"__all"};
 function home(){
   const hw=homeW(),me=prefGet("me")||"",who=allWho(),opts=[...(me?[me]:[]),...who.filter(w=>w!==me)];
-  const sc=hw==="__all"?tasks:tasks.filter(t=>wl(t).includes(hw));
-  const pick=`<div class="hpick" role="group" aria-label="Aufgaben von">`+opts.map(w=>`<button type="button" data-hw="${esc(w)}" class="${w===hw?"on":""}">${w===me?"Meine":esc(w)}</button>`).join("")+`<button type="button" data-hw="__all" class="${hw==="__all"?"on":""}">Alle</button></div>`;
+  /* 1.51: Auf Start gilt von den Filtern nur „Verantwortlich“ (Tag, Projekt, Priorität, Suche nicht) */
+  const sc=fwho.size?tasks.filter(whoOk):hw==="__all"?tasks:tasks.filter(t=>wl(t).includes(hw)),on=w=>fwho.size?fwho.has(w):w===hw;
+  const pick=`<div class="hpick" role="group" aria-label="Aufgaben von">`+opts.map(w=>`<button type="button" data-hw="${esc(w)}" class="${on(w)?"on":""}">${w===me?"Meine":esc(w)}</button>`).join("")+`<button type="button" data-hw="__all" class="${!fwho.size&&hw==="__all"?"on":""}">Alle</button></div>`;
   return homeBody(sc,tasks).replace('<div class="home">','<div class="home">'+pick)}
 function filtered(){
-  const q=$("q").value.toLowerCase(),w=$("fw").value;
-  return tasks.filter(t=>tagOk(t)&&(!w||(w==="__none"?!t.who:wl(t).includes(w)))&&(!q||(t.title+" "+tgs(t).join(" ")+" "+(t.who||"")).toLowerCase().includes(q)))
+  const q=$("q").value.toLowerCase();
+  return tasks.filter(t=>tagOk(t)&&whoOk(t)&&(!q||(t.title+" "+tgs(t).join(" ")+" "+(t.who||"")).toLowerCase().includes(q)))
     .sort((x,y)=>(sortm==="prio"?((x.prio||9)-(y.prio||9)):sortm==="ord"?ordKey(x)-ordKey(y):0)||dn(x.start)-dn(y.start)||dn(x.end)-dn(y.end));
 }
 let renderedView=null;
@@ -144,19 +145,19 @@ function render(){
   if(KIOSK){$("main").innerHTML=kiosk();document.querySelectorAll("[data-adv]").forEach(b=>b.onclick=e=>{e.stopPropagation();advance(b.dataset.adv)});return}
   if(!purged&&RAW.length){purged=true;const lim=iso(new Date(Date.now()-30*864e5));RAW.filter(t=>t.del&&t.delAt&&t.delAt<lim).forEach(t=>delTask(t.id))}
   for(const id of [...sel])if(!tasks.some(t=>t.id===id))sel.delete(id);
-  const n=tasks.length,d=tasks.filter(isOk).length,nv=n-tasks.filter(isFail).length,pct=nv?Math.round(d/nv*100):0;
-  const doing=tasks.filter(t=>t.status==="doing").length,late=tasks.filter(isLate).length,blk=tasks.filter(isBlocked).length,op=nv-d-doing;
-  if(view!=="home"&&isPhone())$("sub").innerHTML=n?`${n} ${n===1?"Aufgabe":"Aufgaben"} · ${pct} % erledigt`+(late?` · <b class="hot">${late} überfällig</b>`:""):"Noch keine Aufgaben";
+  /* 1.51: Kennzahlen beziehen sich immer auf die aktuell gefilterten Aufgaben */
+  const F=filtered(),n=tasks.length,fn=F.length,d=F.filter(isOk).length,nv=fn-F.filter(isFail).length,pct=nv?Math.round(d/nv*100):0;
+  const doing=F.filter(t=>t.status==="doing").length,late=F.filter(isLate).length,blk=F.filter(isBlocked).length,op=nv-d-doing;
+  if(view!=="home"&&isPhone())$("sub").innerHTML=n?`${fn} ${fn===1?"Aufgabe":"Aufgaben"}${fCount()||$("q").value.trim()?" (gefiltert)":""} · ${pct} % erledigt`+(late?` · <b class="hot">${late} überfällig</b>`:""):"Noch keine Aufgaben";
   else $("sub").textContent=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
   $("kpis").innerHTML=view==="home"?"":`<div class="kp"><div class="kn"><b><span data-n="${pct}">${pct}</span><i>%</i></b><span>erledigt · ${d} von ${nv}</span></div><div class="kn"><b data-n="${doing}">${doing}</b><span>in Arbeit</span></div><div class="kn ${late?"hot":""}"><b data-n="${late}">${late}</b><span>überfällig</span></div><div class="kn"><b data-n="${blk}">${blk}</b><span>blockiert</span></div></div>${n?`<div class="stripe" title="Erledigt · In Arbeit · Offen"><i class="s-x" style="flex:${d}"></i><i class="s-d" style="flex:${doing}"></i><i class="s-o" style="flex:${op}"></i></div>`:""}`;
   document.body.dataset.view=view;$("ttl").textContent=view==="home"?"Start":{board:"Board",list:"Liste",gantt:"Zeitstrahl",cal:"Kalender"}[view];
-    const whos=allWho(),curw=$("fw").value;
-  $("fw").innerHTML='<option value="">Alle Personen</option>'+whos.map(a=>`<option ${a===curw?"selected":""}>${esc(a)}</option>`).join("")+`<option value="__none" ${curw==="__none"?"selected":""}>Nicht zugewiesen</option>`;
-  const fw2=$("fw").value,ch=(attr,val,label,c,on)=>`<button data-${attr}="${esc(val)}" class="${on?"on":""}"><span>${attr==="cw"&&val&&val!=="__none"?`<i class="wd ${avc(val)}"></i>`:""}${esc(label)}</span><em>${c}</em></button>`;
-  $("chips").innerHTML=`<div class="cg"><h4>Wer</h4>${ch("cw","","Alle",n,!fw2)}${whos.map(w=>ch("cw",w,w,tasks.filter(t=>wl(t).includes(w)).length,w===fw2)).join("")}${ch("cw","__none","Nicht zugewiesen",tasks.filter(t=>!t.who).length,fw2==="__none")}</div>`;
+    const whos=allWho();
+  const ch=(attr,val,label,c,on)=>`<button data-${attr}="${esc(val)}" class="${on?"on":""}"><span>${attr==="cw"&&val&&val!=="__none"?`<i class="wd ${avc(val)}"></i>`:""}${esc(label)}</span><em>${c}</em></button>`;
+  $("chips").innerHTML=`<div class="cg"><h4>Wer</h4>${ch("cw","","Alle",n,!fwho.size)}${whos.map(w=>ch("cw",w,w,tasks.filter(t=>wl(t).includes(w)).length,fwho.has(w))).join("")}${ch("cw","__none","Nicht zugewiesen",tasks.filter(t=>!t.who).length,fwho.has("__none"))}</div>`;
   drawTbar();migrateReg();if(!iconTried)setTimeout(iconSync,1200);
   $("main").classList.toggle("g",view==="gantt"&&n>0);
-  const old=snap(),list=filtered();
+  const old=snap(),list=F;
   const planOn=view==="cal"; /* Kalender (auch Planen mit Sammelkorb) zeigt immer sein Raster */
   if(!n&&view!=="home"&&!planOn){$("main").innerHTML='<div class="empty">Noch keine Aufgaben.<br><br><button class="btn" onclick="openDlg()">Erste Aufgabe anlegen</button></div>';return}
   if(view!=="home"&&!list.length&&!planOn){$("main").innerHTML='<div class="empty">Keine Aufgaben mit diesen Filtern.<br><br><button class="btn ghost" id="fclr">Filter zurücksetzen</button></div>';$("fclr").onclick=()=>{fClear();$("q").value="";render()};applySel();return}

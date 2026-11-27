@@ -38,7 +38,7 @@ function plan(list){
    +`</aside><div class="pgrid">${weeks}</div></div>`}
 /* Kalenderwoche nach ISO: zählt nach dem Donnerstag der Woche */
 function kw(d){const th=monOf(d)+3,y=fromDn(th).getUTCFullYear();return 1+Math.floor((th-Date.UTC(y,0,1)/864e5)/7)}
-const fActive=()=>!!($("fw")&&$("fw").value)||!!($("q")&&$("q").value.trim());
+const fActive=()=>!!fwho.size||!!($("q")&&$("q").value.trim());
 
 async function planMove(id,target){
   const t=byId(id);if(!t)return;let u;

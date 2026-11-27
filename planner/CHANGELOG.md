@@ -1,5 +1,10 @@
 # Änderungen
 
+## 1.51.0
+- **Filter „Verantwortlich“ mit Mehrfachauswahl**, wie bei Tag, Projekt und Priorität: z. B. Lasse und Melanie gleichzeitig. Gilt auch für „Wer“ in der Seitenleiste; „Alle“ setzt zurück.
+- **Startseite:** Von den Filtern gilt hier nur „Verantwortlich“. Tag, Projekt, Priorität und Suche wirken auf Start nicht. Ist der Personenfilter aktiv, zeigen die Knöpfe oben (Meine · Melanie · Alle) genau diese Auswahl und schalten sie um.
+- **Kennzahlen passen immer zum Filter:** % erledigt, in Arbeit, überfällig und blockiert in Liste, Board, Zeitstrahl und Kalender zählen nur die gefilterten Aufgaben. Auf dem Handy steht in der Zeile darunter „(gefiltert)“.
+
 ## 1.50.0
 - **Abhängigkeiten planen automatisch:** Eine Aufgabe startet frühestens am Tag nach dem Ende aller offenen Vorgänger. Beim Verknüpfen, beim Verlängern oder Verschieben eines Vorgängers rücken die Nachfolger (und deren Nachfolger) mit, die Dauer bleibt gleich. Wer eine Aufgabe zu früh legt, wird an den frühesten möglichen Tag gesetzt; ein Hinweis sagt, was verschoben wurde. Erledigte Vorgänger bremsen nicht mehr.
 - **Zeitstrahl: kürzer oder länger ziehen:** Jeder Balken hat links und rechts einen sichtbaren Griff. Links ziehen ändert den Start, rechts das Ende. Mit dem Finger geht das sofort, ohne vorher gedrückt zu halten. Der Punkt zum Verknüpfen sitzt jetzt etwas außerhalb des Balkens, damit er sich nicht mit dem rechten Griff ins Gehege kommt.

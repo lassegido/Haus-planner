@@ -34,6 +34,9 @@ const pcol=n=>TC[pcolorKey(n)];
 const nextPColor=()=>{const used=new Set(allProjs().map(pcolorKey));return TCK.find(k=>!used.has(k))||TCK[allProjs().length%TCK.length]};
 const projChip=t=>t.proj?`<span class="tag proj" style="--tc:${pcol(t.proj)}">${esc(t.proj)}</span>`:"";
 const fullReg=()=>[...allTags().map(n=>{const o={n,c:colorKey(n)},i=tagIconStored(n);if(i)o.i=i;return o}),...allProjs().map(n=>({n,c:pcolorKey(n),p:1}))];
+/* 1.51: Verantwortlich ist jetzt auch Mehrfachauswahl (wie Tag, Projekt, Priorität); „__none“ = nicht zugewiesen */
+let fwho=new Set();
+const whoOk=t=>!fwho.size||[...fwho].some(k=>k==="__none"?!t.who:wl(t).includes(k));
 const tagOk=t=>(!ftags.size||[...ftags].some(k=>k==="__none"?!tgs(t).length:tgs(t).includes(k)))&&(!fprojs.size||[...fprojs].some(k=>k==="__none"?!t.proj:t.proj===k))&&(!fprios.size||fprios.has(t.prio||0));
 function groups(list){
   if(grp==="none")return[{l:null,L:list}];
@@ -47,12 +50,12 @@ function groups(list){
 }
 let migrated=false,regLoaded=false;
 function migrateReg(){if(migrated||!regLoaded||!tasks.length)return;migrated=true;if(allTags().some(n=>!reg.some(x=>!x.p&&x.n===n))||allProjs().some(n=>!reg.some(x=>x.p&&x.n===n)))saveReg(fullReg())}
-const fCount=()=>ftags.size+fprojs.size+fprios.size+($("fw").value?1:0);
+const fCount=()=>ftags.size+fprojs.size+fprios.size+fwho.size;
 function drawTbar(){
   const names=allTags(),pn=allProjs(),box=$("tchips");
   ftags=new Set([...ftags].filter(x=>x==="__none"||names.includes(x)));fprojs=new Set([...fprojs].filter(x=>x==="__none"||pn.includes(x)));
   const ac=(a,k,l,col,pre)=>`<button class="tc on" data-a="${a}" data-v="${esc(k)}"${col?` style="--tc:${col}"`:""}>${pre||""}<span>${esc(l)}</span><em>×</em></button>`;
-  const w=$("fw").value,act=[...fprojs].map(k=>ac("p",k,k==="__none"?"Ohne Projekt":k,k==="__none"?"var(--faint)":pcol(k),"<i></i>")).concat([...ftags].map(k=>ac("t",k,k==="__none"?"Ohne Tag":k,k==="__none"?"var(--faint)":tcol(k),k==="__none"?"<i></i>":tIc(k))),[...fprios].sort().map(r=>ac("r",String(r),r?"Prio "+r:"Ohne Prio",r?`var(--p${r})`:"var(--faint)","<i></i>")),w?[ac("w",w,w==="__none"?"Nicht zugewiesen":w,"var(--sea)","<i></i>")]:[]);
+  const act=[...fprojs].map(k=>ac("p",k,k==="__none"?"Ohne Projekt":k,k==="__none"?"var(--faint)":pcol(k),"<i></i>")).concat([...ftags].map(k=>ac("t",k,k==="__none"?"Ohne Tag":k,k==="__none"?"var(--faint)":tcol(k),k==="__none"?"<i></i>":tIc(k))),[...fprios].sort().map(r=>ac("r",String(r),r?"Prio "+r:"Ohne Prio",r?`var(--p${r})`:"var(--faint)","<i></i>")),[...fwho].map(w=>ac("w",w,w==="__none"?"Nicht zugewiesen":w,"var(--sea)","<i></i>")));
   if(act.length>1)act.push('<button class="tclr" data-a="all">Alle entfernen</button>');
   box.innerHTML=act.join("");
   const n=fCount();$("fcnt").textContent=n||"";$("fbtn").classList.toggle("on",n>0);
@@ -60,22 +63,22 @@ function drawTbar(){
   if($("dlf").open)drawF();
 }
 function drawF(){
-  const names=allTags(),pn=allProjs(),none=tasks.filter(t=>!tgs(t).length).length,noP=tasks.filter(t=>!t.proj).length,whos=allWho(),w=$("fw").value;
+  const names=allTags(),pn=allProjs(),none=tasks.filter(t=>!tgs(t).length).length,noP=tasks.filter(t=>!t.proj).length,whos=allWho();
   const ch=(a,k,l,cnt,on,col,pre)=>`<button class="tc${on?" on":""}" data-fa="${a}" data-fv="${esc(k)}"${col?` style="--tc:${col}"`:""}>${pre===undefined?(col?"<i></i>":""):pre}<span>${esc(l)}</span><em>${cnt}</em></button>`;
   let h="";
   if(pn.length)h+=`<label>Projekt</label><div class="fch">`+pn.map(x=>ch("p",x,x,tasks.filter(t=>t.proj===x).length,fprojs.has(x),pcol(x))).join("")+(noP&&noP<tasks.length?ch("p","__none","Ohne Projekt",noP,fprojs.has("__none"),"var(--faint)"):"")+"</div>";
   h+=`<label>Priorität</label><div class="fch">`+[1,2,3].map(r=>ch("r",String(r),"Prio "+r,tasks.filter(t=>t.prio===r).length,fprios.has(r),`var(--p${r})`)).join("")+ch("r","0","Ohne Prio",tasks.filter(t=>!t.prio).length,fprios.has(0),"var(--faint)")+"</div>";
   if(names.length)h+=`<label>Tag</label><div class="fch">`+names.map(x=>ch("t",x,x,tasks.filter(t=>tgs(t).includes(x)).length,ftags.has(x),tcol(x),tIc(x))).join("")+(none?ch("t","__none","Ohne Tag",none,ftags.has("__none"),"var(--faint)"):"")+"</div>";
-  if(whos.length)h+=`<label>Verantwortlich</label><div class="fch">`+whos.map(x=>ch("w",x,x,tasks.filter(t=>wl(t).includes(x)).length,w===x,null)).join("")+ch("w","__none","Nicht zugewiesen",tasks.filter(t=>!t.who).length,w==="__none",null)+"</div>";
+  if(whos.length)h+=`<label>Verantwortlich</label><div class="fch">`+whos.map(x=>ch("w",x,x,tasks.filter(t=>wl(t).includes(x)).length,fwho.has(x),null)).join("")+ch("w","__none","Nicht zugewiesen",tasks.filter(t=>!t.who).length,fwho.has("__none"),null)+"</div>";
   $("fbody").innerHTML=h;
   const c=filtered().length;$("f_cnt").textContent=fCount()?`${c} von ${tasks.length} Aufgaben passen`:`${tasks.length} Aufgaben, kein Filter aktiv`;$("f_reset").disabled=!fCount();
 }
-function fClear(){ftags.clear();fprojs.clear();fprios.clear();$("fw").value=""}
+function fClear(){ftags.clear();fprojs.clear();fprios.clear();fwho.clear()}
 function fToggle(a,v){
   if(a==="p")fprojs.has(v)?fprojs.delete(v):fprojs.add(v);
   else if(a==="t")ftags.has(v)?ftags.delete(v):ftags.add(v);
   else if(a==="r"){const k=+v;fprios.has(k)?fprios.delete(k):fprios.add(k)}
-  else if(a==="w")$("fw").value=$("fw").value===v?"":v;
+  else if(a==="w")fwho.has(v)?fwho.delete(v):fwho.add(v);
 }
 $("fbtn").onclick=()=>{drawF();$("dlf").showModal();$("dlf").scrollTop=0};
 $("f_ok").onclick=()=>$("dlf").close();
