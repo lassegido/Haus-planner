@@ -1,5 +1,10 @@
 # Änderungen
 
+## 1.50.0
+- **Abhängigkeiten planen automatisch:** Eine Aufgabe startet frühestens am Tag nach dem Ende aller offenen Vorgänger. Beim Verknüpfen, beim Verlängern oder Verschieben eines Vorgängers rücken die Nachfolger (und deren Nachfolger) mit, die Dauer bleibt gleich. Wer eine Aufgabe zu früh legt, wird an den frühesten möglichen Tag gesetzt; ein Hinweis sagt, was verschoben wurde. Erledigte Vorgänger bremsen nicht mehr.
+- **Zeitstrahl: kürzer oder länger ziehen:** Jeder Balken hat links und rechts einen sichtbaren Griff. Links ziehen ändert den Start, rechts das Ende. Mit dem Finger geht das sofort, ohne vorher gedrückt zu halten. Der Punkt zum Verknüpfen sitzt jetzt etwas außerhalb des Balkens, damit er sich nicht mit dem rechten Griff ins Gehege kommt.
+- **Korrektur:** Der Schalter „Meilenstein“ im Aufgabenblatt war nur ein kleiner Kreis und ist wieder ein richtiger Schalter.
+
 ## 1.49.0
 - **Zeitstrahl: in eine andere Gruppe ziehen.** Ist der Zeitstrahl gruppiert (⋯ → Gruppieren: Projekt, Tag, Person, Priorität), übernimmt eine Aufgabe die Gruppe, in die man sie zieht:
   - Projekt wird gesetzt bzw. entfernt („Ohne Projekt“).

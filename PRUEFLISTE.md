@@ -52,6 +52,8 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] Zeitstrahl: Balken gedrückt halten, ohne zu bewegen, loslassen → Menü; „Zu Projekt hinzufügen“ und „Notiz hinzufügen“ ausprobieren.
 - [ ] Zeitstrahl: Zeile links an den zwei Strichen nach oben ziehen; Reihenfolge bleibt auch nach dem Neuladen und auf dem zweiten Gerät.
 - [ ] Zeitstrahl nach Projekt gruppieren, Aufgabe in ein anderes Projekt ziehen (Zeile links oder Balken): Projekt ist umgestellt; ebenso nach Person.
+- [ ] Zeitstrahl: rechten Griff eines Balkens mit dem Finger ziehen (länger/kürzer); verknüpfte Folgeaufgaben rücken mit.
+- [ ] Aufgabenblatt: Schalter „Meilenstein“ sieht aus wie ein iOS-Schalter und lässt sich umlegen.
 - [ ] Am Tag nach dem Update: Spruch auf der Startseite kommt von Gemini (neu formuliert), KI-Verbrauch in den Einstellungen nur +1.
 
 ## 4. Export (iPhone)

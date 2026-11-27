@@ -22,7 +22,7 @@ async function init(){
   }
 }
 async function saveTask(t,o){
-  const {id,...data}=t;
+  const {id,...data}=t;depLater(t);
   if(col){try{await col.doc(id).set(data)}catch(e){$("note").textContent="Speichern fehlgeschlagen: "+(e.message||e.code)}}
   else{const i=RAW.findIndex(x=>x.id===id);i>=0?RAW[i]=t:RAW.push(t);lsSet();render()}
 }

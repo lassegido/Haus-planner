@@ -60,6 +60,18 @@ async function setStatus(t,next){
 /* Zeitstrahl: Balken ziehen */
 /* 1.48: Verknüpfen (A → B: B startet nach A), auch per Menü „Verknüpfen mit …“ und dann Ziel antippen */
 let linkFrom=null;
+/* 1.50: Abhängigkeiten planen automatisch: Eine Aufgabe startet frühestens am Tag nach dem Ende aller offenen Vorgänger.
+   Wird ein Vorgänger länger oder später, rücken die Nachfolger (und deren Nachfolger) mit; wer eine Aufgabe zu früh legt, wird an die Grenze gesetzt. */
+let depMoved=[],depT=null;
+function depLater(t){if(t&&t.id)setTimeout(()=>depShift(t),0)}
+function depNote(msg){depMoved.push(msg);clearTimeout(depT);depT=setTimeout(()=>{const n=depMoved.length;toast(n===1?depMoved[0]:n+" Aufgaben wegen Abhängigkeiten verschoben");depMoved=[]},450)}
+const shiftBy=(t,d)=>({...t,start:iso(fromDn(dn(t.start)+d)),end:iso(fromDn(dn(t.end)+d))});
+async function depShift(t){
+  if(!t||t.del||t.inbox||t.arch)return;const open=p=>p&&!p.del&&!p.arch&&p.status!=="done";
+  if(open(t)&&(t.deps||[]).length){const P=t.deps.map(byId).filter(open);if(P.length){const m=Math.max(...P.map(p=>dn(p.end)+1));
+    if(dn(t.start)<m){const u=shiftBy(t,m-dn(t.start));u.log=diffLog(t,u);depNote("„"+t.title+"“ startet frühestens am "+fd(u.start)+" (nach „"+P.find(p=>dn(p.end)+1===m).title+"“)");return saveTask(u)}}}
+  if(!open(t))return;const m=dn(t.end)+1;
+  for(const s of RAW.filter(x=>open(x)&&(x.deps||[]).includes(t.id)))if(dn(s.start)<m){const u=shiftBy(s,m-dn(s.start));u.log=diffLog(s,u);depNote("„"+s.title+"“ rückt auf den "+fd(u.start)+" (nach „"+t.title+"“)");await saveTask(u)}}
 async function addDep(fromId,toId){const f=byId(fromId),to=byId(toId);if(!f||!to||f.id===to.id)return false;
   if((to.deps||[]).includes(f.id)){toast("Ist schon verknüpft");return false}
   if(dependsOn(f.id,to.id)){toast("Das wäre ein Kreis: „"+f.title+"“ hängt schon von „"+to.title+"“ ab.");return false}
@@ -145,7 +157,7 @@ function ganttDrag(){
     if(linkFrom)return;
     document.addEventListener("pointermove",move);document.addEventListener("pointerup",end);document.addEventListener("pointercancel",end);
     /* Punkt am Balkenende: auch mit dem Finger sofort ziehen (1.48) */
-    if(e.pointerType==="touch"&&k==="dep"){begin(e,g,t,k);e.preventDefault();return}
+    if(e.pointerType==="touch"&&(k==="dep"||k==="s"||k==="e")){begin(e,g,t,k);e.preventDefault();return}
     if(e.pointerType==="touch"){
       const x0=e.clientX,y0=e.clientY;
       const cancel=ev=>{if(Math.hypot(ev.clientX-x0,ev.clientY-y0)>8){clearTimeout(lp);document.removeEventListener("pointermove",cancel);if(!st){document.removeEventListener("pointermove",move);document.removeEventListener("pointerup",end)}}};
