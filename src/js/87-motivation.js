@@ -2,7 +2,7 @@
    Alles wird aus Status und Verlauf der Aufgaben berechnet, nichts zusätzlich gespeichert
    (Ausnahme: welche Abzeichen dieses Gerät schon gemeldet hat, im Browser unter haus-badges). */
 const doneOn=t=>{if(t.status!=="done")return Infinity;const d=doneDay(t);return isNaN(d)?dn(t.end):d};
-const motScope=()=>{const hw=homeW();return RAW.filter(t=>!t.del&&(hw==="__all"||wl(t).includes(hw)))};
+const motScope=()=>{const hw=homeW();return RAW.filter(t=>!t.del&&!t.inbox&&(hw==="__all"||wl(t).includes(hw)))};
 const todayOpenOf=L=>{const T=today();return L.filter(t=>t.status!=="done"&&!t.arch&&dn(t.start)<=T&&(dn(t.end)>=T||isLate(t)))};
 /* Tage, an denen etwas Fälliges offen blieb (Tagesring nicht voll) */
 function badDays(L,T){const bad=new Set();for(const t of L){const due=dn(t.end),dd=doneOn(t);for(let x=Math.max(due,T-400);x<Math.min(dd,T+1);x++)bad.add(x);

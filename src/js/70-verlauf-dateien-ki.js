@@ -7,6 +7,7 @@ function diffLog(o,n){
   const L=(o.log||[]).slice(),me=prefGet("me")||"",now=new Date().toISOString().slice(0,16),add=x=>L.push({t:now,a:me,k:"h",x});
   if(o.status!==n.status||isFail(o)!==isFail(n))add("Status: "+stName(o)+" → "+stName(n));
   if(o.start!==n.start||o.end!==n.end)add("Zeitraum: "+dr(o)+" → "+dr(n));
+  if(!!o.inbox!==!!n.inbox)add(n.inbox?"In den Sammelkorb gelegt":"Aus dem Sammelkorb eingeplant");
   if((o.who||"")!==(n.who||""))add("Verantwortlich: "+(n.who||"niemand"));
   if((o.proj||"")!==(n.proj||""))add("Projekt: "+(n.proj||"keins"));
   if((o.prio||0)!==(n.prio||0))add("Priorität: "+(n.prio?"Prio "+n.prio:"keine"));
@@ -56,6 +57,7 @@ $("f_files").onclick=async e=>{
 let calM=null,calSel=null;
 const DLONG=["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
 function cal(list){
+  if(calModeNow()==="plan")return plan(list);
   const T=iso(new Date());if(!calM)calM=T.slice(0,7);if(!calSel)calSel=T;
   const[y,m]=calM.split("-").map(Number),first=Date.UTC(y,m-1,1)/864e5,dow=(fromDn(first).getUTCDay()+6)%7,start=first-dow,
     nd=new Date(Date.UTC(y,m,0)).getUTCDate(),weeks=Math.ceil((dow+nd)/7);
@@ -66,7 +68,7 @@ function cal(list){
       +`<div class="pills">${L.slice(0,3).map(t=>`<button class="pill ${t.status}${isFail(t)?" fail":""}${t.ms?" ms":""}${isLate(t)?" late":""}" data-id="${t.id}">${esc(t.title)}</button>`).join("")}</div>`
       +`<div class="cdots">${L.slice(0,4).map(t=>`<i class="${t.status}"></i>`).join("")}</div>${L.length>3?`<em>+${L.length-3}</em>`:""}</div>`}
   const sd=dn(calSel),sl=list.filter(t=>dn(t.start)<=sd&&dn(t.end)>=sd),sdt=fromDn(sd);
-  return`<div class="calbar"><button class="cnav" data-cm="-1" aria-label="Voriger Monat">‹</button><h2>${MONL[m-1]} ${y}</h2><button class="cnav" data-cm="1" aria-label="Nächster Monat">›</button><button class="cnav t" data-cm="0">Heute</button></div>`
+  return calSwitch()+`<div class="calbar"><button class="cnav" data-cm="-1" aria-label="Voriger Monat">‹</button><h2>${MONL[m-1]} ${y}</h2><button class="cnav" data-cm="1" aria-label="Nächster Monat">›</button><button class="cnav t" data-cm="0">Heute</button></div>`
    +`<div class="cgrid">${["Mo","Di","Mi","Do","Fr","Sa","So"].map(x=>`<div class="cwd">${x}</div>`).join("")}${cells}</div>`
    +`<div class="agenda"><h3><span>${DLONG[sdt.getUTCDay()]}, ${sdt.getUTCDate()}. ${MONL[sdt.getUTCMonth()]}</span><button class="btn ghost sm" data-newday="${calSel}">Aufgabe anlegen</button></h3>${sl.length?sl.map((t,i)=>card(t,t.status,i)).join(""):'<div class="none">Nichts geplant.</div>'}</div>`}
 $("main").addEventListener("click",e=>{

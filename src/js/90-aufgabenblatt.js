@@ -191,7 +191,7 @@ $("b_save").onclick=async()=>{
   const rec=recCur?{...recCur}:null;
   const t={...(editing||{}),id:editing?editing.id:newId(),title,tags:selTags.slice(),area:selTags[0]||"",proj,rec,ms,who:selWho.join(", "),
     status:$("f_status").value==="fail"?"done":$("f_status").value,fail:$("f_status").value==="fail",prio:q.prio||+$("f_prio").value||0,start:s,end:e,notes:$("f_notes").value,checklist:cklist.filter(x=>x.t.trim()),deps:[...document.querySelectorAll("#f_deps input:checked")].map(i=>i.value)};
-  if(!t.fail)delete t.fail;const failNew=t.fail&&!isFail(prev);
+  if(!t.fail)delete t.fail;if(t.inbox&&editing&&(t.start!==editing.start||t.end!==editing.end))delete t.inbox;const failNew=t.fail&&!isFail(prev);
   $("dlg").close();
   let sp=null;if(t.status==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);if(sp)t.spawned=sp.id}
   {const r=regDraft;if(r){if(proj&&!r.some(x=>x.p&&x.n===proj))r.push({n:proj,c:nextPColor(),p:1});selTags.forEach(n=>{if(!r.some(x=>!x.p&&x.n===n))r.push({n,c:colorKey(n)})});if(JSON.stringify(r)!==JSON.stringify(reg))saveReg(r)}}

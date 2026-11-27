@@ -132,7 +132,7 @@ function kiosk(){
     <div class="kst"><div><b>${L.length}</b><span>heute</span></div><div class="${late.length?"hot":""}"><b>${late.length}</b><span>überfällig</span></div><div><b>${next.length}</b><span>7 Tage</span></div></div>${who?`<div class="kwho">${esc(who)}</div>`:""}</section>
     <section class="kr">${L.length?`<h3>Heute</h3>${L.slice(0,6).map(row).join("")}`:`<div class="kfree"><b>Für heute ist nichts geplant.</b><span>Genieß den Tag.</span></div>`}${nx.length?`<h3>Als Nächstes</h3>${nx.map(row).join("")}`:""}${L.length>6?`<p class="kmore">und ${L.length-6} weitere</p>`:""}</section></div>`}
 function render(){
-  tasks=RAW.filter(t=>!t.arch&&!t.del).map(t=>t.status==="backlog"?{...t,status:"todo"}:t);
+  tasks=RAW.filter(t=>!t.arch&&!t.del&&!t.inbox).map(t=>t.status==="backlog"?{...t,status:"todo"}:t);
   if(KIOSK){$("main").innerHTML=kiosk();document.querySelectorAll("[data-adv]").forEach(b=>b.onclick=e=>{e.stopPropagation();advance(b.dataset.adv)});return}
   if(!purged&&RAW.length){purged=true;const lim=iso(new Date(Date.now()-30*864e5));RAW.filter(t=>t.del&&t.delAt&&t.delAt<lim).forEach(t=>delTask(t.id))}
   for(const id of [...sel])if(!tasks.some(t=>t.id===id))sel.delete(id);
@@ -149,11 +149,14 @@ function render(){
   drawTbar();migrateReg();if(!iconTried)setTimeout(iconSync,1200);
   $("main").classList.toggle("g",view==="gantt"&&n>0);
   const old=snap(),list=filtered();
-  if(!n&&view!=="home"){$("main").innerHTML='<div class="empty">Noch keine Aufgaben.<br><br><button class="btn" onclick="openDlg()">Erste Aufgabe anlegen</button></div>';return}
-  if(view!=="home"&&!list.length){$("main").innerHTML='<div class="empty">Keine Aufgaben mit diesen Filtern.<br><br><button class="btn ghost" id="fclr">Filter zurücksetzen</button></div>';$("fclr").onclick=()=>{fClear();$("q").value="";render()};applySel();return}
+  const planOn=view==="cal"; /* Kalender (auch Planen mit Sammelkorb) zeigt immer sein Raster */
+  if(!n&&view!=="home"&&!planOn){$("main").innerHTML='<div class="empty">Noch keine Aufgaben.<br><br><button class="btn" onclick="openDlg()">Erste Aufgabe anlegen</button></div>';return}
+  if(view!=="home"&&!list.length&&!planOn){$("main").innerHTML='<div class="empty">Keine Aufgaben mit diesen Filtern.<br><br><button class="btn ghost" id="fclr">Filter zurücksetzen</button></div>';$("fclr").onclick=()=>{fClear();$("q").value="";render()};applySel();return}
   const qa0=$("qadd"),qv0=qa0?qa0.value:"",qf0=!!qa0&&document.activeElement===qa0;
+  {const pi=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.pin;if(pi)planKeep={k:pi,v:document.activeElement.value}}
   $("main").innerHTML=view==="home"?home():view==="board"?board(list):view==="list"?table(list):view==="cal"?cal(list):gantt(list);
   bind();after(old);applySel();
+  if(planKeep){const pi=document.querySelector(`[data-pin="${planKeep.k}"]`);if(pi){pi.value=planKeep.v||"";pi.focus({preventScroll:true})}planKeep=null}
   const qa1=$("qadd");if(qa1){qa1.value=qv0;if(qv0)$("qprev").innerHTML=qChips(parseQuick(qv0));if(qv0&&qf0)$("qsug").innerHTML=sugHtml(sugFind(qv0));if(qf0||qaddKeep){qa1.focus({preventScroll:true});qaddKeep=null}}
 }
 const avc=w=>/^melanie/i.test(w)?"am":/^lasse/i.test(w)?"al":"ao";

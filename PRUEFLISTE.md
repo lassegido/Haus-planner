@@ -43,6 +43,9 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] iPad hochkant und quer: GIF rechts neben dem Ring, gut groß; iPhone: GIF darunter.
 - [ ] Startseite → „Morgen“: morgige Aufgaben, tägliche als blasse Vorschau; nach dem Abhaken der heutigen steht die echte da, nicht doppelt.
 - [ ] Startseite morgens, mittags und abends öffnen: Satz und GIF passen zur Tageszeit; abends mit vielen offenen Aufgaben frech, sonst anspornend.
+- [ ] Kalender → Planen auf dem iPad (hochkant und quer): 2 und 5 Wochen, Aufgabe am Griff mit dem Finger auf einen anderen Tag ziehen; am unteren Rand scrollt die Seite mit.
+- [ ] Planen auf dem iPhone: Griff antippen, dann Tag antippen. Sammelkorb: mehrere Aufgaben hintereinander eintippen, Tastatur bleibt offen.
+- [ ] Aufgaben im Sammelkorb tauchen nicht in der Erinnerung oder bei „Alexa, was steht heute an“ auf.
 - [ ] Am Tag nach dem Update: Spruch auf der Startseite kommt von Gemini (neu formuliert), KI-Verbrauch in den Einstellungen nur +1.
 
 ## 4. Export (iPhone)

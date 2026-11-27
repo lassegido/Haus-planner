@@ -1169,6 +1169,58 @@ main.enter .hero.game .rg{animation:ringin 1.2s .15s cubic-bezier(.2,.8,.2,1) bo
 /* 1.44: Vorschau auf morgige Wiederholungen (entstehen erst beim Abhaken der heutigen) */
 .hrow.pre{opacity:.72}
 .ring.pre{display:inline-block;border-style:dashed}
+/* 1.46: Planen (Kalender → Planen). Handy: Tage untereinander, Sammelkorb oben. iPad hochkant: 7 Spalten je Woche. Breit: Sammelkorb links daneben. */
+.calmode{max-width:16rem;margin:0 0 .8rem}
+.pbar{flex-wrap:wrap;row-gap:.5rem}.pbar h2{min-width:0}
+.pbar .pw{flex:1 1 100%;max-width:22rem;margin:0}
+.phint{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin:0 0 .7rem;padding:.55rem .6rem .55rem .9rem;border-radius:.9rem;background:var(--acc-soft);color:var(--tx);font-weight:600;box-shadow:var(--sh1)}
+.plan{display:grid;gap:.9rem;align-items:start}
+.pbox{padding:.8rem;border-radius:1rem;background:var(--surf-grad) var(--card);border:1px solid var(--line);box-shadow:var(--hi),var(--sh1)}
+.pbox h3,.pwk{display:flex;align-items:center;gap:.45rem;margin:.1rem .1rem .55rem;font:650 .78rem/1.2 var(--fb);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.pbox h3 em{font-style:normal;padding:.05rem .45rem;border-radius:1rem;background:var(--acc-soft);color:var(--tagc);letter-spacing:0}
+.pbox h3.plate{margin-top:1rem;color:var(--brick-ink,var(--brick))}
+.pin{width:100%;min-height:2.85rem;margin:0 0 .55rem;padding:0 .8rem;border-radius:.75rem;border:1px dashed var(--line2);background:var(--grp);color:var(--tx);font:inherit;font-size:16px}
+.pin:focus{outline:none;border-style:solid;border-color:var(--acc);box-shadow:0 0 0 4px color-mix(in srgb,var(--acc) 14%,transparent)}
+.pnone{margin:.2rem .2rem .4rem;color:var(--mut);font-size:.88rem;line-height:1.35}
+.pchips{display:grid;gap:.4rem}
+.pweek{display:grid;gap:.5rem;margin-bottom:1rem}
+.pday{display:flex;flex-direction:column;gap:.4rem;padding:.55rem;border-radius:.9rem;background:var(--surf-grad) var(--card);border:1px solid var(--line);box-shadow:var(--hi),var(--sh1);transition:background-color .15s,box-shadow .15s}
+.pday header{display:flex;align-items:baseline;gap:.4rem;padding:0 .2rem;color:var(--mut);font-size:.85rem}
+.pday header b{color:var(--tx);font-size:.95rem}
+.pday.we{background:var(--wk)}
+.pday.today{border-color:var(--acc);box-shadow:var(--hi),var(--sh1),0 0 0 1px var(--acc)}
+.pday.today header b{color:var(--acc)}
+.pday.past{opacity:.7}
+.pload{margin-left:auto;min-width:1.35rem;padding:0 .4rem;border-radius:1rem;text-align:center;font:700 .75rem/1.35rem var(--fb);font-style:normal;color:var(--tx);background:color-mix(in srgb,var(--acc) 12%,var(--grp))}
+.pload.l3{background:color-mix(in srgb,var(--acc) 22%,var(--grp))}.pload.l4{background:color-mix(in srgb,var(--sun) 35%,var(--grp))}.pload.l5{background:color-mix(in srgb,var(--sun) 60%,var(--grp))}
+.padd{min-height:2.5rem;border-radius:.7rem;border:1px dashed var(--line2);background:transparent;color:var(--mut);font-size:1.2rem;cursor:pointer}
+.padd:hover{color:var(--acc);border-color:var(--acc)}
+.pch{display:flex;align-items:stretch;min-height:2.85rem;border-radius:.7rem;background:var(--grp);box-shadow:var(--hi),0 0 0 1px var(--line),0 1px 2px rgba(20,48,63,.06);cursor:pointer;overflow:hidden;border-left:.22rem solid transparent}
+.pch.p1{border-left-color:var(--brick)}.pch.p2{border-left-color:var(--sun)}.pch.p3{border-left-color:var(--sky)}
+.pch.done .pct b{text-decoration:line-through;color:var(--mut)}.pch.done{opacity:.65}.pch.fail .pct b{text-decoration:none}
+.pgrip{flex:none;display:grid;place-items:center;width:2rem;color:var(--faint);cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none}
+.pgrip svg{width:1rem;height:1rem;fill:currentColor}
+.pgrip:hover,.pch.picked .pgrip{color:var(--acc)}
+.pct{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;padding:.35rem .55rem .35rem 0;text-align:left}
+.pct b{font-weight:600;font-size:.92rem;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.pct small{color:var(--mut);font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pch.picked{box-shadow:0 0 0 2px var(--acc),var(--sh1)}
+.pch.dragging{opacity:.3}
+.pghost{position:fixed;z-index:90;margin:0;pointer-events:none;box-shadow:var(--sh2),0 0 0 2px var(--acc);opacity:.96}
+body.pdragging{cursor:grabbing;-webkit-user-select:none;user-select:none}
+.plan.picking .pday,.plan.picking .pbox{cursor:pointer;outline:2px dashed color-mix(in srgb,var(--acc) 45%,transparent);outline-offset:-2px}
+.pday.pover,.pbox.pover{background:color-mix(in srgb,var(--acc) 12%,var(--card));outline:2px solid var(--acc);outline-offset:-2px}
+@container main (min-width:44rem){
+  .pbar .pw{flex:0 1 auto;margin-left:auto}
+  .pweek{grid-template-columns:repeat(7,minmax(0,1fr));gap:.4rem}
+  .pwk{grid-column:1/-1;margin-bottom:0}
+  .pday{min-height:8.5rem;padding:.45rem}
+  .pch{min-height:2.6rem}.pgrip{width:1.3rem}.pct{padding-right:.35rem}.pct b{font-size:.82rem;-webkit-line-clamp:3;overflow-wrap:normal;word-break:break-word;hyphens:auto}.pct small{font-size:.7rem}
+  .pbox .pchips{grid-template-columns:repeat(auto-fill,minmax(12rem,1fr))}}
+@container main (min-width:80rem){
+  .plan{grid-template-columns:15rem minmax(0,1fr)}
+  .pbox{position:sticky;top:0;max-height:calc(100dvh - 9rem);overflow:auto}
+  .pbox .pchips{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -1821,6 +1873,7 @@ function diffLog(o,n){
   const L=(o.log||[]).slice(),me=prefGet("me")||"",now=new Date().toISOString().slice(0,16),add=x=>L.push({t:now,a:me,k:"h",x});
   if(o.status!==n.status||isFail(o)!==isFail(n))add("Status: "+stName(o)+" → "+stName(n));
   if(o.start!==n.start||o.end!==n.end)add("Zeitraum: "+dr(o)+" → "+dr(n));
+  if(!!o.inbox!==!!n.inbox)add(n.inbox?"In den Sammelkorb gelegt":"Aus dem Sammelkorb eingeplant");
   if((o.who||"")!==(n.who||""))add("Verantwortlich: "+(n.who||"niemand"));
   if((o.proj||"")!==(n.proj||""))add("Projekt: "+(n.proj||"keins"));
   if((o.prio||0)!==(n.prio||0))add("Priorität: "+(n.prio?"Prio "+n.prio:"keine"));
@@ -1870,6 +1923,7 @@ $("f_files").onclick=async e=>{
 let calM=null,calSel=null;
 const DLONG=["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
 function cal(list){
+  if(calModeNow()==="plan")return plan(list);
   const T=iso(new Date());if(!calM)calM=T.slice(0,7);if(!calSel)calSel=T;
   const[y,m]=calM.split("-").map(Number),first=Date.UTC(y,m-1,1)/864e5,dow=(fromDn(first).getUTCDay()+6)%7,start=first-dow,
     nd=new Date(Date.UTC(y,m,0)).getUTCDate(),weeks=Math.ceil((dow+nd)/7);
@@ -1880,7 +1934,7 @@ function cal(list){
       +`<div class="pills">${L.slice(0,3).map(t=>`<button class="pill ${t.status}${isFail(t)?" fail":""}${t.ms?" ms":""}${isLate(t)?" late":""}" data-id="${t.id}">${esc(t.title)}</button>`).join("")}</div>`
       +`<div class="cdots">${L.slice(0,4).map(t=>`<i class="${t.status}"></i>`).join("")}</div>${L.length>3?`<em>+${L.length-3}</em>`:""}</div>`}
   const sd=dn(calSel),sl=list.filter(t=>dn(t.start)<=sd&&dn(t.end)>=sd),sdt=fromDn(sd);
-  return`<div class="calbar"><button class="cnav" data-cm="-1" aria-label="Voriger Monat">‹</button><h2>${MONL[m-1]} ${y}</h2><button class="cnav" data-cm="1" aria-label="Nächster Monat">›</button><button class="cnav t" data-cm="0">Heute</button></div>`
+  return calSwitch()+`<div class="calbar"><button class="cnav" data-cm="-1" aria-label="Voriger Monat">‹</button><h2>${MONL[m-1]} ${y}</h2><button class="cnav" data-cm="1" aria-label="Nächster Monat">›</button><button class="cnav t" data-cm="0">Heute</button></div>`
    +`<div class="cgrid">${["Mo","Di","Mi","Do","Fr","Sa","So"].map(x=>`<div class="cwd">${x}</div>`).join("")}${cells}</div>`
    +`<div class="agenda"><h3><span>${DLONG[sdt.getUTCDay()]}, ${sdt.getUTCDate()}. ${MONL[sdt.getUTCMonth()]}</span><button class="btn ghost sm" data-newday="${calSel}">Aufgabe anlegen</button></h3>${sl.length?sl.map((t,i)=>card(t,t.status,i)).join(""):'<div class="none">Nichts geplant.</div>'}</div>`}
 $("main").addEventListener("click",e=>{
@@ -1922,6 +1976,96 @@ $("ai_ok").onclick=()=>{
   if(!aiRes)return;const on=[...document.querySelectorAll("#ai_items input:checked")].map(i=>aiRes.items[+i.dataset.ai]);
   if(aiRes.notes){const n=$("f_notes");n.value=(n.value.trim()?n.value.trim()+"\n\n":"")+aiRes.notes}
   on.forEach(x=>cklist.push({t:x,d:false}));drawCk();aiRes=null;drawAi()};
+/* 1.46: Planen (im Kalender umschaltbar „Monat | Planen“).
+   Zeitraum 1, 2 oder 5 Wochen ab Montag, links/oben der Sammelkorb (Aufgaben ohne festen Tag) und „Liegen geblieben“.
+   Verschieben: am Griff ziehen (Maus, Finger, Stift) oder Griff antippen und dann den Ziel-Tag antippen.
+   Eine Aufgabe steht an ihrem Starttag; beim Verschieben bleibt die Dauer gleich. */
+let calMode=null,planFrom=null,planPick=null,planKeep=null,planDay=null;
+const PLAN_W=[1,2,5],WDS=["Mo","Di","Mi","Do","Fr","Sa","So"];
+const planWeeks=()=>{const w=+(prefGet("planw")||2);return PLAN_W.includes(w)?w:2};
+const calModeNow=()=>calMode||(prefGet("calm")==="plan"?"plan":"monat");
+const monOf=d=>d-(fromDn(d).getUTCDay()+6)%7;
+const pLabel=d=>WDS[(fromDn(d).getUTCDay()+6)%7]+" "+fd(iso(fromDn(d)));
+const inboxL=()=>RAW.filter(t=>t.inbox&&!t.del&&!t.arch&&t.status!=="done");
+function calSwitch(){const m=calModeNow();return`<div class="calmode hpick" role="tablist" aria-label="Ansicht">${[["monat","Monat"],["plan","Planen"]].map(([k,n])=>`<button type="button" role="tab" data-calm="${k}" class="${m===k?"on":""}" aria-selected="${m===k}">${n}</button>`).join("")}</div>`}
+function pChip(t,i){const meta=[t.who,...tgs(t).slice(0,1)].filter(Boolean),dur=dn(t.end)-dn(t.start);
+  return`<div class="pch${t.status==="done"?" done":""}${isFail(t)?" fail":""}${planPick===t.id?" picked":""}${t.prio?" p"+t.prio:""}" data-id="${t.id}" style="--i:${Math.min(i,8)}">`
+   +`<span class="pgrip" data-pgrip="${t.id}" role="button" tabindex="0" aria-label="„${esc(t.title)}“ verschieben"><svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span>`
+   +`<span class="pct"><b>${esc(t.title)}</b>${meta.length||dur>0||t.rec?`<small>${[...meta.map(esc),dur>0?(dur+1)+" Tage":"",t.rec?"↻":""].filter(Boolean).join(" · ")}</small>`:""}</span></div>`}
+const pSort=(a,b)=>(a.status==="done")-(b.status==="done")||(a.prio||9)-(b.prio||9)||a.title.localeCompare(b.title,"de");
+function plan(list){
+  const T=today(),W=planWeeks();if(planFrom===null)planFrom=monOf(T);const from=planFrom,to=from+W*7-1;
+  const box=inboxL().filter(t=>list.some(x=>x.id===t.id)||!fActive()).sort(pSort),late=list.filter(t=>!t.inbox&&isLate(t)).sort((a,b)=>dn(a.end)-dn(b.end));
+  /* Tag der Aufgabe: ihr Start; läuft sie schon vorher und ist noch offen, steht sie am ersten sichtbaren Tag */
+  const at=new Map();for(const t of list){if(t.inbox||isLate(t))continue;const s=dn(t.start),e=dn(t.end);
+    const d=s>=from?s:(t.status!=="done"&&e>=from?Math.max(from,T):null);if(d!==null&&d<=to){if(!at.has(d))at.set(d,[]);at.get(d).push(t)}}
+  const last=fromDn(to),first=fromDn(from);
+  const lbl=`${first.getUTCDate()}. ${MONL[first.getUTCMonth()]} – ${last.getUTCDate()}. ${MONL[last.getUTCMonth()]}`;
+  let weeks="";for(let w=0;w<W;w++){let days="";for(let i=0;i<7;i++){const d=from+w*7+i,L=(at.get(d)||[]).sort(pSort),open=L.filter(t=>t.status!=="done").length,k=iso(fromDn(d));
+      days+=`<section class="pday${i>4?" we":""}${d===T?" today":""}${d<T?" past":""}" data-pday="${k}" aria-label="${pLabel(d)}, ${open} offen"><header><b>${WDS[i]}</b><span>${fromDn(d).getUTCDate()}.${fromDn(d).getUTCMonth()+1}.</span>${open?`<em class="pload l${Math.min(open,5)}">${open}</em>`:""}</header>`
+        +`<div class="pchips">${L.map(pChip).join("")}</div>`
+        +(planDay===k?`<input class="pin" data-pin="${k}" placeholder="Aufgabe für ${pLabel(d)}" enterkeyhint="done" autocomplete="off">`:`<button type="button" class="padd" data-padd="${k}" aria-label="Aufgabe am ${pLabel(d)} anlegen">+</button>`)+`</section>`}
+    weeks+=`<div class="pweek"><h3 class="pwk">KW ${kw(from+w*7)}</h3>${days}</div>`}
+  return calSwitch()+`<div class="calbar pbar"><button class="cnav" data-pnav="-1" aria-label="Eine Woche zurück">‹</button><h2>${lbl}</h2><button class="cnav" data-pnav="1" aria-label="Eine Woche vor">›</button><button class="cnav t" data-pnav="0">Heute</button>`
+   +`<div class="hpick pw">${PLAN_W.map(n=>`<button type="button" data-planw="${n}" class="${n===W?"on":""}">${n} ${n===1?"Woche":"Wochen"}</button>`).join("")}</div></div>`
+   +(planPick?`<div class="phint" role="status">Ziel antippen: einen Tag oder den Sammelkorb. <button type="button" class="btn ghost sm" data-pcancel>Abbrechen</button></div>`:"")
+   +`<div class="plan${planPick?" picking":""}"><aside class="pbox" data-pbox="1" aria-label="Sammelkorb"><h3>Sammelkorb <em>${box.length}</em></h3>`
+   +`<input class="pin" data-pin="box" placeholder="Neue Aufgabe ohne Tag, Enter" enterkeyhint="done" autocomplete="off">`
+   +`<div class="pchips">${box.length?box.map(pChip).join(""):`<p class="pnone">Hier sammeln, was noch keinen Tag hat. Dann auf einen Tag ziehen.</p>`}</div>`
+   +(late.length?`<h3 class="plate">Liegen geblieben <em>${late.length}</em></h3><div class="pchips">${late.map(pChip).join("")}</div>`:"")
+   +`</aside><div class="pgrid">${weeks}</div></div>`}
+/* Kalenderwoche nach ISO: zählt nach dem Donnerstag der Woche */
+function kw(d){const th=monOf(d)+3,y=fromDn(th).getUTCFullYear();return 1+Math.floor((th-Date.UTC(y,0,1)/864e5)/7)}
+const fActive=()=>!!($("fw")&&$("fw").value)||!!($("q")&&$("q").value.trim());
+
+async function planMove(id,target){
+  const t=byId(id);if(!t)return;let u;
+  if(target==="box"){if(t.inbox)return;u={...t,inbox:true}}
+  else{const d=dn(target),dur=Math.max(0,dn(t.end)-dn(t.start));if(!t.inbox&&dn(t.start)===d&&!isLate(t))return;u={...t,start:target,end:iso(fromDn(d+dur))};delete u.inbox}
+  u.log=diffLog(t,u);lastMoved=id;await saveTask(u);hap(8);
+  toast(`„${t.title}“ → ${target==="box"?"Sammelkorb":pLabel(dn(target))}`,async()=>{const c=byId(id);if(!c)return;const r={...c,start:t.start,end:t.end};if(t.inbox)r.inbox=true;else delete r.inbox;await saveTask(r)})}
+async function planAdd(text,k){
+  const q=parseQuick(text);if(!q.title)return false;q.title=q.title.charAt(0).toUpperCase()+q.title.slice(1);
+  const qd=qDates(q),day=k==="box"?tdy():k,d=qd||[day,day],hw=homeW(),who=q.who.length?q.who:(hw&&hw!=="__all"?[hw]:[]);
+  const t={id:newId(),title:q.title.slice(0,200),tags:q.tags,area:q.tags[0]||"",proj:q.proj,who:who.join(", "),status:"todo",prio:q.prio,start:d[0],end:d[1],notes:"",deps:[],checklist:[],ms:false,rec:null};
+  if(k==="box"&&!qd)t.inbox=true;
+  planKeep={k};await regEnsure(q.tags,q.proj);await saveTask(t);hap(10);return true}
+
+/* Ziehen am Griff: Zeiger festhalten, Geist folgt, Ziel unter dem Finger wird markiert, am Rand scrollt die Seite mit */
+let pdr=null;
+document.addEventListener("pointerdown",e=>{const g=e.target.closest&&e.target.closest("[data-pgrip]");if(!g||e.button>0)return;e.preventDefault();
+  pdr={id:g.dataset.pgrip,x:e.clientX,y:e.clientY,moved:false,src:g.closest(".pch"),ghost:null,over:null,raf:0,vy:0};try{g.setPointerCapture(e.pointerId)}catch(_){}});
+document.addEventListener("pointermove",e=>{if(!pdr)return;const dx=e.clientX-pdr.x,dy=e.clientY-pdr.y;
+  if(!pdr.moved){if(Math.hypot(dx,dy)<6)return;pdr.moved=true;const r=pdr.src.getBoundingClientRect(),gh=pdr.src.cloneNode(true);gh.className+=" pghost";
+    gh.style.width=r.width+"px";gh.style.left=r.left+"px";gh.style.top=r.top+"px";document.body.appendChild(gh);pdr.ghost=gh;pdr.src.classList.add("dragging");document.body.classList.add("pdragging");hap(6)}
+  pdr.ghost.style.transform=`translate(${dx}px,${dy}px) rotate(-1.5deg)`;
+  const el=document.elementFromPoint(e.clientX,e.clientY),tg=el&&el.closest&&el.closest("[data-pday],[data-pbox]");
+  if(tg!==pdr.over){pdr.over&&pdr.over.classList.remove("pover");pdr.over=tg;tg&&tg.classList.add("pover")}
+  const m=$("main"),mr=m.getBoundingClientRect(),edge=56;pdr.vy=e.clientY<mr.top+edge?-(mr.top+edge-e.clientY)/3:e.clientY>mr.bottom-edge?(e.clientY-(mr.bottom-edge))/3:0;
+  if(pdr.vy&&!pdr.raf){const step=()=>{if(!pdr||!pdr.vy){if(pdr)pdr.raf=0;return}m.scrollTop+=pdr.vy;pdr.raf=requestAnimationFrame(step)};pdr.raf=requestAnimationFrame(step)}});
+function pdEnd(drop){const d=pdr;if(!d)return;pdr=null;if(d.raf)cancelAnimationFrame(d.raf);d.ghost&&d.ghost.remove();d.src&&d.src.classList.remove("dragging");document.body.classList.remove("pdragging");d.over&&d.over.classList.remove("pover");
+  if(!drop)return;
+  if(!d.moved){planPick=planPick===d.id?null:d.id;hap(6);render();return}
+  if(d.over){planPick=null;planMove(d.id,d.over.dataset.pday||"box")}}
+document.addEventListener("pointerup",()=>pdEnd(true));
+document.addEventListener("pointercancel",()=>pdEnd(false));
+/* Antippen des Griffs öffnet nicht die Aufgabe */
+document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-pgrip]")){e.stopPropagation();e.preventDefault()}},true);
+document.addEventListener("keydown",e=>{const g=e.target.closest&&e.target.closest("[data-pgrip]");if(g&&(e.key==="Enter"||e.key===" ")){e.preventDefault();planPick=planPick===g.dataset.pgrip?null:g.dataset.pgrip;render()}
+  if(e.key==="Escape"&&planPick){planPick=null;render()}});
+/* Gewählte Aufgabe: Ziel antippen. Läuft vor den Klicks auf Karten (Erfassungsphase), damit kein Blatt aufgeht */
+$("main").addEventListener("click",e=>{if(!planPick||e.target.closest("[data-pgrip],[data-pcancel],input"))return;const tg=e.target.closest("[data-pday],[data-pbox]");if(!tg)return;
+  e.stopPropagation();e.preventDefault();const id=planPick;planPick=null;planMove(id,tg.dataset.pday||"box")},true);
+$("main").addEventListener("click",e=>{
+  const cm=e.target.closest("[data-calm]");if(cm){calMode=cm.dataset.calm;prefSet("calm",calMode);planPick=null;render();return}
+  const pn=e.target.closest("[data-pnav]");if(pn){const v=+pn.dataset.pnav;planFrom=v?planFrom+7*v:monOf(today());render();return}
+  const pw=e.target.closest("[data-planw]");if(pw){prefSet("planw",pw.dataset.planw);render();return}
+  if(e.target.closest("[data-pcancel]")){planPick=null;render();return}
+  const pa=e.target.closest("[data-padd]");if(pa){planDay=pa.dataset.padd;planKeep={k:planDay};render();return}});
+$("main").addEventListener("keydown",async e=>{const i=e.target.closest&&e.target.closest("[data-pin]");if(!i)return;
+  if(e.key==="Escape"){planKeep=null;planDay=null;i.blur();render();return}
+  if(e.key!=="Enter")return;e.preventDefault();const v=i.value;if(!v.trim()){if(i.dataset.pin!=="box"){planDay=null;render()}return}i.value="";if(!await planAdd(v,i.dataset.pin))i.value=v});
+$("main").addEventListener("focusout",e=>{const i=e.target.closest&&e.target.closest("[data-pin]");if(i&&i.dataset.pin!=="box"&&!i.value.trim())setTimeout(()=>{if(planDay===i.dataset.pin&&!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("[data-pin]"))){planDay=null;render()}},150)});
 /* Tags */
 const TC={sky:"#6CB6E4",sun:"#FDAF54",sea:"#387CA3",brick:"#D35526",mint:"#6CC49A",rose:"#E58BAE",lilac:"#9D86DB",sand:"#C9B77A",slate:"#7C93A3",lemon:"#D9CB3F"},TCK=Object.keys(TC);
 const tgs=t=>Array.isArray(t.tags)?t.tags:(t.area?[t.area]:[]);
@@ -2208,7 +2352,7 @@ function kiosk(){
     <div class="kst"><div><b>${L.length}</b><span>heute</span></div><div class="${late.length?"hot":""}"><b>${late.length}</b><span>überfällig</span></div><div><b>${next.length}</b><span>7 Tage</span></div></div>${who?`<div class="kwho">${esc(who)}</div>`:""}</section>
     <section class="kr">${L.length?`<h3>Heute</h3>${L.slice(0,6).map(row).join("")}`:`<div class="kfree"><b>Für heute ist nichts geplant.</b><span>Genieß den Tag.</span></div>`}${nx.length?`<h3>Als Nächstes</h3>${nx.map(row).join("")}`:""}${L.length>6?`<p class="kmore">und ${L.length-6} weitere</p>`:""}</section></div>`}
 function render(){
-  tasks=RAW.filter(t=>!t.arch&&!t.del).map(t=>t.status==="backlog"?{...t,status:"todo"}:t);
+  tasks=RAW.filter(t=>!t.arch&&!t.del&&!t.inbox).map(t=>t.status==="backlog"?{...t,status:"todo"}:t);
   if(KIOSK){$("main").innerHTML=kiosk();document.querySelectorAll("[data-adv]").forEach(b=>b.onclick=e=>{e.stopPropagation();advance(b.dataset.adv)});return}
   if(!purged&&RAW.length){purged=true;const lim=iso(new Date(Date.now()-30*864e5));RAW.filter(t=>t.del&&t.delAt&&t.delAt<lim).forEach(t=>delTask(t.id))}
   for(const id of [...sel])if(!tasks.some(t=>t.id===id))sel.delete(id);
@@ -2225,11 +2369,14 @@ function render(){
   drawTbar();migrateReg();if(!iconTried)setTimeout(iconSync,1200);
   $("main").classList.toggle("g",view==="gantt"&&n>0);
   const old=snap(),list=filtered();
-  if(!n&&view!=="home"){$("main").innerHTML='<div class="empty">Noch keine Aufgaben.<br><br><button class="btn" onclick="openDlg()">Erste Aufgabe anlegen</button></div>';return}
-  if(view!=="home"&&!list.length){$("main").innerHTML='<div class="empty">Keine Aufgaben mit diesen Filtern.<br><br><button class="btn ghost" id="fclr">Filter zurücksetzen</button></div>';$("fclr").onclick=()=>{fClear();$("q").value="";render()};applySel();return}
+  const planOn=view==="cal"; /* Kalender (auch Planen mit Sammelkorb) zeigt immer sein Raster */
+  if(!n&&view!=="home"&&!planOn){$("main").innerHTML='<div class="empty">Noch keine Aufgaben.<br><br><button class="btn" onclick="openDlg()">Erste Aufgabe anlegen</button></div>';return}
+  if(view!=="home"&&!list.length&&!planOn){$("main").innerHTML='<div class="empty">Keine Aufgaben mit diesen Filtern.<br><br><button class="btn ghost" id="fclr">Filter zurücksetzen</button></div>';$("fclr").onclick=()=>{fClear();$("q").value="";render()};applySel();return}
   const qa0=$("qadd"),qv0=qa0?qa0.value:"",qf0=!!qa0&&document.activeElement===qa0;
+  {const pi=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.pin;if(pi)planKeep={k:pi,v:document.activeElement.value}}
   $("main").innerHTML=view==="home"?home():view==="board"?board(list):view==="list"?table(list):view==="cal"?cal(list):gantt(list);
   bind();after(old);applySel();
+  if(planKeep){const pi=document.querySelector(`[data-pin="${planKeep.k}"]`);if(pi){pi.value=planKeep.v||"";pi.focus({preventScroll:true})}planKeep=null}
   const qa1=$("qadd");if(qa1){qa1.value=qv0;if(qv0)$("qprev").innerHTML=qChips(parseQuick(qv0));if(qv0&&qf0)$("qsug").innerHTML=sugHtml(sugFind(qv0));if(qf0||qaddKeep){qa1.focus({preventScroll:true});qaddKeep=null}}
 }
 const avc=w=>/^melanie/i.test(w)?"am":/^lasse/i.test(w)?"al":"ao";
@@ -2336,7 +2483,7 @@ function bind(){
    Alles wird aus Status und Verlauf der Aufgaben berechnet, nichts zusätzlich gespeichert
    (Ausnahme: welche Abzeichen dieses Gerät schon gemeldet hat, im Browser unter haus-badges). */
 const doneOn=t=>{if(t.status!=="done")return Infinity;const d=doneDay(t);return isNaN(d)?dn(t.end):d};
-const motScope=()=>{const hw=homeW();return RAW.filter(t=>!t.del&&(hw==="__all"||wl(t).includes(hw)))};
+const motScope=()=>{const hw=homeW();return RAW.filter(t=>!t.del&&!t.inbox&&(hw==="__all"||wl(t).includes(hw)))};
 const todayOpenOf=L=>{const T=today();return L.filter(t=>t.status!=="done"&&!t.arch&&dn(t.start)<=T&&(dn(t.end)>=T||isLate(t)))};
 /* Tage, an denen etwas Fälliges offen blieb (Tagesring nicht voll) */
 function badDays(L,T){const bad=new Set();for(const t of L){const due=dn(t.end),dd=doneOn(t);for(let x=Math.max(due,T-400);x<Math.min(dd,T+1);x++)bad.add(x);
@@ -2694,7 +2841,7 @@ $("b_save").onclick=async()=>{
   const rec=recCur?{...recCur}:null;
   const t={...(editing||{}),id:editing?editing.id:newId(),title,tags:selTags.slice(),area:selTags[0]||"",proj,rec,ms,who:selWho.join(", "),
     status:$("f_status").value==="fail"?"done":$("f_status").value,fail:$("f_status").value==="fail",prio:q.prio||+$("f_prio").value||0,start:s,end:e,notes:$("f_notes").value,checklist:cklist.filter(x=>x.t.trim()),deps:[...document.querySelectorAll("#f_deps input:checked")].map(i=>i.value)};
-  if(!t.fail)delete t.fail;const failNew=t.fail&&!isFail(prev);
+  if(!t.fail)delete t.fail;if(t.inbox&&editing&&(t.start!==editing.start||t.end!==editing.end))delete t.inbox;const failNew=t.fail&&!isFail(prev);
   $("dlg").close();
   let sp=null;if(t.status==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);if(sp)t.spawned=sp.id}
   {const r=regDraft;if(r){if(proj&&!r.some(x=>x.p&&x.n===proj))r.push({n:proj,c:nextPColor(),p:1});selTags.forEach(n=>{if(!r.some(x=>!x.p&&x.n===n))r.push({n,c:colorKey(n)})});if(JSON.stringify(r)!==JSON.stringify(reg))saveReg(r)}}

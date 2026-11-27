@@ -238,7 +238,9 @@ def clean(t):
             "arch": bool(t.get("arch")), "del": bool(t.get("del")), "delAt": str(t.get("delAt", "") or "")[:10],
             "log": clean_log(t.get("log")), "files": clean_files(t.get("files")), "v": 0,
             # 1.42: „Nicht geschafft“ = erledigt + fail (abgeschlossen, zählt aber nicht als geschafft)
-            **({"fail": True} if st == "done" and t.get("fail") is True else {})}
+            **({"fail": True} if st == "done" and t.get("fail") is True else {}),
+            # 1.46: Sammelkorb = noch ohne festen Tag; zählt nirgends als fällig oder überfällig
+            **({"inbox": True} if st != "done" and t.get("inbox") is True else {})}
 
 
 # ---- Home Assistant: Erinnerungen und Sensoren (nur im Add-on, über die Supervisor-Schnittstelle)
@@ -560,7 +562,7 @@ def init_tz():
 
 
 def stats(tasks, today):
-    act = [t for t in tasks if not t.get("del") and not t.get("arch") and t["status"] != "done"]
+    act = [t for t in tasks if not t.get("del") and not t.get("arch") and not t.get("inbox") and t["status"] != "done"]
     due = [t for t in act if t["end"] == today]
     late = [t for t in act if t["end"] < today]
     doing = [t for t in act if t["status"] == "doing"]
@@ -767,7 +769,7 @@ def speech_summary(when="heute", who=""):
     today = _today()
     ti = today.isoformat()
     with LOCK:
-        act = [t for t in state["tasks"].values() if not t.get("del") and not t.get("arch") and t["status"] != "done" and _mine(t, who)]
+        act = [t for t in state["tasks"].values() if not t.get("del") and not t.get("arch") and not t.get("inbox") and t["status"] != "done" and _mine(t, who)]
     late = sorted([t for t in act if t["end"] < ti], key=lambda t: t["end"])
     if when == "woche":
         lim = (today + datetime.timedelta(7)).isoformat()

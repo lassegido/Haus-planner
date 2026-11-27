@@ -1,5 +1,14 @@
 # Änderungen
 
+## 1.46.0
+- **Planen:** Im Kalender oben „Monat | Planen“ umschalten.
+  - Zeitraum 1, 2 oder 5 Wochen ab Montag, mit ‹ › wochenweise vor und zurück und „Heute“. Jeder Tag zeigt, wie viele Aufgaben offen sind; ab 4 färbt sich die Zahl orange.
+  - Auf iPad und Computer stehen die Tage als Wochen nebeneinander (Mo bis So), auf dem Handy untereinander.
+- **Verschieben:** Am Griff (sechs Punkte) ziehen, auf Tag oder Sammelkorb loslassen. Oder den Griff antippen und dann den Ziel-Tag antippen, das geht auf dem Handy am leichtesten. Mehrtägige Aufgaben behalten ihre Dauer. Jede Verschiebung lässt sich unten rückgängig machen.
+- **Sammelkorb:** Aufgaben ohne festen Tag schnell nacheinander eintippen (Enter, die Eingabe bleibt offen), später auf Tage verteilen. Sie zählen nirgends als fällig oder überfällig: nicht auf der Startseite, nicht in Liste, Board, Zeitstrahl und Monatskalender, nicht in Erinnerungen und bei Alexa.
+- **Liegen geblieben:** Überfällige Aufgaben stehen beim Planen unter dem Sammelkorb und lassen sich direkt auf einen neuen Tag ziehen.
+- **Plus an jedem Tag:** legt direkt an diesem Tag an. Kurzschreibweise wie in der Schnelleingabe (#Tag, @Person, !1).
+
 ## 1.45.1
 - Korrektur: Ist heute nichts fällig, steht wieder „Heute ist nichts fällig. Genieß den freien Tag.“ statt „Mittag, und noch alle 0 offen …“.
 
