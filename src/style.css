@@ -1209,3 +1209,18 @@ body.pdragging{cursor:grabbing;-webkit-user-select:none;user-select:none}
 .hsub2 em{font-style:normal;letter-spacing:0;padding:0 .4rem;border-radius:1rem;background:var(--seg-tr)}
 .hsub2:not(.first)~.hrow{opacity:.82}
 .hmeme .gifbox{min-height:8rem}
+/* 1.48: Zeitstrahl. Verknüpfungen in Akzentfarbe (antippen = lösen), Punkt zum Verknüpfen auch auf dem iPad, Zeilen am Griff verschieben */
+.gdl{cursor:pointer}
+.gdlh{fill:none;stroke:transparent;stroke-width:14}
+.gdlv{fill:none;stroke:var(--acc);stroke-width:1.8;stroke-linejoin:round;opacity:.85;transition:opacity .12s,stroke-width .12s}
+.gdl:hover .gdlv{opacity:1;stroke-width:2.6}
+.gdh{fill:transparent;touch-action:none;cursor:crosshair}
+@media (pointer:coarse){.gdep{display:inline;opacity:.9;fill:var(--card);stroke:var(--acc);stroke-width:2}}
+.gbar:hover .gdep{stroke:var(--acc)}
+.gr .ggrip{flex:none;display:grid;place-items:center;width:1.4rem;height:100%;margin-left:-.35rem;color:var(--faint);cursor:grab;touch-action:none}
+.ggrip svg{width:.95rem;height:.95rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.gr.dragging{opacity:.4}
+.gr.lfrom{background:var(--acc-soft)}
+.grline{position:absolute;left:.4rem;right:.4rem;height:3px;margin-top:-1.5px;border-radius:2px;background:var(--acc);pointer-events:none;z-index:5}
+.shg.ask{display:grid;gap:.6rem;padding:.9rem}
+.shg.ask input,.shg.ask textarea{width:100%;font:inherit;font-size:16px;padding:.7rem .8rem;border-radius:.8rem;border:1px solid var(--line2);background:var(--grp);color:var(--tx)}

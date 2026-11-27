@@ -1,4 +1,4 @@
-import base64, datetime, hashlib, ipaddress, json, os, re, secrets, shutil, socket, struct, threading, time, traceback, urllib.error, urllib.request
+import base64, datetime, hashlib, ipaddress, json, math, os, re, secrets, shutil, socket, struct, threading, time, traceback, urllib.error, urllib.request
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs, unquote
 
@@ -240,7 +240,9 @@ def clean(t):
             # 1.42: „Nicht geschafft“ = erledigt + fail (abgeschlossen, zählt aber nicht als geschafft)
             **({"fail": True} if st == "done" and t.get("fail") is True else {}),
             # 1.46: Sammelkorb = noch ohne festen Tag; zählt nirgends als fällig oder überfällig
-            **({"inbox": True} if st != "done" and t.get("inbox") is True else {})}
+            **({"inbox": True} if st != "done" and t.get("inbox") is True else {}),
+            # 1.48: eigene Reihenfolge (Zahl; fehlt sie, gilt das Startdatum)
+            **({"ord": round(float(t["ord"]), 3)} if isinstance(t.get("ord"), (int, float)) and not isinstance(t.get("ord"), bool) and math.isfinite(t["ord"]) and abs(t["ord"]) < 1e9 else {})}
 
 
 # ---- Home Assistant: Erinnerungen und Sensoren (nur im Add-on, über die Supervisor-Schnittstelle)

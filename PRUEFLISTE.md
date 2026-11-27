@@ -11,7 +11,7 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] Hell und Dunkel: Texte gut lesbar, keine weißen Flächen im Dunkelmodus.
 
 ## 2. Gesten (iPhone)
-- [ ] Karte oder Zeile gedrückt halten: Menü mit höchstens vier Einträgen (bei offenen Aufgaben auch „Nicht geschafft“), **kein** markierter Text, keine Lupe.
+- [ ] Karte oder Zeile gedrückt halten: Menü mit höchstens vier Einträgen (bei offenen Aufgaben auch „Nicht geschafft“; im Zeitstrahl zusätzlich Verknüpfen, Projekt, Notiz, Reihenfolge), **kein** markierter Text, keine Lupe.
 - [ ] Liste: nach rechts wischen = erledigt, nach links = Papierkorb.
 - [ ] Liste ganz oben nach unten ziehen: aktualisiert; weiter ziehen: Suche öffnet sich.
 - [ ] Blätter (Aufgabe, Filter, Einstellungen) nach unten wischen: schließt; bei Änderungen kommt die Rückfrage.
@@ -48,6 +48,9 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] Aufgaben im Sammelkorb tauchen nicht in der Erinnerung oder bei „Alexa, was steht heute an“ auf.
 - [ ] Startseite, weit nach unten scrollen, Kreis antippen (Offen → In Arbeit → Erledigt): Seite bleibt stehen.
 - [ ] Ring zählt nur heute Fällige; mehrtägige Aufgaben stehen unter „Läuft heute, fällig später“.
+- [ ] Zeitstrahl auf dem iPad: Punkt am Balkenende mit dem Finger auf eine andere Aufgabe ziehen → Pfeil erscheint; Pfeil antippen → lösen.
+- [ ] Zeitstrahl: Balken gedrückt halten, ohne zu bewegen, loslassen → Menü; „Zu Projekt hinzufügen“ und „Notiz hinzufügen“ ausprobieren.
+- [ ] Zeitstrahl: Zeile links an den zwei Strichen nach oben ziehen; Reihenfolge bleibt auch nach dem Neuladen und auf dem zweiten Gerät.
 - [ ] Am Tag nach dem Update: Spruch auf der Startseite kommt von Gemini (neu formuliert), KI-Verbrauch in den Einstellungen nur +1.
 
 ## 4. Export (iPhone)

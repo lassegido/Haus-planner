@@ -1227,8 +1227,23 @@ body.pdragging{cursor:grabbing;-webkit-user-select:none;user-select:none}
 .hsub2 em{font-style:normal;letter-spacing:0;padding:0 .4rem;border-radius:1rem;background:var(--seg-tr)}
 .hsub2:not(.first)~.hrow{opacity:.82}
 .hmeme .gifbox{min-height:8rem}
+/* 1.48: Zeitstrahl. Verknüpfungen in Akzentfarbe (antippen = lösen), Punkt zum Verknüpfen auch auf dem iPad, Zeilen am Griff verschieben */
+.gdl{cursor:pointer}
+.gdlh{fill:none;stroke:transparent;stroke-width:14}
+.gdlv{fill:none;stroke:var(--acc);stroke-width:1.8;stroke-linejoin:round;opacity:.85;transition:opacity .12s,stroke-width .12s}
+.gdl:hover .gdlv{opacity:1;stroke-width:2.6}
+.gdh{fill:transparent;touch-action:none;cursor:crosshair}
+@media (pointer:coarse){.gdep{display:inline;opacity:.9;fill:var(--card);stroke:var(--acc);stroke-width:2}}
+.gbar:hover .gdep{stroke:var(--acc)}
+.gr .ggrip{flex:none;display:grid;place-items:center;width:1.4rem;height:100%;margin-left:-.35rem;color:var(--faint);cursor:grab;touch-action:none}
+.ggrip svg{width:.95rem;height:.95rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.gr.dragging{opacity:.4}
+.gr.lfrom{background:var(--acc-soft)}
+.grline{position:absolute;left:.4rem;right:.4rem;height:3px;margin-top:-1.5px;border-radius:2px;background:var(--acc);pointer-events:none;z-index:5}
+.shg.ask{display:grid;gap:.6rem;padding:.9rem}
+.shg.ask input,.shg.ask textarea{width:100%;font:inherit;font-size:16px;padding:.7rem .8rem;border-radius:.8rem;border:1px solid var(--line2);background:var(--grp);color:var(--tx)}
 </style>
-<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"><script>(function(){var n=0,seen={};function send(m,w){try{m=String(m||"").slice(0,400);w=String(w||"");if(n>=8||seen[m+w])return;seen[m+w]=1;n++;var v=(document.body&&document.body.dataset.view)||"";fetch("api/log",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json","X-Planner":"1"},body:JSON.stringify({msg:m,where:w,ver:"1.47.0",view:v,ua:navigator.userAgent.slice(0,120)})}).catch(function(){})}catch(_){}}addEventListener("error",function(e){var t=e.target;if(t&&t!==window){if(t.tagName==="SCRIPT"||t.tagName==="LINK")send("Datei nicht geladen: "+String(t.src||t.href).split("/").pop().split("?")[0],"");return}send(e.message,String(e.filename||"").split("/").pop()+":"+e.lineno+":"+e.colno)},true);addEventListener("unhandledrejection",function(e){var r=e.reason||{};send("Unbehandelt: "+(r.message||r),String(r.stack||"").split("\n")[1]||"")})})();</script></head>
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"><script>(function(){var n=0,seen={};function send(m,w){try{m=String(m||"").slice(0,400);w=String(w||"");if(n>=8||seen[m+w])return;seen[m+w]=1;n++;var v=(document.body&&document.body.dataset.view)||"";fetch("api/log",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json","X-Planner":"1"},body:JSON.stringify({msg:m,where:w,ver:"1.48.0",view:v,ua:navigator.userAgent.slice(0,120)})}).catch(function(){})}catch(_){}}addEventListener("error",function(e){var t=e.target;if(t&&t!==window){if(t.tagName==="SCRIPT"||t.tagName==="LINK")send("Datei nicht geladen: "+String(t.src||t.href).split("/").pop().split("?")[0],"");return}send(e.message,String(e.filename||"").split("/").pop()+":"+e.lineno+":"+e.colno)},true);addEventListener("unhandledrejection",function(e){var r=e.reason||{};send("Unbehandelt: "+(r.message||r),String(r.stack||"").split("\n")[1]||"")})})();</script></head>
 <body>
 <svg id="icsp" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-bad" viewBox="0 0 24 24"><path d="M3 12h18v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-2z"/><path d="M6 12V6.5A2.5 2.5 0 0 1 8.5 4 2.5 2.5 0 0 1 11 6.5"/><path d="M7 18l-1 2M17 18l1 2"/></symbol><symbol id="i-kueche" viewBox="0 0 24 24"><path d="M5 10h14v7a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-7z"/><path d="M3 10h2M19 10h2M9 6.5c0-1.2 1-1.2 1-2.5M14 6.5c0-1.2 1-1.2 1-2.5"/></symbol><symbol id="i-sofa" viewBox="0 0 24 24"><path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><path d="M3 13a2 2 0 0 1 4 0v1h10v-1a2 2 0 0 1 4 0v4H3v-4z"/><path d="M6 17v2M18 17v2"/></symbol><symbol id="i-bett" viewBox="0 0 24 24"><path d="M3 19V6M3 14.5h18V19M21 14.5V12a3 3 0 0 0-3-3h-7v5.5"/><circle cx="7" cy="11" r="1.8"/></symbol><symbol id="i-kind" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="6.5"/><circle cx="6.6" cy="6.8" r="2.2"/><circle cx="17.4" cy="6.8" r="2.2"/><circle cx="12" cy="15.2" r="2"/><path d="M9.6 11.6h.01M14.4 11.6h.01"/></symbol><symbol id="i-tuer" viewBox="0 0 24 24"><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M4 21h16"/><circle cx="15" cy="12.5" r=".9" fill="currentColor"/></symbol><symbol id="i-pflanze" viewBox="0 0 24 24"><path d="M12 21v-9"/><path d="M12 12c0-4 3-6.5 7-6.5 0 4-2.5 6.5-7 6.5z"/><path d="M12 15.5c0-3-2.3-5-6-5 0 3.2 2 5 6 5z"/></symbol><symbol id="i-baum" viewBox="0 0 24 24"><path d="M12 21v-6"/><path d="M12 15c-4 0-6.5-2.5-6.5-5.5C5.5 6 8.5 3.5 12 3.5s6.5 2.5 6.5 6c0 3-2.5 5.5-6.5 5.5z"/></symbol><symbol id="i-sonne" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.8"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></symbol><symbol id="i-treppe" viewBox="0 0 24 24"><path d="M3.5 20.5h17M5 20.5v-4h4v-4h4v-4h4v-4"/></symbol><symbol id="i-dach" viewBox="0 0 24 24"><path d="M2.5 13L12 5l9.5 8"/><path d="M17 8.5V5h2v5.2"/><path d="M6 11.5V19h12v-7.5"/></symbol><symbol id="i-fenster" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="17" rx="1.5"/><path d="M12 3.5v17M4.5 12h15"/></symbol><symbol id="i-flamme" viewBox="0 0 24 24"><path d="M12 21c-3.9 0-6-2.5-6-5.7 0-3.6 3.2-5.5 3.7-9.3C12.4 7.4 18 10.2 18 15.3c0 3.2-2.1 5.7-6 5.7z"/><path d="M12 21c-1.6 0-2.6-1-2.6-2.5 0-1.5 1.6-2.2 2.6-3.7 1 1.5 2.6 2.2 2.6 3.7 0 1.5-1 2.5-2.6 2.5z"/></symbol><symbol id="i-blitz" viewBox="0 0 24 24"><path d="M13 3L5.5 13.5H11L10 21l7.5-10.5H12L13 3z"/></symbol><symbol id="i-tropfen" viewBox="0 0 24 24"><path d="M12 3.5c3.2 4 6 7 6 10.2a6 6 0 0 1-12 0C6 10.5 8.8 7.5 12 3.5z"/></symbol><symbol id="i-werkzeug" viewBox="0 0 24 24"><path d="M14 4.5l5.5 5.5-2.8 2.8-5.5-5.5z"/><path d="M12.2 9.7L4.8 17.1a1.9 1.9 0 0 0 2.7 2.7l7.4-7.4"/></symbol><symbol id="i-roller" viewBox="0 0 24 24"><rect x="4" y="3.5" width="14" height="5.5" rx="1.5"/><path d="M18 6h2.5v5.5h-8V14"/><rect x="10.7" y="14" width="3.6" height="6.5" rx="1.2"/></symbol><symbol id="i-boden" viewBox="0 0 24 24"><path d="M12 4l9 5-9 5-9-5z"/><path d="M3 13.5l9 5 9-5"/></symbol><symbol id="i-dokument" viewBox="0 0 24 24"><path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-16z"/><path d="M14 3.5v4h4M9.5 12.5h5M9.5 16h5"/></symbol><symbol id="i-muenze" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M15.2 9.2a4 4 0 1 0 0 5.6M8.3 11h5M8.3 13h5"/></symbol><symbol id="i-schild" viewBox="0 0 24 24"><path d="M12 3.5l7 2.5v5.5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z"/><path d="M9 12l2.2 2.2L15.2 10"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><path d="M4 16v-3.5L6 7.5h12l2 5V16"/><path d="M4 12.5h16M4 16h16"/><circle cx="7.5" cy="16.5" r="1.7"/><circle cx="16.5" cy="16.5" r="1.7"/></symbol><symbol id="i-wagen" viewBox="0 0 24 24"><path d="M3 4.5h2.5l2 10.5h10.5l2-8H7"/><circle cx="9.2" cy="19" r="1.2"/><circle cx="16.8" cy="19" r="1.2"/></symbol><symbol id="i-eimer" viewBox="0 0 24 24"><path d="M5 9h14l-1.6 11H6.6z"/><path d="M5 9c0-2.6 3-4.2 7-4.2s7 1.6 7 4.2"/></symbol><symbol id="i-karton" viewBox="0 0 24 24"><path d="M3.5 8L12 4l8.5 4v8.5L12 20.5l-8.5-4z"/><path d="M3.5 8L12 12l8.5-4M12 12v8.5"/></symbol><symbol id="i-pfote" viewBox="0 0 24 24"><ellipse cx="12" cy="15.5" rx="4" ry="3.2"/><circle cx="6.3" cy="11" r="1.6"/><circle cx="9.7" cy="6.8" r="1.6"/><circle cx="14.3" cy="6.8" r="1.6"/><circle cx="17.7" cy="11" r="1.6"/></symbol><symbol id="i-herz" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.5-7.5-10A4.2 4.2 0 0 1 12 7.6 4.2 4.2 0 0 1 19.5 10C19.5 15.5 12 20 12 20z"/></symbol><symbol id="i-koffer" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v2M4 13.5h16"/></symbol><symbol id="i-geschenk" viewBox="0 0 24 24"><rect x="4" y="9.5" width="16" height="10.5" rx="1.5"/><path d="M3 9.5h18M12 9.5V20"/><path d="M12 9.5C11 6 7.5 6 8 8c.3 1.4 4 1.5 4 1.5zM12 9.5c1-3.5 4.5-3.5 4-1.5-.3 1.4-4 1.5-4 1.5z"/></symbol><symbol id="i-schloss" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><circle cx="12" cy="15.5" r="1"/></symbol><symbol id="i-wlan" viewBox="0 0 24 24"><path d="M3.5 9.5a12 12 0 0 1 17 0M6.5 12.8a7.8 7.8 0 0 1 11 0M9.5 16a3.5 3.5 0 0 1 5 0"/><circle cx="12" cy="19" r=".9" fill="currentColor"/></symbol><symbol id="i-birne" viewBox="0 0 24 24"><path d="M9 17.5h6M10 20.5h4"/><path d="M12 3.5a5.5 5.5 0 0 0-3.2 10c.6.5 1.2 1.3 1.2 2.5h4c0-1.2.6-2 1.2-2.5A5.5 5.5 0 0 0 12 3.5z"/></symbol><symbol id="i-waschmaschine" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="17" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 7h.01M11 7h2"/></symbol><symbol id="i-kalender" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v3.5M15.5 3.5v3.5"/></symbol><symbol id="i-tonne" viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13"/><path d="M10.5 11v5.5M13.5 11v5.5"/></symbol><symbol id="i-stuhl" viewBox="0 0 24 24"><path d="M7 12V5a1.5 1.5 0 0 1 1.5-1.5h7A1.5 1.5 0 0 1 17 5v7"/><path d="M5.5 12h13v3.5h-13zM7.5 15.5V21M16.5 15.5V21"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M3.5 12.5V4.5a1 1 0 0 1 1-1h8L21 12l-8.5 8.5z"/><circle cx="8" cy="8" r="1.2"/></symbol></defs></svg>
 
@@ -1257,7 +1272,7 @@ body.pdragging{cursor:grabbing;-webkit-user-select:none;user-select:none}
   <div id="note"></div>
   <section class="kpis" id="kpis"></section>
   <div class="tchips" id="tchips"></div>
-  <div id="legacy" hidden><button class="btn ghost" id="exp"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg><span>Export</span></button><button class="ib cfgb" id="cfg" aria-label="Einstellungen" title="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.3"/><circle cx="8" cy="17" r="2.3"/></svg></button><select class="tgrp" id="grp" aria-label="Gruppieren"><option value="none">Gruppieren</option><option value="tag">Nach Tag</option><option value="proj">Nach Projekt</option><option value="who">Nach Person</option><option value="prio">Nach Priorität</option></select><select class="tgrp" id="srt" aria-label="Sortieren"><option value="date">Sort: Datum</option><option value="prio">Sort: Prio</option></select><button class="tsel" id="selbtn" type="button" aria-label="Mehrere auswählen" title="Mehrere auswählen (S)"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.2l2.5 2.5 4.5-5"/></svg><span>Auswählen</span></button><button class="tgear" id="tman" aria-label="Tags verwalten" title="Tags verwalten"><svg viewBox="0 0 24 24"><path d="M20 13.2 13.2 20a2 2 0 0 1-2.8 0L3.5 13.1V4.5a1 1 0 0 1 1-1h8.6L20 10.4a2 2 0 0 1 0 2.8z"/><circle cx="8.2" cy="8.2" r="1.3"/></svg></button></div>
+  <div id="legacy" hidden><button class="btn ghost" id="exp"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg><span>Export</span></button><button class="ib cfgb" id="cfg" aria-label="Einstellungen" title="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.3"/><circle cx="8" cy="17" r="2.3"/></svg></button><select class="tgrp" id="grp" aria-label="Gruppieren"><option value="none">Gruppieren</option><option value="tag">Nach Tag</option><option value="proj">Nach Projekt</option><option value="who">Nach Person</option><option value="prio">Nach Priorität</option></select><select class="tgrp" id="srt" aria-label="Sortieren"><option value="date">Sort: Datum</option><option value="prio">Sort: Prio</option><option value="ord">Sort: Eigene</option></select><button class="tsel" id="selbtn" type="button" aria-label="Mehrere auswählen" title="Mehrere auswählen (S)"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.2l2.5 2.5 4.5-5"/></svg><span>Auswählen</span></button><button class="tgear" id="tman" aria-label="Tags verwalten" title="Tags verwalten"><svg viewBox="0 0 24 24"><path d="M20 13.2 13.2 20a2 2 0 0 1-2.8 0L3.5 13.1V4.5a1 1 0 0 1 1-1h8.6L20 10.4a2 2 0 0 1 0 2.8z"/><circle cx="8.2" cy="8.2" r="1.3"/></svg></button></div>
   <main id="main"></main>
 </div>
 </div>
@@ -1534,6 +1549,29 @@ async function setStatus(t,next){
   if(st==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);if(sp)u.spawned=sp.id}
   await saveTask(u);if(sp)await saveTask(sp);if(next==="done"&&t.status!=="done")cheer();return sp}
 /* Zeitstrahl: Balken ziehen */
+/* 1.48: Verknüpfen (A → B: B startet nach A), auch per Menü „Verknüpfen mit …“ und dann Ziel antippen */
+let linkFrom=null;
+async function addDep(fromId,toId){const f=byId(fromId),to=byId(toId);if(!f||!to||f.id===to.id)return false;
+  if((to.deps||[]).includes(f.id)){toast("Ist schon verknüpft");return false}
+  if(dependsOn(f.id,to.id)){toast("Das wäre ein Kreis: „"+f.title+"“ hängt schon von „"+to.title+"“ ab.");return false}
+  await saveTask({...to,deps:[...(to.deps||[]),f.id]});hap(10);
+  toast("„"+to.title+"“ startet nach „"+f.title+"“",()=>saveTask({...byId(to.id),deps:(byId(to.id).deps||[]).filter(x=>x!==f.id)}));return true}
+async function dropDep(fromId,toId){const f=byId(fromId),to=byId(toId);if(!f||!to)return;
+  if(!await confirmSheet("„"+f.title+"“ → „"+to.title+"“","Verknüpfung lösen"))return;
+  await saveTask({...to,deps:(to.deps||[]).filter(x=>x!==f.id)});toast("Verknüpfung gelöst",()=>saveTask({...byId(to.id),deps:[...(byId(to.id).deps||[]),f.id]}))}
+function linkStart(id){linkFrom=id;render();toast("Jetzt die Aufgabe antippen, die danach kommt",()=>{linkFrom=null;render()},"Abbrechen",8000)}
+/* Reihenfolge (1.48): Schlüssel ord, sonst Startdatum; verschoben wird nur die eine Aufgabe (Mitte zwischen den Nachbarn) */
+const ordKey=t=>typeof t.ord==="number"?t.ord:dn(t.start)*100;
+async function reorder(id,beforeId,afterId){const t=byId(id);if(!t)return;const a=beforeId&&byId(beforeId),b=afterId&&byId(afterId);
+  const ka=a?ordKey(a):null,kb=b?ordKey(b):null,o=ka!==null&&kb!==null?(ka+kb)/2:ka!==null?ka+50:kb!==null?kb-50:ordKey(t);
+  const old=t.ord;if(sortm!=="ord"){sortm="ord";try{localStorage.setItem("haus-sort","ord")}catch(_){}if($("srt"))$("srt").value="ord"}
+  await saveTask({...t,ord:Math.round(o*1000)/1000});hap(8);
+  toast("Reihenfolge geändert",async()=>{const c=byId(id);if(!c)return;const r={...c};if(typeof old==="number")r.ord=old;else delete r.ord;await saveTask(r)})}
+function neighbours(id){const rows=[...document.querySelectorAll(".gl .gr[data-id]")],i=rows.findIndex(r=>r.dataset.id===id);if(i<0)return null;
+  const grpOf=r=>{let p=r.previousElementSibling;while(p&&!p.classList.contains("gh2"))p=p.previousElementSibling;return p};
+  const same=rows.filter(r=>grpOf(r)===grpOf(rows[i])),j=same.indexOf(rows[i]);return{same,j}}
+async function moveRow(id,dir){const n=neighbours(id);if(!n)return;const {same,j}=n,k=j+dir;if(k<0||k>=same.length)return;
+  const ids=same.map(r=>r.dataset.id);ids.splice(j,1);ids.splice(k,0,id);await reorder(id,ids[k-1],ids[k+1])}
 const dependsOn=(a,b,seen=new Set())=>{if(seen.has(a))return false;seen.add(a);const t=byId(a);return!!t&&(t.deps||[]).some(d=>d===b||dependsOn(d,b,seen))};
 function ganttDrag(){
   const svg=document.querySelector(".gb");if(!svg)return;const ppd=+svg.dataset.ppd||38;
@@ -1542,9 +1580,9 @@ function ganttDrag(){
   const showTip=(x,y,txt)=>{tip.textContent=txt;tip.style.left=x+"px";tip.style.top=(y-34)+"px";tip.classList.add("on")};
   const range=(t,k,d)=>{let s=dn(t.start),e=dn(t.end);if(k==="m"){s+=d;e+=d}else if(k==="s")s=Math.min(s+d,e);else e=Math.max(e+d,s);return[s,e]};
   const fmt=(s,e,ms)=>ms?fd(iso(fromDn(s))):fd(iso(fromDn(s)))+" – "+fd(iso(fromDn(e)));
-  const begin=(e,g,t,k)=>{
+  const begin=(e,g,t,k,lp)=>{
     const r=g.querySelector("rect:not(.gh1)");
-    st={t,k,g,x0:e.clientX,y0:e.clientY,moved:false,x:r?+r.getAttribute("x"):0,w:r?+r.getAttribute("width"):0,r,id:e.pointerId};
+    st={t,k,g,lp:!!lp,x0:e.clientX,y0:e.clientY,moved:false,x:r?+r.getAttribute("x"):0,w:r?+r.getAttribute("width"):0,r,id:e.pointerId};
     g.classList.add("drag");if(k==="dep"){st.line=document.createElementNS("http://www.w3.org/2000/svg","path");st.line.setAttribute("class","gtmp");svg.appendChild(st.line)}
     document.addEventListener("touchmove",blockScroll,{passive:false});
   };
@@ -1566,30 +1604,49 @@ function ganttDrag(){
     document.removeEventListener("pointermove",move);document.removeEventListener("pointerup",end);document.removeEventListener("pointercancel",end);document.removeEventListener("touchmove",blockScroll);
     clearTimeout(lp);tip.classList.remove("on");const s=st;st=null;if(!s)return;
     s.g.classList.remove("drag");svg.querySelectorAll(".gbar.tgt").forEach(x=>x.classList.remove("tgt"));if(s.line)s.line.remove();
-    if(!s.moved)return;suppress=true;setTimeout(()=>{suppress=false},60);
+    if(!s.moved){if(s.lp&&s.k!=="dep"){suppress=true;setTimeout(()=>{suppress=false},60);taskMenu(s.t.id)}return}suppress=true;setTimeout(()=>{suppress=false},60);
     if(s.k==="dep"){const over=document.elementFromPoint(e.clientX,e.clientY),tg=over&&over.closest&&over.closest("g[data-id]"),to=tg&&byId(tg.dataset.id);
-      if(!to||to.id===s.t.id||(to.deps||[]).includes(s.t.id))return;
-      if(dependsOn(s.t.id,to.id)){toast("Das wäre ein Kreis: „"+s.t.title+"“ hängt schon von „"+to.title+"“ ab.");return}
-      await saveTask({...to,deps:[...(to.deps||[]),s.t.id]});toast("„"+to.title+"“ startet nach „"+s.t.title+"“",()=>saveTask({...byId(to.id),deps:(byId(to.id).deps||[]).filter(x=>x!==s.t.id)}));return}
+      if(to)await addDep(s.t.id,to.id);return}
     const d=s.d||0;if(!d){render();return}
     const[s2,e2]=range(s.t,s.k,d),old={start:s.t.start,end:s.t.end};
     {const n2={...s.t,start:iso(fromDn(s2)),end:iso(fromDn(e2))};n2.log=diffLog(s.t,n2);await saveTask(n2)}
     toast("„"+s.t.title+"“: "+fmt(s2,e2,s.t.ms),()=>saveTask({...byId(s.t.id),...old}));
   };
-  svg.addEventListener("click",e=>{if(suppress){e.stopPropagation();e.preventDefault()}},true);
+  svg.addEventListener("click",e=>{if(suppress){e.stopPropagation();e.preventDefault();return}
+    if(linkFrom){const g=e.target.closest("g[data-id]");e.stopPropagation();e.preventDefault();const f=linkFrom;linkFrom=null;if(g&&g.dataset.id!==f)addDep(f,g.dataset.id);else render();return}
+    const dl=e.target.closest("[data-dep]");if(dl){e.stopPropagation();e.preventDefault();const[a,b]=dl.dataset.dep.split(">");dropDep(a,b)}},true);
+  svg.addEventListener("contextmenu",e=>{const g=e.target.closest("g[data-id]");if(!g)return;e.preventDefault();taskMenu(g.dataset.id)});
   svg.addEventListener("pointerdown",e=>{
     if(e.button>0)return;const g=e.target.closest("g[data-id]");if(!g)return;const t=byId(g.dataset.id);if(!t)return;
     const h=e.target.closest("[data-h]"),k=h?h.dataset.h:"m";
-    if(e.pointerType==="touch"&&k==="dep")return;
+    if(linkFrom)return;
     document.addEventListener("pointermove",move);document.addEventListener("pointerup",end);document.addEventListener("pointercancel",end);
+    /* Punkt am Balkenende: auch mit dem Finger sofort ziehen (1.48) */
+    if(e.pointerType==="touch"&&k==="dep"){begin(e,g,t,k);e.preventDefault();return}
     if(e.pointerType==="touch"){
       const x0=e.clientX,y0=e.clientY;
       const cancel=ev=>{if(Math.hypot(ev.clientX-x0,ev.clientY-y0)>8){clearTimeout(lp);document.removeEventListener("pointermove",cancel);if(!st){document.removeEventListener("pointermove",move);document.removeEventListener("pointerup",end)}}};
       document.addEventListener("pointermove",cancel);
-      lp=setTimeout(()=>{document.removeEventListener("pointermove",cancel);begin(e,g,t,k);navigator.vibrate&&navigator.vibrate(12)},380);
+      lp=setTimeout(()=>{document.removeEventListener("pointermove",cancel);begin(e,g,t,k,true);navigator.vibrate&&navigator.vibrate(12)},380);
     }else{begin(e,g,t,k);e.preventDefault()}
   });
 }
+/* 1.48: Zeilen links am Griff nach oben/unten ziehen. Linie zeigt, wo die Aufgabe landet. */
+let grd=null;
+document.addEventListener("pointerdown",e=>{const g=e.target.closest&&e.target.closest("[data-ggrip]");if(!g||e.button>0)return;e.preventDefault();e.stopPropagation();
+  const n=neighbours(g.dataset.ggrip);if(!n)return;grd={id:g.dataset.ggrip,y0:e.clientY,moved:false,...n,line:null,k:n.j};try{g.setPointerCapture(e.pointerId)}catch(_){}});
+document.addEventListener("pointermove",e=>{if(!grd)return;if(!grd.moved&&Math.abs(e.clientY-grd.y0)<5)return;
+  if(!grd.moved){grd.moved=true;grd.line=document.createElement("div");grd.line.className="grline";document.querySelector(".gl").appendChild(grd.line);grd.same[grd.j].classList.add("dragging");hap(6)}
+  let k=grd.same.length;for(let i=0;i<grd.same.length;i++){const r=grd.same[i].getBoundingClientRect();if(e.clientY<r.top+r.height/2){k=i;break}}grd.k=k;
+  const ref=grd.same[Math.min(k,grd.same.length-1)],gl=document.querySelector(".gl").getBoundingClientRect(),rr=ref.getBoundingClientRect();
+  grd.line.style.top=((k<grd.same.length?rr.top:rr.bottom)-gl.top)+"px"});
+function grEnd(){const d=grd;grd=null;if(!d)return;d.line&&d.line.remove();d.same[d.j]&&d.same[d.j].classList.remove("dragging");if(!d.moved)return;
+  const ids=d.same.map(r=>r.dataset.id),k=d.k>d.j?d.k-1:d.k;if(k===d.j)return;ids.splice(d.j,1);ids.splice(k,0,d.id);reorder(d.id,ids[k-1],ids[k+1])}
+document.addEventListener("pointerup",grEnd);document.addEventListener("pointercancel",()=>{if(grd){grd.line&&grd.line.remove();grd=null}});
+document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-ggrip]")){e.stopPropagation();e.preventDefault()}},true);
+/* Verknüpfen per Antippen auch über die Zeilen links */
+document.addEventListener("click",e=>{if(!linkFrom||view!=="gantt")return;const r=e.target.closest&&e.target.closest(".gl .gr[data-id]");if(!r)return;e.stopPropagation();e.preventDefault();
+  const f=linkFrom;linkFrom=null;if(r.dataset.id!==f)addDep(f,r.dataset.id);else render()},true);
 /* Darstellung: Hell/Dunkel, Akzentfarbe */
 const hostTheme=document.documentElement.dataset.theme||"";
 const pg=prefGet;
@@ -1626,7 +1683,7 @@ applyTheme();
 matchMedia("(prefers-color-scheme:dark)").addEventListener("change",applyTheme);
 
 /* Fremdcode-Adressen. Das Add-on bekommt lokale Dateien aus planner/vendor/ (tools/build.py ersetzt diese Zeile). */
-const LIB={pdf:"vendor/jspdf.umd.min.js?v=1.47.0",xlsx:"vendor/exceljs.min.js?v=1.47.0",font:()=>"vendor/fonts.css?v=1.47.0"};
+const LIB={pdf:"vendor/jspdf.umd.min.js?v=1.48.0",xlsx:"vendor/exceljs.min.js?v=1.48.0",font:()=>"vendor/fonts.css?v=1.48.0"};
 const SYSF='-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
 const FONTS=[["figtree","Figtree","Figtree:wght@400;500;600;700;800",'"Figtree",'+SYSF,"Freundlich und klar (Standard)"],
  ["sys","Systemschrift","",SYSF,"Sachlich wie iOS (auf dem iPhone San Francisco), lädt sofort"],
@@ -2335,7 +2392,7 @@ function home(){
 function filtered(){
   const q=$("q").value.toLowerCase(),w=$("fw").value;
   return tasks.filter(t=>tagOk(t)&&(!w||(w==="__none"?!t.who:wl(t).includes(w)))&&(!q||(t.title+" "+tgs(t).join(" ")+" "+(t.who||"")).toLowerCase().includes(q)))
-    .sort((x,y)=>(sortm==="prio"?((x.prio||9)-(y.prio||9)):0)||dn(x.start)-dn(y.start)||dn(x.end)-dn(y.end));
+    .sort((x,y)=>(sortm==="prio"?((x.prio||9)-(y.prio||9)):sortm==="ord"?ordKey(x)-ordKey(y):0)||dn(x.start)-dn(y.start)||dn(x.end)-dn(y.end));
 }
 let renderedView=null;
 const snap=()=>({v:renderedView,y:scrollY,m:$("main").scrollTop,b:(document.querySelector(".board")||{}).scrollLeft,g:(document.querySelector(".gwrap")||{}).scrollLeft,gy:(document.querySelector(".gwrap")||{}).scrollTop});
@@ -2486,17 +2543,19 @@ function gantt(list){
   items.forEach(it=>{if(!it.t)return;const t=it.t,x1=X(dn(t.start)),x2=X(dn(t.end)+1);pos[t.id]=t.ms?{x:x1+(x2-x1)/2-9,w:18,y:it.y}:{x:x1,w:Math.max(x2-x1,8),y:it.y}});
   gd+=`<line x1="${tdx}" x2="${tdx}" y1="0" y2="${BH}" stroke="var(--bad)" stroke-width="1.6" stroke-dasharray="3 3"/>`;
   list.forEach(t=>(t.deps||[]).forEach(id=>{const a=pos[id],b=pos[t.id];if(!a)return;
-    const x1=a.x+a.w,y1=a.y+ROW/2,x2=b.x,y2=b.y+ROW/2,mx2=Math.max(x1+8,x2-8);
-    gd+=`<path d="M${x1} ${y1}H${mx2}V${y2}H${x2}" fill="none" stroke="var(--mut)" stroke-width="1.4" marker-end="url(#ar)"/>`}));
+    /* 1.48: deutlich sichtbar in Akzentfarbe, mit abgerundeten Ecken; breite unsichtbare Linie zum Antippen (lösen) */
+    const x1=a.x+a.w,y1=a.y+ROW/2,x2=b.x,y2=b.y+ROW/2,mx2=Math.max(x1+10,x2-10),r=Math.min(6,Math.abs(y2-y1)/2),sg=y2>y1?1:-1,back=x2<x1+20;
+    const d=back?`M${x1} ${y1}h8v${sg*ROW/2-sg*6}H${x2-10}V${y2}H${x2}`:(r<1?`M${x1} ${y1}H${x2}`:`M${x1} ${y1}H${mx2-r}q${r} 0 ${r} ${sg*r}V${y2-sg*r}q0 ${sg*r} ${r} ${sg*r}H${x2}`);
+    gd+=`<g class="gdl" data-dep="${id}>${t.id}"><path class="gdlh" d="${d}"/><path class="gdlv" d="${d}" marker-end="url(#ar)"/></g>`}));
   list.forEach(t=>{const p=pos[t.id],inside=!t.ms&&p.w>=t.title.length*6.7+20,cy=p.y+ROW/2;
     const body=t.ms?`<path d="M${p.x+9} ${cy-10}l10 10l-10 10l-10-10z" fill="${col[t.status]}"/>`:`<rect x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="${col[t.status]}"/><rect class="ggl" x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="url(#gGl)"/>`;
     const lbl=inside?`<text class="bt ${t.status}" x="${p.x+11}" y="${cy+4.2}">${esc(t.title)}</text>`:`<text class="bo" x="${p.x+p.w+10}" y="${cy+4.2}">${esc(t.title)}</text>`;
     const hd2=t.ms?"":`<rect data-h="s" class="gh1" x="${p.x}" y="${p.y+8}" width="7" height="${ROW-16}"/><rect data-h="e" class="gh1" x="${p.x+p.w-7}" y="${p.y+8}" width="7" height="${ROW-16}"/>`;
-    gd+=`<g data-id="${t.id}" class="gbar${isFail(t)?" gfail":""}"${t.status==="done"?' opacity=".72"':""}>${body}${lbl}${hd2}<circle data-h="dep" class="gdep" cx="${p.x+p.w+(t.ms?1:0)}" cy="${cy}" r="5"/></g>`});
-  const rows=items.map(it=>it.g?`<div class="gr gh2" style="--tc:${it.g.c}"><i class="dt" style="background:${it.g.c}"></i><span>${esc(it.g.l)}</span><em>${it.g.L.length}</em></div>`:`<div class="gr" data-id="${it.t.id}" title="${esc(it.t.title)}"><i class="dt ${it.t.status}"></i>${pb(it.t)}<span>${esc(it.t.title)}</span></div>`).join("");
+    gd+=`<g data-id="${t.id}" class="gbar${isFail(t)?" gfail":""}"${t.status==="done"?' opacity=".72"':""}>${body}${lbl}${hd2}<circle data-h="dep" class="gdh" cx="${p.x+p.w+(t.ms?1:0)+6}" cy="${cy}" r="15"/><circle data-h="dep" class="gdep" cx="${p.x+p.w+(t.ms?1:0)}" cy="${cy}" r="5"/></g>`});
+  const rows=items.map(it=>it.g?`<div class="gr gh2" style="--tc:${it.g.c}"><i class="dt" style="background:${it.g.c}"></i><span>${esc(it.g.l)}</span><em>${it.g.L.length}</em></div>`:`<div class="gr${linkFrom===it.t.id?" lfrom":""}" data-id="${it.t.id}" title="${esc(it.t.title)}"><span class="ggrip" data-ggrip="${it.t.id}" aria-label="Reihenfolge ändern"><svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"/></svg></span><i class="dt ${it.t.status}"></i>${pb(it.t)}<span>${esc(it.t.title)}</span></div>`).join("");
   const seg=[["day","Tage"],["month","Monate"],["year","Jahre"]].map(([k,l])=>`<button data-gm="${k}" class="${k===mode?"on":""}">${l}</button>`).join("");
-  return`<div class="gctl"><div class="seg">${seg}</div><button class="btn ghost sm" data-gtoday>Heute</button></div>`+
-  `<div class="gwrap"><div class="gl"><div class="glh" style="--hd:${HEAD}px"></div>${rows}<div class="glg" style="--hd:${HEAD}px" role="separator" aria-label="Breite der Beschriftung ändern" title="Ziehen zum Ändern, Doppeltippen zum Zurücksetzen"></div></div><div class="gs" style="width:${W}px"><svg class="gh" width="${W}" height="${HEAD}">${hd}</svg><svg class="gb" width="${W}" height="${BH}" data-tx="${tdx}" data-ppd="${PPD}"><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--mut)"/></marker><linearGradient id="gGl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".65" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>${gd}</svg></div></div>`;
+  return`<div class="gctl"><div class="seg">${seg}</div><button class="btn ghost sm" data-gtoday>Heute</button></div>`+(linkFrom?`<div class="phint">„${esc((byId(linkFrom)||{}).title||"")}“ verknüpfen: Aufgabe antippen, die danach kommt.</div>`:"")+
+  `<div class="gwrap"><div class="gl"><div class="glh" style="--hd:${HEAD}px"></div>${rows}<div class="glg" style="--hd:${HEAD}px" role="separator" aria-label="Breite der Beschriftung ändern" title="Ziehen zum Ändern, Doppeltippen zum Zurücksetzen"></div></div><div class="gs" style="width:${W}px"><svg class="gh" width="${W}" height="${HEAD}">${hd}</svg><svg class="gb" width="${W}" height="${BH}" data-tx="${tdx}" data-ppd="${PPD}"><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--acc)"/></marker><linearGradient id="gGl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".65" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>${gd}</svg></div></div>`;
 }
 function bind(){
   document.querySelectorAll("[data-id]").forEach(el=>el.onclick=e=>{if(e.target.dataset.adv)return;openDlg(el.dataset.id)});
@@ -2898,11 +2957,17 @@ function sheet(title,groups){
 async function confirmSheet(msg,label,primary){return(await sheet(msg,[{items:[{t:label,v:true,bad:!primary}]}]))===true}
 /* Kontextmenü zu einer Aufgabe */
 async function taskMenu(id){
-  const t=byId(id);if(!t)return;
+  const t=byId(id);if(!t)return;const gv=view==="gantt";
   const v=await sheet(t.title,[
-    {items:[{t:"Bearbeiten",v:"edit"},{t:"Auswählen",v:"sel"},...(t.status!=="done"?[{t:"Nicht geschafft",v:"fail"}]:[])]},
+    {items:[{t:"Bearbeiten",v:"edit"},gv?{t:"Verknüpfen mit …",v:"link"}:{t:"Auswählen",v:"sel"},...(t.status!=="done"?[{t:"Nicht geschafft",v:"fail"}]:[])]},
+    /* 1.48: im Zeitstrahl direkt Projekt, Notiz und Reihenfolge */
+    ...(gv?[{items:[{t:t.proj?"Projekt: "+t.proj:"Zu Projekt hinzufügen …",v:"proj"},{t:"Notiz hinzufügen …",v:"note"}]},{row:1,items:[{t:"↑ Nach oben",v:"up"},{t:"↓ Nach unten",v:"down"}]}]:[]),
     {items:[{t:"In den Papierkorb",v:"del",bad:true}]}]);
   if(!v)return;
+  if(v==="link")return linkStart(id);
+  if(v==="up"||v==="down")return moveRow(id,v==="up"?-1:1);
+  if(v==="proj")return projMenu(id);
+  if(v==="note"){const n=await askText("Notiz zu „"+t.title+"“","Was ist wichtig?","",true);if(n&&n.trim()){const c=byId(id),u={...c,notes:(c.notes?c.notes.replace(/\s+$/,"")+"\n":"")+n.trim()};u.log=diffLog(c,u);await saveTask(u);toast("Notiz gespeichert")}return}
   if(v==="sel"){setSel(true);sel.add(id);applySel()}
   else if(v==="edit")openDlg(id);
   else if(v==="fail")failTask(id);
@@ -3008,7 +3073,7 @@ const GRPL={none:"Keine",tag:"Tag",proj:"Projekt",who:"Person",prio:"Priorität"
 $("more").onclick=()=>{
   const v=view,items=[];
   if(v!=="home")items.push({t:"Auswählen",ic:"sel",fn:()=>setSel(true)});
-  if(v==="board"||v==="list"||v==="gantt")items.push({t:"Sortieren",val:sortm==="prio"?"Priorität":"Datum",sub:[["date","Datum"],["prio","Priorität"]].map(([k,l])=>({t:l,chk:sortm===k,fn:()=>{$("srt").value=k;$("srt").dispatchEvent(new Event("change"))}}))});
+  if(v==="board"||v==="list"||v==="gantt")items.push({t:"Sortieren",val:sortm==="prio"?"Priorität":sortm==="ord"?"Eigene":"Datum",sub:[["date","Datum"],["prio","Priorität"],["ord","Eigene Reihenfolge"]].map(([k,l])=>({t:l,chk:sortm===k,fn:()=>{$("srt").value=k;$("srt").dispatchEvent(new Event("change"))}}))});
   if(v==="list"||v==="gantt")items.push({t:"Gruppieren",val:GRPL[grp],sub:Object.entries(GRPL).map(([k,l])=>({t:l,chk:grp===k,fn:()=>{$("grp").value=k;$("grp").dispatchEvent(new Event("change"))}}))});
   if(items.length)items.push({sep:true});
   items.push({t:"Tags und Projekte",ic:"tag",fn:openMan},{t:"Archiv und Papierkorb",ic:"arch",fn:openArch},{t:"Export und Sicherung",ic:"exp",fn:()=>{$("dlx").showModal();$("dlx").scrollTop=0;preloadExport()}},{t:"Einstellungen",ic:"cfg",fn:openSettings});
@@ -3020,6 +3085,17 @@ async function onboard(){if(KIOSK||prefGet("onb")||prefGet("me")||document.query
   if(v){prefSet("me",v);prefSet("hwho","");render()}
   toast("Tipp: Auf der Startseite oben einfach tippen, z. B. „Rasen mähen Sa #Garten“",null,null,8000)}
 setTimeout(onboard,1600);
+/* 1.48: Text abfragen (Notiz, neues Projekt) im selben Blatt wie die Menüs */
+function askText(title,ph,val,multi){return new Promise(res=>{const d=$("dsh");let done=false;const fin=v=>{if(done)return;done=true;d.close();res(v)};
+  d.innerHTML=`<div class="shg ask"><div class="sht">${esc(title)}</div>${multi?`<textarea id="ask_t" rows="4" placeholder="${esc(ph)}"></textarea>`:`<input id="ask_t" placeholder="${esc(ph)}" autocomplete="off" enterkeyhint="done">`}<button type="button" data-ok="1" class="cur">Speichern</button></div><button type="button" class="cancel" data-c="1">Abbrechen</button>`;
+  const inp=$("ask_t");inp.value=val||"";
+  d.onclick=e=>{const b=e.target.closest("button");if(b){if(b.dataset.c)return fin(null);if(b.dataset.ok)return fin(inp.value)}if(e.target===d)fin(null)};
+  d.oncancel=()=>{done=true;res(null)};inp.onkeydown=e=>{if(e.key==="Enter"&&!multi){e.preventDefault();fin(inp.value)}};
+  d.showModal();setTimeout(()=>inp.focus(),50)})}
+async function projMenu(id){const t=byId(id);if(!t)return;const P=allProjs();
+  const v=await sheet("Projekt für „"+t.title+"“",[{items:[...P.map(p=>({t:p,v:"p:"+p,cur:t.proj===p})),{t:"Neues Projekt …",v:"new"}]},...(t.proj?[{items:[{t:"Aus dem Projekt nehmen",v:"none",bad:true}]}]:[])]);
+  if(!v)return;let p=v==="none"?"":v==="new"?await askText("Neues Projekt","z. B. Elternzeit",""):v.slice(2);if(p===null)return;p=String(p).trim().slice(0,30);if(v==="new"&&!p)return;
+  const c=byId(id),u={...c,proj:p};if(p)await regEnsure([],p);u.log=diffLog(c,u);await saveTask(u);toast(p?"„"+c.title+"“ → Projekt „"+p+"“":"Aus dem Projekt genommen",()=>saveTask({...byId(id),proj:c.proj}))}
 /* Export */
 async function dl(name,data){
   try{const blob=data instanceof Blob?data:new Blob([data],{type:"application/pdf"}),file=new File([blob],name,{type:blob.type});

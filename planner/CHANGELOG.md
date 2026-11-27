@@ -1,5 +1,14 @@
 # Änderungen
 
+## 1.48.0
+- **Zeitstrahl: Verknüpfungen gut sichtbar.** Pfeile in der Akzentfarbe mit runden Ecken. Pfeil antippen → „Verknüpfung lösen“.
+- **Verknüpfen wie im Microsoft Planner:**
+  - Am Punkt am Balkenende ziehen und auf die Aufgabe loslassen, die danach kommt. Das geht jetzt auch mit dem Finger auf dem iPad; der Punkt ist dort immer sichtbar und hat eine große Greiffläche.
+  - Alternativ: Balken gedrückt halten → „Verknüpfen mit …“ → Ziel-Aufgabe antippen.
+  - Kreise (A nach B nach A) werden verhindert.
+- **Reihenfolge ändern:** Links an den zwei Strichen ziehen und nach oben oder unten schieben (eine Linie zeigt, wo die Aufgabe landet). Oder gedrückt halten → „↑ Nach oben“ / „↓ Nach unten“. Danach gilt „Eigene Reihenfolge“, auch in Liste und Board (umstellbar unter ⋯ → Sortieren).
+- **Gedrückt halten im Zeitstrahl** (Balken oder Zeile; am Computer Rechtsklick): Bearbeiten, Verknüpfen, **Zu Projekt hinzufügen** (bestehendes oder neues), **Notiz hinzufügen**, Reihenfolge, Nicht geschafft, Papierkorb.
+
 ## 1.47.0
 - **Startseite: Ring zählt nur, was heute fällig ist** (und Überfälliges). Aufgaben, die heute laufen, aber erst später fällig sind, zählen nicht mehr. Wird eine heute fällige Aufgabe auf später verschoben, ist sie aus dem Ring raus.
 - **„Heute“ ist zweigeteilt:** oben „Heute fällig“, darunter „Läuft heute, fällig später“ (etwas blasser).

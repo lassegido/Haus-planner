@@ -58,6 +58,29 @@ async function setStatus(t,next){
   if(st==="done"&&t.rec&&!t.spawned){sp=nextOcc(t);if(sp)u.spawned=sp.id}
   await saveTask(u);if(sp)await saveTask(sp);if(next==="done"&&t.status!=="done")cheer();return sp}
 /* Zeitstrahl: Balken ziehen */
+/* 1.48: Verknüpfen (A → B: B startet nach A), auch per Menü „Verknüpfen mit …“ und dann Ziel antippen */
+let linkFrom=null;
+async function addDep(fromId,toId){const f=byId(fromId),to=byId(toId);if(!f||!to||f.id===to.id)return false;
+  if((to.deps||[]).includes(f.id)){toast("Ist schon verknüpft");return false}
+  if(dependsOn(f.id,to.id)){toast("Das wäre ein Kreis: „"+f.title+"“ hängt schon von „"+to.title+"“ ab.");return false}
+  await saveTask({...to,deps:[...(to.deps||[]),f.id]});hap(10);
+  toast("„"+to.title+"“ startet nach „"+f.title+"“",()=>saveTask({...byId(to.id),deps:(byId(to.id).deps||[]).filter(x=>x!==f.id)}));return true}
+async function dropDep(fromId,toId){const f=byId(fromId),to=byId(toId);if(!f||!to)return;
+  if(!await confirmSheet("„"+f.title+"“ → „"+to.title+"“","Verknüpfung lösen"))return;
+  await saveTask({...to,deps:(to.deps||[]).filter(x=>x!==f.id)});toast("Verknüpfung gelöst",()=>saveTask({...byId(to.id),deps:[...(byId(to.id).deps||[]),f.id]}))}
+function linkStart(id){linkFrom=id;render();toast("Jetzt die Aufgabe antippen, die danach kommt",()=>{linkFrom=null;render()},"Abbrechen",8000)}
+/* Reihenfolge (1.48): Schlüssel ord, sonst Startdatum; verschoben wird nur die eine Aufgabe (Mitte zwischen den Nachbarn) */
+const ordKey=t=>typeof t.ord==="number"?t.ord:dn(t.start)*100;
+async function reorder(id,beforeId,afterId){const t=byId(id);if(!t)return;const a=beforeId&&byId(beforeId),b=afterId&&byId(afterId);
+  const ka=a?ordKey(a):null,kb=b?ordKey(b):null,o=ka!==null&&kb!==null?(ka+kb)/2:ka!==null?ka+50:kb!==null?kb-50:ordKey(t);
+  const old=t.ord;if(sortm!=="ord"){sortm="ord";try{localStorage.setItem("haus-sort","ord")}catch(_){}if($("srt"))$("srt").value="ord"}
+  await saveTask({...t,ord:Math.round(o*1000)/1000});hap(8);
+  toast("Reihenfolge geändert",async()=>{const c=byId(id);if(!c)return;const r={...c};if(typeof old==="number")r.ord=old;else delete r.ord;await saveTask(r)})}
+function neighbours(id){const rows=[...document.querySelectorAll(".gl .gr[data-id]")],i=rows.findIndex(r=>r.dataset.id===id);if(i<0)return null;
+  const grpOf=r=>{let p=r.previousElementSibling;while(p&&!p.classList.contains("gh2"))p=p.previousElementSibling;return p};
+  const same=rows.filter(r=>grpOf(r)===grpOf(rows[i])),j=same.indexOf(rows[i]);return{same,j}}
+async function moveRow(id,dir){const n=neighbours(id);if(!n)return;const {same,j}=n,k=j+dir;if(k<0||k>=same.length)return;
+  const ids=same.map(r=>r.dataset.id);ids.splice(j,1);ids.splice(k,0,id);await reorder(id,ids[k-1],ids[k+1])}
 const dependsOn=(a,b,seen=new Set())=>{if(seen.has(a))return false;seen.add(a);const t=byId(a);return!!t&&(t.deps||[]).some(d=>d===b||dependsOn(d,b,seen))};
 function ganttDrag(){
   const svg=document.querySelector(".gb");if(!svg)return;const ppd=+svg.dataset.ppd||38;
@@ -66,9 +89,9 @@ function ganttDrag(){
   const showTip=(x,y,txt)=>{tip.textContent=txt;tip.style.left=x+"px";tip.style.top=(y-34)+"px";tip.classList.add("on")};
   const range=(t,k,d)=>{let s=dn(t.start),e=dn(t.end);if(k==="m"){s+=d;e+=d}else if(k==="s")s=Math.min(s+d,e);else e=Math.max(e+d,s);return[s,e]};
   const fmt=(s,e,ms)=>ms?fd(iso(fromDn(s))):fd(iso(fromDn(s)))+" – "+fd(iso(fromDn(e)));
-  const begin=(e,g,t,k)=>{
+  const begin=(e,g,t,k,lp)=>{
     const r=g.querySelector("rect:not(.gh1)");
-    st={t,k,g,x0:e.clientX,y0:e.clientY,moved:false,x:r?+r.getAttribute("x"):0,w:r?+r.getAttribute("width"):0,r,id:e.pointerId};
+    st={t,k,g,lp:!!lp,x0:e.clientX,y0:e.clientY,moved:false,x:r?+r.getAttribute("x"):0,w:r?+r.getAttribute("width"):0,r,id:e.pointerId};
     g.classList.add("drag");if(k==="dep"){st.line=document.createElementNS("http://www.w3.org/2000/svg","path");st.line.setAttribute("class","gtmp");svg.appendChild(st.line)}
     document.addEventListener("touchmove",blockScroll,{passive:false});
   };
@@ -90,27 +113,46 @@ function ganttDrag(){
     document.removeEventListener("pointermove",move);document.removeEventListener("pointerup",end);document.removeEventListener("pointercancel",end);document.removeEventListener("touchmove",blockScroll);
     clearTimeout(lp);tip.classList.remove("on");const s=st;st=null;if(!s)return;
     s.g.classList.remove("drag");svg.querySelectorAll(".gbar.tgt").forEach(x=>x.classList.remove("tgt"));if(s.line)s.line.remove();
-    if(!s.moved)return;suppress=true;setTimeout(()=>{suppress=false},60);
+    if(!s.moved){if(s.lp&&s.k!=="dep"){suppress=true;setTimeout(()=>{suppress=false},60);taskMenu(s.t.id)}return}suppress=true;setTimeout(()=>{suppress=false},60);
     if(s.k==="dep"){const over=document.elementFromPoint(e.clientX,e.clientY),tg=over&&over.closest&&over.closest("g[data-id]"),to=tg&&byId(tg.dataset.id);
-      if(!to||to.id===s.t.id||(to.deps||[]).includes(s.t.id))return;
-      if(dependsOn(s.t.id,to.id)){toast("Das wäre ein Kreis: „"+s.t.title+"“ hängt schon von „"+to.title+"“ ab.");return}
-      await saveTask({...to,deps:[...(to.deps||[]),s.t.id]});toast("„"+to.title+"“ startet nach „"+s.t.title+"“",()=>saveTask({...byId(to.id),deps:(byId(to.id).deps||[]).filter(x=>x!==s.t.id)}));return}
+      if(to)await addDep(s.t.id,to.id);return}
     const d=s.d||0;if(!d){render();return}
     const[s2,e2]=range(s.t,s.k,d),old={start:s.t.start,end:s.t.end};
     {const n2={...s.t,start:iso(fromDn(s2)),end:iso(fromDn(e2))};n2.log=diffLog(s.t,n2);await saveTask(n2)}
     toast("„"+s.t.title+"“: "+fmt(s2,e2,s.t.ms),()=>saveTask({...byId(s.t.id),...old}));
   };
-  svg.addEventListener("click",e=>{if(suppress){e.stopPropagation();e.preventDefault()}},true);
+  svg.addEventListener("click",e=>{if(suppress){e.stopPropagation();e.preventDefault();return}
+    if(linkFrom){const g=e.target.closest("g[data-id]");e.stopPropagation();e.preventDefault();const f=linkFrom;linkFrom=null;if(g&&g.dataset.id!==f)addDep(f,g.dataset.id);else render();return}
+    const dl=e.target.closest("[data-dep]");if(dl){e.stopPropagation();e.preventDefault();const[a,b]=dl.dataset.dep.split(">");dropDep(a,b)}},true);
+  svg.addEventListener("contextmenu",e=>{const g=e.target.closest("g[data-id]");if(!g)return;e.preventDefault();taskMenu(g.dataset.id)});
   svg.addEventListener("pointerdown",e=>{
     if(e.button>0)return;const g=e.target.closest("g[data-id]");if(!g)return;const t=byId(g.dataset.id);if(!t)return;
     const h=e.target.closest("[data-h]"),k=h?h.dataset.h:"m";
-    if(e.pointerType==="touch"&&k==="dep")return;
+    if(linkFrom)return;
     document.addEventListener("pointermove",move);document.addEventListener("pointerup",end);document.addEventListener("pointercancel",end);
+    /* Punkt am Balkenende: auch mit dem Finger sofort ziehen (1.48) */
+    if(e.pointerType==="touch"&&k==="dep"){begin(e,g,t,k);e.preventDefault();return}
     if(e.pointerType==="touch"){
       const x0=e.clientX,y0=e.clientY;
       const cancel=ev=>{if(Math.hypot(ev.clientX-x0,ev.clientY-y0)>8){clearTimeout(lp);document.removeEventListener("pointermove",cancel);if(!st){document.removeEventListener("pointermove",move);document.removeEventListener("pointerup",end)}}};
       document.addEventListener("pointermove",cancel);
-      lp=setTimeout(()=>{document.removeEventListener("pointermove",cancel);begin(e,g,t,k);navigator.vibrate&&navigator.vibrate(12)},380);
+      lp=setTimeout(()=>{document.removeEventListener("pointermove",cancel);begin(e,g,t,k,true);navigator.vibrate&&navigator.vibrate(12)},380);
     }else{begin(e,g,t,k);e.preventDefault()}
   });
 }
+/* 1.48: Zeilen links am Griff nach oben/unten ziehen. Linie zeigt, wo die Aufgabe landet. */
+let grd=null;
+document.addEventListener("pointerdown",e=>{const g=e.target.closest&&e.target.closest("[data-ggrip]");if(!g||e.button>0)return;e.preventDefault();e.stopPropagation();
+  const n=neighbours(g.dataset.ggrip);if(!n)return;grd={id:g.dataset.ggrip,y0:e.clientY,moved:false,...n,line:null,k:n.j};try{g.setPointerCapture(e.pointerId)}catch(_){}});
+document.addEventListener("pointermove",e=>{if(!grd)return;if(!grd.moved&&Math.abs(e.clientY-grd.y0)<5)return;
+  if(!grd.moved){grd.moved=true;grd.line=document.createElement("div");grd.line.className="grline";document.querySelector(".gl").appendChild(grd.line);grd.same[grd.j].classList.add("dragging");hap(6)}
+  let k=grd.same.length;for(let i=0;i<grd.same.length;i++){const r=grd.same[i].getBoundingClientRect();if(e.clientY<r.top+r.height/2){k=i;break}}grd.k=k;
+  const ref=grd.same[Math.min(k,grd.same.length-1)],gl=document.querySelector(".gl").getBoundingClientRect(),rr=ref.getBoundingClientRect();
+  grd.line.style.top=((k<grd.same.length?rr.top:rr.bottom)-gl.top)+"px"});
+function grEnd(){const d=grd;grd=null;if(!d)return;d.line&&d.line.remove();d.same[d.j]&&d.same[d.j].classList.remove("dragging");if(!d.moved)return;
+  const ids=d.same.map(r=>r.dataset.id),k=d.k>d.j?d.k-1:d.k;if(k===d.j)return;ids.splice(d.j,1);ids.splice(k,0,d.id);reorder(d.id,ids[k-1],ids[k+1])}
+document.addEventListener("pointerup",grEnd);document.addEventListener("pointercancel",()=>{if(grd){grd.line&&grd.line.remove();grd=null}});
+document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-ggrip]")){e.stopPropagation();e.preventDefault()}},true);
+/* Verknüpfen per Antippen auch über die Zeilen links */
+document.addEventListener("click",e=>{if(!linkFrom||view!=="gantt")return;const r=e.target.closest&&e.target.closest(".gl .gr[data-id]");if(!r)return;e.stopPropagation();e.preventDefault();
+  const f=linkFrom;linkFrom=null;if(r.dataset.id!==f)addDep(f,r.dataset.id);else render()},true);

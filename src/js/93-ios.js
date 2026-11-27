@@ -12,11 +12,17 @@ function sheet(title,groups){
 async function confirmSheet(msg,label,primary){return(await sheet(msg,[{items:[{t:label,v:true,bad:!primary}]}]))===true}
 /* Kontextmenü zu einer Aufgabe */
 async function taskMenu(id){
-  const t=byId(id);if(!t)return;
+  const t=byId(id);if(!t)return;const gv=view==="gantt";
   const v=await sheet(t.title,[
-    {items:[{t:"Bearbeiten",v:"edit"},{t:"Auswählen",v:"sel"},...(t.status!=="done"?[{t:"Nicht geschafft",v:"fail"}]:[])]},
+    {items:[{t:"Bearbeiten",v:"edit"},gv?{t:"Verknüpfen mit …",v:"link"}:{t:"Auswählen",v:"sel"},...(t.status!=="done"?[{t:"Nicht geschafft",v:"fail"}]:[])]},
+    /* 1.48: im Zeitstrahl direkt Projekt, Notiz und Reihenfolge */
+    ...(gv?[{items:[{t:t.proj?"Projekt: "+t.proj:"Zu Projekt hinzufügen …",v:"proj"},{t:"Notiz hinzufügen …",v:"note"}]},{row:1,items:[{t:"↑ Nach oben",v:"up"},{t:"↓ Nach unten",v:"down"}]}]:[]),
     {items:[{t:"In den Papierkorb",v:"del",bad:true}]}]);
   if(!v)return;
+  if(v==="link")return linkStart(id);
+  if(v==="up"||v==="down")return moveRow(id,v==="up"?-1:1);
+  if(v==="proj")return projMenu(id);
+  if(v==="note"){const n=await askText("Notiz zu „"+t.title+"“","Was ist wichtig?","",true);if(n&&n.trim()){const c=byId(id),u={...c,notes:(c.notes?c.notes.replace(/\s+$/,"")+"\n":"")+n.trim()};u.log=diffLog(c,u);await saveTask(u);toast("Notiz gespeichert")}return}
   if(v==="sel"){setSel(true);sel.add(id);applySel()}
   else if(v==="edit")openDlg(id);
   else if(v==="fail")failTask(id);
@@ -122,7 +128,7 @@ const GRPL={none:"Keine",tag:"Tag",proj:"Projekt",who:"Person",prio:"Priorität"
 $("more").onclick=()=>{
   const v=view,items=[];
   if(v!=="home")items.push({t:"Auswählen",ic:"sel",fn:()=>setSel(true)});
-  if(v==="board"||v==="list"||v==="gantt")items.push({t:"Sortieren",val:sortm==="prio"?"Priorität":"Datum",sub:[["date","Datum"],["prio","Priorität"]].map(([k,l])=>({t:l,chk:sortm===k,fn:()=>{$("srt").value=k;$("srt").dispatchEvent(new Event("change"))}}))});
+  if(v==="board"||v==="list"||v==="gantt")items.push({t:"Sortieren",val:sortm==="prio"?"Priorität":sortm==="ord"?"Eigene":"Datum",sub:[["date","Datum"],["prio","Priorität"],["ord","Eigene Reihenfolge"]].map(([k,l])=>({t:l,chk:sortm===k,fn:()=>{$("srt").value=k;$("srt").dispatchEvent(new Event("change"))}}))});
   if(v==="list"||v==="gantt")items.push({t:"Gruppieren",val:GRPL[grp],sub:Object.entries(GRPL).map(([k,l])=>({t:l,chk:grp===k,fn:()=>{$("grp").value=k;$("grp").dispatchEvent(new Event("change"))}}))});
   if(items.length)items.push({sep:true});
   items.push({t:"Tags und Projekte",ic:"tag",fn:openMan},{t:"Archiv und Papierkorb",ic:"arch",fn:openArch},{t:"Export und Sicherung",ic:"exp",fn:()=>{$("dlx").showModal();$("dlx").scrollTop=0;preloadExport()}},{t:"Einstellungen",ic:"cfg",fn:openSettings});
@@ -134,3 +140,14 @@ async function onboard(){if(KIOSK||prefGet("onb")||prefGet("me")||document.query
   if(v){prefSet("me",v);prefSet("hwho","");render()}
   toast("Tipp: Auf der Startseite oben einfach tippen, z. B. „Rasen mähen Sa #Garten“",null,null,8000)}
 setTimeout(onboard,1600);
+/* 1.48: Text abfragen (Notiz, neues Projekt) im selben Blatt wie die Menüs */
+function askText(title,ph,val,multi){return new Promise(res=>{const d=$("dsh");let done=false;const fin=v=>{if(done)return;done=true;d.close();res(v)};
+  d.innerHTML=`<div class="shg ask"><div class="sht">${esc(title)}</div>${multi?`<textarea id="ask_t" rows="4" placeholder="${esc(ph)}"></textarea>`:`<input id="ask_t" placeholder="${esc(ph)}" autocomplete="off" enterkeyhint="done">`}<button type="button" data-ok="1" class="cur">Speichern</button></div><button type="button" class="cancel" data-c="1">Abbrechen</button>`;
+  const inp=$("ask_t");inp.value=val||"";
+  d.onclick=e=>{const b=e.target.closest("button");if(b){if(b.dataset.c)return fin(null);if(b.dataset.ok)return fin(inp.value)}if(e.target===d)fin(null)};
+  d.oncancel=()=>{done=true;res(null)};inp.onkeydown=e=>{if(e.key==="Enter"&&!multi){e.preventDefault();fin(inp.value)}};
+  d.showModal();setTimeout(()=>inp.focus(),50)})}
+async function projMenu(id){const t=byId(id);if(!t)return;const P=allProjs();
+  const v=await sheet("Projekt für „"+t.title+"“",[{items:[...P.map(p=>({t:p,v:"p:"+p,cur:t.proj===p})),{t:"Neues Projekt …",v:"new"}]},...(t.proj?[{items:[{t:"Aus dem Projekt nehmen",v:"none",bad:true}]}]:[])]);
+  if(!v)return;let p=v==="none"?"":v==="new"?await askText("Neues Projekt","z. B. Elternzeit",""):v.slice(2);if(p===null)return;p=String(p).trim().slice(0,30);if(v==="new"&&!p)return;
+  const c=byId(id),u={...c,proj:p};if(p)await regEnsure([],p);u.log=diffLog(c,u);await saveTask(u);toast(p?"„"+c.title+"“ → Projekt „"+p+"“":"Aus dem Projekt genommen",()=>saveTask({...byId(id),proj:c.proj}))}
