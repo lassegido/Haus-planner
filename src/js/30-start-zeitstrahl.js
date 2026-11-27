@@ -62,7 +62,8 @@ async function setStatus(t,next){
 let linkFrom=null,gOrd=null;
 /* 1.52: Abhängigkeiten werden automatisch eingeplant (Ende-Anfang-Beziehung wie in MS Project, „so früh wie möglich“):
    - Eine offene Aufgabe mit Vorgängern startet am frühesten möglichen Tag, die Dauer bleibt gleich.
-   - Offener Vorgänger: frühestens am Tag nach seinem geplanten Ende (liegt das Ende schon zurück: frühestens morgen).
+   - Offener Vorgänger über mehrere Tage: frühestens am Tag nach seinem Ende (liegt das Ende zurück: frühestens morgen).
+     Eintägiger Vorgänger (1.53): am selben Tag erlaubt, z. B. mehrere Schritte nacheinander an einem Tag.
    - Erledigter Vorgänger: frühestens am Tag, an dem er erledigt wurde, aber nicht in der Vergangenheit (also ab heute).
      Wird ein Vorgänger früher fertig, rückt die Aufgabe deshalb nach vorn.
    - Wer die Aufgabe bewusst später legt, setzt „frühestens ab“ (snet); früher als möglich geht nicht.
@@ -73,7 +74,7 @@ function depLater(t,o){if(t&&t.id&&!(o&&o.sched))userTouched.add(t.id);clearTime
 const shiftBy=(t,d)=>({...t,start:iso(fromDn(dn(t.start)+d)),end:iso(fromDn(dn(t.end)+d))});
 function earliest(t,T){const live=p=>p&&!p.del&&!p.arch;let m=-Infinity,why=null;
   for(const id of t.deps||[]){const p=RAW.find(x=>x.id===id);if(!live(p))continue;
-    let c;if(p.status==="done"){const dd=doneDay(p);c=isNaN(dd)?T:Math.max(dd,T)}else c=Math.max(dn(p.end),T)+1;
+    let c;if(p.status==="done"){const dd=doneDay(p);c=isNaN(dd)?T:Math.max(dd,T)}else c=dn(p.start)===dn(p.end)?Math.max(dn(p.end),T):Math.max(dn(p.end),T)+1; /* 1.53: eintägiger Vorgänger: am selben Tag danach erlaubt */
     if(c>m){m=c;why=p}}
   return m===-Infinity?null:{m,why}}
 async function schedule(){

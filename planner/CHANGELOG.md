@@ -1,5 +1,8 @@
 # Änderungen
 
+## 1.53.0
+- **Abhängigkeiten an einem Tag:** Ist der Vorgänger eine eintägige Aufgabe, darf der Nachfolger am selben Tag liegen (mehrere Schritte nacheinander an einem Tag). Erst bei Vorgängern über mehrere Tage rückt der Nachfolger auf den Tag nach dem Ende. Die Pfeile werden in beiden Fällen angezeigt.
+
 ## 1.52.0
 - **Abhängigkeiten planen jetzt vollautomatisch**, nach den üblichen Regeln aus MS Project („Ende → Anfang“, so früh wie möglich):
   - Eine offene Aufgabe mit Vorgängern startet am frühesten möglichen Tag, die Dauer bleibt gleich.

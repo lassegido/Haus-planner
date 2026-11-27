@@ -255,3 +255,17 @@ def test_reihenfolge_bleibt_beim_bearbeiten(t, browser):
         zeitstrahl(p)
         t.check("Nach dem Neuladen: nach Datum sortiert", rows(p) == ["b", "c", "a"], rows(p))
         p.close()
+
+
+def test_am_selben_tag_hintereinander(t, browser):
+    """1.53: Eintägige Vorgänger erlauben den Nachfolger am selben Tag; mehrtägige schieben auf den Tag danach."""
+    with Server() as s:
+        s.seed([task("a", "Wäsche waschen", D(1), D(1)), task("b", "Wäsche aufhängen", D(1), D(1), deps=["a"]),
+                task("c", "Bad fliesen", D(1), D(4)), task("d", "Bad putzen", D(2), D(2), deps=["c"])])
+        p = Page(browser, s.url, GROSS)
+        zeitstrahl(p)
+        p.pg.wait_for_timeout(1200)
+        t.check("Eintägig hintereinander: bleibt am selben Tag", s.task("b")["start"] == D(1), s.task("b"))
+        t.check("Mehrtägiger Vorgänger: Nachfolger am Tag nach dem Ende", s.task("d")["start"] == D(5), s.task("d"))
+        t.check("Pfeil wird trotzdem gezeigt", p.js("!!document.querySelector('[data-dep=\"a>b\"] .gdlv')"))
+        p.close()
