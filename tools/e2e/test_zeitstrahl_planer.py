@@ -114,3 +114,43 @@ def test_ipad_punkt_sichtbar(t, browser):
         t.check("iPad: große Fläche zum Greifen des Punkts", p.js("+document.querySelector('.gdh').getAttribute('r')") >= 14)
         t.check("keine Skriptfehler", not p.errors, p.errors)
         p.close()
+
+
+def ziehen_y(p, sel_from, sel_to, dx=0):
+    g = p.pg.locator(sel_from).first.bounding_box()
+    z = p.pg.locator(sel_to).first.bounding_box()
+    p.pg.mouse.move(g["x"] + g["width"] / 2, g["y"] + g["height"] / 2)
+    p.pg.mouse.down()
+    p.pg.mouse.move(g["x"] + g["width"] / 2 + 3, g["y"] + 12, steps=3)
+    p.pg.mouse.move(g["x"] + g["width"] / 2 + dx, z["y"] + z["height"] - 6, steps=10)
+    p.pg.mouse.up()
+    p.pg.wait_for_timeout(700)
+
+
+def test_in_andere_gruppe_ziehen(t, browser):
+    """1.49: Im gruppierten Zeitstrahl übernimmt eine Aufgabe die Gruppe, in die man sie zieht."""
+    with Server() as s:
+        s.seed([task("a", "Kinderzimmer", D(0), D(2), proj="Elternzeit", who="Lasse", tags=["Haus"]),
+                task("b", "Hecke", D(1), D(3), who="Melanie", tags=["Garten"]),
+                task("c", "Steuer", D(2), D(4), who="Lasse")], tags=[{"n": "Haus", "c": "sea"}, {"n": "Garten", "c": "mint"}, {"n": "Elternzeit", "c": "sun", "p": 1}])
+        p = Page(browser, s.url, GROSS)
+        zeitstrahl(p)
+        def gruppieren(k):
+            p.js("k=>{grp=k;const g=document.getElementById('grp');if(g)g.value=k;render()}", k)
+            p.pg.wait_for_timeout(400)
+        gruppieren("proj")
+        ziehen_y(p, ".gr[data-id=b] .ggrip", ".gr[data-id=a]")
+        t.check("Nach Projekt: Zeile in „Elternzeit“ ziehen setzt das Projekt", s.task("b")["proj"] == "Elternzeit", s.task("b"))
+        t.check("Hinweis nennt die neue Gruppe", "Elternzeit" in (p.pg.text_content("#toast") or ""))
+        p.pg.click("#toast button")
+        p.pg.wait_for_timeout(500)
+        t.check("Rückgängig nimmt das Projekt wieder weg", s.task("b")["proj"] == "", s.task("b"))
+        gruppieren("who")
+        ziehen_y(p, ".gr[data-id=c] .ggrip", ".gr[data-gk=Melanie][data-id]")
+        t.check("Nach Person: Lasse → Melanie", s.task("c")["who"] == "Melanie", s.task("c"))
+        gruppieren("tag")
+        ziehen_y(p, "g[data-id=b] rect", ".gr[data-id=a]", dx=0)
+        b = s.task("b")
+        t.check("Nach Tag: Balken nach oben in „Haus“ ziehen tauscht den Tag", b["tags"][0] == "Haus" and "Garten" not in b["tags"], b)
+        t.check("keine Skriptfehler", not p.errors, p.errors)
+        p.close()

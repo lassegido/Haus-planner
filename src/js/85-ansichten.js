@@ -198,7 +198,7 @@ const MON=["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","D
 function gantt(list){
   if(!list.length)return'<div class="empty">Keine Treffer.</div>';
   const T=today(),ROW=42,GH=30,mode=gmode,G=groups(list),items=[];let BH=0;
-  G.forEach(g=>{if(g.l!=null){items.push({g,y:BH});BH+=GH}g.L.forEach(t=>{items.push({t,y:BH});BH+=ROW})});
+  G.forEach(g=>{if(g.l!=null){items.push({g,y:BH});BH+=GH}g.L.forEach(t=>{items.push({t,gk:g.k,y:BH});BH+=ROW})});
   const mn=Math.min(T,...list.map(t=>dn(t.start))),mx=Math.max(T,...list.map(t=>dn(t.end)));
   const dp=d=>{const x=fromDn(d);return[x.getUTCFullYear(),x.getUTCMonth(),x.getUTCDate(),x.getUTCDay()]};
   const dim=(y,m)=>new Date(Date.UTC(y,m+1,0)).getUTCDate();
@@ -242,6 +242,7 @@ function gantt(list){
   items.forEach(it=>{if(it.g)gd+=`<rect style="fill:color-mix(in srgb,${it.g.c} 16%,var(--card))" x="0" y="${it.y}" width="${W}" height="${GH}"/>`;gd+=`<line class="gs1" x1="0" x2="${W}" y1="${it.y}" y2="${it.y}"/>`});
   gd+=`<line class="gs1" x1="0" x2="${W}" y1="${BH}" y2="${BH}"/>`;
   const col={todo:"var(--todo)",doing:"var(--doing)",done:"var(--done)"},pos={};
+  const gkOf=new Map();items.forEach(it=>{if(it.t&&!gkOf.has(it.t.id))gkOf.set(it.t.id,it.gk)});
   items.forEach(it=>{if(!it.t)return;const t=it.t,x1=X(dn(t.start)),x2=X(dn(t.end)+1);pos[t.id]=t.ms?{x:x1+(x2-x1)/2-9,w:18,y:it.y}:{x:x1,w:Math.max(x2-x1,8),y:it.y}});
   gd+=`<line x1="${tdx}" x2="${tdx}" y1="0" y2="${BH}" stroke="var(--bad)" stroke-width="1.6" stroke-dasharray="3 3"/>`;
   list.forEach(t=>(t.deps||[]).forEach(id=>{const a=pos[id],b=pos[t.id];if(!a)return;
@@ -253,8 +254,8 @@ function gantt(list){
     const body=t.ms?`<path d="M${p.x+9} ${cy-10}l10 10l-10 10l-10-10z" fill="${col[t.status]}"/>`:`<rect x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="${col[t.status]}"/><rect class="ggl" x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="url(#gGl)"/>`;
     const lbl=inside?`<text class="bt ${t.status}" x="${p.x+11}" y="${cy+4.2}">${esc(t.title)}</text>`:`<text class="bo" x="${p.x+p.w+10}" y="${cy+4.2}">${esc(t.title)}</text>`;
     const hd2=t.ms?"":`<rect data-h="s" class="gh1" x="${p.x}" y="${p.y+8}" width="7" height="${ROW-16}"/><rect data-h="e" class="gh1" x="${p.x+p.w-7}" y="${p.y+8}" width="7" height="${ROW-16}"/>`;
-    gd+=`<g data-id="${t.id}" class="gbar${isFail(t)?" gfail":""}"${t.status==="done"?' opacity=".72"':""}>${body}${lbl}${hd2}<circle data-h="dep" class="gdh" cx="${p.x+p.w+(t.ms?1:0)+6}" cy="${cy}" r="15"/><circle data-h="dep" class="gdep" cx="${p.x+p.w+(t.ms?1:0)}" cy="${cy}" r="5"/></g>`});
-  const rows=items.map(it=>it.g?`<div class="gr gh2" style="--tc:${it.g.c}"><i class="dt" style="background:${it.g.c}"></i><span>${esc(it.g.l)}</span><em>${it.g.L.length}</em></div>`:`<div class="gr${linkFrom===it.t.id?" lfrom":""}" data-id="${it.t.id}" title="${esc(it.t.title)}"><span class="ggrip" data-ggrip="${it.t.id}" aria-label="Reihenfolge ändern"><svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"/></svg></span><i class="dt ${it.t.status}"></i>${pb(it.t)}<span>${esc(it.t.title)}</span></div>`).join("");
+    gd+=`<g data-id="${t.id}" data-gk="${esc(gkOf.get(t.id)||"")}" class="gbar${isFail(t)?" gfail":""}"${t.status==="done"?' opacity=".72"':""}>${body}${lbl}${hd2}<circle data-h="dep" class="gdh" cx="${p.x+p.w+(t.ms?1:0)+6}" cy="${cy}" r="15"/><circle data-h="dep" class="gdep" cx="${p.x+p.w+(t.ms?1:0)}" cy="${cy}" r="5"/></g>`});
+  const rows=items.map(it=>it.g?`<div class="gr gh2" data-gk="${esc(it.g.k)}" style="--tc:${it.g.c}"><i class="dt" style="background:${it.g.c}"></i><span>${esc(it.g.l)}</span><em>${it.g.L.length}</em></div>`:`<div class="gr${linkFrom===it.t.id?" lfrom":""}" data-id="${it.t.id}" data-gk="${esc(it.gk||"")}" title="${esc(it.t.title)}"><span class="ggrip" data-ggrip="${it.t.id}" aria-label="Reihenfolge ändern"><svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"/></svg></span><i class="dt ${it.t.status}"></i>${pb(it.t)}<span>${esc(it.t.title)}</span></div>`).join("");
   const seg=[["day","Tage"],["month","Monate"],["year","Jahre"]].map(([k,l])=>`<button data-gm="${k}" class="${k===mode?"on":""}">${l}</button>`).join("");
   return`<div class="gctl"><div class="seg">${seg}</div><button class="btn ghost sm" data-gtoday>Heute</button></div>`+(linkFrom?`<div class="phint">„${esc((byId(linkFrom)||{}).title||"")}“ verknüpfen: Aufgabe antippen, die danach kommt.</div>`:"")+
   `<div class="gwrap"><div class="gl"><div class="glh" style="--hd:${HEAD}px"></div>${rows}<div class="glg" style="--hd:${HEAD}px" role="separator" aria-label="Breite der Beschriftung ändern" title="Ziehen zum Ändern, Doppeltippen zum Zurücksetzen"></div></div><div class="gs" style="width:${W}px"><svg class="gh" width="${W}" height="${HEAD}">${hd}</svg><svg class="gb" width="${W}" height="${BH}" data-tx="${tdx}" data-ppd="${PPD}"><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--acc)"/></marker><linearGradient id="gGl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".65" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>${gd}</svg></div></div>`;

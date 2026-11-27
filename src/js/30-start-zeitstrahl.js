@@ -71,11 +71,22 @@ async function dropDep(fromId,toId){const f=byId(fromId),to=byId(toId);if(!f||!t
 function linkStart(id){linkFrom=id;render();toast("Jetzt die Aufgabe antippen, die danach kommt",()=>{linkFrom=null;render()},"Abbrechen",8000)}
 /* Reihenfolge (1.48): Schlüssel ord, sonst Startdatum; verschoben wird nur die eine Aufgabe (Mitte zwischen den Nachbarn) */
 const ordKey=t=>typeof t.ord==="number"?t.ord:dn(t.start)*100;
-async function reorder(id,beforeId,afterId){const t=byId(id);if(!t)return;const a=beforeId&&byId(beforeId),b=afterId&&byId(afterId);
-  const ka=a?ordKey(a):null,kb=b?ordKey(b):null,o=ka!==null&&kb!==null?(ka+kb)/2:ka!==null?ka+50:kb!==null?kb-50:ordKey(t);
-  const old=t.ord;if(sortm!=="ord"){sortm="ord";try{localStorage.setItem("haus-sort","ord")}catch(_){}if($("srt"))$("srt").value="ord"}
-  await saveTask({...t,ord:Math.round(o*1000)/1000});hap(8);
-  toast("Reihenfolge geändert",async()=>{const c=byId(id);if(!c)return;const r={...c};if(typeof old==="number")r.ord=old;else delete r.ord;await saveTask(r)})}
+/* 1.49: Ziel-Gruppe übernehmen (Projekt, Tag, Person, Priorität), wenn man eine Aufgabe im Zeitstrahl in eine andere Gruppe zieht */
+function regroupFields(t,from,to){if(grp==="none"||from===to||from===undefined||to===undefined)return{};
+  if(grp==="proj")return{proj:to};
+  if(grp==="prio")return{prio:to?+to.replace(/\D/g,"")||0:0};
+  if(grp==="tag"){const L=tgs(t).filter(x=>x!==from&&x!==to),tags=to?[to,...L]:L;return{tags,area:tags[0]||""}}
+  const L=wl(t).filter(x=>x!==from);if(to&&!L.includes(to))L.push(to);return{who:L.join(", ")}}
+const grpName=k=>k||(grp==="tag"?"Ohne Tag":grp==="proj"?"Ohne Projekt":grp==="prio"?"Ohne Priorität":"Nicht zugewiesen");
+function ordBetween(beforeId,afterId,t){const a=beforeId&&byId(beforeId),b=afterId&&byId(afterId),ka=a?ordKey(a):null,kb=b?ordKey(b):null;
+  return Math.round((ka!==null&&kb!==null?(ka+kb)/2:ka!==null?ka+50:kb!==null?kb-50:ordKey(t))*1000)/1000}
+function ordOn(){if(sortm!=="ord"){sortm="ord";try{localStorage.setItem("haus-sort","ord")}catch(_){}if($("srt"))$("srt").value="ord"}}
+/* Eine Aufgabe neu einordnen: Reihenfolge (zwischen Nachbarn), Gruppe und optional Zeitraum in einem Schritt, mit Rückgängig */
+async function dropRow(id,{before,after,from,to,order=true,dates=null}={}){const t=byId(id);if(!t)return;const u={...t,...regroupFields(t,from,to),...(dates||{})};
+  if(order){ordOn();u.ord=ordBetween(before,after,t)}u.log=diffLog(t,u);await saveTask(u);hap(8);
+  const moved=grp!=="none"&&from!==to&&from!==undefined&&to!==undefined;
+  toast(moved?"„"+t.title+"“ → "+grpName(to):order?"Reihenfolge geändert":"„"+t.title+"“ verschoben",async()=>{const c=byId(id);if(!c)return;const r={...c,proj:t.proj,tags:t.tags,area:t.area,who:t.who,prio:t.prio,start:t.start,end:t.end};if(typeof t.ord==="number")r.ord=t.ord;else delete r.ord;await saveTask(r)})}
+async function reorder(id,beforeId,afterId){return dropRow(id,{before:beforeId,after:afterId})}
 function neighbours(id){const rows=[...document.querySelectorAll(".gl .gr[data-id]")],i=rows.findIndex(r=>r.dataset.id===id);if(i<0)return null;
   const grpOf=r=>{let p=r.previousElementSibling;while(p&&!p.classList.contains("gh2"))p=p.previousElementSibling;return p};
   const same=rows.filter(r=>grpOf(r)===grpOf(rows[i])),j=same.indexOf(rows[i]);return{same,j}}
@@ -105,7 +116,7 @@ function ganttDrag(){
       svg.querySelectorAll(".gbar.tgt").forEach(x=>x.classList.remove("tgt"));if(tg&&tg!==st.g)tg.classList.add("tgt");
       return}
     const d=Math.round(dx/ppd),[s2,e2]=range(st.t,st.k,d),px=d*ppd;
-    if(st.k==="m")st.g.setAttribute("transform",`translate(${px} 0)`);
+    if(st.k==="m"){const vy=Math.abs(dy)>14?dy:0;st.vy=vy;st.g.setAttribute("transform",`translate(${px} ${vy})`);if(vy){const r=rowDrop(e.clientY,st.t.id),gl=document.querySelector(".gl");st.drop=r;if(gl){let ln=gl.querySelector(".grline");if(!ln){ln=document.createElement("div");ln.className="grline";gl.appendChild(ln)}ln.style.top=(r.y-gl.getBoundingClientRect().top)+"px"}}else{st.drop=null;const ln=document.querySelector(".gl .grline");ln&&ln.remove()}}
     else if(st.r){if(st.k==="s"){st.r.setAttribute("x",st.x+Math.min(px,st.w-8));st.r.setAttribute("width",Math.max(8,st.w-px))}else st.r.setAttribute("width",Math.max(8,st.w+px))}
     st.d=d;showTip(e.clientX,e.clientY,fmt(s2,e2,st.t.ms));
   };
@@ -116,6 +127,9 @@ function ganttDrag(){
     if(!s.moved){if(s.lp&&s.k!=="dep"){suppress=true;setTimeout(()=>{suppress=false},60);taskMenu(s.t.id)}return}suppress=true;setTimeout(()=>{suppress=false},60);
     if(s.k==="dep"){const over=document.elementFromPoint(e.clientX,e.clientY),tg=over&&over.closest&&over.closest("g[data-id]"),to=tg&&byId(tg.dataset.id);
       if(to)await addDep(s.t.id,to.id);return}
+    {const ln=document.querySelector(".gl .grline");ln&&ln.remove()}
+    /* 1.49: Balken auch nach oben/unten ziehen: Reihenfolge und Gruppe (Projekt, Tag, Person, Priorität) übernehmen, Datum gleich mit */
+    if(s.k==="m"&&s.vy&&s.drop){const d0=s.d||0,[a2,b2]=range(s.t,"m",d0);await dropRow(s.t.id,{before:s.drop.before,after:s.drop.after,from:grp==="none"?undefined:s.g.dataset.gk,to:s.drop.gk,dates:d0?{start:iso(fromDn(a2)),end:iso(fromDn(b2))}:null});return}
     const d=s.d||0;if(!d){render();return}
     const[s2,e2]=range(s.t,s.k,d),old={start:s.t.start,end:s.t.end};
     {const n2={...s.t,start:iso(fromDn(s2)),end:iso(fromDn(e2))};n2.log=diffLog(s.t,n2);await saveTask(n2)}
@@ -142,16 +156,28 @@ function ganttDrag(){
 }
 /* 1.48: Zeilen links am Griff nach oben/unten ziehen. Linie zeigt, wo die Aufgabe landet. */
 let grd=null;
+/* Einfügestelle unter dem Finger: zwischen zwei Zeilen; die Gruppe ist die Überschrift darüber */
+function rowDrop(y,skipId){const all=[...document.querySelectorAll(".gl .gr")];let k=all.length;
+  for(let i=0;i<all.length;i++){const r=all[i].getBoundingClientRect();if(y<r.top+r.height/2){k=i;break}}
+  if(k===0&&all[0]&&all[0].classList.contains("gh2"))k=1;
+  let gk,h=null;for(let i=k-1;i>=0;i--)if(all[i].classList.contains("gh2")){h=all[i];gk=all[i].dataset.gk;break}
+  const inG=r=>{let p=r.previousElementSibling;while(p&&!p.classList.contains("gh2"))p=p.previousElementSibling;return p===h};
+  const prev=all.slice(0,k).reverse().find(r=>r.dataset.id&&r.dataset.id!==skipId&&inG(r)),next=all.slice(k).find(r=>(r.classList.contains("gh2"))||(r.dataset.id&&r.dataset.id!==skipId));
+  const nx=next&&next.dataset.id&&inG(next)?next:null,ref=all[k]||all[all.length-1],rr=ref?ref.getBoundingClientRect():{top:0,bottom:0};
+  return{gk:grp==="none"?undefined:gk,before:prev&&prev.dataset.id,after:nx&&nx.dataset.id,y:k<all.length?rr.top:rr.bottom}}
 document.addEventListener("pointerdown",e=>{const g=e.target.closest&&e.target.closest("[data-ggrip]");if(!g||e.button>0)return;e.preventDefault();e.stopPropagation();
-  const n=neighbours(g.dataset.ggrip);if(!n)return;grd={id:g.dataset.ggrip,y0:e.clientY,moved:false,...n,line:null,k:n.j};try{g.setPointerCapture(e.pointerId)}catch(_){}});
+  const row=g.closest(".gr");grd={id:g.dataset.ggrip,from:grp==="none"?undefined:row.dataset.gk,row,y0:e.clientY,moved:false,line:null,drop:null};try{g.setPointerCapture(e.pointerId)}catch(_){}});
 document.addEventListener("pointermove",e=>{if(!grd)return;if(!grd.moved&&Math.abs(e.clientY-grd.y0)<5)return;
-  if(!grd.moved){grd.moved=true;grd.line=document.createElement("div");grd.line.className="grline";document.querySelector(".gl").appendChild(grd.line);grd.same[grd.j].classList.add("dragging");hap(6)}
-  let k=grd.same.length;for(let i=0;i<grd.same.length;i++){const r=grd.same[i].getBoundingClientRect();if(e.clientY<r.top+r.height/2){k=i;break}}grd.k=k;
-  const ref=grd.same[Math.min(k,grd.same.length-1)],gl=document.querySelector(".gl").getBoundingClientRect(),rr=ref.getBoundingClientRect();
-  grd.line.style.top=((k<grd.same.length?rr.top:rr.bottom)-gl.top)+"px"});
-function grEnd(){const d=grd;grd=null;if(!d)return;d.line&&d.line.remove();d.same[d.j]&&d.same[d.j].classList.remove("dragging");if(!d.moved)return;
-  const ids=d.same.map(r=>r.dataset.id),k=d.k>d.j?d.k-1:d.k;if(k===d.j)return;ids.splice(d.j,1);ids.splice(k,0,d.id);reorder(d.id,ids[k-1],ids[k+1])}
-document.addEventListener("pointerup",grEnd);document.addEventListener("pointercancel",()=>{if(grd){grd.line&&grd.line.remove();grd=null}});
+  if(!grd.moved){grd.moved=true;grd.line=document.createElement("div");grd.line.className="grline";document.querySelector(".gl").appendChild(grd.line);grd.row.classList.add("dragging");hap(6)}
+  grd.drop=rowDrop(e.clientY,grd.id);const gl=document.querySelector(".gl").getBoundingClientRect();grd.line.style.top=(grd.drop.y-gl.top)+"px";
+  document.querySelectorAll(".gl .gh2.gtgt").forEach(x=>x.classList.remove("gtgt"));
+  if(grd.drop.gk!==grd.from&&grd.drop.gk!==undefined){const h=[...document.querySelectorAll(".gl .gh2")].find(x=>x.dataset.gk===grd.drop.gk);h&&h.classList.add("gtgt")}});
+function grEnd(){const d=grd;grd=null;if(!d)return;d.line&&d.line.remove();d.row.classList.remove("dragging");document.querySelectorAll(".gl .gh2.gtgt").forEach(x=>x.classList.remove("gtgt"));
+  if(!d.moved||!d.drop)return;const r=d.drop,p=[...document.querySelectorAll(".gl .gr[data-id]")].filter(x=>x.dataset.gk===d.row.dataset.gk),i=p.indexOf(d.row);
+  if(r.gk===d.from&&(r.before||null)===((p[i-1]||{}).dataset||{}).id&&(r.after||null)===((p[i+1]||{}).dataset||{}).id)return;
+  if(r.gk===d.from&&!r.before&&i===0&&(r.after||null)===(((p[1]||{}).dataset||{}).id||null))return;
+  dropRow(d.id,{before:r.before,after:r.after,from:d.from,to:r.gk})}
+document.addEventListener("pointerup",grEnd);document.addEventListener("pointercancel",()=>{if(grd){grd.line&&grd.line.remove();grd.row.classList.remove("dragging");grd=null}});
 document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-ggrip]")){e.stopPropagation();e.preventDefault()}},true);
 /* Verknüpfen per Antippen auch über die Zeilen links */
 document.addEventListener("click",e=>{if(!linkFrom||view!=="gantt")return;const r=e.target.closest&&e.target.closest(".gl .gr[data-id]");if(!r)return;e.stopPropagation();e.preventDefault();

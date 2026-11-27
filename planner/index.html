@@ -1242,8 +1242,10 @@ body.pdragging{cursor:grabbing;-webkit-user-select:none;user-select:none}
 .grline{position:absolute;left:.4rem;right:.4rem;height:3px;margin-top:-1.5px;border-radius:2px;background:var(--acc);pointer-events:none;z-index:5}
 .shg.ask{display:grid;gap:.6rem;padding:.9rem}
 .shg.ask input,.shg.ask textarea{width:100%;font:inherit;font-size:16px;padding:.7rem .8rem;border-radius:.8rem;border:1px solid var(--line2);background:var(--grp);color:var(--tx)}
+/* 1.49: Ziel-Gruppe beim Ziehen hervorheben */
+.gr.gh2.gtgt{box-shadow:inset 0 0 0 2px var(--acc);background:var(--acc-soft)}
 </style>
-<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"><script>(function(){var n=0,seen={};function send(m,w){try{m=String(m||"").slice(0,400);w=String(w||"");if(n>=8||seen[m+w])return;seen[m+w]=1;n++;var v=(document.body&&document.body.dataset.view)||"";fetch("api/log",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json","X-Planner":"1"},body:JSON.stringify({msg:m,where:w,ver:"1.48.0",view:v,ua:navigator.userAgent.slice(0,120)})}).catch(function(){})}catch(_){}}addEventListener("error",function(e){var t=e.target;if(t&&t!==window){if(t.tagName==="SCRIPT"||t.tagName==="LINK")send("Datei nicht geladen: "+String(t.src||t.href).split("/").pop().split("?")[0],"");return}send(e.message,String(e.filename||"").split("/").pop()+":"+e.lineno+":"+e.colno)},true);addEventListener("unhandledrejection",function(e){var r=e.reason||{};send("Unbehandelt: "+(r.message||r),String(r.stack||"").split("\n")[1]||"")})})();</script></head>
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Planner"><meta name="apple-mobile-web-app-status-bar-style" content="default"><script>(function(){var n=0,seen={};function send(m,w){try{m=String(m||"").slice(0,400);w=String(w||"");if(n>=8||seen[m+w])return;seen[m+w]=1;n++;var v=(document.body&&document.body.dataset.view)||"";fetch("api/log",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json","X-Planner":"1"},body:JSON.stringify({msg:m,where:w,ver:"1.49.0",view:v,ua:navigator.userAgent.slice(0,120)})}).catch(function(){})}catch(_){}}addEventListener("error",function(e){var t=e.target;if(t&&t!==window){if(t.tagName==="SCRIPT"||t.tagName==="LINK")send("Datei nicht geladen: "+String(t.src||t.href).split("/").pop().split("?")[0],"");return}send(e.message,String(e.filename||"").split("/").pop()+":"+e.lineno+":"+e.colno)},true);addEventListener("unhandledrejection",function(e){var r=e.reason||{};send("Unbehandelt: "+(r.message||r),String(r.stack||"").split("\n")[1]||"")})})();</script></head>
 <body>
 <svg id="icsp" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-bad" viewBox="0 0 24 24"><path d="M3 12h18v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-2z"/><path d="M6 12V6.5A2.5 2.5 0 0 1 8.5 4 2.5 2.5 0 0 1 11 6.5"/><path d="M7 18l-1 2M17 18l1 2"/></symbol><symbol id="i-kueche" viewBox="0 0 24 24"><path d="M5 10h14v7a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-7z"/><path d="M3 10h2M19 10h2M9 6.5c0-1.2 1-1.2 1-2.5M14 6.5c0-1.2 1-1.2 1-2.5"/></symbol><symbol id="i-sofa" viewBox="0 0 24 24"><path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><path d="M3 13a2 2 0 0 1 4 0v1h10v-1a2 2 0 0 1 4 0v4H3v-4z"/><path d="M6 17v2M18 17v2"/></symbol><symbol id="i-bett" viewBox="0 0 24 24"><path d="M3 19V6M3 14.5h18V19M21 14.5V12a3 3 0 0 0-3-3h-7v5.5"/><circle cx="7" cy="11" r="1.8"/></symbol><symbol id="i-kind" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="6.5"/><circle cx="6.6" cy="6.8" r="2.2"/><circle cx="17.4" cy="6.8" r="2.2"/><circle cx="12" cy="15.2" r="2"/><path d="M9.6 11.6h.01M14.4 11.6h.01"/></symbol><symbol id="i-tuer" viewBox="0 0 24 24"><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M4 21h16"/><circle cx="15" cy="12.5" r=".9" fill="currentColor"/></symbol><symbol id="i-pflanze" viewBox="0 0 24 24"><path d="M12 21v-9"/><path d="M12 12c0-4 3-6.5 7-6.5 0 4-2.5 6.5-7 6.5z"/><path d="M12 15.5c0-3-2.3-5-6-5 0 3.2 2 5 6 5z"/></symbol><symbol id="i-baum" viewBox="0 0 24 24"><path d="M12 21v-6"/><path d="M12 15c-4 0-6.5-2.5-6.5-5.5C5.5 6 8.5 3.5 12 3.5s6.5 2.5 6.5 6c0 3-2.5 5.5-6.5 5.5z"/></symbol><symbol id="i-sonne" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.8"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></symbol><symbol id="i-treppe" viewBox="0 0 24 24"><path d="M3.5 20.5h17M5 20.5v-4h4v-4h4v-4h4v-4"/></symbol><symbol id="i-dach" viewBox="0 0 24 24"><path d="M2.5 13L12 5l9.5 8"/><path d="M17 8.5V5h2v5.2"/><path d="M6 11.5V19h12v-7.5"/></symbol><symbol id="i-fenster" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="17" rx="1.5"/><path d="M12 3.5v17M4.5 12h15"/></symbol><symbol id="i-flamme" viewBox="0 0 24 24"><path d="M12 21c-3.9 0-6-2.5-6-5.7 0-3.6 3.2-5.5 3.7-9.3C12.4 7.4 18 10.2 18 15.3c0 3.2-2.1 5.7-6 5.7z"/><path d="M12 21c-1.6 0-2.6-1-2.6-2.5 0-1.5 1.6-2.2 2.6-3.7 1 1.5 2.6 2.2 2.6 3.7 0 1.5-1 2.5-2.6 2.5z"/></symbol><symbol id="i-blitz" viewBox="0 0 24 24"><path d="M13 3L5.5 13.5H11L10 21l7.5-10.5H12L13 3z"/></symbol><symbol id="i-tropfen" viewBox="0 0 24 24"><path d="M12 3.5c3.2 4 6 7 6 10.2a6 6 0 0 1-12 0C6 10.5 8.8 7.5 12 3.5z"/></symbol><symbol id="i-werkzeug" viewBox="0 0 24 24"><path d="M14 4.5l5.5 5.5-2.8 2.8-5.5-5.5z"/><path d="M12.2 9.7L4.8 17.1a1.9 1.9 0 0 0 2.7 2.7l7.4-7.4"/></symbol><symbol id="i-roller" viewBox="0 0 24 24"><rect x="4" y="3.5" width="14" height="5.5" rx="1.5"/><path d="M18 6h2.5v5.5h-8V14"/><rect x="10.7" y="14" width="3.6" height="6.5" rx="1.2"/></symbol><symbol id="i-boden" viewBox="0 0 24 24"><path d="M12 4l9 5-9 5-9-5z"/><path d="M3 13.5l9 5 9-5"/></symbol><symbol id="i-dokument" viewBox="0 0 24 24"><path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-16z"/><path d="M14 3.5v4h4M9.5 12.5h5M9.5 16h5"/></symbol><symbol id="i-muenze" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M15.2 9.2a4 4 0 1 0 0 5.6M8.3 11h5M8.3 13h5"/></symbol><symbol id="i-schild" viewBox="0 0 24 24"><path d="M12 3.5l7 2.5v5.5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z"/><path d="M9 12l2.2 2.2L15.2 10"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><path d="M4 16v-3.5L6 7.5h12l2 5V16"/><path d="M4 12.5h16M4 16h16"/><circle cx="7.5" cy="16.5" r="1.7"/><circle cx="16.5" cy="16.5" r="1.7"/></symbol><symbol id="i-wagen" viewBox="0 0 24 24"><path d="M3 4.5h2.5l2 10.5h10.5l2-8H7"/><circle cx="9.2" cy="19" r="1.2"/><circle cx="16.8" cy="19" r="1.2"/></symbol><symbol id="i-eimer" viewBox="0 0 24 24"><path d="M5 9h14l-1.6 11H6.6z"/><path d="M5 9c0-2.6 3-4.2 7-4.2s7 1.6 7 4.2"/></symbol><symbol id="i-karton" viewBox="0 0 24 24"><path d="M3.5 8L12 4l8.5 4v8.5L12 20.5l-8.5-4z"/><path d="M3.5 8L12 12l8.5-4M12 12v8.5"/></symbol><symbol id="i-pfote" viewBox="0 0 24 24"><ellipse cx="12" cy="15.5" rx="4" ry="3.2"/><circle cx="6.3" cy="11" r="1.6"/><circle cx="9.7" cy="6.8" r="1.6"/><circle cx="14.3" cy="6.8" r="1.6"/><circle cx="17.7" cy="11" r="1.6"/></symbol><symbol id="i-herz" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.5-7.5-10A4.2 4.2 0 0 1 12 7.6 4.2 4.2 0 0 1 19.5 10C19.5 15.5 12 20 12 20z"/></symbol><symbol id="i-koffer" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v2M4 13.5h16"/></symbol><symbol id="i-geschenk" viewBox="0 0 24 24"><rect x="4" y="9.5" width="16" height="10.5" rx="1.5"/><path d="M3 9.5h18M12 9.5V20"/><path d="M12 9.5C11 6 7.5 6 8 8c.3 1.4 4 1.5 4 1.5zM12 9.5c1-3.5 4.5-3.5 4-1.5-.3 1.4-4 1.5-4 1.5z"/></symbol><symbol id="i-schloss" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><circle cx="12" cy="15.5" r="1"/></symbol><symbol id="i-wlan" viewBox="0 0 24 24"><path d="M3.5 9.5a12 12 0 0 1 17 0M6.5 12.8a7.8 7.8 0 0 1 11 0M9.5 16a3.5 3.5 0 0 1 5 0"/><circle cx="12" cy="19" r=".9" fill="currentColor"/></symbol><symbol id="i-birne" viewBox="0 0 24 24"><path d="M9 17.5h6M10 20.5h4"/><path d="M12 3.5a5.5 5.5 0 0 0-3.2 10c.6.5 1.2 1.3 1.2 2.5h4c0-1.2.6-2 1.2-2.5A5.5 5.5 0 0 0 12 3.5z"/></symbol><symbol id="i-waschmaschine" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="17" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 7h.01M11 7h2"/></symbol><symbol id="i-kalender" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v3.5M15.5 3.5v3.5"/></symbol><symbol id="i-tonne" viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13"/><path d="M10.5 11v5.5M13.5 11v5.5"/></symbol><symbol id="i-stuhl" viewBox="0 0 24 24"><path d="M7 12V5a1.5 1.5 0 0 1 1.5-1.5h7A1.5 1.5 0 0 1 17 5v7"/><path d="M5.5 12h13v3.5h-13zM7.5 15.5V21M16.5 15.5V21"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M3.5 12.5V4.5a1 1 0 0 1 1-1h8L21 12l-8.5 8.5z"/><circle cx="8" cy="8" r="1.2"/></symbol></defs></svg>
 
@@ -1562,11 +1564,22 @@ async function dropDep(fromId,toId){const f=byId(fromId),to=byId(toId);if(!f||!t
 function linkStart(id){linkFrom=id;render();toast("Jetzt die Aufgabe antippen, die danach kommt",()=>{linkFrom=null;render()},"Abbrechen",8000)}
 /* Reihenfolge (1.48): Schlüssel ord, sonst Startdatum; verschoben wird nur die eine Aufgabe (Mitte zwischen den Nachbarn) */
 const ordKey=t=>typeof t.ord==="number"?t.ord:dn(t.start)*100;
-async function reorder(id,beforeId,afterId){const t=byId(id);if(!t)return;const a=beforeId&&byId(beforeId),b=afterId&&byId(afterId);
-  const ka=a?ordKey(a):null,kb=b?ordKey(b):null,o=ka!==null&&kb!==null?(ka+kb)/2:ka!==null?ka+50:kb!==null?kb-50:ordKey(t);
-  const old=t.ord;if(sortm!=="ord"){sortm="ord";try{localStorage.setItem("haus-sort","ord")}catch(_){}if($("srt"))$("srt").value="ord"}
-  await saveTask({...t,ord:Math.round(o*1000)/1000});hap(8);
-  toast("Reihenfolge geändert",async()=>{const c=byId(id);if(!c)return;const r={...c};if(typeof old==="number")r.ord=old;else delete r.ord;await saveTask(r)})}
+/* 1.49: Ziel-Gruppe übernehmen (Projekt, Tag, Person, Priorität), wenn man eine Aufgabe im Zeitstrahl in eine andere Gruppe zieht */
+function regroupFields(t,from,to){if(grp==="none"||from===to||from===undefined||to===undefined)return{};
+  if(grp==="proj")return{proj:to};
+  if(grp==="prio")return{prio:to?+to.replace(/\D/g,"")||0:0};
+  if(grp==="tag"){const L=tgs(t).filter(x=>x!==from&&x!==to),tags=to?[to,...L]:L;return{tags,area:tags[0]||""}}
+  const L=wl(t).filter(x=>x!==from);if(to&&!L.includes(to))L.push(to);return{who:L.join(", ")}}
+const grpName=k=>k||(grp==="tag"?"Ohne Tag":grp==="proj"?"Ohne Projekt":grp==="prio"?"Ohne Priorität":"Nicht zugewiesen");
+function ordBetween(beforeId,afterId,t){const a=beforeId&&byId(beforeId),b=afterId&&byId(afterId),ka=a?ordKey(a):null,kb=b?ordKey(b):null;
+  return Math.round((ka!==null&&kb!==null?(ka+kb)/2:ka!==null?ka+50:kb!==null?kb-50:ordKey(t))*1000)/1000}
+function ordOn(){if(sortm!=="ord"){sortm="ord";try{localStorage.setItem("haus-sort","ord")}catch(_){}if($("srt"))$("srt").value="ord"}}
+/* Eine Aufgabe neu einordnen: Reihenfolge (zwischen Nachbarn), Gruppe und optional Zeitraum in einem Schritt, mit Rückgängig */
+async function dropRow(id,{before,after,from,to,order=true,dates=null}={}){const t=byId(id);if(!t)return;const u={...t,...regroupFields(t,from,to),...(dates||{})};
+  if(order){ordOn();u.ord=ordBetween(before,after,t)}u.log=diffLog(t,u);await saveTask(u);hap(8);
+  const moved=grp!=="none"&&from!==to&&from!==undefined&&to!==undefined;
+  toast(moved?"„"+t.title+"“ → "+grpName(to):order?"Reihenfolge geändert":"„"+t.title+"“ verschoben",async()=>{const c=byId(id);if(!c)return;const r={...c,proj:t.proj,tags:t.tags,area:t.area,who:t.who,prio:t.prio,start:t.start,end:t.end};if(typeof t.ord==="number")r.ord=t.ord;else delete r.ord;await saveTask(r)})}
+async function reorder(id,beforeId,afterId){return dropRow(id,{before:beforeId,after:afterId})}
 function neighbours(id){const rows=[...document.querySelectorAll(".gl .gr[data-id]")],i=rows.findIndex(r=>r.dataset.id===id);if(i<0)return null;
   const grpOf=r=>{let p=r.previousElementSibling;while(p&&!p.classList.contains("gh2"))p=p.previousElementSibling;return p};
   const same=rows.filter(r=>grpOf(r)===grpOf(rows[i])),j=same.indexOf(rows[i]);return{same,j}}
@@ -1596,7 +1609,7 @@ function ganttDrag(){
       svg.querySelectorAll(".gbar.tgt").forEach(x=>x.classList.remove("tgt"));if(tg&&tg!==st.g)tg.classList.add("tgt");
       return}
     const d=Math.round(dx/ppd),[s2,e2]=range(st.t,st.k,d),px=d*ppd;
-    if(st.k==="m")st.g.setAttribute("transform",`translate(${px} 0)`);
+    if(st.k==="m"){const vy=Math.abs(dy)>14?dy:0;st.vy=vy;st.g.setAttribute("transform",`translate(${px} ${vy})`);if(vy){const r=rowDrop(e.clientY,st.t.id),gl=document.querySelector(".gl");st.drop=r;if(gl){let ln=gl.querySelector(".grline");if(!ln){ln=document.createElement("div");ln.className="grline";gl.appendChild(ln)}ln.style.top=(r.y-gl.getBoundingClientRect().top)+"px"}}else{st.drop=null;const ln=document.querySelector(".gl .grline");ln&&ln.remove()}}
     else if(st.r){if(st.k==="s"){st.r.setAttribute("x",st.x+Math.min(px,st.w-8));st.r.setAttribute("width",Math.max(8,st.w-px))}else st.r.setAttribute("width",Math.max(8,st.w+px))}
     st.d=d;showTip(e.clientX,e.clientY,fmt(s2,e2,st.t.ms));
   };
@@ -1607,6 +1620,9 @@ function ganttDrag(){
     if(!s.moved){if(s.lp&&s.k!=="dep"){suppress=true;setTimeout(()=>{suppress=false},60);taskMenu(s.t.id)}return}suppress=true;setTimeout(()=>{suppress=false},60);
     if(s.k==="dep"){const over=document.elementFromPoint(e.clientX,e.clientY),tg=over&&over.closest&&over.closest("g[data-id]"),to=tg&&byId(tg.dataset.id);
       if(to)await addDep(s.t.id,to.id);return}
+    {const ln=document.querySelector(".gl .grline");ln&&ln.remove()}
+    /* 1.49: Balken auch nach oben/unten ziehen: Reihenfolge und Gruppe (Projekt, Tag, Person, Priorität) übernehmen, Datum gleich mit */
+    if(s.k==="m"&&s.vy&&s.drop){const d0=s.d||0,[a2,b2]=range(s.t,"m",d0);await dropRow(s.t.id,{before:s.drop.before,after:s.drop.after,from:grp==="none"?undefined:s.g.dataset.gk,to:s.drop.gk,dates:d0?{start:iso(fromDn(a2)),end:iso(fromDn(b2))}:null});return}
     const d=s.d||0;if(!d){render();return}
     const[s2,e2]=range(s.t,s.k,d),old={start:s.t.start,end:s.t.end};
     {const n2={...s.t,start:iso(fromDn(s2)),end:iso(fromDn(e2))};n2.log=diffLog(s.t,n2);await saveTask(n2)}
@@ -1633,16 +1649,28 @@ function ganttDrag(){
 }
 /* 1.48: Zeilen links am Griff nach oben/unten ziehen. Linie zeigt, wo die Aufgabe landet. */
 let grd=null;
+/* Einfügestelle unter dem Finger: zwischen zwei Zeilen; die Gruppe ist die Überschrift darüber */
+function rowDrop(y,skipId){const all=[...document.querySelectorAll(".gl .gr")];let k=all.length;
+  for(let i=0;i<all.length;i++){const r=all[i].getBoundingClientRect();if(y<r.top+r.height/2){k=i;break}}
+  if(k===0&&all[0]&&all[0].classList.contains("gh2"))k=1;
+  let gk,h=null;for(let i=k-1;i>=0;i--)if(all[i].classList.contains("gh2")){h=all[i];gk=all[i].dataset.gk;break}
+  const inG=r=>{let p=r.previousElementSibling;while(p&&!p.classList.contains("gh2"))p=p.previousElementSibling;return p===h};
+  const prev=all.slice(0,k).reverse().find(r=>r.dataset.id&&r.dataset.id!==skipId&&inG(r)),next=all.slice(k).find(r=>(r.classList.contains("gh2"))||(r.dataset.id&&r.dataset.id!==skipId));
+  const nx=next&&next.dataset.id&&inG(next)?next:null,ref=all[k]||all[all.length-1],rr=ref?ref.getBoundingClientRect():{top:0,bottom:0};
+  return{gk:grp==="none"?undefined:gk,before:prev&&prev.dataset.id,after:nx&&nx.dataset.id,y:k<all.length?rr.top:rr.bottom}}
 document.addEventListener("pointerdown",e=>{const g=e.target.closest&&e.target.closest("[data-ggrip]");if(!g||e.button>0)return;e.preventDefault();e.stopPropagation();
-  const n=neighbours(g.dataset.ggrip);if(!n)return;grd={id:g.dataset.ggrip,y0:e.clientY,moved:false,...n,line:null,k:n.j};try{g.setPointerCapture(e.pointerId)}catch(_){}});
+  const row=g.closest(".gr");grd={id:g.dataset.ggrip,from:grp==="none"?undefined:row.dataset.gk,row,y0:e.clientY,moved:false,line:null,drop:null};try{g.setPointerCapture(e.pointerId)}catch(_){}});
 document.addEventListener("pointermove",e=>{if(!grd)return;if(!grd.moved&&Math.abs(e.clientY-grd.y0)<5)return;
-  if(!grd.moved){grd.moved=true;grd.line=document.createElement("div");grd.line.className="grline";document.querySelector(".gl").appendChild(grd.line);grd.same[grd.j].classList.add("dragging");hap(6)}
-  let k=grd.same.length;for(let i=0;i<grd.same.length;i++){const r=grd.same[i].getBoundingClientRect();if(e.clientY<r.top+r.height/2){k=i;break}}grd.k=k;
-  const ref=grd.same[Math.min(k,grd.same.length-1)],gl=document.querySelector(".gl").getBoundingClientRect(),rr=ref.getBoundingClientRect();
-  grd.line.style.top=((k<grd.same.length?rr.top:rr.bottom)-gl.top)+"px"});
-function grEnd(){const d=grd;grd=null;if(!d)return;d.line&&d.line.remove();d.same[d.j]&&d.same[d.j].classList.remove("dragging");if(!d.moved)return;
-  const ids=d.same.map(r=>r.dataset.id),k=d.k>d.j?d.k-1:d.k;if(k===d.j)return;ids.splice(d.j,1);ids.splice(k,0,d.id);reorder(d.id,ids[k-1],ids[k+1])}
-document.addEventListener("pointerup",grEnd);document.addEventListener("pointercancel",()=>{if(grd){grd.line&&grd.line.remove();grd=null}});
+  if(!grd.moved){grd.moved=true;grd.line=document.createElement("div");grd.line.className="grline";document.querySelector(".gl").appendChild(grd.line);grd.row.classList.add("dragging");hap(6)}
+  grd.drop=rowDrop(e.clientY,grd.id);const gl=document.querySelector(".gl").getBoundingClientRect();grd.line.style.top=(grd.drop.y-gl.top)+"px";
+  document.querySelectorAll(".gl .gh2.gtgt").forEach(x=>x.classList.remove("gtgt"));
+  if(grd.drop.gk!==grd.from&&grd.drop.gk!==undefined){const h=[...document.querySelectorAll(".gl .gh2")].find(x=>x.dataset.gk===grd.drop.gk);h&&h.classList.add("gtgt")}});
+function grEnd(){const d=grd;grd=null;if(!d)return;d.line&&d.line.remove();d.row.classList.remove("dragging");document.querySelectorAll(".gl .gh2.gtgt").forEach(x=>x.classList.remove("gtgt"));
+  if(!d.moved||!d.drop)return;const r=d.drop,p=[...document.querySelectorAll(".gl .gr[data-id]")].filter(x=>x.dataset.gk===d.row.dataset.gk),i=p.indexOf(d.row);
+  if(r.gk===d.from&&(r.before||null)===((p[i-1]||{}).dataset||{}).id&&(r.after||null)===((p[i+1]||{}).dataset||{}).id)return;
+  if(r.gk===d.from&&!r.before&&i===0&&(r.after||null)===(((p[1]||{}).dataset||{}).id||null))return;
+  dropRow(d.id,{before:r.before,after:r.after,from:d.from,to:r.gk})}
+document.addEventListener("pointerup",grEnd);document.addEventListener("pointercancel",()=>{if(grd){grd.line&&grd.line.remove();grd.row.classList.remove("dragging");grd=null}});
 document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-ggrip]")){e.stopPropagation();e.preventDefault()}},true);
 /* Verknüpfen per Antippen auch über die Zeilen links */
 document.addEventListener("click",e=>{if(!linkFrom||view!=="gantt")return;const r=e.target.closest&&e.target.closest(".gl .gr[data-id]");if(!r)return;e.stopPropagation();e.preventDefault();
@@ -1683,7 +1711,7 @@ applyTheme();
 matchMedia("(prefers-color-scheme:dark)").addEventListener("change",applyTheme);
 
 /* Fremdcode-Adressen. Das Add-on bekommt lokale Dateien aus planner/vendor/ (tools/build.py ersetzt diese Zeile). */
-const LIB={pdf:"vendor/jspdf.umd.min.js?v=1.48.0",xlsx:"vendor/exceljs.min.js?v=1.48.0",font:()=>"vendor/fonts.css?v=1.48.0"};
+const LIB={pdf:"vendor/jspdf.umd.min.js?v=1.49.0",xlsx:"vendor/exceljs.min.js?v=1.49.0",font:()=>"vendor/fonts.css?v=1.49.0"};
 const SYSF='-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
 const FONTS=[["figtree","Figtree","Figtree:wght@400;500;600;700;800",'"Figtree",'+SYSF,"Freundlich und klar (Standard)"],
  ["sys","Systemschrift","",SYSF,"Sachlich wie iOS (auf dem iPhone San Francisco), lädt sofort"],
@@ -2189,7 +2217,7 @@ function groups(list){
   const ks=[...m.keys()].filter(Boolean).sort((a,b)=>{const i=order.indexOf(a),j=order.indexOf(b);return(i<0?999:i)-(j<0?999:j)||a.localeCompare(b,"de")});
   if(m.has(""))ks.push("");
   const pc=w=>/^melanie/i.test(w)?TC.brick:/^lasse/i.test(w)?TC.sea:TC.sky;
-  return ks.map(k=>({l:k||(grp==="tag"?"Ohne Tag":grp==="proj"?"Ohne Projekt":grp==="prio"?"Ohne Priorität":"Nicht zugewiesen"),c:k?(grp==="tag"?tcol(k):grp==="proj"?pcol(k):grp==="prio"?"#14303F":pc(k)):"#9FB0B9",L:m.get(k)}))
+  return ks.map(k=>({k,l:k||(grp==="tag"?"Ohne Tag":grp==="proj"?"Ohne Projekt":grp==="prio"?"Ohne Priorität":"Nicht zugewiesen"),c:k?(grp==="tag"?tcol(k):grp==="proj"?pcol(k):grp==="prio"?"#14303F":pc(k)):"#9FB0B9",L:m.get(k)}))
 }
 let migrated=false,regLoaded=false;
 function migrateReg(){if(migrated||!regLoaded||!tasks.length)return;migrated=true;if(allTags().some(n=>!reg.some(x=>!x.p&&x.n===n))||allProjs().some(n=>!reg.some(x=>x.p&&x.n===n)))saveReg(fullReg())}
@@ -2496,7 +2524,7 @@ const MON=["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","D
 function gantt(list){
   if(!list.length)return'<div class="empty">Keine Treffer.</div>';
   const T=today(),ROW=42,GH=30,mode=gmode,G=groups(list),items=[];let BH=0;
-  G.forEach(g=>{if(g.l!=null){items.push({g,y:BH});BH+=GH}g.L.forEach(t=>{items.push({t,y:BH});BH+=ROW})});
+  G.forEach(g=>{if(g.l!=null){items.push({g,y:BH});BH+=GH}g.L.forEach(t=>{items.push({t,gk:g.k,y:BH});BH+=ROW})});
   const mn=Math.min(T,...list.map(t=>dn(t.start))),mx=Math.max(T,...list.map(t=>dn(t.end)));
   const dp=d=>{const x=fromDn(d);return[x.getUTCFullYear(),x.getUTCMonth(),x.getUTCDate(),x.getUTCDay()]};
   const dim=(y,m)=>new Date(Date.UTC(y,m+1,0)).getUTCDate();
@@ -2540,6 +2568,7 @@ function gantt(list){
   items.forEach(it=>{if(it.g)gd+=`<rect style="fill:color-mix(in srgb,${it.g.c} 16%,var(--card))" x="0" y="${it.y}" width="${W}" height="${GH}"/>`;gd+=`<line class="gs1" x1="0" x2="${W}" y1="${it.y}" y2="${it.y}"/>`});
   gd+=`<line class="gs1" x1="0" x2="${W}" y1="${BH}" y2="${BH}"/>`;
   const col={todo:"var(--todo)",doing:"var(--doing)",done:"var(--done)"},pos={};
+  const gkOf=new Map();items.forEach(it=>{if(it.t&&!gkOf.has(it.t.id))gkOf.set(it.t.id,it.gk)});
   items.forEach(it=>{if(!it.t)return;const t=it.t,x1=X(dn(t.start)),x2=X(dn(t.end)+1);pos[t.id]=t.ms?{x:x1+(x2-x1)/2-9,w:18,y:it.y}:{x:x1,w:Math.max(x2-x1,8),y:it.y}});
   gd+=`<line x1="${tdx}" x2="${tdx}" y1="0" y2="${BH}" stroke="var(--bad)" stroke-width="1.6" stroke-dasharray="3 3"/>`;
   list.forEach(t=>(t.deps||[]).forEach(id=>{const a=pos[id],b=pos[t.id];if(!a)return;
@@ -2551,8 +2580,8 @@ function gantt(list){
     const body=t.ms?`<path d="M${p.x+9} ${cy-10}l10 10l-10 10l-10-10z" fill="${col[t.status]}"/>`:`<rect x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="${col[t.status]}"/><rect class="ggl" x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="url(#gGl)"/>`;
     const lbl=inside?`<text class="bt ${t.status}" x="${p.x+11}" y="${cy+4.2}">${esc(t.title)}</text>`:`<text class="bo" x="${p.x+p.w+10}" y="${cy+4.2}">${esc(t.title)}</text>`;
     const hd2=t.ms?"":`<rect data-h="s" class="gh1" x="${p.x}" y="${p.y+8}" width="7" height="${ROW-16}"/><rect data-h="e" class="gh1" x="${p.x+p.w-7}" y="${p.y+8}" width="7" height="${ROW-16}"/>`;
-    gd+=`<g data-id="${t.id}" class="gbar${isFail(t)?" gfail":""}"${t.status==="done"?' opacity=".72"':""}>${body}${lbl}${hd2}<circle data-h="dep" class="gdh" cx="${p.x+p.w+(t.ms?1:0)+6}" cy="${cy}" r="15"/><circle data-h="dep" class="gdep" cx="${p.x+p.w+(t.ms?1:0)}" cy="${cy}" r="5"/></g>`});
-  const rows=items.map(it=>it.g?`<div class="gr gh2" style="--tc:${it.g.c}"><i class="dt" style="background:${it.g.c}"></i><span>${esc(it.g.l)}</span><em>${it.g.L.length}</em></div>`:`<div class="gr${linkFrom===it.t.id?" lfrom":""}" data-id="${it.t.id}" title="${esc(it.t.title)}"><span class="ggrip" data-ggrip="${it.t.id}" aria-label="Reihenfolge ändern"><svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"/></svg></span><i class="dt ${it.t.status}"></i>${pb(it.t)}<span>${esc(it.t.title)}</span></div>`).join("");
+    gd+=`<g data-id="${t.id}" data-gk="${esc(gkOf.get(t.id)||"")}" class="gbar${isFail(t)?" gfail":""}"${t.status==="done"?' opacity=".72"':""}>${body}${lbl}${hd2}<circle data-h="dep" class="gdh" cx="${p.x+p.w+(t.ms?1:0)+6}" cy="${cy}" r="15"/><circle data-h="dep" class="gdep" cx="${p.x+p.w+(t.ms?1:0)}" cy="${cy}" r="5"/></g>`});
+  const rows=items.map(it=>it.g?`<div class="gr gh2" data-gk="${esc(it.g.k)}" style="--tc:${it.g.c}"><i class="dt" style="background:${it.g.c}"></i><span>${esc(it.g.l)}</span><em>${it.g.L.length}</em></div>`:`<div class="gr${linkFrom===it.t.id?" lfrom":""}" data-id="${it.t.id}" data-gk="${esc(it.gk||"")}" title="${esc(it.t.title)}"><span class="ggrip" data-ggrip="${it.t.id}" aria-label="Reihenfolge ändern"><svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"/></svg></span><i class="dt ${it.t.status}"></i>${pb(it.t)}<span>${esc(it.t.title)}</span></div>`).join("");
   const seg=[["day","Tage"],["month","Monate"],["year","Jahre"]].map(([k,l])=>`<button data-gm="${k}" class="${k===mode?"on":""}">${l}</button>`).join("");
   return`<div class="gctl"><div class="seg">${seg}</div><button class="btn ghost sm" data-gtoday>Heute</button></div>`+(linkFrom?`<div class="phint">„${esc((byId(linkFrom)||{}).title||"")}“ verknüpfen: Aufgabe antippen, die danach kommt.</div>`:"")+
   `<div class="gwrap"><div class="gl"><div class="glh" style="--hd:${HEAD}px"></div>${rows}<div class="glg" style="--hd:${HEAD}px" role="separator" aria-label="Breite der Beschriftung ändern" title="Ziehen zum Ändern, Doppeltippen zum Zurücksetzen"></div></div><div class="gs" style="width:${W}px"><svg class="gh" width="${W}" height="${HEAD}">${hd}</svg><svg class="gb" width="${W}" height="${BH}" data-tx="${tdx}" data-ppd="${PPD}"><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--acc)"/></marker><linearGradient id="gGl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".65" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>${gd}</svg></div></div>`;

@@ -43,7 +43,7 @@ function groups(list){
   const ks=[...m.keys()].filter(Boolean).sort((a,b)=>{const i=order.indexOf(a),j=order.indexOf(b);return(i<0?999:i)-(j<0?999:j)||a.localeCompare(b,"de")});
   if(m.has(""))ks.push("");
   const pc=w=>/^melanie/i.test(w)?TC.brick:/^lasse/i.test(w)?TC.sea:TC.sky;
-  return ks.map(k=>({l:k||(grp==="tag"?"Ohne Tag":grp==="proj"?"Ohne Projekt":grp==="prio"?"Ohne Priorität":"Nicht zugewiesen"),c:k?(grp==="tag"?tcol(k):grp==="proj"?pcol(k):grp==="prio"?"#14303F":pc(k)):"#9FB0B9",L:m.get(k)}))
+  return ks.map(k=>({k,l:k||(grp==="tag"?"Ohne Tag":grp==="proj"?"Ohne Projekt":grp==="prio"?"Ohne Priorität":"Nicht zugewiesen"),c:k?(grp==="tag"?tcol(k):grp==="proj"?pcol(k):grp==="prio"?"#14303F":pc(k)):"#9FB0B9",L:m.get(k)}))
 }
 let migrated=false,regLoaded=false;
 function migrateReg(){if(migrated||!regLoaded||!tasks.length)return;migrated=true;if(allTags().some(n=>!reg.some(x=>!x.p&&x.n===n))||allProjs().some(n=>!reg.some(x=>x.p&&x.n===n)))saveReg(fullReg())}

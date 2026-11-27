@@ -1,5 +1,14 @@
 # Änderungen
 
+## 1.49.0
+- **Zeitstrahl: in eine andere Gruppe ziehen.** Ist der Zeitstrahl gruppiert (⋯ → Gruppieren: Projekt, Tag, Person, Priorität), übernimmt eine Aufgabe die Gruppe, in die man sie zieht:
+  - Projekt wird gesetzt bzw. entfernt („Ohne Projekt“).
+  - Bei Tag wird der bisherige Gruppen-Tag ersetzt, die übrigen Tags bleiben.
+  - Bei Person wird die bisherige Person getauscht.
+  - Bei Priorität wird die neue Priorität gesetzt.
+  - Die Ziel-Gruppe leuchtet beim Ziehen auf, „Rückgängig“ stellt alles wieder her.
+- **So geht's:** links an den zwei Strichen ziehen, oder den Balken selbst nach oben/unten ziehen. Beim Balken lässt sich gleichzeitig das Datum nach links/rechts ändern.
+
 ## 1.48.0
 - **Zeitstrahl: Verknüpfungen gut sichtbar.** Pfeile in der Akzentfarbe mit runden Ecken. Pfeil antippen → „Verknüpfung lösen“.
 - **Verknüpfen wie im Microsoft Planner:**
