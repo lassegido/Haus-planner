@@ -17,6 +17,8 @@ Zuletzt vollständig geprüft: _noch nie_ (Version: –)
 - [ ] Blätter (Aufgabe, Filter, Einstellungen) nach unten wischen: schließt; bei Änderungen kommt die Rückfrage.
 - [ ] Filter-Blatt: nach unten wischen setzt keinen Filter.
 - [ ] Checkliste: Punkt am Griff (sechs Punkte) gedrückt halten und verschieben.
+- [ ] Checkliste (1.54): auf dem **Text** eines Punkts kurz gedrückt halten, dann ziehen: Punkt hebt sich, die anderen rutschen weg, nichts bleibt dazwischen hängen; danach geht keine Tastatur auf. Kurz antippen öffnet weiter die Tastatur.
+- [ ] Zeitstrahl (1.54, iPad): Balken antippen öffnet die Aufgabe; Zoom-Regler ziehen; „Wochen“; Seitenleiste einklappen und wieder ausklappen.
 
 ## 3. Aufgabenblatt
 - [ ] „Wiederholen und Abhängigkeiten“ öffnen, im Suchfeld z. B. „garten“ tippen: nur passende Aufgaben, Zähler „x von y“.

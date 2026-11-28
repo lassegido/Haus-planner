@@ -38,16 +38,23 @@ const fullReg=()=>[...allTags().map(n=>{const o={n,c:colorKey(n)},i=tagIconStore
 let fwho=new Set();
 const whoOk=t=>!fwho.size||[...fwho].some(k=>k==="__none"?!t.who:wl(t).includes(k));
 const tagOk=t=>(!ftags.size||[...ftags].some(k=>k==="__none"?!tgs(t).length:tgs(t).includes(k)))&&(!fprojs.size||[...fprojs].some(k=>k==="__none"?!t.proj:t.proj===k))&&(!fprios.size||fprios.has(t.prio||0));
-function groups(list){
-  if(grp==="none")return[{l:null,L:list}];
-  const key=t=>grp==="tag"?(tgs(t)[0]||""):grp==="proj"?(t.proj||""):grp==="prio"?(t.prio?"Prio "+t.prio:""):(t.who||"");
-  const order=grp==="tag"?allTags():grp==="proj"?allProjs():grp==="prio"?["Prio 1","Prio 2","Prio 3"]:allWho();
-  const m=new Map();list.forEach(t=>{const ks=grp==="who"?(wl(t).length?wl(t):[""]):[key(t)];ks.forEach(k=>{if(!m.has(k))m.set(k,[]);m.get(k).push(t)})});
+/* Gruppen nach einem Merkmal (by: tag, proj, prio, who). 1.54: zweite Ebene über grp2 („Dann gruppieren“), siehe groups2 */
+const GSEP="\u001f";
+function groups(list,by=grp){
+  if(by==="none")return[{l:null,L:list}];
+  const key=t=>by==="tag"?(tgs(t)[0]||""):by==="proj"?(t.proj||""):by==="prio"?(t.prio?"Prio "+t.prio:""):(t.who||"");
+  const order=by==="tag"?allTags():by==="proj"?allProjs():by==="prio"?["Prio 1","Prio 2","Prio 3"]:allWho();
+  const m=new Map();list.forEach(t=>{const ks=by==="who"?(wl(t).length?wl(t):[""]):[key(t)];ks.forEach(k=>{if(!m.has(k))m.set(k,[]);m.get(k).push(t)})});
   const ks=[...m.keys()].filter(Boolean).sort((a,b)=>{const i=order.indexOf(a),j=order.indexOf(b);return(i<0?999:i)-(j<0?999:j)||a.localeCompare(b,"de")});
   if(m.has(""))ks.push("");
   const pc=w=>/^melanie/i.test(w)?TC.brick:/^lasse/i.test(w)?TC.sea:TC.sky;
-  return ks.map(k=>({k,l:k||(grp==="tag"?"Ohne Tag":grp==="proj"?"Ohne Projekt":grp==="prio"?"Ohne Priorität":"Nicht zugewiesen"),c:k?(grp==="tag"?tcol(k):grp==="proj"?pcol(k):grp==="prio"?"#14303F":pc(k)):"#9FB0B9",L:m.get(k)}))
+  return ks.map(k=>({k,l:grpLabel(k,by),c:k?(by==="tag"?tcol(k):by==="proj"?pcol(k):by==="prio"?"#14303F":pc(k)):"#9FB0B9",L:m.get(k)}))
 }
+const grpLabel=(k,by=grp)=>k||(by==="tag"?"Ohne Tag":by==="proj"?"Ohne Projekt":by==="prio"?"Ohne Priorität":"Nicht zugewiesen");
+const twoLevel=()=>grp!=="none"&&grp2!=="none"&&grp2!==grp;
+/* Zwei Ebenen: jede Gruppe bekommt Untergruppen (S) mit zusammengesetztem Schlüssel „k1␟k2“ */
+function groups2(list){const G=groups(list);if(!twoLevel())return G;
+  return G.map(g=>({...g,S:groups(g.L,grp2).map(h=>({...h,k:g.k+GSEP+h.k}))}))}
 let migrated=false,regLoaded=false;
 function migrateReg(){if(migrated||!regLoaded||!tasks.length)return;migrated=true;if(allTags().some(n=>!reg.some(x=>!x.p&&x.n===n))||allProjs().some(n=>!reg.some(x=>x.p&&x.n===n)))saveReg(fullReg())}
 const fCount=()=>ftags.size+fprojs.size+fprios.size+fwho.size;
@@ -85,7 +92,8 @@ $("f_ok").onclick=()=>$("dlf").close();
 $("f_reset").onclick=()=>{fClear();render()};
 $("fbody").onclick=e=>{const b=e.target.closest("[data-fa]");if(!b)return;fToggle(b.dataset.fa,b.dataset.fv);render()};
 $("tchips").onclick=e=>{const b=e.target.closest("[data-a]");if(!b)return;if(b.dataset.a==="all")fClear();else fToggle(b.dataset.a,b.dataset.v);render()};
-$("grp").onchange=e=>{grp=e.target.value;render()};
+$("grp").onchange=e=>{grp=e.target.value;try{localStorage.setItem("haus-grp",grp)}catch(_){}render()};
+function setGrp2(v){grp2=v;try{localStorage.setItem("haus-grp2",v)}catch(_){}render()}
 $("srt").onchange=e=>{sortm=e.target.value;gOrd=null;try{localStorage.setItem("haus-sort",sortm)}catch(_){}render()};
 /* Tag-Auswahl im Aufgaben-Dialog */
 function drawTags(){

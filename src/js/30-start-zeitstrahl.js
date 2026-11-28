@@ -103,12 +103,14 @@ function linkStart(id){linkFrom=id;render();toast("Jetzt die Aufgabe antippen, d
 /* Reihenfolge (1.48): Schlüssel ord, sonst Startdatum; verschoben wird nur die eine Aufgabe (Mitte zwischen den Nachbarn) */
 const ordKey=t=>typeof t.ord==="number"?t.ord:dn(t.start)*100;
 /* 1.49: Ziel-Gruppe übernehmen (Projekt, Tag, Person, Priorität), wenn man eine Aufgabe im Zeitstrahl in eine andere Gruppe zieht */
-function regroupFields(t,from,to){if(grp==="none"||from===to||from===undefined||to===undefined)return{};
-  if(grp==="proj")return{proj:to};
-  if(grp==="prio")return{prio:to?+to.replace(/\D/g,"")||0:0};
-  if(grp==="tag"){const L=tgs(t).filter(x=>x!==from&&x!==to),tags=to?[to,...L]:L;return{tags,area:tags[0]||""}}
+function regroupFields(t,from,to,by=grp){if(by==="none"||from===to||from===undefined||to===undefined)return{};
+  /* 1.54: zwei Ebenen, Schlüssel „k1␟k2“: erst die obere Gruppe übernehmen, dann die untere */
+  if(String(from).includes(GSEP)||String(to).includes(GSEP)){const[f1,f2]=String(from).split(GSEP),[t1,t2]=String(to).split(GSEP),a=regroupFields(t,f1,t1,grp),b=f2===undefined||t2===undefined?{}:regroupFields({...t,...a},f2,t2,grp2);return{...a,...b}}
+  if(by==="proj")return{proj:to};
+  if(by==="prio")return{prio:to?+to.replace(/\D/g,"")||0:0};
+  if(by==="tag"){const L=tgs(t).filter(x=>x!==from&&x!==to),tags=to?[to,...L]:L;return{tags,area:tags[0]||""}}
   const L=wl(t).filter(x=>x!==from);if(to&&!L.includes(to))L.push(to);return{who:L.join(", ")}}
-const grpName=k=>k||(grp==="tag"?"Ohne Tag":grp==="proj"?"Ohne Projekt":grp==="prio"?"Ohne Priorität":"Nicht zugewiesen");
+const grpName=(k,from)=>{const a=String(k).split(GSEP),f=String(from===undefined?"":from).split(GSEP),bys=[grp,grp2];return a.map((x,i)=>a.length>1&&x===f[i]?null:grpLabel(x,bys[i])).filter(Boolean).join(" · ")};
 function ordBetween(beforeId,afterId,t){const a=beforeId&&byId(beforeId),b=afterId&&byId(afterId),ka=a?ordKey(a):null,kb=b?ordKey(b):null;
   return Math.round((ka!==null&&kb!==null?(ka+kb)/2:ka!==null?ka+50:kb!==null?kb-50:ordKey(t))*1000)/1000}
 function ordOn(){if(sortm!=="ord"){sortm="ord";try{localStorage.setItem("haus-sort","ord")}catch(_){}if($("srt"))$("srt").value="ord"}}
@@ -116,7 +118,7 @@ function ordOn(){if(sortm!=="ord"){sortm="ord";try{localStorage.setItem("haus-so
 async function dropRow(id,{before,after,from,to,order=true,dates=null}={}){const t=byId(id);if(!t)return;const u={...t,...regroupFields(t,from,to),...(dates||{})};
   if(order){ordOn();u.ord=ordBetween(before,after,t);if(gOrd){gOrd=gOrd.filter(x=>x!==id);const bi=before?gOrd.indexOf(before):-1,ai=after?gOrd.indexOf(after):-1;gOrd.splice(bi>=0?bi+1:ai>=0?ai:gOrd.length,0,id)}}u.log=diffLog(t,u);await saveTask(u);hap(8);
   const moved=grp!=="none"&&from!==to&&from!==undefined&&to!==undefined;
-  toast(moved?"„"+t.title+"“ → "+grpName(to):order?"Reihenfolge geändert":"„"+t.title+"“ verschoben",async()=>{const c=byId(id);if(!c)return;const r={...c,proj:t.proj,tags:t.tags,area:t.area,who:t.who,prio:t.prio,start:t.start,end:t.end};if(typeof t.ord==="number")r.ord=t.ord;else delete r.ord;await saveTask(r)})}
+  toast(moved?"„"+t.title+"“ → "+grpName(to,from):order?"Reihenfolge geändert":"„"+t.title+"“ verschoben",async()=>{const c=byId(id);if(!c)return;const r={...c,proj:t.proj,tags:t.tags,area:t.area,who:t.who,prio:t.prio,start:t.start,end:t.end};if(typeof t.ord==="number")r.ord=t.ord;else delete r.ord;await saveTask(r)})}
 async function reorder(id,beforeId,afterId){return dropRow(id,{before:beforeId,after:afterId})}
 function neighbours(id){const rows=[...document.querySelectorAll(".gl .gr[data-id]")],i=rows.findIndex(r=>r.dataset.id===id);if(i<0)return null;
   const grpOf=r=>{let p=r.previousElementSibling;while(p&&!p.classList.contains("gh2"))p=p.previousElementSibling;return p};
@@ -153,7 +155,9 @@ function ganttDrag(){
   };
   const end=async e=>{
     document.removeEventListener("pointermove",move);document.removeEventListener("pointerup",end);document.removeEventListener("pointercancel",end);document.removeEventListener("touchmove",blockScroll);
-    clearTimeout(lp);tip.classList.remove("on");const s=st;st=null;if(!s)return;
+    clearTimeout(lp);tip.classList.remove("on");const s=st;st=null;
+    /* 1.54: Kurzes Antippen eines Balkens öffnet die Aufgabe (auch wenn der Browser bei SVG keinen Klick schickt) */
+    if(!s){if(tap&&e.type==="pointerup"&&Date.now()-tap.t<450&&Math.hypot(e.clientX-tap.x,e.clientY-tap.y)<10&&!linkFrom){const id=tap.id;tap=null;suppress=true;setTimeout(()=>{suppress=false},400);openDlg(id)}tap=null;return}
     s.g.classList.remove("drag");svg.querySelectorAll(".gbar.tgt").forEach(x=>x.classList.remove("tgt"));if(s.line)s.line.remove();
     if(!s.moved){if(s.lp&&s.k!=="dep"){suppress=true;setTimeout(()=>{suppress=false},60);taskMenu(s.t.id)}return}suppress=true;setTimeout(()=>{suppress=false},60);
     if(s.k==="dep"){const over=document.elementFromPoint(e.clientX,e.clientY),tg=over&&over.closest&&over.closest("g[data-id]"),to=tg&&byId(tg.dataset.id);
@@ -170,10 +174,12 @@ function ganttDrag(){
     if(linkFrom){const g=e.target.closest("g[data-id]");e.stopPropagation();e.preventDefault();const f=linkFrom;linkFrom=null;if(g&&g.dataset.id!==f)addDep(f,g.dataset.id);else render();return}
     const dl=e.target.closest("[data-dep]");if(dl){e.stopPropagation();e.preventDefault();const[a,b]=dl.dataset.dep.split(">");dropDep(a,b)}},true);
   svg.addEventListener("contextmenu",e=>{const g=e.target.closest("g[data-id]");if(!g)return;e.preventDefault();taskMenu(g.dataset.id)});
+  let tap=null;
   svg.addEventListener("pointerdown",e=>{
     if(e.button>0)return;const g=e.target.closest("g[data-id]");if(!g)return;const t=byId(g.dataset.id);if(!t)return;
     const h=e.target.closest("[data-h]"),k=h?h.dataset.h:"m";
     if(linkFrom)return;
+    tap=k==="m"?{id:t.id,t:Date.now(),x:e.clientX,y:e.clientY}:null;
     document.addEventListener("pointermove",move);document.addEventListener("pointerup",end);document.addEventListener("pointercancel",end);
     /* Punkt am Balkenende: auch mit dem Finger sofort ziehen (1.48) */
     if(e.pointerType==="touch"&&(k==="dep"||k==="s"||k==="e")){begin(e,g,t,k);e.preventDefault();return}
@@ -192,6 +198,8 @@ function rowDrop(y,skipId){const all=[...document.querySelectorAll(".gl .gr")];l
   for(let i=0;i<all.length;i++){const r=all[i].getBoundingClientRect();if(y<r.top+r.height/2){k=i;break}}
   if(k===0&&all[0]&&all[0].classList.contains("gh2"))k=1;
   let gk,h=null;for(let i=k-1;i>=0;i--)if(all[i].classList.contains("gh2")){h=all[i];gk=all[i].dataset.gk;break}
+  /* zwei Ebenen: direkt unter der oberen Überschrift zählt die erste Untergruppe */
+  if(h&&h.dataset.lv==="1"&&all[k]&&all[k].dataset.lv==="2"){h=all[k];gk=h.dataset.gk;k++}
   const inG=r=>{let p=r.previousElementSibling;while(p&&!p.classList.contains("gh2"))p=p.previousElementSibling;return p===h};
   const prev=all.slice(0,k).reverse().find(r=>r.dataset.id&&r.dataset.id!==skipId&&inG(r)),next=all.slice(k).find(r=>(r.classList.contains("gh2"))||(r.dataset.id&&r.dataset.id!==skipId));
   const nx=next&&next.dataset.id&&inG(next)?next:null,ref=all[k]||all[all.length-1],rr=ref?ref.getBoundingClientRect():{top:0,bottom:0};

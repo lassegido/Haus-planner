@@ -130,6 +130,8 @@ $("more").onclick=()=>{
   if(v!=="home")items.push({t:"Auswählen",ic:"sel",fn:()=>setSel(true)});
   if(v==="board"||v==="list"||v==="gantt")items.push({t:"Sortieren",val:sortm==="prio"?"Priorität":sortm==="ord"?"Eigene":"Datum",sub:[["date","Datum"],["prio","Priorität"],["ord","Eigene Reihenfolge"]].map(([k,l])=>({t:l,chk:sortm===k,fn:()=>{$("srt").value=k;$("srt").dispatchEvent(new Event("change"))}}))});
   if(v==="list"||v==="gantt")items.push({t:"Gruppieren",val:GRPL[grp],sub:Object.entries(GRPL).map(([k,l])=>({t:l,chk:grp===k,fn:()=>{$("grp").value=k;$("grp").dispatchEvent(new Event("change"))}}))});
+  /* 1.54: zweite Ebene, z. B. erst Projekt, dann Person */
+  if((v==="list"||v==="gantt")&&grp!=="none")items.push({t:"Dann gruppieren",val:twoLevel()?GRPL[grp2]:"Keine",sub:Object.entries(GRPL).filter(([k])=>k!==grp).map(([k,l])=>({t:l,chk:(twoLevel()?grp2:"none")===k,fn:()=>setGrp2(k)}))});
   if(items.length)items.push({sep:true});
   items.push({t:"Tags und Projekte",ic:"tag",fn:openMan},{t:"Archiv und Papierkorb",ic:"arch",fn:openArch},{t:"Export und Sicherung",ic:"exp",fn:()=>{$("dlx").showModal();$("dlx").scrollTop=0;preloadExport()}},{t:"Einstellungen",ic:"cfg",fn:openSettings});
   hap(8);popMenu($("more"),items)};

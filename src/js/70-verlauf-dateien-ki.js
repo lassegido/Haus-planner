@@ -85,7 +85,7 @@ $("x_ics").onclick=()=>dl("planner-"+stamp()+".ics",new Blob([ics()],{type:"text
 function aiPrompt(){
   const t=$("f_title").value.trim(),notes=$("f_notes").value.trim(),have=cklist.map(c=>c.t).filter(Boolean),tags=selTags.join(", "),pv=$("f_proj").value,proj=pv&&pv!=="__new"?pv:"";
   return"Du hilfst einem Paar beim Planen von Aufgaben rund ums Haus. Schreibe auf Deutsch, knapp und praktisch.\nAufgabe: "+t+"\n"+(tags?"Tags: "+tags+"\n":"")+(proj?"Projekt: "+proj+"\n":"")+(notes?"Vorhandene Notizen (nicht wiederholen): "+notes+"\n":"")+(have.length?"Vorhandene Checklistenpunkte (nicht wiederholen): "+have.join("; ")+"\n":"")
-   +'Antworte ausschließlich mit einem JSON-Objekt, ohne Erklärung und ohne Code-Block: {"notes":"1 bis 3 kurze Sätze: was ist zu tun, worauf achten","checklist":["3 bis 8 kurze Schritte im Imperativ"]}'}
+   +'Antworte ausschließlich mit einem JSON-Objekt, ohne Erklärung und ohne Code-Block: {"notes":"1 bis 3 kurze Sätze: was ist zu tun, worauf achten","checklist":["3 bis 8 kurze Schritte im Imperativ, in der Reihenfolge, in der man sie erledigt"]}\nOrdne die Schritte als Arbeitsablauf: Vorbereitung und Besorgungen zuerst, dann was Voraussetzung für Späteres ist (z. B. erst Kabel verlegen, dann verputzen, dann streichen), Aufräumen und Prüfen zuletzt. Nicht alphabetisch sortieren.'+(have.length?" Neue Schritte werden hinten angehängt; schlage nur vor, was nach den vorhandenen kommt oder fehlt.":"")}
 let aiRes=null,aiHints=[];
 async function aiRun(refine){
   if(!$("f_title").value.trim()){toast("Bitte zuerst einen Titel eingeben");$("f_title").focus();return}

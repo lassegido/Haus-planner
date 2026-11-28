@@ -1,5 +1,20 @@
 # Änderungen
 
+## 1.54.0
+- **Neue Statusfarben:** Offen grau-blau, In Arbeit blau, Erledigt grün, Nicht geschafft rot (statt Orange und zweimal Blau). Überfällig bleibt ziegelrot. Gilt in allen Ansichten und Farbwelten; Kontrast geprüft.
+- **Zeitstrahl:**
+  - **Wochen** zwischen Tagen und Monaten, mit Kalenderwochen (KW 48 …). Die Wahl bleibt gespeichert.
+  - **Zoom-Regler** für die Spaltenbreite (50–250 %). Bei engen Spalten werden die Beschriftungen ausgedünnt (Mo → M, nur Montage, nur jede zweite KW), damit nichts übereinander steht. Beim Zoomen bleibt die Mitte stehen.
+  - **Zwei Gruppierungsebenen:** ⋯ → Gruppieren, dann „Dann gruppieren“, z. B. erst Projekt, dann Person. Gilt auch in der Liste. Ziehen in eine andere Untergruppe übernimmt beides (z. B. Projekt und Person). Die Gruppierung bleibt gespeichert.
+  - **Wer ist verantwortlich, auf einen Blick:** Kürzel in Personenfarbe am Anfang jedes Balkens (Melanie ziegelrot, Lasse blau) und rechts in der Zeile, auch in Planen.
+  - **Erledigte sehen erledigt aus:** ✓ vor dem Namen (✕ bei nicht geschafft), durchgestrichen, ohne Griffe und ohne Verknüpfungspunkt. Der Punkt bei offenen Aufgaben ist jetzt ausgefüllt, damit er nicht wie ein leerer Haken wirkt.
+  - **Antippen oder Klicken auf einen Balken öffnet die Aufgabe**, auch in der Home-Assistant-App auf dem iPad.
+- **Seitenleiste einklappen** (iPad quer, Computer): Knopf neben „Planner“ klappt sie auf die schmale Symbolleiste zusammen; alle Ansichten bleiben erreichbar. Bleibt gespeichert.
+- **Checkliste:**
+  - **Gedrückt halten auf dem Text** zieht den Punkt (am Griff weiter sofort).
+  - **Kein Hängenbleiben mehr:** Beim Ziehen rutschen die anderen Punkte weich zur Seite; vorher konnte ein Punkt zwischen zwei anderen hängen bleiben (Safari verlor beim Umhängen den Finger).
+  - **KI schlägt Schritte in Arbeitsreihenfolge vor** (Vorbereitung zuerst, Voraussetzungen vor dem, was darauf aufbaut, Aufräumen zuletzt), nicht alphabetisch. Die eigene Reihenfolge wurde schon immer so gespeichert, wie sie ist.
+
 ## 1.53.0
 - **Abhängigkeiten an einem Tag:** Ist der Vorgänger eine eintägige Aufgabe, darf der Nachfolger am selben Tag liegen (mehrere Schritte nacheinander an einem Tag). Erst bei Vorgängern über mehrere Tage rückt der Nachfolger auf den Tag nach dem Ende. Die Pfeile werden in beiden Fällen angezeigt.
 

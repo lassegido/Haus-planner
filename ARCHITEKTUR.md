@@ -73,7 +73,7 @@ Alle Dateien bilden **ein** Skript (keine Module): Namen sind überall sichtbar,
 
 ## CSS in `src/style.css`
 
-Grundgerüst, dann Schichten je Version (`/* 1.2: … */` bis `/* 1.32: … */`). Spätere Schichten überschreiben frühere. Neue Regeln kommen ans Ende, mit Versionskommentar. Farben nur über Variablen (`--acc`, `--grp`, Status `--sky`, `--sun`, `--sea`, `--brick`). Aufräumen nur mit `tools/css_audit.py` und Absicherung durch `tools/style_diff.py`.
+Grundgerüst, dann Schichten je Version (`/* 1.2: … */` bis `/* 1.32: … */`). Spätere Schichten überschreiben frühere. Neue Regeln kommen ans Ende, mit Versionskommentar. Farben nur über Variablen (`--acc`, `--grp`, Status ab 1.54 `--todo`, `--doing`, `--done`, `--fail`, Überfällig `--bad`; Personen über `avc()`). Aufräumen nur mit `tools/css_audit.py` und Absicherung durch `tools/style_diff.py`.
 
 ## Server (`planner/server.py`)
 
@@ -116,3 +116,6 @@ Nicht abgedeckt (nur auf echten Geräten prüfbar, siehe `PRUEFLISTE.md`): Safar
 | Neue Schnittstelle im Server | Schreibschutz vergessen | `X-Planner`-Prüfung gilt für alle POST/DELETE in `guard()`; Test ergänzen |
 | Persönliche Einstellung (neuer Schlüssel) | Wird nicht je Benutzer gespeichert | In `PREF_KEYS` (Server) und `PK` (`src/js/10-speicher.addon.js`) eintragen |
 | Bibliothek oder Schrift | Add-on lädt sie lokal | Adresse in `tools/vendor.py` und `LIB` ändern, GitHub-Lauf „Fremdcode holen“ |
+
+## Gespeicherte Ansichtseinstellungen (ab 1.54)
+Im Browser (`localStorage`, Präfix `haus-`): `grp` und `grp2` (Gruppierung, zwei Ebenen; Schlüssel der Untergruppe `k1␟k2`, `GSEP` in `80-tags.js`), `gmode` (Tage/Wochen/Monate/Jahre), `gzoom` (Zoom 0,5–2,5), `mini` (Seitenleiste eingeklappt). Wer `groups()` ändert, prüft auch `groups2()`, `regroupFields()` (zieht über beide Ebenen) und `rowDrop()`.

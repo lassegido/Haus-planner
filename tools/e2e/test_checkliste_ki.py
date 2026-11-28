@@ -79,3 +79,76 @@ def test_ki_schluessel_speichern(t, browser):
         t.check("keine Skriptfehler", not p.errors, p.errors)
         p.close()
     g.close()
+
+
+def _liste(p, punkte):
+    p.pg.click("#add")
+    p.pg.wait_for_timeout(400)
+    p.pg.fill("#f_title", "Büro")
+    p.js("document.getElementById('d_ck').open=true")
+    for x in punkte:
+        p.pg.click("#ck_add")
+        p.pg.keyboard.type(x)
+    p.js("document.activeElement.blur()")
+    p.pg.wait_for_timeout(200)
+
+
+def test_checkliste_gedrueckt_halten_auf_dem_text(t, browser):
+    """1.54: Gedrückt halten auf dem Text zieht (echte Touch-Ereignisse über CDP); keine Zeile bleibt zwischendrin hängen."""
+    with Server() as s:
+        p = Page(browser, s.url, PHONE)
+        _liste(p, ["Material kaufen", "Kabel verlegen", "Strom verlegen", "Verputzen", "Streichen"])
+        cdp = p.pg.context.new_cdp_session(p.pg)
+        r = p.js("[...document.querySelectorAll('#f_ck .ct')].map(e=>{const b=e.getBoundingClientRect();return[b.x+b.width/2,b.y+b.height/2,b.height]})")
+        x, y = r[4][0], r[4][1]
+        cdp.send("Input.dispatchTouchEvent", {"type": "touchStart", "touchPoints": [{"x": x, "y": y}]})
+        p.pg.wait_for_timeout(550)
+        t.check("Nach kurzem Halten: Zeile hebt sich an", p.js("!!document.querySelector('#f_ck .ck.drag')"))
+        ziel = r[1][1] - 4
+        for k in range(1, 15):
+            cdp.send("Input.dispatchTouchEvent", {"type": "touchMove", "touchPoints": [{"x": x, "y": y + (ziel - y) * k / 14}]})
+            p.pg.wait_for_timeout(20)
+        cdp.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []})
+        p.pg.wait_for_timeout(300)
+        order = p.js("cklist.map(c=>c.t)")
+        t.check("„Streichen“ am Text nach oben auf Platz 2 gezogen", order == ["Material kaufen", "Streichen", "Kabel verlegen", "Strom verlegen", "Verputzen"], order)
+        lage = p.js("[...document.querySelectorAll('#f_ck .ck')].map(e=>[e.style.transform,Math.round(e.getBoundingClientRect().top)])")
+        tops = [z[1] for z in lage]
+        t.check("Danach liegt jede Zeile sauber an ihrem Platz (nichts hängt dazwischen)", all(not z[0] for z in lage) and tops == sorted(tops) and
+                max(b - a for a, b in zip(tops, tops[1:])) - min(b - a for a, b in zip(tops, tops[1:])) <= 1, lage)
+        t.check("Keine Tastatur nach dem Ziehen", p.js("!document.activeElement.classList.contains('ct')"))
+        # kurzes Antippen bleibt Texteingabe, Wischen bleibt Scrollen
+        cdp.send("Input.dispatchTouchEvent", {"type": "touchStart", "touchPoints": [{"x": x, "y": r[0][1]}]})
+        cdp.send("Input.dispatchTouchEvent", {"type": "touchMove", "touchPoints": [{"x": x, "y": r[0][1] + 40}]})
+        p.pg.wait_for_timeout(500)
+        cdp.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []})
+        p.pg.wait_for_timeout(200)
+        t.check("Sofort bewegt (Scrollen): kein Ziehen", not p.js("!!document.querySelector('#f_ck .ck.drag')") and p.js("cklist.map(c=>c.t)") == order)
+        p.pg.click("#b_save")
+        p.pg.wait_for_timeout(700)
+        t.check("Reihenfolge wird so gespeichert (nicht alphabetisch)", [c["t"] for c in s.tasks()[0]["checklist"]] == order)
+        p.js("openDlg(%r)" % s.tasks()[0]["id"])
+        p.pg.wait_for_timeout(300)
+        t.check("Wieder geöffnet: gleiche Reihenfolge", p.js("cklist.map(c=>c.t)") == order)
+        t.check("keine Skriptfehler", not p.errors, p.errors)
+        p.close()
+
+
+def test_ki_checkliste_in_arbeitsreihenfolge(t, browser):
+    g = FakeGemini(antwort)
+    with Server(settings={"ai_key": "AQ.TestSchluessel_1234567890abcdef"}, GEMINI_URL=g.url) as s:
+        p = Page(browser, s.url, PHONE)
+        p.pg.click("#add")
+        p.pg.wait_for_timeout(400)
+        p.pg.fill("#f_title", "Steckdose im Büro")
+        p.js("document.getElementById('d_ck').open=true")
+        p.pg.click("#ai_btn")
+        p.pg.wait_for_function("aiRes&&aiRes.items&&aiRes.items.length", timeout=5000)
+        pr = next((x for x in reversed(g.prompts) if "Steckdose" in x), "")
+        t.check("KI wird um Arbeitsreihenfolge gebeten, nicht alphabetisch", "Reihenfolge, in der man sie erledigt" in pr and "Nicht alphabetisch" in pr, pr[-400:])
+        p.pg.click("#ai_ok")
+        p.pg.wait_for_timeout(200)
+        t.check("Vorschläge in der Reihenfolge der KI übernommen", p.js("cklist.map(c=>c.t)") == ["Wände verputzen", "Wände streichen", "Boden verlegen"])
+        t.check("keine Skriptfehler", not p.errors, p.errors)
+        p.close()
+    g.close()

@@ -10,10 +10,10 @@ const monOf=d=>d-(fromDn(d).getUTCDay()+6)%7;
 const pLabel=d=>WDS[(fromDn(d).getUTCDay()+6)%7]+" "+fd(iso(fromDn(d)));
 const inboxL=()=>RAW.filter(t=>t.inbox&&!t.del&&!t.arch&&t.status!=="done");
 function calSwitch(){const m=calModeNow();return`<div class="calmode hpick" role="tablist" aria-label="Ansicht">${[["monat","Monat"],["plan","Planen"]].map(([k,n])=>`<button type="button" role="tab" data-calm="${k}" class="${m===k?"on":""}" aria-selected="${m===k}">${n}</button>`).join("")}</div>`}
-function pChip(t,i){const meta=[t.who,...tgs(t).slice(0,1)].filter(Boolean),dur=dn(t.end)-dn(t.start);
+function pChip(t,i){const meta=tgs(t).slice(0,1),dur=dn(t.end)-dn(t.start);
   return`<div class="pch${t.status==="done"?" done":""}${isFail(t)?" fail":""}${planPick===t.id?" picked":""}${t.prio?" p"+t.prio:""}" data-id="${t.id}" style="--i:${Math.min(i,8)}">`
    +`<span class="pgrip" data-pgrip="${t.id}" role="button" tabindex="0" aria-label="„${esc(t.title)}“ verschieben"><svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span>`
-   +`<span class="pct"><b>${esc(t.title)}</b>${meta.length||dur>0||t.rec?`<small>${[...meta.map(esc),dur>0?(dur+1)+" Tage":"",t.rec?"↻":""].filter(Boolean).join(" · ")}</small>`:""}</span></div>`}
+   +`<span class="pct"><b>${esc(t.title)}</b>${meta.length||dur>0||t.rec?`<small>${[...meta.map(esc),dur>0?(dur+1)+" Tage":"",t.rec?"↻":""].filter(Boolean).join(" · ")}</small>`:""}</span>${avsH(t,2)}</div>`}
 const pSort=(a,b)=>(a.status==="done")-(b.status==="done")||(a.prio||9)-(b.prio||9)||a.title.localeCompare(b.title,"de");
 function plan(list){
   const T=today(),W=planWeeks();if(planFrom===null)planFrom=monOf(T);const from=planFrom,to=from+W*7-1;

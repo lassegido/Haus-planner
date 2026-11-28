@@ -61,22 +61,32 @@ let cklist=[];
 function drawCk(){const box=$("f_ck");box.innerHTML=cklist.map((c,i)=>`<div class="ck" data-ck="${i}">${cklist.length>1?`<button class="grip" type="button" aria-label="Ziehen zum Verschieben" tabindex="-1"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="1.5"/><circle cx="15" cy="7" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="17" r="1.5"/><circle cx="15" cy="17" r="1.5"/></svg></button>`:""}<input type="checkbox" data-i="${i}" ${c.d?"checked":""}><input class="ct" data-i="${i}" value="${esc(c.t)}" placeholder="Punkt"><button class="x" type="button" data-r="${i}">✕</button></div>`).join("");
   box.querySelectorAll("input[type=checkbox]").forEach(b=>b.onchange=()=>{cklist[b.dataset.i].d=b.checked});
   box.querySelectorAll(".ct").forEach(b=>{b.oninput=()=>{cklist[b.dataset.i].t=b.value};b.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();cklist.splice(+b.dataset.i+1,0,{t:"",d:false});drawCk();box.querySelectorAll(".ct")[+b.dataset.i+1].focus()}}});
-  box.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{cklist.splice(+b.dataset.r,1);drawCk()});
-  box.querySelectorAll(".grip").forEach(g=>g.onpointerdown=ckDrag)}
-/* Checkliste umsortieren: Griff gedrückt halten und ziehen */
-function ckDrag(e){
-  if(e.button>0)return;e.preventDefault();
-  const g=e.currentTarget,row=g.closest(".ck"),box=$("f_ck");let y0=e.clientY,moved=false;
-  g.setPointerCapture(e.pointerId);row.classList.add("drag");hap(10);
-  const mv=ev=>{let dy=ev.clientY-y0;
-    const prev=row.previousElementSibling,next=row.nextElementSibling;
-    if(prev&&dy<-prev.offsetHeight/2){box.insertBefore(row,prev);y0-=prev.offsetHeight+parseFloat(getComputedStyle(prev).marginBottom);dy=ev.clientY-y0;moved=true;hap(5)}
-    else if(next&&dy>next.offsetHeight/2){box.insertBefore(next,row);y0+=next.offsetHeight+parseFloat(getComputedStyle(next).marginBottom);dy=ev.clientY-y0;moved=true;hap(5)}
-    row.style.transform=`translateY(${dy}px)`};
-  const up=()=>{g.removeEventListener("pointermove",mv);g.removeEventListener("pointerup",up);g.removeEventListener("pointercancel",up);
-    row.classList.remove("drag");row.style.transform="";
-    if(moved){const order=[...box.querySelectorAll(".ck")].map(r=>+r.dataset.ck);cklist=order.map(i=>cklist[i]);drawCk()}};
-  g.addEventListener("pointermove",mv);g.addEventListener("pointerup",up);g.addEventListener("pointercancel",up)}
+  box.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{cklist.splice(+b.dataset.r,1);drawCk()});}
+/* Checkliste umsortieren (1.54): am Griff sofort ziehen, sonst irgendwo auf der Zeile (auch auf dem Text) kurz gedrückt halten.
+   Während des Ziehens bleiben die Zeilen im DOM, wo sie sind (nur transform); neu geordnet wird erst beim Loslassen. Vorher wurde
+   die Zeile beim Ziehen im DOM umgehängt – Safari verliert dabei den Pointer-Capture, und die Zeile blieb zwischen zwei anderen hängen. */
+let ckd=null,ckEndAt=0;
+function ckStart(row,y){const box=$("f_ck"),rows=[...box.querySelectorAll(".ck")];if(rows.length<2)return;
+  const from=rows.indexOf(row),R=rows.map(r=>r.getBoundingClientRect()),step=R[1].top-R[0].top;
+  if(document.activeElement&&row.contains(document.activeElement))document.activeElement.blur();
+  ckd={row,rows,from,to:from,y0:y,R,step};row.classList.add("drag");box.classList.add("sorting");hap(10)}
+function ckMove(y){const d=ckd;if(!d)return;const dy=y-d.y0,r0=d.R[d.from],c=r0.top+r0.height/2+dy;d.row.style.transform=`translateY(${dy}px)`;
+  let to=0;d.R.forEach((r,i)=>{if(i!==d.from&&c>r.top+r.height/2)to++});if(to!==d.to){d.to=to;hap(5)}
+  d.rows.forEach((r,i)=>{if(i===d.from)return;const sh=d.from<i&&i<=to?-d.step:to<=i&&i<d.from?d.step:0;r.style.transform=sh?`translateY(${sh}px)`:""})}
+function ckEnd(){const d=ckd;ckd=null;if(!d)return;ckEndAt=Date.now();$("f_ck").classList.remove("sorting");
+  if(d.to!==d.from){const[x]=cklist.splice(d.from,1);cklist.splice(d.to,0,x)}drawCk()}
+{const box=$("f_ck");let lp=null;const stopLp=()=>{if(lp){clearTimeout(lp.tm);lp=null}};
+  box.addEventListener("pointerdown",e=>{if(e.button>0||ckd)return;const row=e.target.closest(".ck");if(!row)return;
+    if(e.target.closest(".grip")){e.preventDefault();ckStart(row,e.clientY);return}
+    if(e.target.closest(".x,input[type=checkbox]"))return;
+    lp={row,x:e.clientX,y:e.clientY,tm:setTimeout(()=>{const l=lp;lp=null;if(l)ckStart(l.row,l.y)},380)}});
+  addEventListener("pointermove",e=>{if(ckd)ckMove(e.clientY);else if(lp&&Math.hypot(e.clientX-lp.x,e.clientY-lp.y)>8)stopLp()},{passive:true});
+  addEventListener("pointerup",()=>{stopLp();ckEnd()});addEventListener("pointercancel",()=>{stopLp();ckEnd()});
+  /* beim Ziehen nicht scrollen; nach dem Ziehen keine Tastatur und kein Textmenü */
+  box.addEventListener("touchmove",e=>{if(ckd)e.preventDefault()},{passive:false});
+  box.addEventListener("touchend",e=>{if(Date.now()-ckEndAt<300)e.preventDefault()},{passive:false});
+  box.addEventListener("click",e=>{if(Date.now()-ckEndAt<300){e.preventDefault();e.stopPropagation()}},true);
+  box.addEventListener("contextmenu",e=>{if(ckd||lp)e.preventDefault()})}
 $("ck_add").onclick=()=>{cklist.push({t:"",d:false});drawCk();const a=$("f_ck").querySelectorAll(".ct");a[a.length-1].focus()};
 
 /* Dialog */

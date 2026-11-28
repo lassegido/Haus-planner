@@ -16,3 +16,7 @@ $("tabs").onclick=e=>{const bt=e.target.closest("button"),v=bt&&bt.dataset.v;if(
   
   const close=()=>{s.classList.add("out");setTimeout(()=>s.remove(),700)};setTimeout(close,1100);s.onclick=close})();
 init();
+/* 1.54: Seitenleiste einklappen (iPad quer, Computer): schmale Symbolleiste, Wahl bleibt gespeichert */
+{const set=on=>{document.documentElement.classList.toggle("mini",on);const b=$("sidetog");if(b){b.setAttribute("aria-label",on?"Seitenleiste ausklappen":"Seitenleiste einklappen");b.setAttribute("aria-pressed",on)}};
+ let on=false;try{on=localStorage.getItem("haus-mini")==="1"}catch(_){}set(on);
+ $("sidetog").onclick=()=>{on=!document.documentElement.classList.contains("mini");set(on);try{localStorage.setItem("haus-mini",on?"1":"0")}catch(_){}render()}}

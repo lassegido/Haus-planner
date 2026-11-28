@@ -40,7 +40,7 @@ function homeBody(tasks,allT){
   const sub=!rn?"Für heute ist nichts geplant.":!todayL.length?(nf?NF.trim():"Alles für heute erledigt."):`Noch ${todayL.length} offen`+(over.length?`, davon ${over.length} überfällig.`:".")+NF;
   const TL={heute:["Heute",todayL,"var(--acc)",'<rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/><circle cx="12" cy="15" r="1.6" fill="currentColor" stroke="none"/>',"Für heute ist nichts geplant."],
     morgen:["Morgen",week,"#6F8796",'<rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4M10 13.5l2.5 2.5-2.5 2.5"/>',"Für morgen ist nichts geplant."],
-    doing:["In Arbeit",doingL,"var(--sun)",'<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/>',"Gerade ist nichts in Arbeit."],
+    doing:["In Arbeit",doingL,"var(--doing)",'<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/>',"Gerade ist nichts in Arbeit."],
     late:["Überfällig",over,"var(--brick)",'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.3v.2"/>',"Nichts überfällig."]};
   let ht="heute";try{ht=localStorage.getItem("haus-htile")||"heute"}catch(_){}if(!TL[ht])ht="heute";
   const tiles=`<div class="tiles">`+Object.entries(TL).map(([k,[l,L,c,ic]])=>`<button type="button" class="tile${k===ht?" on":""}" data-ht="${k}" style="--tc:${c}"><span class="ti2"><svg viewBox="0 0 24 24">${ic}</svg></span><b>${L.length}</b><span class="tl">${l}</span></button>`).join("")+`</div>`;
@@ -173,12 +173,14 @@ function render(){
 }
 const avc=w=>/^melanie/i.test(w)?"am":/^lasse/i.test(w)?"al":"ao";
 const pjh=t=>t.proj?`<div class="pjh" style="--tc:${pcol(t.proj)}"><i></i>${esc(t.proj)}</div>`:"";
+/* 1.54: Wer ist verantwortlich – Kürzel in Personenfarbe (Melanie Ziegel, Lasse Meer, andere Himmel) */
+const avsH=(t,max=3)=>{const w=wl(t);return w.length?`<span class="avs" title="${esc(w.join(", "))}">${w.slice(0,max).map(n=>`<i class="av ${avc(n)}">${esc(n[0].toUpperCase())}</i>`).join("")}${w.length>max?`<i class="av ao">+${w.length-max}</i>`:""}</span>`:""};
 const pb=t=>t.prio?`<span class="pr p${t.prio}" title="Prio ${t.prio}">P${t.prio}</span>`:"";
 const cl=t=>{const a=t.checklist||[];return a.length?`<span class="ckc">${a.filter(x=>x.d).length}/${a.length}</span>`:""};
 function card(t,s,i=0){
   const a=t.checklist||[],k=a.filter(x=>x.d).length,late=isLate(t),fl=isFail(t)?" fail":"";
   const tg=pb(t)+tgs(t).map(chip).join("")+(isBlocked(t)?'<span class="blk">blockiert</span>':"");
-  return`<div class="card ${s}${fl}${t.id===lastMoved?" pop":""}"${t.prio?` data-pr="${t.prio}"`:""} draggable="true" data-id="${t.id}" style="--i:${Math.min(i,8)}">${pjh(t)}<div class="ch"><button class="ring ${s}${fl}" data-adv="${t.id}" aria-label="Status: ${stName(t)}. Weiterschalten"></button><div class="t">${esc(t.title)}</div>${wl(t).length?`<span class="avs" title="${esc(wl(t).join(", "))}">${wl(t).slice(0,3).map(n=>`<i class="av ${avc(n)}">${esc(n[0].toUpperCase())}</i>`).join("")}${wl(t).length>3?`<i class="av ao">+${wl(t).length-3}</i>`:""}</span>`:""}</div>${tg?`<div class="tg">${tg}</div>`:""}${a.length?`<div class="cb"><i style="width:${Math.round(k/a.length*100)}%"></i></div>`:""}<div class="cm"><span class="${late?"late":""}">${fl?'<b class="nfail">Nicht geschafft</b> · ':""}${dr(t)}</span><span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}${cl(t)}</span></div></div>`}
+  return`<div class="card ${s}${fl}${t.id===lastMoved?" pop":""}"${t.prio?` data-pr="${t.prio}"`:""} draggable="true" data-id="${t.id}" style="--i:${Math.min(i,8)}">${pjh(t)}<div class="ch"><button class="ring ${s}${fl}" data-adv="${t.id}" aria-label="Status: ${stName(t)}. Weiterschalten"></button><div class="t">${esc(t.title)}</div>${avsH(t)}</div>${tg?`<div class="tg">${tg}</div>`:""}${a.length?`<div class="cb"><i style="width:${Math.round(k/a.length*100)}%"></i></div>`:""}<div class="cm"><span class="${late?"late":""}">${fl?'<b class="nfail">Nicht geschafft</b> · ':""}${dr(t)}</span><span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}${cl(t)}</span></div></div>`}
 let showDone=false;const DONE_MAX=20;
 function board(list){
   return`<div class="board">`+Object.keys(ST).map(s=>{let L=list.filter(t=>t.status===s);const all=L.length;
@@ -190,62 +192,87 @@ function board(list){
 const isPhone=()=>matchMedia("(max-width:699px)").matches;
 function lrow(t,i){const dn_=t.status==="done",fl=isFail(t);return`<div class="hrow lrow${fl?" fail":""}" data-id="${t.id}"${t.prio?` data-pr="${t.prio}"`:""} style="--i:${Math.min(i,8)}"><button class="ring ${t.status}${fl?" fail":""}" data-adv="${t.id}" aria-label="Status: ${stName(t)}. Weiterschalten"></button><div class="hm"><div class="ht">${pb(t)}<span>${esc(t.title)}</span>${t.ms?MSI:""}${t.rec?RECI:""}</div><div class="hs">${[t.proj,...tgs(t),t.who].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}${isBlocked(t)?' · <span class="blk">blockiert</span>':""}</div></div><span class="hd${isLate(t)?" late":""}">${fl?"nicht geschafft":dn_?fd(t.end):rel(t)}</span></div>`}
 function table(list){
-  if(isPhone())return`<div class="ilist">`+groups(list).map(g=>(g.l!=null?`<h3 class="igh"><i class="dt" style="background:${g.c}"></i><span>${esc(g.l)}</span><em>${g.L.length}</em></h3>`:"")+`<div class="igrp">${g.L.map(lrow).join("")}</div>`).join("")+`</div>`;
+  const ih=(g,c="")=>`<h3 class="igh${c}"><i class="dt" style="background:${g.c}"></i><span>${esc(g.l)}</span><em>${g.L.length}</em></h3>`;
+  if(isPhone())return`<div class="ilist">`+groups2(list).map(g=>(g.l!=null?ih(g):"")+(g.S?g.S.map(h=>ih(h," igh2")+`<div class="igrp">${h.L.map(lrow).join("")}</div>`).join(""):`<div class="igrp">${g.L.map(lrow).join("")}</div>`)).join("")+`</div>`;
+  const th=(g,c="")=>`<tr class="grp${c}"><td colspan="6"><i class="dt" style="background:${g.c}"></i>${esc(g.l)}<em>${g.L.length}</em></td></tr>`;
   const row=t=>`<tr class="row" data-id="${t.id}"${t.prio?` data-pr="${t.prio}"`:""}><td>${pjh(t)}${pb(t)}${esc(t.title)} ${isBlocked(t)?'<span class="blk">blockiert</span>':""}<span class="ic">${t.ms?MSI:""}${t.rec?RECI:""}${extra(t)}</span></td><td>${tgs(t).map(chip).join("")}</td><td>${esc(t.who)}</td><td>${fd(t.start)}</td><td class="${isLate(t)?"late":""}">${fd(t.end)}</td><td><span class="st ${t.status}${isFail(t)?" fail":""}">${stName(t)}</span></td></tr>`;
   return`<div class="wrap"><table><tr><th>Aufgabe</th><th>Tags</th><th>Wer</th><th>Beginn</th><th>Ende</th><th>Status</th></tr>`+
-  groups(list).map(g=>(g.l!=null?`<tr class="grp"><td colspan="6"><i class="dt" style="background:${g.c}"></i>${esc(g.l)}<em>${g.L.length}</em></td></tr>`:"")+g.L.map(row).join("")).join("")+`</table></div>`;
+  groups2(list).map(g=>(g.l!=null?th(g):"")+(g.S?g.S.map(h=>th(h," grp2")+h.L.map(row).join("")).join(""):g.L.map(row).join(""))).join("")+`</table></div>`;
 }
-let gmode="day";
+let gmode=(()=>{const v=prefGet("gmode");return["day","week","month","year"].includes(v)?v:"day"})();
+/* 1.54: Zoom des Zeitstrahls (Breite einer Einheit), 50–250 %, gespeichert; Beschriftungen werden bei engen Spalten ausgedünnt */
+let gzoom=(()=>{const v=+prefGet("gzoom");return v>=.5&&v<=2.5?v:1})();
+const isoWk=d=>{const x=fromDn(d),w=(x.getUTCDay()+6)%7,th=new Date(x);th.setUTCDate(x.getUTCDate()-w+3);return 1+Math.floor((th-Date.UTC(th.getUTCFullYear(),0,1))/864e5/7)};
 const MON=["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"],MONL=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"],WD=["So","Mo","Di","Mi","Do","Fr","Sa"];
 function gantt(list){
   if(!list.length)return'<div class="empty">Keine Treffer.</div>';
-  const T=today(),ROW=42,GH=30,mode=gmode,G=groups(list),items=[];let BH=0;
+  const T=today(),ROW=42,GH=30,GH2=26,mode=gmode,G=groups2(list),items=[];let BH=0;
   /* 1.52: Beim Bearbeiten bleibt die Zeilenfolge stehen (sonst springen Zeilen nach jedem Ziehen). Neu sortiert wird erst beim
      Neuladen oder wenn man unter ⋯ die Sortierung wechselt; eigenes Verschieben (Griff, Nach oben/unten) gilt sofort. */
   if(!gOrd)gOrd=list.map(t=>t.id);else for(const t of list)if(!gOrd.includes(t.id))gOrd.push(t.id);
   const gi=new Map(gOrd.map((id,i)=>[id,i]));G.forEach(g=>g.L.sort((a,b)=>gi.get(a.id)-gi.get(b.id)));
-  G.forEach(g=>{if(g.l!=null){items.push({g,y:BH});BH+=GH}g.L.forEach(t=>{items.push({t,gk:g.k,y:BH});BH+=ROW})});
+  const rowsOf=(L,gk)=>L.forEach(t=>{items.push({t,gk,y:BH});BH+=ROW});
+  G.forEach(g=>{if(g.l!=null){items.push({g,y:BH,lv:1});BH+=GH}
+    if(g.S)g.S.forEach(h=>{items.push({g:h,y:BH,lv:2});BH+=GH2;rowsOf(h.L,h.k)});else rowsOf(g.L,g.k)});
   const mn=Math.min(T,...list.map(t=>dn(t.start))),mx=Math.max(T,...list.map(t=>dn(t.end)));
   const dp=d=>{const x=fromDn(d);return[x.getUTCFullYear(),x.getUTCMonth(),x.getUTCDate(),x.getUTCDay()]};
   const dim=(y,m)=>new Date(Date.UTC(y,m+1,0)).getUTCDate();
   const tx=(x,y,c,t)=>`<text class="${c}" x="${x}" y="${y}" text-anchor="middle">${t}</text>`;
   let X,W,HEAD,PPD,hd="",gd="",tdx;
   if(mode==="day"){
-    const U=38,d0=mn-3,d1=Math.max(mx+14,d0+30);HEAD=68;PPD=U;W=(d1-d0+1)*U;X=d=>(d-d0)*U;tdx=X(T)+U/2;
+    const U=Math.round(38*gzoom),d0=mn-3,d1=Math.max(mx+14,d0+Math.ceil(1140/U));HEAD=68;PPD=U;W=(d1-d0+1)*U;X=d=>(d-d0)*U;tdx=X(T)+U/2;
     let seg=null;const segs=[];
     for(let d=d0;d<=d1;d++){
       const[y,m,dd,w]=dp(d),x=X(d),we=w===0||w===6;
       if(!seg||seg.y!==y||seg.m!==m){seg={y,m,x,w:0};segs.push(seg)}seg.w+=U;
       if(we)gd+=`<rect class="wk" x="${x}" y="0" width="${U}" height="${BH}"/>`;
       gd+=`<line class="${dd===1?"gs2":"gs1"}" x1="${x}" x2="${x}" y1="0" y2="${BH}"/>`;
-      hd+=tx(x+U/2,43,we?"we":"",WD[w]);
-      hd+=d===T?`<rect x="${x+U/2-14}" y="47" width="28" height="20" rx="10" fill="var(--bad)"/>`+tx(x+U/2,61,"tdn",dd):tx(x+U/2,61,we?"we":"",dd);
+      /* eng: Wochentag nur als Buchstabe, sehr eng: nur Montage und der 1. beschriftet */
+      const lab=U>=16||w===1||dd===1||d===T;
+      if(U>=16)hd+=tx(x+U/2,43,we?"we":"",U>=26?WD[w]:WD[w][0]);else if(w===1)hd+=tx(x+U/2,43,"","Mo");
+      if(lab)hd+=d===T?`<rect x="${x+U/2-Math.min(14,U/2+6)}" y="47" width="${Math.min(28,U+12)}" height="20" rx="10" fill="var(--bad)"/>`+tx(x+U/2,61,"tdn",dd):tx(x+U/2,61,we?"we":"",dd);
     }
     segs.forEach(g=>{hd+=`<line class="gs2" x1="${g.x}" x2="${g.x}" y1="0" y2="28"/><text class="l1" data-a="${g.x}" data-b="${g.x+g.w}" x="${g.x+10}" y="18">${g.w>=150?MONL[g.m]+" "+g.y:MON[g.m]+" "+String(g.y).slice(2)}</text>`});
+  }else if(mode==="week"){
+    /* 1.54: Kalenderwochen. Spalte = eine Woche (Mo–So), oben Monat und Jahr */
+    const U=Math.round(84*gzoom),wk=d=>d-((dp(d)[3]+6)%7),w0=wk(mn)-7,w1=Math.max(wk(mx)+21,w0+7*Math.ceil(1100/U));HEAD=52;PPD=U/7;W=((w1-w0)/7+1)*U;
+    X=d=>(d-w0)*U/7;tdx=X(T)+U/14;
+    let seg=null;const segs=[],step=U>=34?1:U>=18?2:4;
+    for(let d=w0,i=0;d<=w1;d+=7,i++){
+      const x=X(d),[y,m]=dp(d+3),n=isoWk(d);
+      if(!seg||seg.y!==y||seg.m!==m){seg={y,m,x,w:0};segs.push(seg)}seg.w+=U;
+      gd+=`<line class="${n===1?"gs2":"gs1"}" x1="${x}" x2="${x}" y1="0" y2="${BH}"/>`;
+      const lb=U>=58?"KW "+n:String(n);
+      if(d===wk(T))hd+=`<rect x="${x+U/2-Math.min(24,U/2+4)}" y="30" width="${Math.min(48,U+8)}" height="21" rx="10.5" fill="var(--bad)"/>`+tx(x+U/2,45,"tdn",lb);
+      else if(i%step===0)hd+=tx(x+U/2,45,"",lb);
+    }
+    segs.forEach(g=>{hd+=`<line class="gs2" x1="${g.x}" x2="${g.x}" y1="0" y2="28"/><text class="l1" data-a="${g.x}" data-b="${g.x+g.w}" x="${g.x+8}" y="18">${g.w>=110?MONL[g.m]+" "+g.y:g.w>=40?MON[g.m]+(g.m===0?" "+String(g.y).slice(2):""):""}</text>`});
   }else if(mode==="month"){
-    const U=64,mi=d=>{const[y,m]=dp(d);return y*12+m},m0=mi(mn)-1,m1=Math.max(mi(mx)+3,m0+11);HEAD=52;PPD=U/30.44;W=(m1-m0+1)*U;
+    const U=Math.round(64*gzoom),mi=d=>{const[y,m]=dp(d);return y*12+m},m0=mi(mn)-1,m1=Math.max(mi(mx)+3,m0+11);HEAD=52;PPD=U/30.44;W=(m1-m0+1)*U;
     X=d=>{const[y,m,dd]=dp(d);return(y*12+m-m0+(dd-1)/dim(y,m))*U};tdx=X(T);
     let ys=null;const segs=[];
     for(let k=m0;k<=m1;k++){
       const y=Math.floor(k/12),m=k%12,x=(k-m0)*U;
       if(!ys||ys.y!==y){ys={y,x,w:0};segs.push(ys)}ys.w+=U;
       gd+=`<line class="${m===0?"gs2":"gs1"}" x1="${x}" x2="${x}" y1="0" y2="${BH}"/>`;
-      hd+=k===mi(T)?`<rect x="${x+U/2-19}" y="30" width="38" height="21" rx="10.5" fill="var(--bad)"/>`+tx(x+U/2,45,"tdn",MON[m]):tx(x+U/2,45,"",MON[m]);
+      const lb=U>=36?MON[m]:MON[m][0],show=U>=18||m%3===0;
+      hd+=k===mi(T)?`<rect x="${x+U/2-Math.min(19,U/2+5)}" y="30" width="${Math.min(38,U+10)}" height="21" rx="10.5" fill="var(--bad)"/>`+tx(x+U/2,45,"tdn",lb):show?tx(x+U/2,45,"",lb):"";
     }
     segs.forEach(g=>{hd+=`<line class="gs2" x1="${g.x}" x2="${g.x}" y1="0" y2="28"/><text class="l1" data-a="${g.x}" data-b="${g.x+g.w}" x="${g.x+10}" y="18">${g.y}</text>`});
   }else{
-    const U=150,y0=dp(mn)[0],y1=Math.max(dp(mx)[0]+1,y0+4),cy=dp(T)[0];HEAD=52;PPD=U/365.25;W=(y1-y0+1)*U;
+    const U=Math.round(150*gzoom),y0=dp(mn)[0],y1=Math.max(dp(mx)[0]+1,y0+4),cy=dp(T)[0];HEAD=52;PPD=U/365.25;W=(y1-y0+1)*U;
     X=d=>{const y=dp(d)[0],len=dim(y,1)===29?366:365;return(y-y0+(d-Date.UTC(y,0,1)/864e5)/len)*U};tdx=X(T);
     let ds=null;const segs=[];
     for(let y=y0;y<=y1;y++){
       const x=(y-y0)*U,dc=Math.floor(y/10)*10;
       if(!ds||ds.dc!==dc){ds={dc,x,w:0};segs.push(ds)}ds.w+=U;
       gd+=`<line class="${y%10===0?"gs2":"gs1"}" x1="${x}" x2="${x}" y1="0" y2="${BH}"/>`;
-      hd+=y===cy?`<rect x="${x+U/2-27}" y="30" width="54" height="21" rx="10.5" fill="var(--bad)"/>`+tx(x+U/2,45,"tdn",y):tx(x+U/2,45,"",y);
+      const lb=U>=44?y:"'"+String(y).slice(2);
+      hd+=y===cy?`<rect x="${x+U/2-Math.min(27,U/2+4)}" y="30" width="${Math.min(54,U+8)}" height="21" rx="10.5" fill="var(--bad)"/>`+tx(x+U/2,45,"tdn",lb):tx(x+U/2,45,"",lb);
     }
     segs.forEach(g=>{hd+=`<line class="gs2" x1="${g.x}" x2="${g.x}" y1="0" y2="28"/><text class="l1" data-a="${g.x}" data-b="${g.x+g.w}" x="${g.x+10}" y="18">${g.dc}er</text>`});
   }
-  items.forEach(it=>{if(it.g)gd+=`<rect style="fill:color-mix(in srgb,${it.g.c} 16%,var(--card))" x="0" y="${it.y}" width="${W}" height="${GH}"/>`;gd+=`<line class="gs1" x1="0" x2="${W}" y1="${it.y}" y2="${it.y}"/>`});
+  items.forEach(it=>{if(it.g)gd+=`<rect style="fill:color-mix(in srgb,${it.g.c} ${it.lv===2?8:16}%,var(--card))" x="0" y="${it.y}" width="${W}" height="${it.lv===2?GH2:GH}"/>`;gd+=`<line class="gs1" x1="0" x2="${W}" y1="${it.y}" y2="${it.y}"/>`});
   gd+=`<line class="gs1" x1="0" x2="${W}" y1="${BH}" y2="${BH}"/>`;
   const col={todo:"var(--todo)",doing:"var(--doing)",done:"var(--done)"},pos={};
   const gkOf=new Map();items.forEach(it=>{if(it.t&&!gkOf.has(it.t.id))gkOf.set(it.t.id,it.gk)});
@@ -256,22 +283,27 @@ function gantt(list){
     const x1=a.x+a.w,y1=a.y+ROW/2,x2=b.x,y2=b.y+ROW/2,mx2=Math.max(x1+10,x2-10),r=Math.min(6,Math.abs(y2-y1)/2),sg=y2>y1?1:-1,back=x2<x1+20;
     const d=back?`M${x1} ${y1}h8v${sg*ROW/2-sg*6}H${x2-10}V${y2}H${x2}`:(r<1?`M${x1} ${y1}H${x2}`:`M${x1} ${y1}H${mx2-r}q${r} 0 ${r} ${sg*r}V${y2-sg*r}q0 ${sg*r} ${r} ${sg*r}H${x2}`);
     gd+=`<g class="gdl" data-dep="${id}>${t.id}"><path class="gdlh" d="${d}"/><path class="gdlv" d="${d}" marker-end="url(#ar)"/></g>`}));
-  list.forEach(t=>{const p=pos[t.id],inside=!t.ms&&p.w>=t.title.length*6.7+20,cy=p.y+ROW/2;
+  list.forEach(t=>{const p=pos[t.id],w1=wl(t)[0],pv=w1&&!t.ms&&p.w>=46,inside=!t.ms&&p.w>=t.title.length*6.7+20+(pv?20:0),cy=p.y+ROW/2;
+    /* 1.54: Kürzel der verantwortlichen Person am Anfang des Balkens */
+    const pin=pv?`<g class="gav ${avc(w1)}"><circle cx="${p.x+13}" cy="${cy}" r="8.5"/><text x="${p.x+13}" y="${cy+3.6}" text-anchor="middle">${esc(w1[0].toUpperCase())}</text></g>`:"";
     const body=t.ms?`<path d="M${p.x+9} ${cy-10}l10 10l-10 10l-10-10z" fill="${col[t.status]}"/>`:`<rect x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="${col[t.status]}"/><rect class="ggl" x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="url(#gGl)"/>`;
-    const lbl=inside?`<text class="bt ${t.status}" x="${p.x+11}" y="${cy+4.2}">${esc(t.title)}</text>`:`<text class="bo" x="${p.x+p.w+20}" y="${cy+4.2}">${esc(t.title)}</text>`;
+    const lbl=pin+(inside?`<text class="bt ${t.status}" x="${p.x+(pv?27:11)}" y="${cy+4.2}">${esc(t.title)}</text>`:`<text class="bo${t.status==="done"?" done":""}" x="${p.x+p.w+(t.status==="done"?8:20)}" y="${cy+4.2}">${t.status==="done"?(isFail(t)?"✕ ":"✓ "):""}${esc(t.title)}</text>`);
     /* 1.50: Enden zum Verkürzen/Verlängern: sichtbarer Griff, große Greiffläche (auch mit dem Finger sofort ziehbar) */
     const hw=Math.min(16,Math.max(8,p.w/3)),hd2=t.ms?"":`<rect data-h="s" class="gh1" x="${p.x-6}" y="${p.y+4}" width="${hw+6}" height="${ROW-8}"/><rect data-h="e" class="gh1" x="${p.x+p.w-hw}" y="${p.y+4}" width="${hw+4}" height="${ROW-8}"/><rect class="ghv" x="${p.x+3}" y="${cy-6}" width="3" height="12" rx="1.5"/><rect class="ghv" x="${p.x+p.w-6}" y="${cy-6}" width="3" height="12" rx="1.5"/>`;
-    gd+=`<g data-id="${t.id}" data-gk="${esc(gkOf.get(t.id)||"")}" class="gbar${isFail(t)?" gfail":""}"${t.status==="done"?' opacity=".72"':""}>${body}${lbl}${hd2}<circle data-h="dep" class="gdh" cx="${p.x+p.w+(t.ms?1:0)+16}" cy="${cy}" r="11"/><circle data-h="dep" class="gdep" cx="${p.x+p.w+(t.ms?1:0)+11}" cy="${cy}" r="5"/></g>`});
-  const rows=items.map(it=>it.g?`<div class="gr gh2" data-gk="${esc(it.g.k)}" style="--tc:${it.g.c}"><i class="dt" style="background:${it.g.c}"></i><span>${esc(it.g.l)}</span><em>${it.g.L.length}</em></div>`:`<div class="gr${linkFrom===it.t.id?" lfrom":""}" data-id="${it.t.id}" data-gk="${esc(it.gk||"")}" title="${esc(it.t.title)}"><span class="ggrip" data-ggrip="${it.t.id}" aria-label="Reihenfolge ändern"><svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"/></svg></span><i class="dt ${it.t.status}"></i>${pb(it.t)}<span>${esc(it.t.title)}</span></div>`).join("");
-  const seg=[["day","Tage"],["month","Monate"],["year","Jahre"]].map(([k,l])=>`<button data-gm="${k}" class="${k===mode?"on":""}">${l}</button>`).join("");
-  return`<div class="gctl"><div class="seg">${seg}</div><button class="btn ghost sm" data-gtoday>Heute</button></div>`+(linkFrom?`<div class="phint">„${esc((byId(linkFrom)||{}).title||"")}“ verknüpfen: Aufgabe antippen, die danach kommt.</div>`:"")+
+    gd+=`<g data-id="${t.id}" data-gk="${esc(gkOf.get(t.id)||"")}" class="gbar${isFail(t)?" gfail":""}"${t.status==="done"?' opacity=".72"':""}>${body}${lbl}${t.status==="done"?"":hd2+`<circle data-h="dep" class="gdh" cx="${p.x+p.w+(t.ms?1:0)+16}" cy="${cy}" r="11"/><circle data-h="dep" class="gdep" cx="${p.x+p.w+(t.ms?1:0)+11}" cy="${cy}" r="5"/>`}</g>`});
+  const rows=items.map(it=>it.g?`<div class="gr gh2${it.lv===2?" gh3":""}" data-lv="${it.lv}" data-gk="${esc(it.g.k)}" style="--tc:${it.g.c}"><i class="dt" style="background:${it.g.c}"></i><span>${esc(it.g.l)}</span><em>${it.g.L.length}</em></div>`:`<div class="gr${linkFrom===it.t.id?" lfrom":""}" data-id="${it.t.id}" data-gk="${esc(it.gk||"")}" title="${esc(it.t.title)}"><span class="ggrip" data-ggrip="${it.t.id}" aria-label="Reihenfolge ändern"><svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"/></svg></span><i class="dt ${it.t.status}"></i>${pb(it.t)}<span>${esc(it.t.title)}</span>${avsH(it.t,2)}</div>`).join("");
+  const seg=[["day","Tage"],["week","Wochen"],["month","Monate"],["year","Jahre"]].map(([k,l])=>`<button data-gm="${k}" class="${k===mode?"on":""}">${l}</button>`).join("");
+  return`<div class="gctl"><div class="seg">${seg}</div><label class="gzoom" title="Zoom"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M8.5 11h5M20 20l-4.6-4.6"/></svg><input type="range" id="gzoom" min="50" max="250" step="10" value="${Math.round(gzoom*100)}" aria-label="Zoom des Zeitstrahls"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M8.5 11h5M11 8.5v5M20 20l-4.6-4.6"/></svg></label><button class="btn ghost sm" data-gtoday>Heute</button></div>`+(linkFrom?`<div class="phint">„${esc((byId(linkFrom)||{}).title||"")}“ verknüpfen: Aufgabe antippen, die danach kommt.</div>`:"")+
   `<div class="gwrap"><div class="gl"><div class="glh" style="--hd:${HEAD}px"></div>${rows}<div class="glg" style="--hd:${HEAD}px" role="separator" aria-label="Breite der Beschriftung ändern" title="Ziehen zum Ändern, Doppeltippen zum Zurücksetzen"></div></div><div class="gs" style="width:${W}px"><svg class="gh" width="${W}" height="${HEAD}">${hd}</svg><svg class="gb" width="${W}" height="${BH}" data-tx="${tdx}" data-ppd="${PPD}"><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--acc)"/></marker><linearGradient id="gGl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".65" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>${gd}</svg></div></div>`;
 }
 function bind(){
   document.querySelectorAll("[data-id]").forEach(el=>el.onclick=e=>{if(e.target.dataset.adv)return;openDlg(el.dataset.id)});
   document.querySelectorAll("[data-adv]").forEach(b=>b.onclick=e=>{e.stopPropagation();advance(b.dataset.adv)});
   document.querySelectorAll("[data-back]").forEach(b=>b.onclick=e=>{e.stopPropagation();navigator.vibrate&&navigator.vibrate(8);const t=byId(b.dataset.back);saveTask({...t,status:{doing:"todo",done:"doing"}[t.status]})});
-  document.querySelectorAll("[data-gm]").forEach(b=>b.onclick=()=>{gmode=b.dataset.gm;renderedView=null;render()});
+  document.querySelectorAll("[data-gm]").forEach(b=>b.onclick=()=>{gmode=b.dataset.gm;prefSet("gmode",gmode);renderedView=null;render()});
+  /* Zoom: Stelle in der Mitte bleibt stehen (Zeitraum hängt nicht vom Zoom ab, darum genügt der Anteil) */
+  const gz=$("gzoom");if(gz){let raf=0;gz.oninput=()=>{gzoom=+gz.value/100;if(raf)return;raf=requestAnimationFrame(()=>{raf=0;const g=document.querySelector(".gwrap"),l=g.querySelector(".gl").offsetWidth,w=g.querySelector(".gs").offsetWidth,c=(g.scrollLeft+(g.clientWidth-l)/2)/w;
+    render();const g2=document.querySelector(".gwrap");if(g2){const w2=g2.querySelector(".gs").offsetWidth;g2.scrollLeft=c*w2-(g2.clientWidth-l)/2}const z=$("gzoom");if(z&&document.activeElement!==z)z.focus()})};gz.onchange=()=>prefSet("gzoom",String(gzoom))}
   const gt=document.querySelector("[data-gtoday]");if(gt)gt.onclick=()=>gToday(true);
   document.querySelectorAll(".card").forEach(c=>c.ondragstart=e=>e.dataTransfer.setData("text/plain",c.dataset.id));
   document.querySelectorAll(".colm").forEach(c=>{
