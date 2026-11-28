@@ -64,7 +64,9 @@ def test_zwei_ebenen_und_personen(t, browser):
         t.check("Menü bietet „Dann gruppieren“", "Dann gruppieren" in p.js("(()=>{$('more').click();return [...document.querySelectorAll('.pop button, #pop button, [role=menu] button')].map(b=>b.textContent).join('|')})()"))
         p.pg.keyboard.press("Escape")
         av = p.js("[...document.querySelectorAll('.gb .gav')].map(g=>g.closest('[data-id]').dataset.id+g.classList[1])")
-        t.check("Balken tragen das Kürzel in Personenfarbe", "aam" in av and "bal" in av, av)
+        t.check("Unter den Balken eine Linie in Personenfarbe", "aam" in av and "bal" in av, av)
+        t.check("Personenlinie liegt unter dem Balken, verdeckt ihn nicht", p.js("(()=>{const b=document.querySelector('.gbar[data-id=a] rect').getBBox(),l=document.querySelector('.gbar[data-id=a] .gav').getBBox();return l.y>=b.y+b.height})()"))
+        t.check("Kopfzeile liegt über den Balken", p.js("+getComputedStyle(document.querySelector('.gh')).zIndex>+getComputedStyle(document.querySelector('.gb')).zIndex"))
         t.check("Zeilen links mit Kürzel", p.js("!!document.querySelector('.gl .gr[data-id=a] .av.am')"))
         # Ziehen über beide Ebenen: Wickeltisch (Baby/Lasse) nach Haus/Lasse → Projekt wechselt, Person bleibt
         p.js("void dropRow('d',{after:'b',from:'Baby\\u001fLasse',to:'Haus\\u001fLasse'})")

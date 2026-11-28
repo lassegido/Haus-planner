@@ -1,5 +1,9 @@
 # Änderungen
 
+## 1.54.1
+- **Zeitstrahl: Personen-Kürzel verdecken den Balken nicht mehr.** Statt eines Kreises am Balkenanfang zeigt jetzt eine schmale Linie in Personenfarbe unter dem Balken, wer verantwortlich ist (bei mehreren Personen geteilt). Die Kürzel stehen links in der Zeile, auf dem Handy das erste.
+- **Kopfzeile mit den Tagen bleibt über den Balken**, auch in Safari auf dem iPhone, wenn man im Zeitstrahl nach unten scrollt.
+
 ## 1.54.0
 - **Neue Statusfarben:** Offen grau-blau, In Arbeit blau, Erledigt grün, Nicht geschafft rot (statt Orange und zweimal Blau). Überfällig bleibt ziegelrot. Gilt in allen Ansichten und Farbwelten; Kontrast geprüft.
 - **Zeitstrahl:**

@@ -283,11 +283,12 @@ function gantt(list){
     const x1=a.x+a.w,y1=a.y+ROW/2,x2=b.x,y2=b.y+ROW/2,mx2=Math.max(x1+10,x2-10),r=Math.min(6,Math.abs(y2-y1)/2),sg=y2>y1?1:-1,back=x2<x1+20;
     const d=back?`M${x1} ${y1}h8v${sg*ROW/2-sg*6}H${x2-10}V${y2}H${x2}`:(r<1?`M${x1} ${y1}H${x2}`:`M${x1} ${y1}H${mx2-r}q${r} 0 ${r} ${sg*r}V${y2-sg*r}q0 ${sg*r} ${r} ${sg*r}H${x2}`);
     gd+=`<g class="gdl" data-dep="${id}>${t.id}"><path class="gdlh" d="${d}"/><path class="gdlv" d="${d}" marker-end="url(#ar)"/></g>`}));
-  list.forEach(t=>{const p=pos[t.id],w1=wl(t)[0],pv=w1&&!t.ms&&p.w>=46,inside=!t.ms&&p.w>=t.title.length*6.7+20+(pv?20:0),cy=p.y+ROW/2;
-    /* 1.54: Kürzel der verantwortlichen Person am Anfang des Balkens */
-    const pin=pv?`<g class="gav ${avc(w1)}"><circle cx="${p.x+13}" cy="${cy}" r="8.5"/><text x="${p.x+13}" y="${cy+3.6}" text-anchor="middle">${esc(w1[0].toUpperCase())}</text></g>`:"";
+  list.forEach(t=>{const p=pos[t.id],inside=!t.ms&&p.w>=t.title.length*6.7+20,cy=p.y+ROW/2;
+    /* 1.54.1: Wer verantwortlich ist, zeigt eine schmale Linie in Personenfarbe unter dem Balken (bei mehreren geteilt).
+       Sie verdeckt nichts; Kürzel stehen links in der Zeile. */
+    const ws=wl(t),uw=((t.ms?18:p.w)-6)/Math.max(1,ws.length),pin=ws.map((w,i)=>`<rect class="gav ${avc(w)}" x="${p.x+3+i*uw+(i?1:0)}" y="${p.y+ROW-6}" width="${Math.max(2,uw-(i?1:0))}" height="3" rx="1.5"/>`).join("");
     const body=t.ms?`<path d="M${p.x+9} ${cy-10}l10 10l-10 10l-10-10z" fill="${col[t.status]}"/>`:`<rect x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="${col[t.status]}"/><rect class="ggl" x="${p.x}" y="${p.y+8}" width="${p.w}" height="${ROW-16}" rx="8" fill="url(#gGl)"/>`;
-    const lbl=pin+(inside?`<text class="bt ${t.status}" x="${p.x+(pv?27:11)}" y="${cy+4.2}">${esc(t.title)}</text>`:`<text class="bo${t.status==="done"?" done":""}" x="${p.x+p.w+(t.status==="done"?8:20)}" y="${cy+4.2}">${t.status==="done"?(isFail(t)?"✕ ":"✓ "):""}${esc(t.title)}</text>`);
+    const lbl=pin+(inside?`<text class="bt ${t.status}" x="${p.x+11}" y="${cy+4.2}">${esc(t.title)}</text>`:`<text class="bo${t.status==="done"?" done":""}" x="${p.x+p.w+(t.status==="done"?8:20)}" y="${cy+4.2}">${t.status==="done"?(isFail(t)?"✕ ":"✓ "):""}${esc(t.title)}</text>`);
     /* 1.50: Enden zum Verkürzen/Verlängern: sichtbarer Griff, große Greiffläche (auch mit dem Finger sofort ziehbar) */
     const hw=Math.min(16,Math.max(8,p.w/3)),hd2=t.ms?"":`<rect data-h="s" class="gh1" x="${p.x-6}" y="${p.y+4}" width="${hw+6}" height="${ROW-8}"/><rect data-h="e" class="gh1" x="${p.x+p.w-hw}" y="${p.y+4}" width="${hw+4}" height="${ROW-8}"/><rect class="ghv" x="${p.x+3}" y="${cy-6}" width="3" height="12" rx="1.5"/><rect class="ghv" x="${p.x+p.w-6}" y="${cy-6}" width="3" height="12" rx="1.5"/>`;
     gd+=`<g data-id="${t.id}" data-gk="${esc(gkOf.get(t.id)||"")}" class="gbar${isFail(t)?" gfail":""}"${t.status==="done"?' opacity=".72"':""}>${body}${lbl}${t.status==="done"?"":hd2+`<circle data-h="dep" class="gdh" cx="${p.x+p.w+(t.ms?1:0)+16}" cy="${cy}" r="11"/><circle data-h="dep" class="gdep" cx="${p.x+p.w+(t.ms?1:0)+11}" cy="${cy}" r="5"/>`}</g>`});

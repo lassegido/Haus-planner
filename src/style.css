@@ -1239,17 +1239,19 @@ body.pdragging{cursor:grabbing;-webkit-user-select:none;user-select:none}
 .gzoom{display:flex;align-items:center;gap:.4rem;flex:1 1 9rem;max-width:16rem;margin-left:auto;color:var(--mut);min-height:2.85rem}
 .gzoom svg{width:1.1rem;height:1.1rem;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .gzoom input{flex:1;min-width:0;accent-color:var(--acc);height:2rem;touch-action:none}
-@media (max-width:699px){.gzoom{order:3;flex-basis:100%;max-width:none;min-height:2.2rem}.gctl .seg{flex:1 1 0;min-width:0}.gctl .seg button{min-width:0;padding-inline:.25rem}.gl .gr .avs{display:none}}
+@media (max-width:699px){.gzoom{order:3;flex-basis:100%;max-width:none;min-height:2.2rem}.gctl .seg{flex:1 1 0;min-width:0}.gctl .seg button{min-width:0;padding-inline:.25rem}.gl .gr .avs .av+.av{display:none}}
 /* 1.54: zweite Gruppierungsebene und Personen-Kürzel */
 .gr.gh3{height:26px;padding-left:1.7rem;font-size:.8rem;font-weight:600;background:color-mix(in srgb,var(--tc) 8%,var(--card))}
 @media (hover:hover){.gr.gh3:hover{background:color-mix(in srgb,var(--tc) 8%,var(--card))}}
 .igh.igh2{font-size:.8rem;padding-left:1.2rem;opacity:.9}
 tr.grp2 td{padding-left:1.8rem;font-size:.8rem;background:color-mix(in srgb,var(--line) 40%,transparent)}
 .gr .avs{margin-left:auto;flex:none}.gr .avs .av{width:1.25rem;height:1.25rem;font-size:.62rem}
-.gb .gav circle{stroke:#fff;stroke-width:1.5}.gb .gav text{font:700 9.5px var(--font,system-ui);fill:#fff;pointer-events:none}
-.gb .gav.am circle{fill:var(--brick)}.gb .gav.al circle{fill:var(--sea)}.gb .gav.ao circle{fill:var(--sky)}.gb .gav.ao text{fill:#14303F}
+.gb .gav{pointer-events:none}
+.gb .gav.am{fill:var(--brick)}.gb .gav.al{fill:var(--sea)}.gb .gav.ao{fill:var(--sky)}
 .pch .avs{align-self:center;margin:0 .45rem 0 .1rem}.pch .avs .av{width:1.2rem;height:1.2rem;font-size:.6rem}
 /* 1.54: Checkliste ziehen ohne DOM-Umbau: Nachbarn rutschen weich zur Seite, Text lässt sich beim Gedrückthalten nicht markieren */
 #f_ck .ck{transition:transform .16s ease}#f_ck .ck.drag{transition:none}
 #f_ck.sorting,#f_ck.sorting *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 #f_ck .ck input.ct{-webkit-touch-callout:none}
+/* 1.54.1: Kopfzeile des Zeitstrahls bleibt über den Balken (Safari zeichnete animierte Balken sonst über die feststehende Kopfzeile) */
+.gb{position:relative;z-index:0;isolation:isolate}.gh{z-index:3;transform:translateZ(0)}
